@@ -1,0 +1,21 @@
+{
+    "name": "cpp-runner",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "description": "Isolated C++ compilation and execution sandbox",
+    "scripts": {
+        "start": "node dist/server.js",
+        "build": "tsc",
+        "dev": "tsx watch src/server.ts"
+    },
+    "dependencies": {
+        "express": "^5.1.0"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.3",
+        "@types/node": "^22.15.0",
+        "tsx": "^4.19.4",
+        "typescript": "^5.8.3"
+    }
+}

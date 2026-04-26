@@ -1,0 +1,43 @@
+{
+    "name": "round1",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "算法竞赛测试平台",
+    "workspaces": [
+        "server",
+        "client"
+    ],
+    "engines": {
+        "node": ">=24"
+    },
+    "scripts": {
+        "clean": "node scripts/clean-build-output.mjs dist/server client/dist client/tsconfig.tsbuildinfo",
+        "dev:client": "npm run dev --workspace=client",
+        "dev:server": "npm run dev --workspace=server",
+        "build:client": "npm run build --workspace=client",
+        "build:server": "npm run build --workspace=server",
+        "dev:setup": "tsx scripts/dev-setup.ts",
+        "migrate": "tsx scripts/migrate.ts",
+        "migrate:up": "tsx scripts/migrate.ts up",
+        "migrate:down": "tsx scripts/migrate.ts down",
+        "migrate:status": "tsx scripts/migrate.ts status",
+        "migrate:rehearse:011-failure": "tsx scripts/rehearseMigration011Failure.ts",
+        "lint": "eslint .",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:e2e": "playwright test"
+    },
+    "dependencies": {
+        "otpauth": "^9.5.0"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.56.1",
+        "@types/node": "^25.6.0",
+        "@types/supertest": "^7.2.0",
+        "supertest": "^7.2.2",
+        "vitest": "^4.1.4"
+    }
+}

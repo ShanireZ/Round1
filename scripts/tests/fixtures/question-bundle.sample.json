@@ -1,0 +1,44 @@
+{
+    "meta": {
+        "bundleType": "question_bundle",
+        "generatedAt": "2026-04-25T00:00:00.000Z",
+        "provider": "fixture",
+        "model": "fixture-model",
+        "promptHash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "sourceTimestamp": "2026-04-25T00:00:00.000Z",
+        "examType": "CSP-J",
+        "questionType": "single_choice",
+        "primaryKpCode": "BAS",
+        "difficulty": "easy",
+        "requestedCount": 1
+    },
+    "items": [
+        {
+            "type": "single_choice",
+            "difficulty": "easy",
+            "primaryKpCode": "BAS",
+            "auxiliaryKpCodes": [],
+            "examTypes": [
+                "CSP-J"
+            ],
+            "contentHash": "07cbb12a289e1968caeea8f881551d0aaa67784e9a0c3010a43cb79d2ccb71f4",
+            "sandboxVerified": false,
+            "source": "manual",
+            "contentJson": {
+                "stem": "2+2 等于多少？",
+                "options": [
+                    "A. 1",
+                    "B. 2",
+                    "C. 4",
+                    "D. 8"
+                ]
+            },
+            "answerJson": {
+                "answer": "C"
+            },
+            "explanationJson": {
+                "explanation": "基础加法。"
+            }
+        }
+    ]
+}

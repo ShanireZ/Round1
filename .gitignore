@@ -1,0 +1,47 @@
+# Dependencies
+node_modules
+.venv
+
+# Build outputs
+dist
+playwright-report
+test-results
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+
+# Certificates
+certs
+
+# Data
+/data
+/docs/localres
+/docs/res/
+/papers
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Script artifacts
+scripts/.tmp/
+/temp
+
+# Agents
+/.agents
+/.claude
+/.codex
+/.commandcode
+/.gemini
+/.worktrees

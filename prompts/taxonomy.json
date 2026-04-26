@@ -1,0 +1,814 @@
+[
+    {
+        "code": "BAS",
+        "name": "计算机基础",
+        "category": "basics",
+        "children": [
+            {
+                "code": "BAS-01",
+                "name": "进制基础（二/八/十/十六进制）",
+                "category": "basics"
+            },
+            {
+                "code": "BAS-02",
+                "name": "进制转换",
+                "category": "basics"
+            },
+            {
+                "code": "BAS-03",
+                "name": "位运算（&, |, ~, ^, <<, >>）",
+                "category": "basics"
+            },
+            {
+                "code": "BAS-04",
+                "name": "原码/反码/补码",
+                "category": "basics"
+            },
+            {
+                "code": "BAS-05",
+                "name": "数据存储单位（B/KB/MB/GB）",
+                "category": "basics"
+            },
+            {
+                "code": "BAS-06",
+                "name": "字符编码（ASCII/Unicode/GB2312）",
+                "category": "basics"
+            },
+            {
+                "code": "BAS-07",
+                "name": "浮点数存储（IEEE 754）",
+                "category": "basics"
+            },
+            {
+                "code": "BAS-08",
+                "name": "多媒体存储（图像/音频/视频格式）",
+                "category": "basics"
+            },
+            {
+                "code": "BAS-09",
+                "name": "计算机组成（CPU/内存/I/O）",
+                "category": "basics"
+            },
+            {
+                "code": "BAS-10",
+                "name": "操作系统基础",
+                "category": "basics"
+            },
+            {
+                "code": "BAS-11",
+                "name": "网络基础（协议/拓扑/IP）",
+                "category": "basics"
+            },
+            {
+                "code": "BAS-12",
+                "name": "流程图（概念/符号/三种基本结构描述）",
+                "category": "basics"
+            },
+            {
+                "code": "BAS-13",
+                "name": "数据类型转换（隐式/强制）",
+                "category": "basics"
+            },
+            {
+                "code": "BAS-14",
+                "name": "Linux 基础命令与编译环境",
+                "category": "basics"
+            }
+        ]
+    },
+    {
+        "code": "CPP",
+        "name": "C++ 语言知识",
+        "category": "cpp",
+        "children": [
+            {
+                "code": "CPP-01",
+                "name": "变量与数据类型（int/float/char/bool）",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-02",
+                "name": "运算符与表达式",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-03",
+                "name": "运算符优先级",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-04",
+                "name": "控制结构（if/switch/for/while）",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-05",
+                "name": "数组（一维/二维/多维）",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-06",
+                "name": "字符串与字符处理",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-07",
+                "name": "函数（定义/调用/递归）",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-08",
+                "name": "指针基础",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-09",
+                "name": "结构体",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-10",
+                "name": "参数传递（值传递/引用/指针）",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-11",
+                "name": "文件 I/O 与重定向",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-12",
+                "name": "异常处理（try/catch）",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-13",
+                "name": "面向对象基础（类/对象/继承/封装/多态）",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-14",
+                "name": "输入输出（cin/cout/scanf/printf）",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-15",
+                "name": "STL 基础容器与算法（vector/stack/queue/sort）",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-16",
+                "name": "联合体（union）",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-17",
+                "name": "数学库函数（abs/sqrt/ceil/floor/三角/对数/指数）",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-18",
+                "name": "运算符重载",
+                "category": "cpp"
+            },
+            {
+                "code": "CPP-19",
+                "name": "STL 扩展容器（pair/tuple/set/map/deque/priority_queue/bitset）",
+                "category": "cpp"
+            }
+        ]
+    },
+    {
+        "code": "DS",
+        "name": "数据结构",
+        "category": "datastruct",
+        "children": [
+            {
+                "code": "DS-01",
+                "name": "线性表概念/特性",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-02",
+                "name": "链表（单/双/循环）",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-03",
+                "name": "栈（LIFO）",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-04",
+                "name": "队列/循环队列",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-05",
+                "name": "哈希表",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-06",
+                "name": "树的基本概念",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-07",
+                "name": "二叉树（性质与分类）",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-08",
+                "name": "树的遍历（前/中/后序/层序）",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-09",
+                "name": "二叉排序树（BST）",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-10",
+                "name": "哈夫曼树与编码",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-11",
+                "name": "图的基本概念",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-12",
+                "name": "图的存储（邻接矩阵/邻接表）",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-13",
+                "name": "堆（优先队列）",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-14",
+                "name": "单调栈/单调队列",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-15",
+                "name": "并查集",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-16",
+                "name": "树状数组（BIT）",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-17",
+                "name": "线段树",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-18",
+                "name": "字典树（Trie）",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-19",
+                "name": "ST 表（Sparse Table）",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-20",
+                "name": "二分图/欧拉图/有向无环图",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-21",
+                "name": "笛卡尔树",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-22",
+                "name": "平衡树（AVL/Treap/Splay）",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-23",
+                "name": "块状链表",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-24",
+                "name": "树链剖分",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-25",
+                "name": "动态树（LCT）",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-26",
+                "name": "树套树/k-d树",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-27",
+                "name": "虚树",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-28",
+                "name": "可合并堆（左偏树/二项堆）",
+                "category": "datastruct"
+            },
+            {
+                "code": "DS-29",
+                "name": "可持久化数据结构（主席树等）",
+                "category": "datastruct"
+            }
+        ]
+    },
+    {
+        "code": "ALG",
+        "name": "算法",
+        "category": "algo",
+        "children": [
+            {
+                "code": "ALG-01",
+                "name": "时间/空间复杂度分析",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-02",
+                "name": "枚举法",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-03",
+                "name": "模拟法",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-04",
+                "name": "递推",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-05",
+                "name": "递归",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-06",
+                "name": "排序算法（冒泡/选择/插入）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-07",
+                "name": "排序算法（归并/快速排序）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-08",
+                "name": "二分查找/二分答案",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-09",
+                "name": "贪心算法",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-10",
+                "name": "分治算法",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-11",
+                "name": "深度优先搜索（DFS）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-12",
+                "name": "广度优先搜索（BFS）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-13",
+                "name": "简单动态规划（一维 DP）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-14",
+                "name": "复杂动态规划（二维/多维 DP）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-15",
+                "name": "图论算法（最短路径：Dijkstra/Floyd/Bellman-Ford）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-16",
+                "name": "图论算法（最小生成树：Prim/Kruskal）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-17",
+                "name": "高精度运算",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-18",
+                "name": "计数排序/桶排序",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-19",
+                "name": "前缀和与差分",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-20",
+                "name": "倍增法",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-21",
+                "name": "泛洪算法（Flood Fill）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-22",
+                "name": "背包动态规划（01背包/完全背包）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-23",
+                "name": "区间动态规划",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-24",
+                "name": "KMP 字符串匹配",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-25",
+                "name": "拓扑排序",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-26",
+                "name": "记忆化搜索",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-27",
+                "name": "搜索剪枝优化",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-28",
+                "name": "离散化",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-29",
+                "name": "堆排序/基数排序",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-30",
+                "name": "树型动态规划",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-31",
+                "name": "状态压缩动态规划",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-32",
+                "name": "欧拉回路与欧拉路径",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-33",
+                "name": "最近公共祖先（LCA）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-34",
+                "name": "树的直径/重心/DFS序",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-35",
+                "name": "强连通分量/割点/割边",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-36",
+                "name": "Manacher算法（回文串）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-37",
+                "name": "启发式搜索（A*/IDA*）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-38",
+                "name": "双向广度优先搜索",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-39",
+                "name": "迭代加深搜索",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-40",
+                "name": "树上差分/子树和/欧拉序",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-41",
+                "name": "扫描线",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-42",
+                "name": "动态规划优化（单调队列/斜率优化等）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-43",
+                "name": "分块算法",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-44",
+                "name": "离线算法（CDQ分治/莫队等）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-45",
+                "name": "字符串自动机（AC自动机/扩展KMP）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-46",
+                "name": "后缀数组/后缀自动机",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-47",
+                "name": "网络流（最大流/最小割/费用流）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-48",
+                "name": "二分图匹配（匈牙利/KM算法）",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-49",
+                "name": "2-SAT",
+                "category": "algo"
+            },
+            {
+                "code": "ALG-50",
+                "name": "基环树",
+                "category": "algo"
+            }
+        ]
+    },
+    {
+        "code": "MATH",
+        "name": "数学知识",
+        "category": "math",
+        "children": [
+            {
+                "code": "MATH-01",
+                "name": "排列与组合",
+                "category": "math"
+            },
+            {
+                "code": "MATH-02",
+                "name": "抽屉原理（鸽巢原理）",
+                "category": "math"
+            },
+            {
+                "code": "MATH-03",
+                "name": "概率与期望",
+                "category": "math"
+            },
+            {
+                "code": "MATH-04",
+                "name": "辗转相除法（GCD/LCM）",
+                "category": "math"
+            },
+            {
+                "code": "MATH-05",
+                "name": "素数与筛法（埃氏/线性筛）",
+                "category": "math"
+            },
+            {
+                "code": "MATH-06",
+                "name": "唯一分解定理",
+                "category": "math"
+            },
+            {
+                "code": "MATH-07",
+                "name": "杨辉三角",
+                "category": "math"
+            },
+            {
+                "code": "MATH-08",
+                "name": "容斥原理",
+                "category": "math"
+            },
+            {
+                "code": "MATH-09",
+                "name": "简单数论（整除/余数/取模）",
+                "category": "math"
+            },
+            {
+                "code": "MATH-10",
+                "name": "逻辑推理",
+                "category": "math"
+            },
+            {
+                "code": "MATH-11",
+                "name": "加法原理与乘法原理",
+                "category": "math"
+            },
+            {
+                "code": "MATH-12",
+                "name": "同余式与模运算性质",
+                "category": "math"
+            },
+            {
+                "code": "MATH-13",
+                "name": "初等代数与几何（初中/高中）",
+                "category": "math"
+            },
+            {
+                "code": "MATH-14",
+                "name": "向量与矩阵基础",
+                "category": "math"
+            },
+            {
+                "code": "MATH-15",
+                "name": "二项式定理",
+                "category": "math"
+            },
+            {
+                "code": "MATH-16",
+                "name": "卡特兰数",
+                "category": "math"
+            },
+            {
+                "code": "MATH-17",
+                "name": "格雷编码",
+                "category": "math"
+            },
+            {
+                "code": "MATH-18",
+                "name": "欧拉定理与欧拉函数",
+                "category": "math"
+            },
+            {
+                "code": "MATH-19",
+                "name": "费马小定理/威尔逊定理",
+                "category": "math"
+            },
+            {
+                "code": "MATH-20",
+                "name": "裴蜀定理与扩展欧几里得算法",
+                "category": "math"
+            },
+            {
+                "code": "MATH-21",
+                "name": "模逆元",
+                "category": "math"
+            },
+            {
+                "code": "MATH-22",
+                "name": "中国剩余定理",
+                "category": "math"
+            },
+            {
+                "code": "MATH-23",
+                "name": "多重集排列/组合/错排列/圆排列",
+                "category": "math"
+            },
+            {
+                "code": "MATH-24",
+                "name": "高斯消元法",
+                "category": "math"
+            },
+            {
+                "code": "MATH-25",
+                "name": "原根与BSGS算法",
+                "category": "math"
+            },
+            {
+                "code": "MATH-26",
+                "name": "莫比乌斯反演/狄利克雷卷积",
+                "category": "math"
+            },
+            {
+                "code": "MATH-27",
+                "name": "生成函数（母函数）/斯特林数",
+                "category": "math"
+            },
+            {
+                "code": "MATH-28",
+                "name": "Burnside引理与Pólya定理/Prüfer序列",
+                "category": "math"
+            },
+            {
+                "code": "MATH-29",
+                "name": "博弈论（Nim博弈/SG函数）",
+                "category": "math"
+            },
+            {
+                "code": "MATH-30",
+                "name": "计算几何（凸包/半平面交）",
+                "category": "math"
+            },
+            {
+                "code": "MATH-31",
+                "name": "多项式与FFT",
+                "category": "math"
+            },
+            {
+                "code": "MATH-32",
+                "name": "线性基",
+                "category": "math"
+            }
+        ]
+    },
+    {
+        "code": "CS",
+        "name": "常识题",
+        "category": "common_sense",
+        "children": [
+            {
+                "code": "CS-01",
+                "name": "计算机发展史与人物",
+                "category": "common_sense"
+            },
+            {
+                "code": "CS-02",
+                "name": "编程语言发展与分类",
+                "category": "common_sense"
+            },
+            {
+                "code": "CS-03",
+                "name": "信息安全与加密",
+                "category": "common_sense"
+            },
+            {
+                "code": "CS-04",
+                "name": "开源协议与知识产权",
+                "category": "common_sense"
+            },
+            {
+                "code": "CS-05",
+                "name": "竞赛相关资讯（NOI/IOI/GESP）",
+                "category": "common_sense"
+            },
+            {
+                "code": "CS-06",
+                "name": "网络拓扑与协议",
+                "category": "common_sense"
+            },
+            {
+                "code": "CS-07",
+                "name": "数据库基础概念",
+                "category": "common_sense"
+            },
+            {
+                "code": "CS-08",
+                "name": "多媒体与编码格式",
+                "category": "common_sense"
+            },
+            {
+                "code": "CS-09",
+                "name": "信息安全法律法规",
+                "category": "common_sense"
+            },
+            {
+                "code": "CS-10",
+                "name": "人工智能基础概念",
+                "category": "common_sense"
+            }
+        ]
+    }
+]

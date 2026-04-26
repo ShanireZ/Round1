@@ -1,0 +1,62 @@
+# Round 1 — 本地开发基础设施
+# 要求: Docker Desktop (WSL2 backend)
+#
+# 启动:  docker compose -f docker-compose.dev.yml up -d
+# 停止:  docker compose -f docker-compose.dev.yml down
+# 重置:  docker compose -f docker-compose.dev.yml down -v
+
+services:
+  pg:
+    image: postgres:18
+    container_name: r1-pg
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: round1
+      POSTGRES_USER: round1
+      POSTGRES_PASSWORD: round1_dev
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U round1 -d round1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:8-alpine
+    container_name: r1-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  cpp-runner:
+    build:
+      context: ./cpp-runner
+      dockerfile: Dockerfile
+    container_name: r1-cpp-runner
+    restart: unless-stopped
+    ports:
+      - "6100:6100"
+    environment:
+      PORT: 6100
+      COMPILE_TIMEOUT_MS: 10000
+      RUN_TIMEOUT_MS: 1000
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:6100/health').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  pgdata:
+  redisdata:

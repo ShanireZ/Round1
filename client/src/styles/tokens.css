@@ -1,0 +1,205 @@
+/* ==========================================================================
+   Round1 Design Tokens — 完整设计令牌系统
+   所有 CSS 变量集中管理，Tailwind 4 @theme 引用
+   ========================================================================== */
+
+:root {
+  /* ── 品牌色 ── */
+  --color-primary: #E63946;
+  --color-primary-hover: #DC2E3B;
+  --color-primary-foreground: #FFFFFF;
+
+  /* ── 语义色 ── */
+  --color-destructive: #C8102E;
+  --color-destructive-foreground: #FFFFFF;
+  --color-warning: #F59E0B;
+  --color-warning-foreground: #451A03;
+  --color-success: #059669;
+  --color-success-foreground: #FFFFFF;
+  --color-info: #0284C7;
+  --color-info-foreground: #FFFFFF;
+
+  /* ── 数据可视化色板（色盲友好） ── */
+  --color-chart-1: #E63946;
+  --color-chart-2: #0EA5E9;
+  --color-chart-3: #10B981;
+  --color-chart-4: #F59E0B;
+  --color-chart-5: #8B5CF6;
+  --color-chart-6: #64748B;
+
+  /* ── 热力图色阶 ── */
+  --color-heatmap-0: #FEF9F8;
+  --color-heatmap-1: #FDEEEF;
+  --color-heatmap-2: #F8B5BC;
+  --color-heatmap-3: #E63946;
+  --color-heatmap-4: #8B1538;
+
+  /* ── 字体栈 ── */
+  --font-sans: 'Geist', 'HarmonyOS Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'HarmonyOS Sans SC', monospace;
+  --font-serif: 'Fraunces', 'Source Han Serif SC', Georgia, serif;
+  --font-display: var(--font-serif);
+
+  /* ── 圆角 ── */
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  --radius: 8px; /* 基准值 */
+
+  /* ── 间距（8pt Grid） ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  /* ── 阴影 ── */
+  --shadow-none: none;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 32px -4px rgba(15, 23, 42, 0.12);
+  --shadow-glow: 0 0 0 4px rgba(230, 57, 70, 0.12);
+  --shadow-hero: 0 40px 80px -20px rgba(230, 57, 70, 0.25);
+
+  /* ── 边框 ── */
+  --border-hair: 1px;
+  --border-weight: 1.5px;
+  --border-focus: 2px;
+
+  /* ── Z-Index 层级 ── */
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-fixed: 20;
+  --z-dropdown: 30;
+  --z-popover: 40;
+  --z-overlay: 50;
+  --z-modal: 60;
+  --z-toast: 70;
+  --z-ceremony: 100;
+
+  /* ── 动效时长 ── */
+  --duration-instant: 75ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-deliberate: 600ms;
+  --duration-ceremony: 1500ms;
+
+  /* ── 动效曲线 ── */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-ceremony: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── 布局 ── */
+  --content-max-width: 1280px;
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 56px;
+  --topbar-height: 56px;
+
+  /* ── Backdrop ── */
+  --backdrop-blur: 12px;
+}
+
+/* ── Light 主题（默认） ── */
+:root,
+html:not(.dark) {
+  --color-background: #FEF9F8;
+  --color-surface: #FFFFFF;
+  --color-subtle: #FAF3F2;
+  --color-border: #F0E4E2;
+  --color-divider: #E4D6D3;
+  --color-muted: #94A3B8;
+  --color-muted-foreground: #64748B;
+  --color-foreground-secondary: #475569;
+  --color-foreground: #0F172A;
+  --color-ink: #020617;
+  --color-accent-wash: #FDEEEF;
+
+  --color-card: #FFFFFF;
+  --color-card-foreground: #0F172A;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #0F172A;
+
+  --color-secondary: #FAF3F2;
+  --color-secondary-foreground: #0F172A;
+
+  --color-input: #F0E4E2;
+  --color-ring: #E63946;
+
+  /* Light 语义色微调 */
+  --color-destructive: #C8102E;
+  --color-warning: #F59E0B;
+  --color-success: #059669;
+  --color-info: #0284C7;
+}
+
+/* ── Dark 主题 ── */
+html.dark {
+  --color-background: #0A0E1A;
+  --color-surface: #121826;
+  --color-subtle: #1E293B;
+  --color-border: #2D3748;
+  --color-divider: #475569;
+  --color-muted: #64748B;
+  --color-muted-foreground: #94A3B8;
+  --color-foreground-secondary: #CBD5E1;
+  --color-foreground: #F1F5F9;
+  --color-ink: #FFFFFF;
+  --color-accent-wash: rgba(230, 57, 70, 0.1);
+
+  --color-card: #121826;
+  --color-card-foreground: #F1F5F9;
+  --color-popover: #121826;
+  --color-popover-foreground: #F1F5F9;
+
+  --color-secondary: #1E293B;
+  --color-secondary-foreground: #F1F5F9;
+
+  --color-input: #2D3748;
+  --color-ring: #E63946;
+
+  /* Dark 语义色微调 */
+  --color-destructive: #E11D48;
+  --color-warning: #FBBF24;
+  --color-success: #10B981;
+  --color-info: #0EA5E9;
+
+  /* Dark 阴影调整 — 降低不透明度 + outer glow */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 0 4px rgba(230, 57, 70, 0.2);
+  --shadow-hero: 0 40px 80px -20px rgba(230, 57, 70, 0.15);
+}
+
+/* ── 数字处理 ── */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 代码连字关闭 ── */
+code, pre, .font-mono {
+  font-feature-settings: "liga" 0, "calt" 0;
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

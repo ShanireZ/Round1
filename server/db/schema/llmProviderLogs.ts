@@ -1,0 +1,25 @@
+import { pgTable, uuid, text, integer, real, timestamp, index, jsonb } from "drizzle-orm/pg-core";
+
+export const llmProviderLogs = pgTable(
+  "llm_provider_logs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    provider: text("provider").notNull(),
+    model: text("model").notNull(),
+    responseModel: text("response_model"),
+    lane: text("lane").notNull(),
+    task: text("task").notNull(),
+    tokensIn: integer("tokens_in").notNull(),
+    tokensOut: integer("tokens_out").notNull(),
+    costEstimate: real("cost_estimate"),
+    latencyMs: integer("latency_ms").notNull(),
+    finishReason: text("finish_reason"),
+    responseId: text("response_id"),
+    reasoningText: text("reasoning_text"),
+    warningsJson: jsonb("warnings_json"),
+    providerMetadataJson: jsonb("provider_metadata_json"),
+    errorMessage: text("error_message"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+  },
+  (t) => [index("llm_provider_logs_provider_task_idx").on(t.provider, t.task, t.createdAt)],
+);

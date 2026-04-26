@@ -1,0 +1,126 @@
+/* ==========================================================================
+   Round1 Print CSS — 印刷级打印样式
+   ========================================================================== */
+
+@media print {
+  /* 页面设置 */
+  @page {
+    size: A4;
+    margin: 2cm;
+  }
+
+  /* 移除所有背景色 / 阴影 / 动效 / 品牌色 */
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
+    color: #000 !important;
+  }
+
+  /* 隐藏不需要打印的元素 */
+  nav,
+  .sidebar,
+  .topbar,
+  .toast,
+  .dialog-overlay,
+  .no-print,
+  button:not(.print-visible),
+  [data-no-print] {
+    display: none !important;
+  }
+
+  /* 字体切换为印刷字体 */
+  body {
+    font-family: 'SimSun', '宋体', serif !important;
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+    color: #000 !important;
+  }
+
+  html,
+  body,
+  #root,
+  main,
+  [data-testid="exam-session-page"] {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  [data-testid="exam-session-page"] {
+    padding: 0 !important;
+  }
+
+  /* 英文衬线 */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Times New Roman', 'SimSun', serif !important;
+    page-break-after: avoid;
+  }
+
+  /* 代码块 Courier New */
+  code, pre, .font-mono {
+    font-family: 'Courier New', monospace !important;
+    font-size: 9pt !important;
+    border: 1px solid #ccc !important;
+    padding: 0.5em !important;
+  }
+
+  /* 每题不跨页 */
+  .question-card,
+  .question-block {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    border: 1px solid #999 !important;
+    margin-bottom: 12pt !important;
+  }
+
+  [data-print-surface] {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* FillBlank input → 下划线空格 */
+  input[type="text"],
+  .fill-blank-input {
+    border: none !important;
+    border-bottom: 1px solid #000 !important;
+    min-width: 80px;
+    display: inline-block;
+  }
+
+  /* 页眉页脚 */
+  .print-header {
+    display: block !important;
+    text-align: center;
+    font-size: 9pt;
+    color: #666 !important;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8pt;
+    margin-bottom: 16pt;
+  }
+
+  .print-footer {
+    display: block !important;
+    text-align: center;
+    font-size: 8pt;
+    color: #999 !important;
+    border-top: 1px solid #ccc;
+    padding-top: 8pt;
+    margin-top: 16pt;
+  }
+
+  /* 链接显示 URL */
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    color: #666 !important;
+  }
+
+  /* 内部链接不显示 URL */
+  a[href^="#"]::after,
+  a[href^="/"]::after {
+    content: none;
+  }
+}
