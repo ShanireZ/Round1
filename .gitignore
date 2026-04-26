@@ -20,6 +20,7 @@ certs
 /docs/localres
 /docs/res/
 /papers
+/artifacts
 
 # IDE
 .idea/
