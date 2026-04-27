@@ -71,8 +71,8 @@
 ### D. 后续收尾项
 
 1. 继续收口剩余 compatibility-first 业务语义遗留面，避免重新引入在线换题、冷却表或其他运行时拼题结构。
-2. 为离线 bundle 增加更明确的产物元数据，例如校验时间、校验器版本、来源批次。
-3. 若需要更强审计，可为 question bundle 增加签名或 checksum 清单。
+2. 继续收口剩余 compatibility-first 业务语义遗留面时，同步检查 bundle 元数据契约是否仍包含 `schemaVersion`、`runId`、`createdAt`、来源批次、校验器版本与 checksum manifest。
+3. 若需要更强审计，可再评估 question bundle 签名；当前已先以 item 级 checksum manifest + import batch raw checksum 作为基线。
 
 ## 具体修改方案
 
