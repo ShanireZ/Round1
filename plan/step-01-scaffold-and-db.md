@@ -10,8 +10,8 @@
 
 ### 0.1 项目初始化
 
-- 创建 `package.json`（npm workspaces: `["server", "client"]`）+ `engines: { "node": ">=24" }`
-- 创建 `server/package.json`（依赖：express, pg, drizzle-orm, drizzle-kit, ioredis, redis, connect-redis, bullmq, ai@^6.0, @ai-sdk/*, nodemailer, helmet, pino, pino-http, csrf-sync, express-rate-limit, rate-limit-redis, @sentry/node, @asteasolutions/zod-to-openapi, swagger-ui-express, @simplewebauthn/server, zod, argon2, zxcvbn 等）
+- 创建 `package.json`（npm workspaces: `["server", "client"]`）+ `engines: { "node": ">=24.15.0", "npm": ">=11.12.1" }`
+- 创建 `server/package.json`（依赖：express, pg, drizzle-orm, ioredis, redis, connect-redis, bullmq, ai@^6.0, @ai-sdk/*, nodemailer, helmet, pino, pino-http, csrf-sync, express-rate-limit, rate-limit-redis, @sentry/node, @asteasolutions/zod-to-openapi, swagger-ui-express, @simplewebauthn/server, zod, argon2, zxcvbn 等；迁移执行由 `scripts/migrate.ts` 负责）
 - 创建 `client/package.json`（依赖：react, vite, tailwindcss, @radix-ui/*, react-hook-form, @hookform/resolvers, @simplewebauthn/browser, @sentry/react, @tanstack/react-query, @fingerprintjs/fingerprintjs 等）
 - 根 `tsconfig.json` + `server/tsconfig.json`（extends 根配置）
 - `eslint.config.js` + `prettier.config.js`

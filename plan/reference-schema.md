@@ -6,7 +6,7 @@
 
 ## 数据库 Schema（postgreSQL 18，数据库 `round1`）
 
-Schema 采用版本化迁移（`server/db/migrations/` + drizzle-kit + `schema_migrations` 表）。Session 不落 Postgres，由 Redis 通过 `connect-redis` 存储。`__Host-Round1.sid` 为代码常量（非可配置项），不暴露到 .env。
+Schema 采用版本化迁移（`server/db/migrations/` + `scripts/migrate.ts` + `schema_migrations` 表）。Session 不落 Postgres，由 Redis 通过 `connect-redis` 存储。`__Host-Round1.sid` 为代码常量（非可配置项），不暴露到 .env。
 
 > **对齐说明（2026-04-25）**：`generation_jobs`、`manual_generation_jobs`、`question_bucket_stats`、`bucket_slot_counters`、`paper_question_replacements`、`exam_cooldowns` 与 `papers.replacement_count` 均已删除；原手工导入批次语义并入 `import_batches`。当前 remaining compatibility-first 面主要剩业务语义层的旧约束，不再包含这些 schema/runtime 结构。
 

@@ -4,18 +4,22 @@
     "private": true,
     "type": "module",
     "description": "Isolated C++ compilation and execution sandbox",
+    "engines": {
+        "node": ">=24.15.0",
+        "npm": ">=11.12.1"
+    },
     "scripts": {
         "start": "node dist/server.js",
         "build": "tsc",
         "dev": "tsx watch src/server.ts"
     },
     "dependencies": {
-        "express": "^5.1.0"
+        "express": "^5.2.1"
     },
     "devDependencies": {
-        "@types/express": "^5.0.3",
-        "@types/node": "^22.15.0",
-        "tsx": "^4.19.4",
-        "typescript": "^5.8.3"
+        "@types/express": "^5.0.6",
+        "@types/node": "^25.6.0",
+        "tsx": "^4.21.0",
+        "typescript": "^6.0.3"
     }
 }

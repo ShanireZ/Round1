@@ -5,17 +5,17 @@
 # 2. runner: 最小运行时 + g++ 编译器
 
 # ── 构建阶段 ──────────────────────────────────────────────
-FROM node:24-slim AS builder
+FROM node:24.15.0-slim AS builder
 
 WORKDIR /build
-COPY package.json ./
-RUN npm install --omit=dev && npm install typescript tsx
+COPY package.json package-lock.json ./
+RUN npm ci
 COPY tsconfig.json ./
 COPY src/ src/
-RUN npx tsc
+RUN npx tsc && npm prune --omit=dev
 
 # ── 运行阶段 ──────────────────────────────────────────────
-FROM node:24-slim AS runner
+FROM node:24.15.0-slim AS runner
 
 # 安装 g++ 编译器
 RUN apt-get update && \

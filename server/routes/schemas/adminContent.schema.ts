@@ -9,23 +9,30 @@ const DifficultySchema = z.enum(["easy", "medium", "hard"]);
 const PrebuiltPaperStatusSchema = z.enum(["draft", "published", "archived"]);
 const QuestionReviewStatusSchema = z.enum(["pending", "ai_reviewed", "confirmed", "rejected"]);
 
-export const AdminQuestionUpsertBody = z.object({
+const AdminQuestionBodyFields = {
   type: QuestionTypeSchema,
   difficulty: DifficultySchema,
   primaryKpId: z.coerce.number().int().positive(),
-  auxiliaryKpIds: z.array(z.coerce.number().int().positive()).max(3).default([]),
+  auxiliaryKpIds: z.array(z.coerce.number().int().positive()).max(3),
   examTypes: z.array(z.string().min(1)).min(1),
   contentHash: z.string().min(1).max(64),
   contentJson: z.record(z.string(), z.unknown()),
   answerJson: z.record(z.string(), z.unknown()),
   explanationJson: z.record(z.string(), z.unknown()),
-  source: z.enum(["ai", "manual", "real_paper"]).default("manual"),
-  sandboxVerified: z.boolean().default(false),
+  source: z.enum(["ai", "manual", "real_paper"]),
+  sandboxVerified: z.boolean(),
+};
+
+export const AdminQuestionUpsertBody = z.object({
+  ...AdminQuestionBodyFields,
+  auxiliaryKpIds: AdminQuestionBodyFields.auxiliaryKpIds.default([]),
+  source: AdminQuestionBodyFields.source.default("manual"),
+  sandboxVerified: AdminQuestionBodyFields.sandboxVerified.default(false),
 });
 
 export const AdminQuestionCreateBody = AdminQuestionUpsertBody;
 
-export const AdminQuestionUpdateBody = AdminQuestionUpsertBody.partial().refine(
+export const AdminQuestionUpdateBody = z.object(AdminQuestionBodyFields).partial().refine(
   (value) => Object.keys(value).length > 0,
   { message: "至少提供一个可更新字段" },
 );
@@ -55,18 +62,23 @@ export const PrebuiltPaperSlotInputSchema = z.object({
   points: z.coerce.number().int().positive(),
 });
 
-export const PrebuiltPaperUpsertBody = z.object({
+const PrebuiltPaperBodyFields = {
   title: z.string().min(1).max(200),
   examType: z.string().min(1),
   difficulty: DifficultySchema,
   blueprintVersion: z.coerce.number().int().positive(),
-  metadataJson: z.record(z.string(), z.unknown()).default({}),
+  metadataJson: z.record(z.string(), z.unknown()),
   slots: z.array(PrebuiltPaperSlotInputSchema).min(1),
+};
+
+export const PrebuiltPaperUpsertBody = z.object({
+  ...PrebuiltPaperBodyFields,
+  metadataJson: PrebuiltPaperBodyFields.metadataJson.default({}),
 });
 
 export const PrebuiltPaperCreateBody = PrebuiltPaperUpsertBody;
 
-export const PrebuiltPaperUpdateBody = PrebuiltPaperUpsertBody.partial().refine(
+export const PrebuiltPaperUpdateBody = z.object(PrebuiltPaperBodyFields).partial().refine(
   (value) => Object.keys(value).length > 0,
   { message: "至少提供一个可更新字段" },
 );

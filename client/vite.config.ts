@@ -4,8 +4,10 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "node:path";
 import fs from "node:fs";
 
-const certPath = path.resolve(__dirname, "../certs/dev-cert.pem");
-const keyPath = path.resolve(__dirname, "../certs/dev-key.pem");
+const rootDir = import.meta.dirname;
+
+const certPath = path.resolve(rootDir, "../certs/dev-cert.pem");
+const keyPath = path.resolve(rootDir, "../certs/dev-key.pem");
 
 let httpsConfig: { cert: Buffer; key: Buffer } | undefined;
 
@@ -26,7 +28,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(rootDir, "./src"),
     },
   },
   server: {

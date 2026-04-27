@@ -21,7 +21,7 @@
 
 | 层级      | 选型                                                                                         |
 | --------- | -------------------------------------------------------------------------------------------- |
-| 后端      | Node 24 LTS + Express 5 + TypeScript，端口 `:5100`                                           |
+| 后端      | Node.js `>=24.15.0` + npm `>=11.12.1` + Express 5 + TypeScript，端口 `:5100`                 |
 | 前端      | React 19 + TypeScript + Vite + React Router 7 + TanStack Query v5 + shadcn/ui + Tailwind CSS |
 | 数据库    | postgreSQL 18（独立数据库 `round1`），pg + drizzle-orm                                       |
 | 缓存/队列 | Redis — Session Store / 频控 / 延迟作业                                                      |

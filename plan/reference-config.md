@@ -9,7 +9,7 @@
 
 | #   | 决策项                  | 选择                                                                                                                                                                                                 |
 | --- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | 后端部署                | `Node 24 LTS` + `Express 5` + `TypeScript` 独立进程（`server/`），监听独立端口（默认 `:5100`），Caddy 按域名反代                                                                                     |
+| 1   | 后端部署                | Node.js `>=24.15.0` + npm `>=11.12.1` + `Express 5` + `TypeScript` 独立进程（`server/`），监听独立端口（默认 `:5100`），Caddy 按域名反代                                                               |
 | 2   | 前端部署                | `React 19` + `TypeScript` + `Vite` + `React Router 7` + `TanStack Query v5` + `shadcn/ui` + `Tailwind CSS` + `react-hook-form`（`client/`），独立域名、独立构建产物                                  |
 | 3   | 代码存放                | 独立项目 `Round1/`，独立 Git 仓库；除 CppLearn OIDC 对接外，与其无代码依赖                                                                                                                           |
 | 4   | 数据库                  | `postgreSQL 18` 独立数据库 `round1`，通过 `pg` 驱动 + `drizzle-orm` 访问（schema 版本化迁移）；自有 `users` 表；session 不落库，交给 Redis                                                           |
@@ -41,7 +41,7 @@
 
 ```
 Round1/
-├─ package.json                    → npm workspaces（server, client）+ engines: node>=24
+├─ package.json                    → npm workspaces（server, client）+ engines: node>=24.15.0, npm>=11.12.1
 ├─ tsconfig.json                   → TypeScript 基础配置
 ├─ vitest.config.ts / playwright.config.ts
 ├─ .env / .gitignore / eslint.config.js / prettier.config.js

@@ -1,4 +1,4 @@
-import { rateLimit } from "express-rate-limit";
+import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 import { RedisStore } from "rate-limit-redis";
 import { redisClient } from "../redis.js";
 import { env } from "../../config/env.js";
@@ -23,6 +23,8 @@ const failMessage = {
   },
 };
 
+const requestIpKey = (req: Request) => ipKeyGenerator(req.ip ?? "");
+
 // 1. Email challenge sending: per-email per-hour
 export const challengePerEmailLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
@@ -41,7 +43,7 @@ export const challengePerIpLimiter = rateLimit({
   standardHeaders: "draft-7",
   legacyHeaders: false,
   store: makeStore("challenge-ip"),
-  keyGenerator: (req: Request) => `ip:${req.ip}`,
+  keyGenerator: (req: Request) => `ip:${requestIpKey(req)}`,
   message: failMessage,
 });
 
@@ -64,7 +66,7 @@ export const loginPerDeviceLimiter = rateLimit({
   standardHeaders: "draft-7",
   legacyHeaders: false,
   store: makeStore("login-device"),
-  keyGenerator: (req: Request) => `dev:${req.body?.deviceIdHash ?? req.ip}`,
+  keyGenerator: (req: Request) => `dev:${req.body?.deviceIdHash ?? requestIpKey(req)}`,
   message: failMessage,
   skipSuccessfulRequests: true,
 });
@@ -87,6 +89,6 @@ export const registerPerIpLimiter = rateLimit({
   standardHeaders: "draft-7",
   legacyHeaders: false,
   store: makeStore("register-ip"),
-  keyGenerator: (req: Request) => `ip:${req.ip}`,
+  keyGenerator: (req: Request) => `ip:${requestIpKey(req)}`,
   message: failMessage,
 });

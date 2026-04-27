@@ -33,7 +33,7 @@
 
 ### 生产机（默认单机）
 
-1. 安装 Node 24 LTS + Redis 7+ + postgreSQL 18
+1. 安装 Node.js `>=24.15.0` + npm `>=11.12.1` + Redis 7+ + postgreSQL 18
 2. 克隆代码、`npm install` + `npm run build`
 3. 配置 `.env`（见 [01-reference.md — 环境变量配置](reference-config.md#环境变量配置env)）
 4. 安装并配置 Caddy（见 [14.2 Caddy 配置](#142-caddy-配置)）
@@ -51,7 +51,7 @@
 
 ## 离线内容环境部署清单
 
-1. 安装 Node 24 LTS，按需安装 Redis（如需要 BullMQ 队列）
+1. 安装 Node.js `>=24.15.0` + npm `>=11.12.1`，按需安装 Redis（如需要 BullMQ 队列）
 2. 安装 Docker + gVisor（`runsc` runtime）
 3. 构建并启动 `cpp-runner`
 4. 启动 `scripts/workers/contentWorker.ts`，仅消费 `generation` / `sandbox-verify` 队列

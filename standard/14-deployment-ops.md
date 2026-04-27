@@ -11,6 +11,13 @@ Round1 采用“两层架构”：
 
 生产 runtime worker 只允许承载考试会话支持型任务，例如 auto-submit；不得消费 generation 或 sandbox verify。
 
+## 运行时工具链基线
+
+- Node.js 标准基线为 `>=24.15.0`。
+- npm 标准基线为 `>=11.12.1`。
+- 所有 `package.json` 的 `engines`、lockfile 顶层 package 元数据、Docker/部署文档中的 Node/npm 版本口径必须与本节同步。
+- 需要更高版本时，先更新本节，再同步 `package.json`、lockfile、Dockerfile、部署 runbook 与 plan/reference 文档；不得只改其中一处。
+
 ## 部署前检查
 
 - `npm run lint`

@@ -26,6 +26,10 @@
 - 考试页 autosave 飞行中输入保护：`ExamSession` autosave 成功回包不再直接用服务端快照覆盖本地答案，而是将仍未发送的 pending patches 重放到已保存快照上；`beforeunload` 与最终 submit 判断也显式纳入 pending patch 数量，手动/自动交卷会等待当前 autosave 收尾，避免持续输入时丢失本地答案或漏掉关闭前 keepalive 保存。
 - 前端测试入口漂移：仓库已有 `client/vitest.config.ts` 与 `client/src/**/*.test.ts`，但根 `npm run test` 只发现 server 测试；本轮补 `npm run client:test`，避免前端 helper 单测继续沉默。
 - 前端 Vitest 配置 ESM 兼容：`client/vitest.config.ts` 不再依赖 `__dirname`，改用 `import.meta.dirname` 作为 root/alias 基准；在 bundle loader 被本机 esbuild spawn 权限限制卡住时，native loader 至少可以正确读取配置。
+- 依赖版本与 lockfile 漂移：root/client/server workspace 与独立 `cpp-runner` 的 package spec 和 lockfile 已刷新到当前 npm latest；`cpp-runner` 新增独立 `package-lock.json`，Dockerfile 改为 `npm ci` 后构建并在产物层 `npm prune --omit=dev`。`drizzle-kit` 未被 package script/config 调用且 latest 与旧版都会引入 npm audit 风险链，已从 `server` devDependency 移除，当前迁移真源明确为 `scripts/migrate.ts` + `server/db/migrations`。
+- 运行时版本口径：Node.js 标准基线收紧为 `>=24.15.0`，npm 标准基线收紧为 `>=11.12.1`；root/client/server/cpp-runner `package.json` engines、lockfile 顶层 package 元数据、`cpp-runner` Docker base image 与 plan/reference 部署文档已同步。
+- Vite / React lint 工具链兼容：`client/vite.config.ts` 改用 `import.meta.dirname` 适配 Vite 8 ESM；`eslint-plugin-react-hooks@7` 保留最新包版本，但当前未启用 React Compiler，因此 lint 配置显式保留稳定 hooks 基线 `rules-of-hooks` 与 `exhaustive-deps`，避免把 Compiler adoption 重构混入依赖升级。
+- Zod 4 PATCH default 兼容：`AdminQuestionUpdateBody` 与 `PrebuiltPaperUpdateBody` 不再从带 `default()` 的 create/upsert schema 直接 `.partial()`；创建接口保留默认值，更新接口只包含调用方显式传入的字段，避免 PATCH 隐式清空辅助 KP 或写入空 metadata。
 - 考试 session API reference 漏登记：`server/routes/exams.ts`、前端 `fetchExamSession` 与 `exams-runtime.integration.test.ts` 已依赖 `GET /api/v1/exams/:id/session`，但 `plan/reference-api.md` 与 `plan/step-04-exam-and-grading.md` 当前 surface 未列出；本轮已补为现状契约。
 
 ## 验证
@@ -49,7 +53,23 @@ npm run client:test -- src/lib/client-config.test.ts src/lib/exam-runtime.test.t
 npm run lint
 npm run build --workspace=client
 npm run build --workspace=server
+(cd cpp-runner && npm run build)
+npm run client:test -- --configLoader native --pool=vmThreads --maxWorkers=1 --reporter dot
+npm test -- server/__tests__/admin-content.integration.test.ts --configLoader native --pool=vmThreads --maxWorkers=1 --reporter verbose
+npm test -- server/__tests__/llm-config.test.ts --configLoader native --pool=vmThreads --maxWorkers=1 --reporter verbose
+npm test -- server/__tests__/exams-runtime.integration.test.ts --configLoader native --pool=vmThreads --maxWorkers=1 --reporter verbose
+npm test -- --configLoader native --maxWorkers=1 --reporter dot
+npm outdated --json --long
+npm audit --json
+(cd cpp-runner && npm outdated --json --long)
+(cd cpp-runner && npm audit --json)
+npm run migrate:status
+git diff --check
+node -v
+npm -v
 ```
+
+2026-04-27 dependency-upgrade verification note: root/workspace and `cpp-runner` `npm outdated --json --long` both returned `{}` and both audit trees returned 0 vulnerabilities. The full server Vitest run with default forks passed 160 tests and left only Redis-dependent suites blocked by local `127.0.0.1:6379` being unavailable (`bullmq-dead-letter`, `auth-integration`, `pow`). `npm run migrate:status` is likewise blocked by local Postgres `127.0.0.1:5432` being unavailable.
 
 当前 Codex 沙箱追加复核时，`npm run client:test -- src/lib/exam-session.test.ts src/lib/client-config.test.ts src/lib/exam-runtime.test.ts` 的默认 bundle loader 在加载 Vite/Vitest 配置阶段触发 Windows `spawn EPERM`；改为 `--configLoader native` 后配置可加载，但 Vitest worker / Vite realpath 仍被同一类 `spawn EPERM` 阻断，未进入测试断言。本轮使用 `node --experimental-strip-types` 对新增 autosave helper 行为做等价断言，并运行 `npx tsc -p client/tsconfig.json --noEmit`、`npm run build:client` 作为补充验证。
 
