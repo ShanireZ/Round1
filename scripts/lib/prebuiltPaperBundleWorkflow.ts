@@ -43,6 +43,7 @@ export interface BuildPrebuiltPaperArgs {
   examType: keyof typeof blueprintSpecs;
   difficulty: "easy" | "medium" | "hard";
   count: number;
+  blueprintVersion?: number;
 }
 
 export interface ImportPrebuiltPaperBundleOptions {
@@ -132,12 +133,13 @@ export async function buildPrebuiltPaperBundle(
   args: BuildPrebuiltPaperArgs,
 ): Promise<PrebuiltPaperBundle> {
   const spec = blueprintSpecs[args.examType];
+  const blueprintVersion = args.blueprintVersion ?? 1;
   const builtAt = new Date().toISOString();
   const provider = "local-deterministic";
   const model = "prebuilt-paper-builder-v1";
   const promptHash = computeJsonChecksum({
     args,
-    blueprintVersion: 1,
+    blueprintVersion,
     sections: spec.sections,
   });
   const sourceBatchId = `${model}:${args.examType}:${args.difficulty}:${builtAt}`;
@@ -211,7 +213,7 @@ export async function buildPrebuiltPaperBundle(
       title: `${args.examType} ${args.difficulty} 预制卷 ${paperIndex + 1}`,
       examType: args.examType,
       difficulty: args.difficulty,
-      blueprintVersion: 1,
+      blueprintVersion,
       metadataJson: {
         overlapScore,
         provider,
@@ -238,9 +240,8 @@ export async function buildPrebuiltPaperBundle(
       examType: args.examType,
       difficulty: args.difficulty,
       requestedCount: args.count,
-      blueprintVersion: 1,
-      overlapScore:
-        overlapScores.length === 0 ? 0 : Number(Math.max(...overlapScores).toFixed(4)),
+      blueprintVersion,
+      overlapScore: overlapScores.length === 0 ? 0 : Number(Math.max(...overlapScores).toFixed(4)),
     },
     items,
   };

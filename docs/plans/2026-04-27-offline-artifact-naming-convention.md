@@ -10,13 +10,24 @@
 
 ---
 
+## Implementation Status
+
+- [x] Task 1 path helpers and lightweight tests are implemented in `scripts/lib/paperPaths.ts` and `scripts/tests/offlineArtifactPaths.test.ts`.
+- [x] Task 2 CLI defaults and help text are implemented for `generateQuestionBundle.ts`, `buildAcceptanceQuestionBundle.ts`, and `buildPrebuiltPaperBundle.ts`; `--output` remains an explicit override.
+- [ ] Task 3 current artifact migration remains pending because `papers/` and `artifacts/` are ignored runtime asset directories and were not present in this worktree.
+- [x] Task 4 guardrails are implemented in `scripts/verifyOfflineArtifactNames.ts` and exposed as `npm run verify:offline-artifacts`.
+
+---
+
 ## Current Finding
 
-- 已有弱规范：
-  - `scripts/lib/paperPaths.ts` 默认 question bundle 输出为 `papers/<year>/YYYY-MM-DD-<questionType>-<count>.json`。
+- 原有弱规范：
+  - `scripts/lib/paperPaths.ts` 曾默认 question bundle 输出为 `papers/<year>/YYYY-MM-DD-<questionType>-<count>.json`。
   - `docs/plans/2026-04-24-offline-content-prebuilt-papers-design.md` 曾允许 prebuilt paper bundle 使用 `paper-packs.json`。
-  - `plan/reference-ops.md` 的 runbook 也仍示例为 `artifacts/prebuilt-papers/paper-packs.json`。
-- 当前问题：
+  - `plan/reference-ops.md` 的 runbook 曾示例为 `artifacts/prebuilt-papers/paper-packs.json`。
+- 已修复问题：
+  - `generateQuestionBundle.ts`、`buildAcceptanceQuestionBundle.ts`、`buildPrebuiltPaperBundle.ts` 的默认输出已改为 runId 持久化路径；`--output` 仅保留为显式覆盖。
+- 仍需迁移的历史资产问题：
   - `artifacts/prebuilt-papers/paper-packs.json` 这类通用名会被下一次构建覆盖，无法长期审计。
   - `artifacts/llm-step3/probe*.json` 混在正式产物目录层级中，命名没有 runId、用途、版本和可清理边界。
   - `papers/2026/step3-llm-2026-04-27/2026-04-27-*.json` 已经比默认格式更接近批次目录，但目录 token 顺序与文件名仍不统一，且缺少考试类型/难度/version。
@@ -99,6 +110,7 @@ artifacts/tmp/<year>/<runId>/
 ## Task 1: Update Path Helpers
 
 **Files:**
+
 - Modify: `scripts/lib/paperPaths.ts`
 - Test: `scripts/tests` 或新增轻量 path helper 单测
 
@@ -134,6 +146,7 @@ Expected: path helper tests pass.
 ## Task 2: Update CLI Defaults And Help Text
 
 **Files:**
+
 - Modify: `scripts/generateQuestionBundle.ts`
 - Modify: `scripts/buildAcceptanceQuestionBundle.ts`
 - Modify: `scripts/buildPrebuiltPaperBundle.ts`
@@ -152,7 +165,7 @@ Keep `--output` as an escape hatch, but help text must call it an explicit overr
 
 **Step 2: Replace generic defaults**
 
-Update defaults away from:
+Update defaults away from the legacy forms:
 
 ```text
 papers/<year>/YYYY-MM-DD-<questionType>-<count>.json
@@ -175,6 +188,7 @@ Expected: help text documents runId and persistent output paths.
 ## Task 3: Migrate Current Step3 Artifacts
 
 **Files:**
+
 - Move: `papers/2026/step3-llm-2026-04-27/*.json`
 - Move: `artifacts/prebuilt-papers/step3-llm-cspj-medium-paper-packs.json`
 - Move: `artifacts/llm-step3/probe*.json`
@@ -232,6 +246,7 @@ Expected: validators pass with the renamed paths.
 ## Task 4: Add Guardrails
 
 **Files:**
+
 - Create: `scripts/verifyOfflineArtifactNames.ts`
 - Modify: `scripts/README.md`
 
