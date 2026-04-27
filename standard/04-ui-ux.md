@@ -266,6 +266,27 @@ Admin 追加：
 
 选中态固定：左侧 2px 品牌红细条 + `bg-accent-wash` + 品牌红文字。
 
+### 9.3 CommandBar
+
+Cmd+K 全局命令面板必须实装，不能退化为普通搜索框。
+
+分组固定：
+
+- 导航。
+- 我的考试，最近 5 条。
+- 我的班级，coach+ 可见。
+- 管理操作，admin+ 可见。
+- 设置。
+- 主题切换。
+
+交互要求：
+
+- 支持模糊搜索。
+- 支持键盘上下选择、Enter 执行、Esc 关闭。
+- `<sm` 隐藏入口，移动端通过头像菜单进入常用操作。
+- 不展示用户无权访问的命令。
+- 命令执行失败必须以 Toast 或 inline error 反馈。
+
 ## 10. 页面视觉策略
 
 | 页面 | 底层 | 视觉重量来源 |
@@ -279,6 +300,39 @@ Admin 追加：
 | Admin/Settings | Layer A Utility | 表格、筛选、状态 |
 
 Utility 页面不得使用过量 mesh 或大装饰。
+
+### 10.1 视觉层定义
+
+Layer A 是工具型页面底层：
+
+- `bg-base #FEF9F8` 或 dark `#0A0E1A`。
+- `surface` 白/深色面板。
+- 1px border 分隔。
+- 最少阴影，靠排版、间距和表格层级组织信息。
+
+Layer B 是仪式/品牌视觉层，只能用于 plan 指定页面：
+
+- Mesh Gradient。
+- Radial Aura。
+- Large Typography Backdrop，例如 Fraunces 空心描边 `Round1`。
+- Dot/Grid Pattern。
+- 数据图表承担装饰，不使用无意义抽象插画堆叠。
+
+Layer B 使用边界：
+
+- Auth、Dashboard 顶部、ExamResult Ceremony、CoachReport、AdminDashboard Hero Band 可以使用。
+- Exam 考试中禁止使用。
+- 题库、设置、导入中心、用户管理等 Utility 页面只能小剂量继承品牌氛围。
+
+### 10.2 外部设计参照落地
+
+外部设计系统只转化为方法，不覆盖 Round1 定稿：
+
+- Material Design 的 token 化、状态层、运动节奏，落地为本文件颜色/间距/动效 token。
+- Microsoft Fluent 的可达性、焦点可见、清晰文案，落地为 focus glow、键盘操作和错误反馈。
+- Arco Design 的企业中后台效率，落地为 Admin/Coach 的表格、筛选、Sheet 下钻和批量操作一致性。
+
+禁止因为引入 shadcn、Radix、Tailwind 或任意外部组件库，而替换本方案的品牌红、字体、布局和页面 IA。
 
 ## 11. 组件规范
 
@@ -381,6 +435,40 @@ Sizes：`sm h-8`、`md h-10`、`lg h-12`、`icon h-10 w-10`。
 - Skeleton：`bg-subtle animate-pulse`。
 - Progress：考试顶部极细 `h-0.5`，普通进度 `h-1.5`。
 
+### 11.9 Select / Dropdown / Tooltip
+
+- Select 高度与 Input 对齐，默认 `h-10 rounded-md`。
+- Dropdown 菜单宽度不得小于触发器宽度。
+- 菜单项 hover 使用 `accent-wash`，危险项使用 destructive 文本色。
+- Tooltip 延迟 300ms，内容短句，不放长说明。
+- Icon-only button 必须同时有 Tooltip 和 `aria-label`。
+
+### 11.10 Dialog / Sheet / Popover
+
+- Dialog 用于确认、短表单、不可忽略的阻断操作。
+- Sheet 用于右侧详情下钻，例如题目预览、学生详情、导入错误详情。
+- Popover 用于轻量选择器，不承载复杂编辑流程。
+- Admin 敏感操作确认 Dialog 必须展示动作、影响对象、不可逆风险和 step-up 状态。
+- Sheet 宽度 desktop 默认 `480-640px`，移动端全屏。
+
+### 11.11 Chart
+
+- 图表主色只能使用本文件定性图表色板。
+- 雷达图、热力图、曲线图必须有图例或可读标签。
+- 图表 tooltip 必须可键盘触发或提供等价表格摘要。
+- 图表不得成为唯一信息来源，关键分数/排名/状态必须有文本。
+- 大数据加载时先显示 Skeleton，不显示空白画布。
+
+### 11.12 Print
+
+打印样式必须独立维护，不能依赖屏幕样式碰巧可打印：
+
+- A4 优先，边距稳定。
+- 移除背景色、阴影、动画和品牌装饰。
+- 代码块使用等宽打印字体，优先 `Courier New`。
+- 题目分页避免题干与选项被拆断。
+- 打印结果页保留分数、错题、解析和时间信息。
+
 ## 12. 页面 IA 硬约束
 
 ### 12.1 Dashboard
@@ -442,6 +530,48 @@ Admin 是 Utility 风格：
 - 预制卷库：筛选、详情、复制版本、发布/归档。
 - 导入中心：dry-run/apply、错误报告、批次历史、修复重试。
 - 设置：Tabs，敏感操作 step-up。
+
+### 12.7 Auth Pages
+
+AuthLayout 必须保留左侧品牌 Hero + 右侧表单结构。移动端改为顶部品牌 banner + 表单，不改成营销长页。
+
+页面要求：
+
+- `/login`：邮箱/密码、OIDC 入口按 feature flag 显示、找回密码链接。
+- `/register`：邮箱 challenge 流程文案清晰，不暗示 GET 链接会直接登录。
+- `/forgot-password`：提交后不暴露账号是否存在。
+- `/auth/callback`：显示明确处理中、失败、可重试状态。
+- `/join` 未登录态：保留班级加入意图，登录后继续。
+
+### 12.8 Account Pages
+
+账号区保持 Utility 风格，不能做成个人主页装饰页：
+
+- `AccountSecurityPage` 使用 Tabs：密码、Passkey/OIDC 绑定、邮箱、会话管理。
+- `AccountClassPage` 展示当前班级、邀请状态、任务入口。
+- 安全操作必须显示最近认证状态和 step-up 入口。
+- 会话列表显示设备摘要、最近活动、撤销按钮，不展示完整 IP。
+
+### 12.9 Admin Page Contracts
+
+Admin 页面必须遵守以下信息架构：
+
+| 页面 | 必须包含 | 禁止 |
+| --- | --- | --- |
+| AdminQuestionPool | 筛选栏、表格、详情 Sheet、引用摘要、发布/归档/删除未引用 draft | 手动生成题、库存补货入口 |
+| AdminPaperLibrary | 预制卷筛选、slot 详情、copy-version、发布/归档、引用摘要 | 已发布版本原地编辑 |
+| AdminImports | raw bundle 面板、dry-run/apply、错误明细、批次历史、修复重试 | 三套不同摘要口径 |
+| AdminReview | AI/人工审核差异、confirm/reject、备注、历史 | 用模型结论自动发布 |
+| AdminUsers | 用户表格、筛选、角色修改、禁用/恢复、step-up | 后台直接创建普通用户 |
+| AdminSettings | 认证、频控、邮件、导入等 Tabs，保存后配置热更新反馈 | 无审计修改 |
+
+### 12.10 Coach Page Contracts
+
+- `CoachClasses`：班级列表、成员数、邀请码状态、归档状态。
+- `CoachClassDetail`：成员表、任务列表、邀请管理、进入报告。
+- `CoachAssignments`：绑定已发布预制卷、截止时间、单任务单次作答说明。
+- `CoachReport`：热力图主视觉、学生行点击右 Sheet 下钻、导出 CSV、打印报告。
+- Coach 页面只展示自己参与班级的数据；Admin 的全局视角不得混入 Coach UI。
 
 ## 13. 图标、插画与空态
 
@@ -619,3 +749,32 @@ npm run test:e2e
 
 如未运行 E2E 或截图验收，PR/最终说明必须写明原因。
 
+## 23. plan 覆盖矩阵
+
+本矩阵用于防止遗漏 `plan/uiux_plan.md` 已定稿内容。UI/UX PR 必须逐项确认，不允许只说“符合设计风格”。
+
+| plan 环节 | 已定稿内容 | standard 落点 | 验收方式 |
+| --- | --- | --- | --- |
+| 环节 1 品牌与 Logo | Round1、R1 monogram、尖括号辅助图形、无 slogan、双主题 Logo | 4 | Logo 资源、favicon、暗/亮底截图 |
+| 环节 2 配色系统 | 品牌红、错误红、Light/Dark 底色、图表色板、Layer A/B 页面映射 | 5、10 | token diff、Light/Dark 截图、图表色检查 |
+| 环节 3 字体系统 | Geist、Geist Mono、Fraunces、HarmonyOS SC、思源宋体 Heavy、tabular nums | 6、7、18 | 字体加载、数字列、ExamResult 分数截图 |
+| 环节 4 设计令牌 | 圆角、8pt grid、边框优先、focus glow、z-index、动效时长和曲线 | 8、14 | `/dev/ui-gallery` token 面板 |
+| 环节 5 布局骨架 | AuthLayout、AppShell、FocusLayout、CeremonyLayout、Cmd+K、响应式 | 9、12 | 路由截图、键盘操作、断点检查 |
+| 环节 6 核心组件 | Button/Form/Card/Table/Badge/CodeBlock/QuestionRenderer/Chart/Print | 11 | 组件 6 状态快照、打印预览 |
+| 环节 7 页面 IA | Dashboard、ExamNew、Exam、ExamResult、CoachReport、Admin、Account | 12 | Playwright 关键流程截图 |
+| 环节 8 细节 | Lucide、空态、错误页、加载态、微交互、a11y、本地化、字体托管 | 13-18 | axe、reduced motion、长文本、错误态 |
+| 交付物 | tokens/globals/ui/layout/domain/theme/motion/print/gallery | 19、20 | 文件存在、导出路径、build 通过 |
+| 验证策略 | 视觉一致性、E2E、a11y、性能、打印 | 22、15 标准 | 验证记录写入 PR |
+
+## 24. UI/UX 变更阻塞条件
+
+以下情况必须阻塞合并：
+
+- 页面 IA 与 plan 不一致且没有 ADR。
+- 使用未登记颜色、字体、圆角、阴影或 z-index。
+- 新组件没有 default/hover/focus/active/disabled/error 状态。
+- 考试页出现 Sidebar、通知、搜索、营销入口或大装饰。
+- ExamResult 未触发或无法跳过 Ceremony。
+- Admin/Coach Utility 页面被改成营销风或装饰卡片堆叠。
+- `/dev/ui-gallery` 未覆盖新增基础组件。
+- Light/Dark、移动端、键盘、reduced motion 任一基础验收未做且未说明。

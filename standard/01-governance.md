@@ -21,6 +21,8 @@
 - 数据模型真源：`server/db/schema/**`、迁移文件与 `plan/reference-schema.md`。
 - API 现状真源：`server/app.ts`、`server/routes/**`、OpenAPI registry、`plan/reference-api.md`。
 - 运行时配置优先级：`app_settings > .env > 代码默认值`，目标契约见 `plan/reference-schema.md`。
+- 业务状态机真源：`plan/step-*`、`plan/reference-schema.md` 与 [20-product-state-and-workflow.md](20-product-state-and-workflow.md)。
+- 隐私与数据生命周期真源：[21-privacy-and-data-lifecycle.md](21-privacy-and-data-lifecycle.md)。
 - 计划状态真源：较新的 `plan/step-*`、`plan/reference-*`、`docs/plans/*` 对齐说明。
 
 ## 变更流程
@@ -86,6 +88,7 @@
 - 已发布预制卷不可原地覆盖。
 - 可导入内容资产必须有 `runId`、checksum 和 import batch。
 - `config/env.ts`、`config/llm.ts`、DB schema、OpenAPI registry 是代码真源。
+- 状态迁移必须由服务端完成，并满足 [20-product-state-and-workflow.md](20-product-state-and-workflow.md) 的幂等、审计和不变量。
 
 ## 角色职责
 

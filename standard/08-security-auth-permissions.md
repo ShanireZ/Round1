@@ -63,6 +63,8 @@
 
 审计记录应包含 actor、target、action、before/after 摘要、request id、时间。
 
+审计日志、隐私字段、导出与保留策略必须同时遵守 [21-privacy-and-data-lifecycle.md](21-privacy-and-data-lifecycle.md)。
+
 ## 禁止事项
 
 - 禁止在日志、错误响应、前端配置端点暴露 secret。

@@ -39,6 +39,9 @@
 | [17-docs-plan-maintenance.md](17-docs-plan-maintenance.md) | 文档、计划、知识库维护 |
 | [18-agent-and-tool-calling.md](18-agent-and-tool-calling.md) | AI agent 协作、工具调用、执行边界 |
 | [19-source-code-style.md](19-source-code-style.md) | TypeScript、注释、复杂度、格式化与代码组织 |
+| [20-product-state-and-workflow.md](20-product-state-and-workflow.md) | 产品流程、状态机、幂等与业务不变量 |
+| [21-privacy-and-data-lifecycle.md](21-privacy-and-data-lifecycle.md) | 隐私、数据生命周期、日志脱敏与导出 |
+| [22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md) | 标准采纳、PR 审计、漂移治理与持续改进 |
 
 ## 关键词
 
@@ -72,6 +75,7 @@
 - Microsoft REST API Guidelines 强调一致的资源建模、错误语义、版本化与长期兼容；Round1 落地为 [06-backend-api.md](06-backend-api.md) 的 envelope、错误码、分页、OpenAPI 和兼容策略。
 - Microsoft Fluent 2 强调 token、组件、可达性、设计到开发一致性；Round1 落地为 [04-ui-ux.md](04-ui-ux.md)、[15-performance-accessibility-print.md](15-performance-accessibility-print.md) 的 UI 验收。
 - Arco Design 公开资料强调企业级组件、主题 token、自定义物料和中后台效率；Round1 落地为 shadcn/Radix 原子组件、`/dev/ui-gallery`、Admin/Coach utility 页面一致性。
+- 大型工程组织普遍要求决策可追溯、例外有期限、标准可自动化检查；Round1 落地为 [20-product-state-and-workflow.md](20-product-state-and-workflow.md)、[21-privacy-and-data-lifecycle.md](21-privacy-and-data-lifecycle.md)、[22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md) 的状态机、隐私和采纳审计。
 
 ## 最小执行流程
 

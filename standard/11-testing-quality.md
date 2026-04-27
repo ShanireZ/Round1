@@ -108,7 +108,8 @@ UI 改动必须检查：
 | API 路由 | server build、integration test、OpenAPI |
 | DB 迁移 | migrate status、迁移测试、回滚/恢复说明 |
 | 认证权限 | auth integration、权限矩阵、审计检查 |
-| 考试状态机 | exams runtime integration、并发/CAS、E2E |
+| 考试状态机 | exams runtime integration、并发/CAS、E2E、[20-product-state-and-workflow.md](20-product-state-and-workflow.md) 不变量 |
+| 隐私/日志 | 脱敏断言、权限过滤、导出字段检查、[21-privacy-and-data-lifecycle.md](21-privacy-and-data-lifecycle.md) |
 | 离线脚本 | script unit、CLI smoke、fixture validate |
 | 部署 | runbook smoke、health、备份恢复演练 |
 
@@ -151,4 +152,4 @@ UI 改动必须检查：
 - 迁移状态正确。
 - 没有临时 debug 输出。
 - 没有未处理 TODO 影响上线。
-- 文档/标准同步完成。
+- 文档/标准同步完成，并按 [22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md) 记录影响面。

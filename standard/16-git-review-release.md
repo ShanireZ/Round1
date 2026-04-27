@@ -30,6 +30,8 @@ test: cover prebuilt paper archive references
 - 文档同步情况。
 - 截图或录屏（UI 变更）。
 
+PR 应按 [22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md) 写明已检查的标准、验证结果和未覆盖风险。
+
 ## 代码评审
 
 评审优先级：

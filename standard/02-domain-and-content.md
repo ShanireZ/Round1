@@ -43,6 +43,8 @@ V1 单账号单角色。coach/admin 以学生身份体验答题时，其 attempt
 
 ## 状态生命周期
 
+详细迁移、幂等和测试标准见 [20-product-state-and-workflow.md](20-product-state-and-workflow.md)。本节只保留产品语义总览。
+
 - 题目：`draft -> reviewed -> published -> archived`。已发布题目如需大改，应复制或生成新版本，保留历史引用。
 - 预制卷：`draft -> published -> archived`。已发布预制卷视为不可变资产，禁止原地覆盖。
 - 个人试卷：`draft -> started -> completed/abandoned`。
