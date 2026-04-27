@@ -289,7 +289,8 @@ describe("admin content api", () => {
   });
 
   it("publishes and archives questions through lifecycle endpoints", async () => {
-    queuedResults.push([{ id: "question-1", type: "single_choice", sandboxVerified: false }]);
+    queuedResults.push([{ id: "question-1", status: "reviewed", type: "single_choice", sandboxVerified: false }]);
+    queuedResults.push([{ id: "question-1", status: "published" }]);
     queuedResults.push([{ id: "question-1", status: "published" }]);
     queuedResults.push([{ id: "question-1", status: "archived" }]);
     const app = createTestApp();
@@ -306,8 +307,20 @@ describe("admin content api", () => {
     expect(archiveRes.body.data.status).toBe("archived");
   });
 
+  it("prevents publishing questions before review", async () => {
+    queuedResults.push([{ id: "question-1", status: "draft", type: "single_choice", sandboxVerified: false }]);
+    const app = createTestApp();
+
+    const publishRes = await supertest(app).post("/api/v1/admin/questions/question-1/publish");
+
+    expect(publishRes.status).toBe(409);
+    expect(publishRes.body.success).toBe(false);
+    expect(publishRes.body.error.message).toContain("reviewed");
+    expect(mockDb.update).not.toHaveBeenCalled();
+  });
+
   it("rejects publishing unverified code questions", async () => {
-    queuedResults.push([{ id: "question-1", type: "reading_program", sandboxVerified: false }]);
+    queuedResults.push([{ id: "question-1", status: "reviewed", type: "reading_program", sandboxVerified: false }]);
     const app = createTestApp();
 
     const publishRes = await supertest(app).post("/api/v1/admin/questions/question-1/publish");
@@ -320,7 +333,7 @@ describe("admin content api", () => {
 
   it("confirms questions into the reviewed lifecycle state", async () => {
     queuedResults.push(
-      [{ id: "question-1" }],
+      [{ id: "question-1", status: "draft" }],
       [{ id: "review-1" }],
       [{ id: "review-1", reviewStatus: "confirmed" }],
       [{ id: "question-1", status: "reviewed" }],
@@ -338,7 +351,7 @@ describe("admin content api", () => {
 
   it("rejects question reviews and keeps the question in draft", async () => {
     queuedResults.push(
-      [{ id: "question-1" }],
+      [{ id: "question-1", status: "draft" }],
       [{ id: "review-1" }],
       [{ id: "review-1", reviewStatus: "rejected" }],
       [{ id: "question-1", status: "draft" }],
@@ -360,6 +373,7 @@ describe("admin content api", () => {
     queuedResults.push([{ id: "paper-1", title: "Paper A", status: "draft" }]);
     queuedResults.push([{ slotNo: 1, questionId: "question-1" }]);
     queuedResults.push([{ id: "paper-1", status: "draft" }]);
+    queuedResults.push([{ id: "paper-1", status: "published" }]);
     queuedResults.push([{ id: "paper-1", status: "published" }]);
     queuedResults.push([{ id: "paper-1", status: "archived" }]);
     const app = createTestApp();
@@ -515,7 +529,7 @@ describe("admin content api", () => {
   });
 
   it("copies a prebuilt paper into a new draft lineage version", async () => {
-    queuedResults.push([{ id: "paper-1", rootPaperId: "paper-root", versionNo: 3 }], []);
+    queuedResults.push([{ id: "paper-1", status: "published", rootPaperId: "paper-root", versionNo: 3 }], []);
     queuedResults.push([{ slotNo: 1, questionId: "question-1" }]);
     queuedResults.push([
       {

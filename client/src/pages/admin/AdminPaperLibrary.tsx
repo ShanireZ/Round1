@@ -177,7 +177,28 @@ export default function AdminPaperLibrary() {
   const selectedPaper = detailQuery.data;
   const references = referencesQuery.data;
   const selectedCanEdit = selectedPaper?.status === "draft";
+  const selectedCanPublish = selectedPaper?.status === "draft";
+  const selectedCanArchive = selectedPaper?.status === "published";
+  const selectedCanCopy = selectedPaper?.status === "published" || selectedPaper?.status === "archived";
   const selectedCanDelete = selectedPaper?.status === "draft" && references?.canDelete === true;
+  const paperDeleteHint =
+    selectedPaper?.status === "draft"
+      ? referencesQuery.isLoading
+        ? "正在检查引用。"
+        : references?.canDelete === true
+          ? "未被引用的 draft 预制卷可硬删除。"
+          : references
+            ? "已有引用的 draft 预制卷不能硬删除。"
+            : "引用信息未加载，暂不能硬删除。"
+      : "仅未被引用的 draft 预制卷可硬删除。";
+  const paperLifecycleHint =
+    selectedPaper?.status === "draft"
+      ? "Draft 预制卷可原地编辑和发布，不需要复制版本。"
+      : selectedPaper?.status === "published"
+        ? "Published 预制卷不能原地覆盖；修改请先复制新 draft，或归档旧版本。"
+        : selectedPaper?.status === "archived"
+          ? "Archived 预制卷已退出投放；可复制为新 draft。"
+          : "";
 
   const listSummary = useMemo(() => {
     const total = papersQuery.data?.pagination.total ?? 0;
@@ -267,6 +288,23 @@ export default function AdminPaperLibrary() {
       toast.error(error instanceof Error ? error.message : "预制卷操作失败");
     },
   });
+
+  const runLifecycleAction = (action: "publish" | "archive" | "delete" | "copy") => {
+    if (!selectedPaper) {
+      return;
+    }
+
+    const confirmMessages = {
+      publish: `确认发布预制卷 ${selectedPaper.id.slice(0, 8)}？发布后不能原地编辑。`,
+      archive: `确认归档预制卷 ${selectedPaper.id.slice(0, 8)}？归档后不会进入新试卷选择。`,
+      delete: `确认硬删除 draft 预制卷 ${selectedPaper.id.slice(0, 8)}？此操作不可撤销。`,
+      copy: `确认复制预制卷 ${selectedPaper.id.slice(0, 8)} 为新 draft 版本？`,
+    };
+
+    if (window.confirm(confirmMessages[action])) {
+      lifecycleMutation.mutate(action);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -544,6 +582,7 @@ export default function AdminPaperLibrary() {
                   <Button
                     variant="secondary"
                     disabled={!selectedCanEdit}
+                    title={selectedCanEdit ? "保存 draft 预制卷" : "仅 draft 预制卷可编辑"}
                     loading={saveMutation.isPending}
                     onClick={() => saveMutation.mutate()}
                   >
@@ -551,25 +590,29 @@ export default function AdminPaperLibrary() {
                     保存
                   </Button>
                   <Button
-                    disabled={selectedPaper.status !== "draft"}
+                    disabled={!selectedCanPublish}
+                    title={selectedCanPublish ? "发布 draft 预制卷" : "仅 draft 预制卷可发布"}
                     loading={lifecycleMutation.isPending && lifecycleMutation.variables === "publish"}
-                    onClick={() => lifecycleMutation.mutate("publish")}
+                    onClick={() => runLifecycleAction("publish")}
                   >
                     发布
                   </Button>
                   <Button
                     variant="secondary"
+                    disabled={!selectedCanCopy}
+                    title={selectedCanCopy ? "复制为新 draft 版本" : "Draft 预制卷可直接编辑"}
                     loading={lifecycleMutation.isPending && lifecycleMutation.variables === "copy"}
-                    onClick={() => lifecycleMutation.mutate("copy")}
+                    onClick={() => runLifecycleAction("copy")}
                   >
                     <CopyPlus className="h-4 w-4" />
                     复制新版本
                   </Button>
                   <Button
                     variant="secondary"
-                    disabled={selectedPaper.status === "archived"}
+                    disabled={!selectedCanArchive}
+                    title={selectedCanArchive ? "归档 published 预制卷" : "仅 published 预制卷可归档"}
                     loading={lifecycleMutation.isPending && lifecycleMutation.variables === "archive"}
-                    onClick={() => lifecycleMutation.mutate("archive")}
+                    onClick={() => runLifecycleAction("archive")}
                   >
                     <Archive className="h-4 w-4" />
                     归档
@@ -577,13 +620,17 @@ export default function AdminPaperLibrary() {
                   <Button
                     variant="destructive"
                     disabled={!selectedCanDelete}
+                    title={selectedCanDelete ? "删除未引用 draft 预制卷" : paperDeleteHint}
                     loading={lifecycleMutation.isPending && lifecycleMutation.variables === "delete"}
-                    onClick={() => lifecycleMutation.mutate("delete")}
+                    onClick={() => runLifecycleAction("delete")}
                   >
                     <Trash2 className="h-4 w-4" />
                     删除
                   </Button>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  {paperLifecycleHint} {paperDeleteHint}
+                </p>
               </>
             )}
           </CardContent>

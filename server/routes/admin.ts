@@ -916,6 +916,7 @@ adminRouter.delete(
   "/admin/questions/:id",
   requireAuth,
   requireRole("admin"),
+  requireRecentAuth,
   adminAudit("delete_question", "question_bank"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -981,6 +982,7 @@ adminRouter.post(
   "/admin/questions/:id/publish",
   requireAuth,
   requireRole("admin"),
+  requireRecentAuth,
   adminAudit("publish_question", "question_bank"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -988,6 +990,7 @@ adminRouter.post(
       const [current] = await db
         .select({
           id: questions.id,
+          status: questions.status,
           type: questions.type,
           sandboxVerified: questions.sandboxVerified,
         })
@@ -997,6 +1000,11 @@ adminRouter.post(
 
       if (!current) {
         res.fail("ROUND1_NOT_FOUND", "题目不存在", 404);
+        return;
+      }
+
+      if (current.status !== "reviewed") {
+        res.fail("ROUND1_CONFLICT", "Only reviewed questions can be published", 409);
         return;
       }
 
@@ -1017,7 +1025,7 @@ adminRouter.post(
           archivedAt: null,
           updatedAt: new Date(),
         })
-        .where(eq(questions.id, id))
+        .where(and(eq(questions.id, id), eq(questions.status, "reviewed")))
         .returning({
           id: questions.id,
           status: questions.status,
@@ -1026,11 +1034,12 @@ adminRouter.post(
         });
 
       if (!updated) {
-        res.fail("ROUND1_NOT_FOUND", "题目不存在", 404);
+        res.fail("ROUND1_CONFLICT", "Question status changed, refresh and retry", 409);
         return;
       }
 
       res.locals.adminAudit.targetId = id;
+      res.locals.adminAudit.before = current;
       res.locals.adminAudit.after = updated;
       res.ok(updated);
     } catch (err) {
@@ -1044,10 +1053,30 @@ adminRouter.post(
   "/admin/questions/:id/archive",
   requireAuth,
   requireRole("admin"),
+  requireRecentAuth,
   adminAudit("archive_question", "question_bank"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = req.params.id as string;
+      const [current] = await db
+        .select({
+          id: questions.id,
+          status: questions.status,
+        })
+        .from(questions)
+        .where(eq(questions.id, id))
+        .limit(1);
+
+      if (!current) {
+        res.fail("ROUND1_NOT_FOUND", "题目不存在", 404);
+        return;
+      }
+
+      if (current.status !== "published") {
+        res.fail("ROUND1_CONFLICT", "Only published questions can be archived", 409);
+        return;
+      }
+
       const [updated] = await db
         .update(questions)
         .set({
@@ -1055,7 +1084,7 @@ adminRouter.post(
           archivedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(questions.id, id))
+        .where(and(eq(questions.id, id), eq(questions.status, "published")))
         .returning({
           id: questions.id,
           status: questions.status,
@@ -1064,11 +1093,12 @@ adminRouter.post(
         });
 
       if (!updated) {
-        res.fail("ROUND1_NOT_FOUND", "题目不存在", 404);
+        res.fail("ROUND1_CONFLICT", "Question status changed, refresh and retry", 409);
         return;
       }
 
       res.locals.adminAudit.targetId = id;
+      res.locals.adminAudit.before = current;
       res.locals.adminAudit.after = updated;
       res.ok(updated);
     } catch (err) {
@@ -1082,19 +1112,25 @@ adminRouter.post(
   "/admin/questions/:id/confirm",
   requireAuth,
   requireRole("admin"),
+  requireRecentAuth,
   adminAudit("confirm_question", "question_bank"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = req.params.id as string;
 
       const [current] = await db
-        .select({ id: questions.id })
+        .select({ id: questions.id, status: questions.status })
         .from(questions)
         .where(eq(questions.id, id))
         .limit(1);
 
       if (!current) {
         res.fail("ROUND1_NOT_FOUND", "题目不存在", 404);
+        return;
+      }
+
+      if (current.status !== "draft") {
+        res.fail("ROUND1_CONFLICT", "Only draft questions can be confirmed", 409);
         return;
       }
 
@@ -1113,7 +1149,7 @@ adminRouter.post(
             archivedAt: null,
             updatedAt: new Date(),
           })
-          .where(eq(questions.id, id))
+          .where(and(eq(questions.id, id), eq(questions.status, "draft")))
           .returning({
             id: questions.id,
             status: questions.status,
@@ -1126,6 +1162,7 @@ adminRouter.post(
       });
 
       res.locals.adminAudit.targetId = id;
+      res.locals.adminAudit.before = current;
       res.locals.adminAudit.after = result;
       res.ok(result);
     } catch (err) {
@@ -1139,19 +1176,25 @@ adminRouter.post(
   "/admin/questions/:id/reject",
   requireAuth,
   requireRole("admin"),
+  requireRecentAuth,
   adminAudit("reject_question", "question_bank"),
   validate(AdminQuestionRejectBody),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = req.params.id as string;
       const [current] = await db
-        .select({ id: questions.id })
+        .select({ id: questions.id, status: questions.status })
         .from(questions)
         .where(eq(questions.id, id))
         .limit(1);
 
       if (!current) {
         res.fail("ROUND1_NOT_FOUND", "题目不存在", 404);
+        return;
+      }
+
+      if (current.status !== "draft") {
+        res.fail("ROUND1_CONFLICT", "Only draft questions can be rejected", 409);
         return;
       }
 
@@ -1171,7 +1214,7 @@ adminRouter.post(
             archivedAt: null,
             updatedAt: new Date(),
           })
-          .where(eq(questions.id, id))
+          .where(and(eq(questions.id, id), eq(questions.status, "draft")))
           .returning({
             id: questions.id,
             status: questions.status,
@@ -1184,6 +1227,7 @@ adminRouter.post(
       });
 
       res.locals.adminAudit.targetId = id;
+      res.locals.adminAudit.before = current;
       res.locals.adminAudit.after = result;
       res.ok(result);
     } catch (err) {
@@ -1374,6 +1418,7 @@ adminRouter.post(
   "/admin/prebuilt-papers/:id/copy-version",
   requireAuth,
   requireRole("admin"),
+  requireRecentAuth,
   adminAudit("copy_prebuilt_paper_version", "prebuilt_paper"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -1385,6 +1430,7 @@ adminRouter.post(
           examType: prebuiltPapers.examType,
           difficulty: prebuiltPapers.difficulty,
           blueprintVersion: prebuiltPapers.blueprintVersion,
+          status: prebuiltPapers.status,
           rootPaperId: prebuiltPapers.rootPaperId,
           versionNo: prebuiltPapers.versionNo,
           sourceBatchId: prebuiltPapers.sourceBatchId,
@@ -1396,6 +1442,11 @@ adminRouter.post(
 
       if (!current) {
         res.fail("ROUND1_NOT_FOUND", "预制卷不存在", 404);
+        return;
+      }
+
+      if (current.status === "draft") {
+        res.fail("ROUND1_CONFLICT", "Draft prebuilt papers can be edited in place", 409);
         return;
       }
 
@@ -1465,6 +1516,7 @@ adminRouter.post(
       });
 
       res.locals.adminAudit.targetId = copied.id;
+      res.locals.adminAudit.before = current;
       res.locals.adminAudit.after = copied;
       res.ok(copied, 201);
     } catch (err) {
@@ -1559,6 +1611,7 @@ adminRouter.delete(
   "/admin/prebuilt-papers/:id",
   requireAuth,
   requireRole("admin"),
+  requireRecentAuth,
   adminAudit("delete_prebuilt_paper", "prebuilt_paper"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -1622,6 +1675,7 @@ adminRouter.post(
   "/admin/prebuilt-papers/:id/publish",
   requireAuth,
   requireRole("admin"),
+  requireRecentAuth,
   adminAudit("publish_prebuilt_paper", "prebuilt_paper"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -1650,7 +1704,7 @@ adminRouter.post(
           archivedAt: null,
           updatedAt: new Date(),
         })
-        .where(eq(prebuiltPapers.id, id))
+        .where(and(eq(prebuiltPapers.id, id), eq(prebuiltPapers.status, "draft")))
         .returning({
           id: prebuiltPapers.id,
           status: prebuiltPapers.status,
@@ -1659,7 +1713,7 @@ adminRouter.post(
         });
 
       if (!updated) {
-        res.fail("ROUND1_NOT_FOUND", "预制卷不存在", 404);
+        res.fail("ROUND1_CONFLICT", "Prebuilt paper status changed, refresh and retry", 409);
         return;
       }
 
@@ -1678,10 +1732,30 @@ adminRouter.post(
   "/admin/prebuilt-papers/:id/archive",
   requireAuth,
   requireRole("admin"),
+  requireRecentAuth,
   adminAudit("archive_prebuilt_paper", "prebuilt_paper"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = req.params.id as string;
+      const [current] = await db
+        .select({
+          id: prebuiltPapers.id,
+          status: prebuiltPapers.status,
+        })
+        .from(prebuiltPapers)
+        .where(eq(prebuiltPapers.id, id))
+        .limit(1);
+
+      if (!current) {
+        res.fail("ROUND1_NOT_FOUND", "预制卷不存在", 404);
+        return;
+      }
+
+      if (current.status !== "published") {
+        res.fail("ROUND1_CONFLICT", "Only published prebuilt papers can be archived", 409);
+        return;
+      }
+
       const [updated] = await db
         .update(prebuiltPapers)
         .set({
@@ -1689,7 +1763,7 @@ adminRouter.post(
           archivedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(prebuiltPapers.id, id))
+        .where(and(eq(prebuiltPapers.id, id), eq(prebuiltPapers.status, "published")))
         .returning({
           id: prebuiltPapers.id,
           status: prebuiltPapers.status,
@@ -1698,11 +1772,12 @@ adminRouter.post(
         });
 
       if (!updated) {
-        res.fail("ROUND1_NOT_FOUND", "预制卷不存在", 404);
+        res.fail("ROUND1_CONFLICT", "Prebuilt paper status changed, refresh and retry", 409);
         return;
       }
 
       res.locals.adminAudit.targetId = id;
+      res.locals.adminAudit.before = current;
       res.locals.adminAudit.after = updated;
       res.ok(updated);
     } catch (err) {

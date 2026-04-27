@@ -196,7 +196,29 @@ export default function AdminQuestionLibrary() {
   const selectedQuestion = detailQuery.data;
   const references = referencesQuery.data;
   const selectedCanEdit = selectedQuestion?.status === "draft";
+  const selectedCanPublish = selectedQuestion?.status === "reviewed";
+  const selectedCanArchive = selectedQuestion?.status === "published";
   const selectedCanDelete = selectedQuestion?.status === "draft" && references?.canDelete === true;
+  const questionDeleteHint =
+    selectedQuestion?.status === "draft"
+      ? referencesQuery.isLoading
+        ? "正在检查引用。"
+        : references?.canDelete === true
+          ? "未被引用的 draft 题目可硬删除。"
+          : references
+            ? "已有引用的 draft 题目不能硬删除。"
+            : "引用信息未加载，暂不能硬删除。"
+      : "仅未被引用的 draft 题目可硬删除。";
+  const questionLifecycleHint =
+    selectedQuestion?.status === "draft"
+      ? "Draft 题目需先确认到 reviewed 才能发布。"
+      : selectedQuestion?.status === "reviewed"
+        ? "Reviewed 题目可发布，发布后只允许归档。"
+        : selectedQuestion?.status === "published"
+          ? "Published 题目不能原地编辑，只允许归档。"
+          : selectedQuestion?.status === "archived"
+            ? "Archived 题目已退出投放，不能再次发布。"
+            : "";
 
   const listSummary = useMemo(() => {
     const total = questionsQuery.data?.pagination.total ?? 0;
@@ -279,6 +301,22 @@ export default function AdminQuestionLibrary() {
       toast.error(error instanceof Error ? error.message : "题目操作失败");
     },
   });
+
+  const runLifecycleAction = (action: "publish" | "archive" | "delete") => {
+    if (!selectedQuestion) {
+      return;
+    }
+
+    const confirmMessages = {
+      publish: `确认发布题目 ${selectedQuestion.id.slice(0, 8)}？发布后不能原地编辑。`,
+      archive: `确认归档题目 ${selectedQuestion.id.slice(0, 8)}？归档后不会进入新试卷选择。`,
+      delete: `确认硬删除 draft 题目 ${selectedQuestion.id.slice(0, 8)}？此操作不可撤销。`,
+    };
+
+    if (window.confirm(confirmMessages[action])) {
+      lifecycleMutation.mutate(action);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -628,6 +666,7 @@ export default function AdminQuestionLibrary() {
                   <Button
                     variant="secondary"
                     disabled={!selectedCanEdit}
+                    title={selectedCanEdit ? "保存 draft 题目" : "仅 draft 题目可编辑"}
                     loading={saveMutation.isPending}
                     onClick={() => saveMutation.mutate()}
                   >
@@ -635,18 +674,20 @@ export default function AdminQuestionLibrary() {
                     保存
                   </Button>
                   <Button
-                    disabled={selectedQuestion.status === "published"}
+                    disabled={!selectedCanPublish}
+                    title={selectedCanPublish ? "发布 reviewed 题目" : "仅 reviewed 题目可发布"}
                     loading={lifecycleMutation.isPending && lifecycleMutation.variables === "publish"}
-                    onClick={() => lifecycleMutation.mutate("publish")}
+                    onClick={() => runLifecycleAction("publish")}
                   >
                     <CheckCircle2 className="h-4 w-4" />
                     发布
                   </Button>
                   <Button
                     variant="secondary"
-                    disabled={selectedQuestion.status === "archived"}
+                    disabled={!selectedCanArchive}
+                    title={selectedCanArchive ? "归档 published 题目" : "仅 published 题目可归档"}
                     loading={lifecycleMutation.isPending && lifecycleMutation.variables === "archive"}
-                    onClick={() => lifecycleMutation.mutate("archive")}
+                    onClick={() => runLifecycleAction("archive")}
                   >
                     <Archive className="h-4 w-4" />
                     归档
@@ -654,13 +695,17 @@ export default function AdminQuestionLibrary() {
                   <Button
                     variant="destructive"
                     disabled={!selectedCanDelete}
+                    title={selectedCanDelete ? "删除未引用 draft 题目" : questionDeleteHint}
                     loading={lifecycleMutation.isPending && lifecycleMutation.variables === "delete"}
-                    onClick={() => lifecycleMutation.mutate("delete")}
+                    onClick={() => runLifecycleAction("delete")}
                   >
                     <Trash2 className="h-4 w-4" />
                     删除
                   </Button>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  {questionLifecycleHint} {questionDeleteHint}
+                </p>
               </>
             )}
           </CardContent>

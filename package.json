@@ -34,13 +34,15 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "otpauth": "^9.5.0"
+    "otpauth": "^9.5.0",
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.1",
     "@types/node": "^25.6.0",
     "@types/supertest": "^7.2.0",
     "supertest": "^7.2.2",
+    "tsx": "^4.19.4",
     "vitest": "^4.1.4"
   }
 }
