@@ -1,6 +1,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { z } from "zod";
+
 import {
   DifficultySchema,
   ExamTypeSchema,
@@ -12,6 +14,56 @@ import {
 import { defaultQuestionBundleOutputPath } from "./lib/paperPaths.js";
 
 type ComputeContentHash = (stem: string, codeOrOptions: string) => string;
+
+const generatedSingleChoiceSchema = z.object({
+  stem: z.string().min(10),
+  options: z.array(z.string().min(1)).length(4),
+  answer: z.enum(["A", "B", "C", "D"]),
+  explanation: z.string().min(10),
+  primaryKpCode: z.string().min(1),
+  auxiliaryKpCodes: z.array(z.string().min(1)).max(3).default([]),
+});
+
+const generatedReadingProgramSchema = z.object({
+  stem: z.string().min(10),
+  cppCode: z.string().min(30),
+  subQuestions: z
+    .array(
+      z.object({
+        stem: z.string().min(1),
+        options: z.array(z.string().min(1)).length(4),
+        answer: z.enum(["A", "B", "C", "D"]),
+        explanation: z.string().min(10),
+      }),
+    )
+    .min(3)
+    .max(6),
+  sampleInputs: z.array(z.string()).default([]),
+  expectedOutputs: z.array(z.string()).default([]),
+  primaryKpCode: z.string().min(1),
+  auxiliaryKpCodes: z.array(z.string().min(1)).max(3).default([]),
+});
+
+const generatedCompletionProgramSchema = z.object({
+  stem: z.string().min(10),
+  cppCode: z.string().min(30),
+  blanks: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        options: z.array(z.string().min(1)).length(4),
+        answer: z.enum(["A", "B", "C", "D"]),
+        explanation: z.string().min(10),
+      }),
+    )
+    .min(2)
+    .max(6),
+  fullCode: z.string().min(30),
+  sampleInputs: z.array(z.string()).default([]),
+  expectedOutputs: z.array(z.string()).default([]),
+  primaryKpCode: z.string().min(1),
+  auxiliaryKpCodes: z.array(z.string().min(1)).max(3).default([]),
+});
 
 interface GenerateArgs {
   examType: string;
@@ -73,6 +125,30 @@ function applyTemplate(template: string, replacements: Record<string, string>) {
     (current, [key, value]) => current.replaceAll(`{{${key}}}`, value),
     template,
   );
+}
+
+function getGeneratedQuestionSchema(questionType: string) {
+  if (questionType === "single_choice") {
+    return {
+      schema: generatedSingleChoiceSchema,
+      schemaName: "GeneratedSingleChoiceQuestion",
+      maxTokens: 2_400,
+    };
+  }
+
+  if (questionType === "reading_program") {
+    return {
+      schema: generatedReadingProgramSchema,
+      schemaName: "GeneratedReadingProgramQuestion",
+      maxTokens: 6_000,
+    };
+  }
+
+  return {
+    schema: generatedCompletionProgramSchema,
+    schemaName: "GeneratedCompletionProgramQuestion",
+    maxTokens: 6_000,
+  };
 }
 
 function normalizeGeneratedQuestion(
@@ -236,13 +312,13 @@ async function main() {
     throw new Error("--count must be a positive integer");
   }
 
-  const [{ eq }, { db }, { knowledgePoints }, { computeContentHash }, { callScriptLlmScene }] =
+  const [{ eq }, { db }, { knowledgePoints }, { computeContentHash }, { llmGenerateObject }] =
     await Promise.all([
       import("drizzle-orm"),
       import("../server/db.js"),
       import("../server/db/schema/knowledgePoints.js"),
       import("../server/services/deduplicationService.js"),
-      import("./lib/scriptLlmClient.js"),
+      import("../server/services/llm/index.js"),
     ]);
 
   const promptTemplate = await readFile(
@@ -263,6 +339,7 @@ async function main() {
   }
 
   const items = [];
+  const generationSchema = getGeneratedQuestionSchema(args.questionType);
 
   for (let index = 0; index < args.count; index += 1) {
     const prompt = applyTemplate(promptTemplate, {
@@ -274,15 +351,17 @@ async function main() {
       fewShotExamples: "[]",
     });
 
-    const result = await callScriptLlmScene({
-      scene: "generate",
+    const result = await llmGenerateObject({
+      task: "generate",
+      schema: generationSchema.schema,
+      schemaName: generationSchema.schemaName,
       system: "你是算法竞赛中文命题专家，只输出 JSON。",
       prompt,
-      maxTokens: 3_200,
-      timeoutMs: 60_000,
+      maxTokens: generationSchema.maxTokens,
+      temperature: 0.72,
     });
 
-    const generated = JSON.parse(result.text) as Record<string, unknown>;
+    const generated = result.data as Record<string, unknown>;
     const item = normalizeGeneratedQuestion(generated, args, computeContentHash);
     items.push(item);
 
@@ -291,7 +370,7 @@ async function main() {
         meta: {
           bundleType: "question_bundle",
           generatedAt: new Date().toISOString(),
-          provider: result.providerName,
+          provider: result.provider,
           model: result.model,
           promptHash,
           sourceBatchId,
