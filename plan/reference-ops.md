@@ -21,21 +21,24 @@ tsx scripts/bootstrapKnowledgePoints.ts
 tsx scripts/ingestRealPapers.ts
 
 # 5. 生成并校验 question bundle（离线内容环境执行）
-# 默认输出：papers/<year>/YYYY-MM-DD-<questionType>-<count>.json
-tsx scripts/generateQuestionBundle.ts --exam-type <exam-type> --question-type <question-type> --primary-kp-code <kp-code> --difficulty <difficulty> --count <count>
-tsx scripts/validateQuestionBundle.ts papers/<year>/<bundle-file>.json --run-sandbox --write
+# 持久化输出：papers/<year>/<runId>/question-bundles/<runId>__question-bundle__<question-type>__<kp-code>__n<count>__vNN.json
+# 当前脚本未完全内建 runId 默认路径前，必须显式传 --output 到持久化路径
+tsx scripts/generateQuestionBundle.ts --exam-type <exam-type> --question-type <question-type> --primary-kp-code <kp-code> --difficulty <difficulty> --count <count> --output papers/<year>/<runId>/question-bundles/<bundle-file>.json
+tsx scripts/validateQuestionBundle.ts papers/<year>/<runId>/question-bundles/<bundle-file>.json --run-sandbox --write
 
 # 6. 导入题目 bundle（生产环境可 dry-run / apply）
-tsx scripts/importQuestionBundle.ts papers/<year>/<bundle-file>.json --dry-run
-tsx scripts/importQuestionBundle.ts papers/<year>/<bundle-file>.json --apply
+tsx scripts/importQuestionBundle.ts papers/<year>/<runId>/question-bundles/<bundle-file>.json --dry-run
+tsx scripts/importQuestionBundle.ts papers/<year>/<runId>/question-bundles/<bundle-file>.json --apply
 
 # 7. 生成并校验 prebuilt paper bundle（离线内容环境执行）
-tsx scripts/buildPrebuiltPaperBundle.ts --exam-type <exam-type> --difficulty <difficulty> --count <count> --output artifacts/prebuilt-papers/paper-packs.json
-tsx scripts/validatePrebuiltPaperBundle.ts artifacts/prebuilt-papers/paper-packs.json
+# 持久化输出：artifacts/prebuilt-papers/<year>/<runId>/<runId>__prebuilt-paper-bundle__blueprint-v<blueprintVersion>__n<count>__vNN.json
+# 当前脚本未完全内建 runId 默认路径前，必须显式传 --output 到持久化路径
+tsx scripts/buildPrebuiltPaperBundle.ts --exam-type <exam-type> --difficulty <difficulty> --count <count> --output artifacts/prebuilt-papers/<year>/<runId>/<bundle-file>.json
+tsx scripts/validatePrebuiltPaperBundle.ts artifacts/prebuilt-papers/<year>/<runId>/<bundle-file>.json
 
 # 8. 导入预制卷 bundle（生产环境可 dry-run / apply）
-tsx scripts/importPrebuiltPaperBundle.ts artifacts/prebuilt-papers/paper-packs.json --dry-run
-tsx scripts/importPrebuiltPaperBundle.ts artifacts/prebuilt-papers/paper-packs.json --apply
+tsx scripts/importPrebuiltPaperBundle.ts artifacts/prebuilt-papers/<year>/<runId>/<bundle-file>.json --dry-run
+tsx scripts/importPrebuiltPaperBundle.ts artifacts/prebuilt-papers/<year>/<runId>/<bundle-file>.json --apply
 
 # 9. 创建首个管理员账号
 # 当前仓库暂无 scripts/initAdmin.ts；首个管理员通过数据库手工设置 role 或后续补专用脚本

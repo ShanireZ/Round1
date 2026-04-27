@@ -60,7 +60,7 @@
 5. `importQuestionBundle` 在生产环境 dry-run 或 apply。
 6. 管理员在后台执行 publish、archive、review。
 
-> question bundle 标准产物统一放入 `papers/<year>/YYYY-MM-DD-<questionType>-<count>.json`，文件内容为可直接导入的 raw `QuestionBundleSchema` JSON；prebuilt paper bundle 可继续使用 `paper-packs.json`。仓库内部脚本名可以继续使用 `generateQuestionBundle` / `buildPrebuiltPaperBundle` 这一类实现名。
+> question bundle 与 prebuilt paper bundle 均必须使用持久化、不可覆盖的 `runId` 命名。`runId` 格式为 `YYYY-MM-DD-<pipeline>-<exam-type-slug>-<difficulty>-vNN`。question bundle 标准产物统一放入 `papers/<year>/<runId>/question-bundles/<runId>__question-bundle__<question-type>__<kp-code>__n<count>__vNN.json`；prebuilt paper bundle 标准产物统一放入 `artifacts/prebuilt-papers/<year>/<runId>/<runId>__prebuilt-paper-bundle__blueprint-v<blueprintVersion>__n<count>__vNN.json`。`paper-packs.json`、`latest.json`、`probe*.json` 等无 runId 名称只允许作为本地临时 alias，不得作为可导入/可审计资产。详细规范与迁移任务见 `docs/plans/2026-04-27-offline-artifact-naming-convention.md`。仓库内部脚本名可以继续使用 `generateQuestionBundle` / `buildPrebuiltPaperBundle` 这一类实现名。
 
 ### Prebuilt Paper Bundle Pipeline
 
