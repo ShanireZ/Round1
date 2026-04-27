@@ -6,6 +6,7 @@ import {
   getDraftAnswerValue,
   getSessionCountdownState,
   normalizeDraftAnswers,
+  replayPendingAutosavePatches,
   shouldBlockBeforeUnload,
   upsertDraftAnswer,
 } from "./exam-session";
@@ -199,5 +200,55 @@ describe("exam session helpers", () => {
         lastSavedSnapshot: JSON.stringify(persisted),
       }),
     ).toBe(true);
+
+    expect(
+      shouldBlockBeforeUnload({
+        autosavePhase: "saved",
+        answers: persisted,
+        lastSavedSnapshot: JSON.stringify(persisted),
+        pendingPatchCount: 1,
+      }),
+    ).toBe(true);
+  });
+
+  it("replays pending autosave patches over the saved server snapshot", () => {
+    const saved = normalizeDraftAnswers({
+      "1": {
+        subAnswers: { "0": "B", "1": "C" },
+        updatedAt: "2026-04-26T00:30:00.000Z",
+      },
+    });
+
+    const rebased = replayPendingAutosavePatches(saved, [
+      {
+        slotNo: 1,
+        subKey: "0",
+        value: "D",
+        updatedAt: "2026-04-26T00:31:00.000Z",
+      },
+      {
+        slotNo: 2,
+        subKey: "0",
+        value: "A",
+        updatedAt: "2026-04-26T00:32:00.000Z",
+      },
+      {
+        slotNo: 1,
+        subKey: "1",
+        value: "",
+        updatedAt: "2026-04-26T00:33:00.000Z",
+      },
+    ]);
+
+    expect(rebased).toEqual({
+      "1": {
+        subAnswers: { "0": "D" },
+        updatedAt: "2026-04-26T00:33:00.000Z",
+      },
+      "2": {
+        subAnswers: { "0": "A" },
+        updatedAt: "2026-04-26T00:32:00.000Z",
+      },
+    });
   });
 });

@@ -38,6 +38,7 @@ import {
   getSessionCountdownState,
   getDraftAnswerValue,
   normalizeDraftAnswers,
+  replayPendingAutosavePatches,
   shouldBlockBeforeUnload,
   upsertDraftAnswer,
   type AutosavePhase,
@@ -454,6 +455,7 @@ export default function ExamSessionPage() {
         autosavePhase: currentAutosavePhase,
         answers: draftAnswers,
         lastSavedSnapshot,
+        pendingPatchCount: pendingPatchesRef.current.length,
       });
 
       if (hasPendingDraft) {
@@ -514,10 +516,11 @@ export default function ExamSessionPage() {
   const autosaveMutation = useMutation({
     mutationFn: autosaveExamAttempt,
     onSuccess: (result) => {
-      const normalized = normalizeDraftAnswers(result.answersJson);
-      lastSavedSnapshotRef.current = JSON.stringify(normalized);
-      setAnswers(normalized);
-      setAutosavePhase("saved");
+      const savedAnswers = normalizeDraftAnswers(result.answersJson);
+      const pendingPatches = pendingPatchesRef.current;
+      lastSavedSnapshotRef.current = JSON.stringify(savedAnswers);
+      setAnswers(replayPendingAutosavePatches(savedAnswers, pendingPatches));
+      setAutosavePhase(pendingPatches.length > 0 ? "dirty" : "saved");
       setAutosaveError(null);
       setLastSavedAt(new Date().toISOString());
     },
@@ -634,6 +637,7 @@ export default function ExamSessionPage() {
     autosavePhase,
     answers,
     lastSavedSnapshot: lastSavedSnapshotRef.current,
+    pendingPatchCount: pendingPatchesRef.current.length,
   });
 
   useEffect(() => {
@@ -669,7 +673,12 @@ export default function ExamSessionPage() {
   });
 
   useEffect(() => {
-    if (!session?.attempt || !countdownState.isExpired || submitAttemptMutation.isPending) {
+    if (
+      !session?.attempt ||
+      !countdownState.isExpired ||
+      autosaveMutation.isPending ||
+      submitAttemptMutation.isPending
+    ) {
       return;
     }
 
@@ -685,7 +694,14 @@ export default function ExamSessionPage() {
       lastSavedSnapshot: lastSavedSnapshotRef.current,
       currentAutosavePhase: autosavePhase,
     });
-  }, [answers, autosavePhase, countdownState.isExpired, session, submitAttemptMutation]);
+  }, [
+    answers,
+    autosaveMutation.isPending,
+    autosavePhase,
+    countdownState.isExpired,
+    session,
+    submitAttemptMutation,
+  ]);
 
   function handleAnswerChange(slotNo: number, subKey: string, value: string) {
     const updatedAt = new Date().toISOString();
@@ -962,6 +978,7 @@ export default function ExamSessionPage() {
                     size="lg"
                     data-testid="exam-submit-button"
                     className="w-full"
+                    disabled={autosaveMutation.isPending}
                     loading={submitAttemptMutation.isPending}
                     onClick={() =>
                       submitAttemptMutation.mutate({

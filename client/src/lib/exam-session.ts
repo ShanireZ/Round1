@@ -9,6 +9,13 @@ export type CountdownWarningLevel = "normal" | "warning" | "critical" | "expired
 
 export type DraftAnswers = Record<string, DraftAnswerEntry>;
 
+export type PendingDraftAnswerPatch = {
+  slotNo: number;
+  subKey: string;
+  value: string;
+  updatedAt?: string;
+};
+
 export type QuestionOption = {
   value: string;
   label: string;
@@ -347,12 +354,14 @@ export function shouldBlockBeforeUnload({
   autosavePhase,
   answers,
   lastSavedSnapshot,
+  pendingPatchCount = 0,
 }: {
   autosavePhase: AutosavePhase;
   answers: DraftAnswers;
   lastSavedSnapshot: string;
+  pendingPatchCount?: number;
 }): boolean {
-  if (autosavePhase === "saving") {
+  if (autosavePhase === "saving" || pendingPatchCount > 0) {
     return true;
   }
 
@@ -365,7 +374,7 @@ export function upsertDraftAnswer(
     slotNo: number;
     subKey: string;
     value: string;
-    updatedAt: string;
+    updatedAt?: string;
   },
 ): DraftAnswers {
   const slotKey = String(input.slotNo);
@@ -390,8 +399,15 @@ export function upsertDraftAnswer(
 
   nextAnswers[slotKey] = {
     subAnswers: nextSubAnswers,
-    updatedAt: input.updatedAt,
+    updatedAt: input.updatedAt ?? existingEntry?.updatedAt,
   };
 
   return nextAnswers;
+}
+
+export function replayPendingAutosavePatches(
+  answers: DraftAnswers,
+  patches: PendingDraftAnswerPatch[],
+): DraftAnswers {
+  return patches.reduce((nextAnswers, patch) => upsertDraftAnswer(nextAnswers, patch), answers);
 }

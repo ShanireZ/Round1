@@ -23,7 +23,9 @@
 - UI 构建依赖漂移：`lucide-react@0.475.0` 的当前安装包 barrel export 会引用缺失的 icon 文件，导致 `npm run build --workspace=client` 在 Vite 阶段失败；已升级到 `lucide-react@1.11.0`，客户端生产构建恢复通过。
 - `plan/reference-config.md` 目录结构：已补 `server/routes/config.ts`，移除已不存在的 `csrf.ts` / `rateLimit.ts` middleware 口径，改为当前 `authRateLimit.ts` 与 app 内联 CSRF/rateLimit 结构。
 - 考试页前端配置消费：`/api/v1/config/client` 已暴露 `autosaveIntervalSeconds`，但 `ExamSession` 只保留本地 30s debounce，未按计划使用后端配置做基础 autosave flush；本轮新增 `client/src/lib/client-config.ts`，考试页用该配置周期性 flush pending patches，同时保留 30s debounce 与 beforeunload keepalive。
+- 考试页 autosave 飞行中输入保护：`ExamSession` autosave 成功回包不再直接用服务端快照覆盖本地答案，而是将仍未发送的 pending patches 重放到已保存快照上；`beforeunload` 与最终 submit 判断也显式纳入 pending patch 数量，手动/自动交卷会等待当前 autosave 收尾，避免持续输入时丢失本地答案或漏掉关闭前 keepalive 保存。
 - 前端测试入口漂移：仓库已有 `client/vitest.config.ts` 与 `client/src/**/*.test.ts`，但根 `npm run test` 只发现 server 测试；本轮补 `npm run client:test`，避免前端 helper 单测继续沉默。
+- 前端 Vitest 配置 ESM 兼容：`client/vitest.config.ts` 不再依赖 `__dirname`，改用 `import.meta.dirname` 作为 root/alias 基准；在 bundle loader 被本机 esbuild spawn 权限限制卡住时，native loader 至少可以正确读取配置。
 - 考试 session API reference 漏登记：`server/routes/exams.ts`、前端 `fetchExamSession` 与 `exams-runtime.integration.test.ts` 已依赖 `GET /api/v1/exams/:id/session`，但 `plan/reference-api.md` 与 `plan/step-04-exam-and-grading.md` 当前 surface 未列出；本轮已补为现状契约。
 
 ## 验证
@@ -48,6 +50,8 @@ npm run lint
 npm run build --workspace=client
 npm run build --workspace=server
 ```
+
+当前 Codex 沙箱追加复核时，`npm run client:test -- src/lib/exam-session.test.ts src/lib/client-config.test.ts src/lib/exam-runtime.test.ts` 的默认 bundle loader 在加载 Vite/Vitest 配置阶段触发 Windows `spawn EPERM`；改为 `--configLoader native` 后配置可加载，但 Vitest worker / Vite realpath 仍被同一类 `spawn EPERM` 阻断，未进入测试断言。本轮使用 `node --experimental-strip-types` 对新增 autosave helper 行为做等价断言，并运行 `npx tsc -p client/tsconfig.json --noEmit`、`npm run build:client` 作为补充验证。
 
 ## 剩余标准债务
 
