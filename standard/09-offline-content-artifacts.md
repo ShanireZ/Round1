@@ -8,6 +8,14 @@
 generate / judge / cpp-runner / build prebuilt paper -> JSON bundle -> validate -> admin dry-run/apply -> publish
 ```
 
+## 产物原则
+
+- 正式资产必须可复现、可追溯、可校验；临时产物必须容易识别和清理。
+- 文件名表达内容类型和批次，不靠父目录或人工记忆解释。
+- `runId` 是内容生产批次的主线索，必须贯穿 prompt、报告、bundle、checksum、import batch 和发布记录。
+- 任何进入 Admin dry-run/apply 的资产都视为审计输入，不能随手覆盖。
+- 离线环境可以复杂，生产运行时必须简单：只消费已发布、已验证、已导入的内容。
+
 ## 资产类型
 
 - question bundle：可导入题目资产，放入 `papers/`。
@@ -30,6 +38,8 @@ YYYY-MM-DD-<pipeline>-<exam-type-slug>-<difficulty>-vNN
 ```
 
 同一天同 pipeline 重跑必须递增 `vNN`。
+
+重跑同一目标不得复用旧 `runId`。如果是修复同批次内容，使用新版本号并在报告中写明 supersedes/derivedFrom；如果只是本地 probe，放入 `artifacts/tmp/**`，不得伪装成正式批次。
 
 ## question bundle 命名
 
@@ -87,6 +97,8 @@ bundle metadata 必须包含：
 - item checksum manifest。
 - overlap score 或去重摘要（如适用）。
 
+metadata 不应包含 secret、完整 provider key、个人邮箱、生产用户答案或 session 信息。需要诊断 provider 调用时保存 provider 名称、model、prompt hash、token、latency 和错误摘要即可。
+
 ## 校验链
 
 question bundle apply 前必须通过：
@@ -106,12 +118,24 @@ prebuilt paper bundle apply 前必须通过：
 4. slot points 合计 100。
 5. 不引用 archived 或不合格题目。
 
+## 批次风险分级
+
+| 风险 | 示例 | 额外要求 |
+| --- | --- | --- |
+| low | 少量手工修正、只补解析 typo | schema validate、review 记录 |
+| medium | 新增一批模拟题、改知识点或难度 | 去重、judge/人工抽样、导入 dry-run |
+| high | 真题批量导入、预制卷批量发布、程序题大批生成 | sandbox、官方答案比对、人工复核、发布 smoke |
+
+风险越高，越要增加确定性校验和人工抽样；不要用“模型看起来没问题”替代答案一致性和结构校验。
+
 ## Admin 导入
 
 - dry-run 与 apply 返回统一 `ImportSummary`。
 - dry-run 对合法 batch 返回 accepted item count，不写业务表。
 - apply 必须写 `import_batches`，保留 raw checksum 与摘要。
 - Admin UI/API/CLI 必须复用同一 import workflow，不分叉三套口径。
+
+dry-run 与 apply 的差异只能是是否写业务表。校验规则、错误码、summary 字段、item 定位方式必须一致，否则 Admin 无法信任 dry-run 结果。
 
 ## 禁止事项
 
@@ -132,6 +156,8 @@ prebuilt paper bundle apply 前必须通过：
 - 输出 summary，包含 accepted/rejected/warnings。
 - 不在脚本中复制底层业务逻辑；薄封装只转发到共享 workflow。
 
+脚本输出应默认适合人读，同时支持必要的机器读选项。长批次必须定期输出进度；失败时说明最后安全检查点和可重试命令。
+
 ## Bundle Contract
 
 所有 bundle 必须：
@@ -142,6 +168,8 @@ prebuilt paper bundle apply 前必须通过：
 - items 顺序稳定。
 - 每个 item 有可定位 identifier，便于错误报告指向。
 - checksum manifest 可复算。
+
+正式 bundle 一旦被 apply 或发布，不再原地修改。发现错误时生成新 bundle、新 import batch 或 copy-version，保留旧批次用于追溯。
 
 ## 导入生命周期
 
@@ -156,6 +184,14 @@ local/tmp probe
 
 不得跳过 validate 直接 apply。dry-run 成功不代表已发布，只代表可导入。
 
+## 重试与恢复
+
+- 生成失败可以重跑，但正式重跑必须产生新 `runId` 或递增版本。
+- validate 失败只修复源文件或生成新 bundle，不直接手改数据库绕过。
+- dry-run 失败不应留下业务表副作用。
+- apply 中断后必须能通过 import batch、checksum、唯一约束或幂等逻辑判断哪些 item 已写入。
+- publish 失败后不得让 UI 显示“已发布”；应保留 draft/imported 状态和错误摘要。
+
 ## 错误报告
 
 错误报告必须包含：
@@ -167,6 +203,8 @@ local/tmp probe
 - 相关字段路径。
 
 Admin UI 需要能展示错误报告并支持修复重试。
+
+错误报告应避免一次只报第一个错误。结构类错误可以 fail fast；内容类错误应尽量汇总到 item 级，便于批量修复。
 
 ## 资产保留策略
 
@@ -189,6 +227,8 @@ Admin UI 需要能展示错误报告并支持修复重试。
 - bundle meta 与文件名是否一致。
 - checksum manifest 是否可复算。
 
+Guard 失败信息必须给出修复方向，例如期望路径、当前路径、缺失字段、可运行的 validate 命令。只输出 “invalid” 不满足要求。
+
 ## 内容发布检查清单
 
 - question bundle validate 通过。
@@ -198,3 +238,4 @@ Admin UI 需要能展示错误报告并支持修复重试。
 - Admin publish 成功。
 - 运行时 catalog 能看到对应 exam_type/difficulty。
 - 测试用户能创建 draft 并开始 attempt。
+- 发布记录包含 runId、bundle 路径、import batch、warnings 处理和回滚/归档方式。

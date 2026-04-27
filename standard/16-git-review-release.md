@@ -6,6 +6,8 @@
 - 分支名使用小写 kebab-case：`codex/admin-import-retry-flow`。
 - 不在主分支直接堆大改；高风险任务应分阶段。
 
+分支应表达业务目标，不用 `fix2`、`misc`、`update-docs` 这类难以追溯的名字。临时实验分支如果转为正式实现，合并前应整理成可审查提交。
+
 ## 提交
 
 提交应保持单一主题。推荐格式：
@@ -18,6 +20,8 @@ test: cover prebuilt paper archive references
 ```
 
 提交说明要让未来维护者看懂“为什么”，不仅是“改了什么”。
+
+机械改动和行为改动尽量拆开提交：格式化、rename、迁移、业务逻辑、测试补充各自保持可审查。不得用一个大提交掩盖状态机、权限或数据语义变化。
 
 ## PR 描述
 
@@ -32,6 +36,8 @@ test: cover prebuilt paper archive references
 
 PR 应按 [22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md) 写明已检查的标准、验证结果和未覆盖风险。
 
+PR 描述中的验证应写命令和结果，不只写“已测试”。无法运行的检查要说明原因、风险和替代验收。
+
 ## 代码评审
 
 评审优先级：
@@ -45,6 +51,8 @@ PR 应按 [22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md)
 7. 命名、复杂度、文档。
 
 评论必须针对代码，不针对人。非阻塞建议标明 `Nit:` 或“建议”。
+
+Reviewer 不应要求作者满足未写入标准的个人偏好。若某偏好反复影响可维护性，应转化为 standard、lint、test 或 checklist。
 
 ## Review 响应时限
 
@@ -78,6 +86,13 @@ PR 应按 [22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md)
 - 新配置未更新 `.env.example` 和 reference。
 - 新脚本无 README/帮助。
 
+也禁止合并：
+
+- 只删除失败测试而未修复代表目标契约的问题。
+- 对 S0/S1 风险没有回滚或恢复说明。
+- 文档声称已完成但代码、测试或部署记录未支持。
+- UI 变更缺少移动端、dark mode 或可达性基本检查。
+
 ## 发布
 
 发布前必须完成：
@@ -88,6 +103,8 @@ PR 应按 [22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md)
 - 健康检查。
 - 关键路径 smoke。
 - 监控观察窗口。
+
+发布执行者必须知道本次发布的停止点：构建失败、迁移失败、health 失败、smoke 失败、告警触发时分别怎么停止、回滚或进入降级。
 
 ## 回归范围
 
@@ -111,6 +128,8 @@ PR 应按 [22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md)
 - 回滚方案。
 - 事后补完整测试和复盘。
 
+热修复优先选择最小、可回滚、可验证的改动。不要在热修复中顺手重构、升级依赖、调整 UI 风格或改 unrelated 文档。
+
 ## PR 大小
 
 推荐 PR 保持小而完整：
@@ -130,6 +149,8 @@ PR 应按 [22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md)
 - 新能力还缺 reference/API/标准对齐，reviewer 无法判断目标态。
 
 拆分时保持每个 PR 可独立验证；如必须串联，PR 描述写清依赖顺序和回滚点。
+
+大 PR 允许存在，但需要额外降低 review 成本：先给文件导览、标注机械改动、列出核心风险文件、说明哪些测试覆盖主路径。没有导览的大范围改动应先拆分。
 
 ## Review 评论规范
 
@@ -160,6 +181,8 @@ PR 应按 [22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md)
 - UI/UX token 和布局。
 - 测试是否会在行为坏掉时失败。
 
+Reviewer 可以抽查机器产物和大型 fixture，但必须确认生成来源、校验脚本和 checksum。手改大型 JSON 资产需要特别说明。
+
 ## Review 严重级别
 
 | 级别 | 含义 | 示例 |
@@ -181,6 +204,8 @@ vYYYY.MM.DD.N
 
 每个 tag 对应一份发布记录，包含迁移、配置、验证、回滚说明。
 
+发布记录至少写清 commit/tag、时间、执行人、迁移、配置变化、验证结果、观察窗口和残余风险。涉及内容发布时同时写 runId、bundle 路径和 import batch。
+
 ## 回滚 PR
 
 回滚必须说明：
@@ -201,3 +226,13 @@ vYYYY.MM.DD.N
 - 是否需要补回归测试、监控、runbook 或 standard。
 
 热修复不能成为长期绕过质量门禁的理由。
+
+## 评审完成定义
+
+一个 PR 在评审意义上完成，至少满足：
+
+- 目标、非目标和影响面清楚。
+- 阻塞评论已解决或有明确延期记录。
+- 必要测试、截图、迁移演练或发布 smoke 已记录。
+- 影响的 `plan/reference/standard` 已同步，或说明不需要同步。
+- 残余风险有 owner、触发条件或观察窗口。

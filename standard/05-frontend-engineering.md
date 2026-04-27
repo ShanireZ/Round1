@@ -4,6 +4,14 @@
 
 当前前端技术栈为 React 19、TypeScript、Vite、React Router 7、TanStack Query v5、shadcn/ui、Radix、Tailwind CSS 4、react-hook-form、Zod、lucide-react、motion、sonner。不得无计划引入第二套 UI 组件库、全局状态库或 CSS-in-JS 体系。
 
+## 前端产品原则
+
+- 前端首先保证核心流程可靠：登录、恢复考试、保存、提交、结果查看、Admin 导入和设置。
+- 视觉和交互遵守 `plan/uiux_plan.md` 与 [04-ui-ux.md](04-ui-ux.md)，不在单页重新发明组件风格。
+- 用户可恢复错误要给下一步动作；不可恢复错误要保留 request id 或可排障线索。
+- 前端不得把后端权限、状态机或数据校验当作可选项；隐藏按钮只是体验优化。
+- 所有复杂 UI 变更都应考虑 loading、empty、error、disabled、offline/slow network、mobile、dark mode、keyboard。
+
 ## 组件设计
 
 - 组件必须保持 render 纯净：渲染阶段不得写全局变量、发请求、写 localStorage、改 document。
@@ -13,6 +21,8 @@
 - UI primitive 不直接调用业务 API。
 - 组件文件默认只导出一个主要组件；shadcn primitive 可按现有模式导出子组件。
 
+组件拆分优先按用户任务和领域职责，不按“Header/Body/Footer”机械拆分。一个组件如果需要同时理解权限、表单、表格筛选和弹窗状态，通常应拆出 hook、领域 helper 或子组件。
+
 ## 状态管理
 
 - 服务端数据使用 TanStack Query；不得用 `useEffect + fetch` 重复实现缓存、重试、失效。
@@ -20,6 +30,16 @@
 - 仅组件内部交互状态使用 `useState`。
 - 跨页面持久偏好仅限主题、必要本地草稿缓存等；写入 localStorage 必须有版本或容错。
 - 考试答案可靠性以服务端 autosave 为准，`beforeunload keepalive` 只作为 best-effort 补充。
+
+状态来源必须清晰：
+
+- URL 保存页面导航、筛选、分页等可分享状态。
+- Query cache 保存服务端数据，不作为长期业务真源。
+- Form state 保存未提交输入。
+- `sessionStorage` 仅保存当前标签相关数据，例如 `tabNonce`。
+- `localStorage` 仅保存非敏感偏好，并带版本或兼容读取。
+
+不得把权限、价格、考试状态、题目快照等服务端真源写入本地存储后长期信任。
 
 ## API 调用
 
@@ -29,12 +49,24 @@
 - 409 `X-Tab-Nonce` 冲突必须提示用户并停止本标签保存，不能静默覆盖。
 - 503 `ROUND1_PREBUILT_PAPER_UNAVAILABLE` 必须显示可理解空态。
 
+错误处理要求：
+
+- 401 引导重新登录，并尽量保留用户当前上下文。
+- 403 说明无权限，不展示“系统错误”。
+- 409 展示冲突对象和建议动作，例如刷新、切换标签、联系管理员。
+- 429/503 如果后端返回 retry 信息，前端应展示等待或重试建议。
+- validation error 映射到字段；无法定位字段时使用 form-level alert。
+
+页面不得只 `console.error` 后保持静默失败。
+
 ## 路由与权限
 
 - 路由定义集中在 `client/src/router.tsx` 与导航配置。
 - 菜单按角色渐进显示；不得提供角色切换器。
 - 未授权页面必须由后端权限兜底，前端隐藏只作为体验优化。
 - 旧 Admin 路径 `/admin/jobs`、`/admin/manual-gen` 不得恢复。
+
+路由恢复和跳转必须尊重考试优先级：存在 active attempt 时，不得把用户直接带到普通 Dashboard 而丢失继续作答入口。认证回跳只接受 `safeReturnTo` 允许的站内路径。
 
 ## Tailwind 与样式
 
@@ -58,12 +90,21 @@
 - Dashboard/CoachReport 可用 Skeleton 表示数据积累中，不得伪造趋势。
 - 图表颜色使用既定 6 色板；热力图使用既定连续色阶。
 
+表格和列表必须做到：
+
+- 分页、筛选、排序状态可见。
+- 空态区分“没有数据”和“当前筛选无结果”。
+- 批量操作前展示范围，例如当前页、当前筛选结果或选中项。
+- Admin 列表刷新后保留合理筛选上下文，不让操作者误以为操作失败。
+
 ## 可维护性
 
 - 组件超过约 250 行或出现多个独立状态机时应拆分。
 - 不在页面里直接写长 JSON mock；测试 fixture 放测试目录。
 - 不把业务错误码写成散落字符串，优先集中枚举或 helper。
 - 新 UI 必须在 `/dev/ui-gallery` 或等价页面补展示，便于视觉回归。
+
+新增依赖前必须说明为什么现有 React、Radix、TanStack Query、Zod、Tailwind 或少量本地 helper 无法解决。纯 UI 便利库、日期库、图表库、表格库尤其要评估包体、可达性和样式一致性。
 
 ## 前端验证
 
@@ -74,6 +115,8 @@ npm run build --workspace=client
 ```
 
 涉及逻辑 helper 时运行对应 `*.test.ts`。涉及关键流程、布局或打印时补 Playwright/截图验收。
+
+手工验收必须写明浏览器宽度或设备类型。涉及 Admin、Coach、Student 差异时，至少验证受影响角色，不用一个 admin 账号代替全部角色。
 
 ## 分层结构
 
@@ -127,6 +170,8 @@ npm run build --workspace=client
 - submit 应携带最后 pending patches。
 - keepalive 保存不保证成功，UI 不得把它当唯一可靠保存。
 - 进入 Exam 页时必须能从服务端 active attempt 恢复。
+
+考试页渲染失败时应优先保留恢复路径：显示可重试错误和返回 Dashboard/active attempt 的入口，而不是空白页。提交按钮必须在最后一次 pending patch 处理期间防重复点击，并对最终状态以服务端结果为准。
 
 ## 前端 PR 检查清单
 
