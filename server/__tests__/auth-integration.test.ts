@@ -30,6 +30,7 @@ import { db, pool } from "../db.js";
 import { connectRedis, redisClient, disconnectRedis } from "../redis.js";
 import { seedFromFile } from "../services/auth/blocklistService.js";
 import { users } from "../db/schema/users.js";
+import { env } from "../../config/env.js";
 import { eq } from "drizzle-orm";
 
 // ── Test harness ─────────────────────────────────────────────────────
@@ -608,6 +609,24 @@ describe("Admin Blocklist CRUD", () => {
     expect(res.body.data).toHaveProperty("githubCount");
     expect(res.body.data).toHaveProperty("manualCount");
     expect(res.body.data).toHaveProperty("total");
+  });
+
+  it("GET /openapi.json — requires admin outside development", async () => {
+    const originalNodeEnv = env.NODE_ENV;
+    env.NODE_ENV = "production";
+
+    try {
+      const anonymousRes = await supertest(server).get("/api/v1/openapi.json");
+      expect(anonymousRes.status).toBe(401);
+      expect(anonymousRes.body.error.code).toBe("ROUND1_UNAUTHENTICATED");
+
+      const adminRes = await adminAgent.get("/api/v1/openapi.json");
+      expect(adminRes.status).toBe(200);
+      expect(adminRes.body.openapi).toBe("3.1.0");
+      expect(adminRes.body.info.title).toBe("Round1 API");
+    } finally {
+      env.NODE_ENV = originalNodeEnv;
+    }
   });
 
   it("POST /admin/blocklist — add a domain", async () => {

@@ -63,16 +63,17 @@ Phase 0 必须逐一实测以下中间件在 Express 5 下的兼容性：
 
 ### 0.5 双主题 CSS 变量
 
-- Light 模式：纯白背景 + 深灰文字 + 品牌蓝/橙色块
-- Dark 模式：深色背景 + 浅色文字 + 品牌色块
-- 颜色全部通过 Tailwind CSS 主题变量集中管理
-- 严禁硬编码色值或内联样式
+> **当前对齐说明（2026-04-27）**：Phase 0 的早期“纯白 + 蓝/橙色块”脚手架口径已被 `plan/uiux_plan.md` 定稿覆盖。当前 UI 目标是 Modern Editorial × Contest Ceremony：Light 底色 `#FEF9F8`、Dark 底色 `#0A0E1A`、品牌红 `#E63946`、中性灰阶和 token 化组件。实现路径以 `client/src/styles/tokens.css`、`client/src/styles/globals.css` 与 `standard/04-ui-ux.md` 为准。
+
+- Light/Dark 主题变量集中在 `client/src/styles/tokens.css` 与 `client/src/styles/globals.css`。
+- 页面和组件不得重新引入独立蓝/橙主题或 Codeforces/AtCoder 风格。
+- 新增颜色必须进入 token 或已有语义色，不在页面里散落 magic color。
 
 ### 0.6 OpenAPI 3.1 骨架
 
 - `server/openapi/registry.ts` — 全局 `OpenAPIRegistry` 单例
 - `server/openapi/generator.ts` — 启动时生成 OpenAPI 3.1 JSON → 内存缓存
-- `GET /api/v1/openapi.json` — 返回缓存 JSON（生产仅 admin，开发无鉴权）
+- `GET /api/v1/openapi.json` — 返回缓存 JSON（开发无鉴权；非开发环境需 admin session）
 - `GET /api/v1/docs` — `swagger-ui-express`（仅 `NODE_ENV=development`）
 - `server/routes/schemas/common.schema.ts` — 通用分页 / 错误响应 schema
 
@@ -160,7 +161,7 @@ Phase 0 必须逐一实测以下中间件在 Express 5 下的兼容性：
 
 - [x] `npm install` 成功（server + client）
 - [x] `npm run dev:server` 启动，`/api/v1/health` 返回 200（响应时间 17ms < 100ms）
-- [x] `/api/v1/openapi.json` 返回合法 OpenAPI 3.1 Document
+- [x] `/api/v1/openapi.json` 返回合法 OpenAPI 3.1 Document（2026-04-27 复核：开发环境无鉴权；非开发环境需 admin session）
 - [x] `npm run dev:client` 启动，访问 `https://round1.local` 显示空壳页面
 - [x] `tsx scripts/migrate.ts up` 成功创建所有表（执行时间 < 100ms）
 - [x] `tsx scripts/migrate.ts status` 显示所有迁移已应用

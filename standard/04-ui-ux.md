@@ -693,7 +693,7 @@ ease-ceremony: cubic-bezier(0.16, 1, 0.3, 1)
 | Motion | `client/src/lib/motion.ts` |
 | UI Gallery | `client/src/pages/dev/UIGallery.tsx` |
 
-`plan/uiux_plan.md` 中早期写到的 `apps/web` 路径属于方案阶段命名；当前仓库落地路径为 `client/`。
+旧计划记录中若出现 `apps/web` 路径，属于方案阶段命名；当前仓库落地路径为 `client/`。
 
 ## 20. UI Gallery
 

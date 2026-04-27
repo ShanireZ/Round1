@@ -1,17 +1,18 @@
-import { readdir } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
-const LEGACY_QUESTION_BUNDLE_ALLOWLIST = new Set([
-  "papers/2026/2026-04-26-reading_program-30.json",
-  "papers/2026/2026-04-26-completion_program-20.json",
-]);
+import {
+  PrebuiltPaperBundleSchema,
+  QuestionBundleSchema,
+  verifyBundleIntegrity,
+} from "./lib/bundleTypes.js";
 
 const RUN_ID_PATTERN = String.raw`\d{4}-\d{2}-\d{2}-[a-z0-9-]+-[a-z0-9-]+-[a-z0-9-]+-v\d{2}`;
 const QUESTION_BUNDLE_PATTERN = new RegExp(
-  String.raw`^papers/\d{4}/(${RUN_ID_PATTERN})/question-bundles/\1__question-bundle__[a-z0-9-]+__[a-z0-9-]+__n\d+__v\d{2}\.json$`,
+  String.raw`^papers/\d{4}/(${RUN_ID_PATTERN})/question-bundles/\1__question-bundle__([a-z0-9-]+)__([a-z0-9-]+)__n(\d+)__v\d{2}\.json$`,
 );
 const PREBUILT_BUNDLE_PATTERN = new RegExp(
-  String.raw`^artifacts/prebuilt-papers/\d{4}/(${RUN_ID_PATTERN})/\1__prebuilt-paper-bundle__blueprint-v\d+__n\d+__v\d{2}\.json$`,
+  String.raw`^artifacts/prebuilt-papers/\d{4}/(${RUN_ID_PATTERN})/\1__prebuilt-paper-bundle__blueprint-v(\d+)__n(\d+)__v\d{2}\.json$`,
 );
 
 async function collectFiles(root: string): Promise<string[]> {
@@ -60,10 +61,6 @@ function validateRepoPath(repoPath: string): string | null {
   }
 
   if (isQuestionBundleDirectlyUnderYear(repoPath)) {
-    if (LEGACY_QUESTION_BUNDLE_ALLOWLIST.has(repoPath)) {
-      return null;
-    }
-
     return "question bundle JSON must live under papers/<year>/<runId>/question-bundles/";
   }
 
@@ -71,8 +68,7 @@ function validateRepoPath(repoPath: string): string | null {
     repoPath.startsWith("papers/") &&
     repoPath.endsWith(".json") &&
     !repoPath.startsWith("papers/real-papers/") &&
-    !QUESTION_BUNDLE_PATTERN.test(repoPath) &&
-    !LEGACY_QUESTION_BUNDLE_ALLOWLIST.has(repoPath)
+    !QUESTION_BUNDLE_PATTERN.test(repoPath)
   ) {
     return "question bundle filename does not match the runId naming convention";
   }
@@ -88,17 +84,115 @@ function validateRepoPath(repoPath: string): string | null {
   return null;
 }
 
+function slugifyMetadataToken(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/_/g, "-")
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+async function validateQuestionBundleFile(filePath: string, repoPath: string) {
+  const match = QUESTION_BUNDLE_PATTERN.exec(repoPath);
+  if (!match) {
+    return null;
+  }
+
+  const [, runId, questionType, kpCode, count] = match;
+  const raw = await readFile(filePath, "utf8");
+  const parsed = QuestionBundleSchema.safeParse(JSON.parse(raw));
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    return `question bundle JSON does not match schema at ${issue?.path.join(".") || "<root>"}: ${issue?.message ?? "invalid"}`;
+  }
+
+  const bundle = parsed.data;
+  if (bundle.meta.runId !== runId) {
+    return `question bundle meta.runId ${bundle.meta.runId} does not match path runId ${runId}`;
+  }
+
+  if (slugifyMetadataToken(bundle.meta.questionType) !== questionType) {
+    return `question bundle meta.questionType ${bundle.meta.questionType} does not match filename ${questionType}`;
+  }
+
+  if (slugifyMetadataToken(bundle.meta.primaryKpCode) !== kpCode) {
+    return `question bundle meta.primaryKpCode ${bundle.meta.primaryKpCode} does not match filename ${kpCode}`;
+  }
+
+  if (bundle.meta.requestedCount !== Number(count)) {
+    return `question bundle meta.requestedCount ${bundle.meta.requestedCount} does not match filename n${count}`;
+  }
+
+  const integrityErrors = verifyBundleIntegrity(bundle.items, bundle.meta.integrity);
+  if (integrityErrors.length > 0) {
+    return `question bundle integrity check failed: ${integrityErrors[0]!.code}`;
+  }
+
+  return null;
+}
+
+async function validatePrebuiltPaperBundleFile(filePath: string, repoPath: string) {
+  const match = PREBUILT_BUNDLE_PATTERN.exec(repoPath);
+  if (!match) {
+    return null;
+  }
+
+  const [, runId, blueprintVersion, count] = match;
+  const raw = await readFile(filePath, "utf8");
+  const parsed = PrebuiltPaperBundleSchema.safeParse(JSON.parse(raw));
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    return `prebuilt paper bundle JSON does not match schema at ${issue?.path.join(".") || "<root>"}: ${issue?.message ?? "invalid"}`;
+  }
+
+  const bundle = parsed.data;
+  if (bundle.meta.runId !== runId) {
+    return `prebuilt paper bundle meta.runId ${bundle.meta.runId} does not match path runId ${runId}`;
+  }
+
+  if (bundle.meta.blueprintVersion !== Number(blueprintVersion)) {
+    return `prebuilt paper bundle meta.blueprintVersion ${bundle.meta.blueprintVersion} does not match filename blueprint-v${blueprintVersion}`;
+  }
+
+  if (bundle.meta.requestedCount !== Number(count)) {
+    return `prebuilt paper bundle meta.requestedCount ${bundle.meta.requestedCount} does not match filename n${count}`;
+  }
+
+  const integrityErrors = verifyBundleIntegrity(bundle.items, bundle.meta.integrity);
+  if (integrityErrors.length > 0) {
+    return `prebuilt paper bundle integrity check failed: ${integrityErrors[0]!.code}`;
+  }
+
+  return null;
+}
+
+async function validateRepoFile(filePath: string) {
+  const repoPath = toRepoPath(filePath);
+  const pathMessage = validateRepoPath(repoPath);
+  if (pathMessage) {
+    return { repoPath, message: pathMessage };
+  }
+
+  const bundleMessage =
+    (await validateQuestionBundleFile(filePath, repoPath)) ??
+    (await validatePrebuiltPaperBundleFile(filePath, repoPath));
+  if (bundleMessage) {
+    return { repoPath, message: bundleMessage };
+  }
+
+  return null;
+}
+
 async function main() {
   const files = [
     ...(await collectFiles(path.join(process.cwd(), "papers"))),
     ...(await collectFiles(path.join(process.cwd(), "artifacts"))),
   ];
-  const failures = files
-    .map(toRepoPath)
-    .map((repoPath) => ({ repoPath, message: validateRepoPath(repoPath) }))
-    .filter((failure): failure is { repoPath: string; message: string } =>
-      Boolean(failure.message),
-    );
+  const failures = (await Promise.all(files.map(validateRepoFile))).filter(
+    (failure): failure is { repoPath: string; message: string } => Boolean(failure),
+  );
 
   if (failures.length > 0) {
     for (const failure of failures) {

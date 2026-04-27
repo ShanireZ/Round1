@@ -72,7 +72,7 @@ External: CppLearn OIDC Provider
 | 8   | 会话模型     | express-session + Redis，idle/absolute TTL                                     |
 | 9   | 频控分层防线 | L1 Cloudflare WAF + L2 Redis + L3 进程内 Map 兜底                              |
 | 10  | API 规范     | OpenAPI 3.1，Zod schema 自动生成                                               |
-| 11  | 视觉风格     | 学院竞赛风双主题（Light/Dark），类 Codeforces 风格                             |
+| 11  | 视觉风格     | Modern Editorial × Contest Ceremony，Light/Dark 双主题，品牌红 + 中性灰阶；以 `plan/uiux_plan.md` 和 `standard/04-ui-ux.md` 为准 |
 | 12  | 多教练模型   | V1 即支持多教练（class_coaches M2M），班级至少一位 owner                       |
 
 > 完整决策表与全量技术细节见 [01-reference.md](01-reference.md)。

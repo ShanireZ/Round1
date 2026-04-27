@@ -42,7 +42,7 @@
 - reviewRealPapers.ts：逐题 LLM 复核脚本，统一复核 `questionType`、`difficulty`、知识点标签与 explanation；支持 `--metadata-only`、`--write`，并将低置信度或 stem/code 可疑项输出到 `scripts/.tmp/paper-review-report-*.json`。
 - verifyLlmTasks.ts：用合成 prompt 实跑 `generate` / `judge` 两类 LLM 任务，并回查 `llm_provider_logs` 是否记录 tokens、cost estimate、latency 与受控失败信息。
 - verifyQuestionBundleGuards.ts：构造临时候选题，验证规则去重可用 `DUPLICATE_JACCARD` 拦截近似题，并验证 LLM 判官可用 `JUDGE_REJECTED` 拦截答案不一致题。
-- verifyOfflineArtifactNames.ts：检查正式离线产物是否使用 runId 持久化命名，拒绝 `paper-packs.json`、`artifacts/llm-step3/probe*.json` 以及未 allowlist 的 `papers/<year>/*.json` 旧布局。
+- verifyOfflineArtifactNames.ts：检查正式离线产物是否使用 runId 持久化命名，并校验 bundle JSON meta 与文件名一致；拒绝 `paper-packs.json`、`artifacts/llm-step3/probe*.json` 以及所有 `papers/<year>/*.json` 旧布局。
 - tests/verifyExamMappings.ts：校验共享考试映射是否包含关键批次。
 
 ## 初始化与维护类

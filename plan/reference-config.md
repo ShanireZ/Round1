@@ -15,7 +15,7 @@
 | 4   | 数据库                  | `postgreSQL 18` 独立数据库 `round1`，通过 `pg` 驱动 + `drizzle-orm` 访问（schema 版本化迁移）；自有 `users` 表；session 不落库，交给 Redis                                                           |
 | 5   | LLM 客户端              | 基于 `Vercel AI SDK (ai)` 统一多供应商路由；server 与 scripts 共享 `config/llm.ts` 的 scene 路由，支持 `provider:model` 级别配置（`generate` / `judge` / `rewrite` / `paper_audit` / `answer_fill`） |
 | 6   | 内容生产策略            | 开发环境离线生成 question bundle 与 prebuilt paper bundle；生产环境只支持导入、发布、归档                                                                                                            |
-| 7   | 视觉风格                | 独立双主题（Light / Dark），学院竞赛风：纯白底 + 深色文字 + 亮色品牌色块，类 Codeforces/AtCoder 风格                                                                                                 |
+| 7   | 视觉风格                | Modern Editorial × Contest Ceremony，Light / Dark 双主题，品牌红 + 中性灰阶；当前视觉真源为 `plan/uiux_plan.md` 与 `standard/04-ui-ux.md`                                                              |
 | 8   | 用户与权限              | 自有账号体系，`role` 字段区分 student / coach / admin；V1 单账号单角色                                                                                                                               |
 | 9   | Worker                  | `BullMQ + Redis` 仅承担考试超时自动提交等运行时作业，不再承担题目生成与库存补货                                                                                                                      |
 | 10  | 试卷类型                | 10 个试卷类型：CSP-J、CSP-S、GESP-1 ~ GESP-8                                                                                                                                                         |
@@ -61,9 +61,9 @@ Round1/
 │   ├─ index.ts / app.ts / db.ts
 │   ├─ db/migrations/
 │   ├─ openapi/                    → registry.ts / generator.ts
-│   ├─ routes/                     → auth.ts / exams.ts / health.ts / admin.ts
+│   ├─ routes/                     → auth.ts / config.ts / exams.ts / health.ts / admin.ts
 │   │   └─ schemas/                → auth.schema.ts / exams.schema.ts / adminContent.schema.ts / common.schema.ts / ...
-│   ├─ middleware/                  → auth.ts / requireRecentAuth.ts / adminAudit.ts / csrf.ts / responseWrapper.ts / rateLimit.ts / validate.ts
+│   ├─ middleware/                  → auth.ts / authRateLimit.ts / requireRecentAuth.ts / adminAudit.ts / responseWrapper.ts / validate.ts
 │   ├─ db/schema/                  → user / userEmail / externalIdentity / passkeyCredential / authChallenge / authTicket / authAuditLog / adminAuditLog / question / paper / attempt / class / classInvite / assignment / ...
 │   ├─ repositories/
 │   ├─ services/

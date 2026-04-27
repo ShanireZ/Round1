@@ -5,6 +5,7 @@ import { generateOpenAPIDocument } from "../openapi/generator.js";
 import { registry } from "../openapi/registry.js";
 import { env } from "../../config/env.js";
 import { checkDbConnection } from "../db.js";
+import { requireAuth, requireRole } from "../middleware/auth.js";
 import { redisClient } from "../redis.js";
 
 // Register health endpoint in OpenAPI
@@ -66,18 +67,22 @@ healthRouter.get("/health", async (_req, res) => {
 });
 
 // GET /api/v1/openapi.json
-healthRouter.get("/openapi.json", (_req, res) => {
-  // Dev mode: unrestricted; Production: admin only (will be enforced after auth module)
-  if (env.NODE_ENV !== "development") {
-    // Auth not yet implemented — return 403 in production for now
-    res.status(403).json({
-      success: false,
-      error: { code: "ROUND1_FORBIDDEN", message: "Forbidden" },
-    });
-    return;
-  }
-  res.json(generateOpenAPIDocument());
-});
+healthRouter.get(
+  "/openapi.json",
+  (_req, res, next) => {
+    if (env.NODE_ENV === "development") {
+      res.json(generateOpenAPIDocument());
+      return;
+    }
+
+    next();
+  },
+  requireAuth,
+  requireRole("admin"),
+  (_req, res) => {
+    res.json(generateOpenAPIDocument());
+  },
+);
 
 // GET /api/v1/docs — Swagger UI (dev only)
 if (env.NODE_ENV === "development") {

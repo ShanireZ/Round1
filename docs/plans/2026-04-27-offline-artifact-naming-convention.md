@@ -15,7 +15,7 @@
 - [x] Task 1 path helpers and lightweight tests are implemented in `scripts/lib/paperPaths.ts` and `scripts/tests/offlineArtifactPaths.test.ts`.
 - [x] Task 2 CLI defaults and help text are implemented for `generateQuestionBundle.ts`, `buildAcceptanceQuestionBundle.ts`, and `buildPrebuiltPaperBundle.ts`; `--output` remains an explicit override.
 - [x] Task 3 current artifact migration is complete for the local ignored runtime assets present in this worktree.
-- [x] Task 4 guardrails are implemented in `scripts/verifyOfflineArtifactNames.ts` and exposed as `npm run verify:offline-artifacts`.
+- [x] Task 4 guardrails are implemented in `scripts/verifyOfflineArtifactNames.ts` and exposed as `npm run verify:offline-artifacts`; the guard now rejects all `papers/<year>/*.json` question bundle files and validates formal bundle JSON meta against the runId filename.
 
 ---
 
@@ -31,7 +31,7 @@
   - `papers/2026/step3-llm-2026-04-27/2026-04-27-*.json` 已迁移到 `papers/2026/2026-04-27-step3-llm-csp-j-medium-v01/question-bundles/`。
   - `artifacts/prebuilt-papers/step3-llm-cspj-medium-paper-packs.json` 已迁移到 `artifacts/prebuilt-papers/2026/2026-04-27-step3-llm-csp-j-medium-v01/`。
   - `artifacts/llm-step3/probe*.json` 已迁移到 `artifacts/tmp/2026/2026-04-27-step3-llm-csp-j-medium-v01/`。
-  - 迁移时补齐 bundle/probe meta 的 `schemaVersion`、`runId`、`createdAt` 字段；后续 raw bundle schema 将要求新资产显式携带这些字段。
+  - 迁移时补齐 bundle/probe meta 的 `schemaVersion`、`runId`、`createdAt` 字段；2026-04-27 追加复核已把 formal bundle 的 `createdAt` 统一为 ISO datetime，并让 `verifyOfflineArtifactNames.ts` 校验 schema 与文件名一致，防止路径合规但 JSON contract 漂移。
 
 ## Persistent Naming Convention
 
@@ -259,7 +259,7 @@ The guard should reject:
 
 - `artifacts/prebuilt-papers/paper-packs.json`
 - `artifacts/llm-step3/probe3-single.json`
-- question bundle files directly under `papers/<year>/` unless they are legacy allowlisted
+- all question bundle files directly under `papers/<year>/`; historical evidence should remain in docs/plans records, not as current persistent import assets
 
 **Step 2: Run guard in local checks**
 

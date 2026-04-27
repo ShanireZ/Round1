@@ -236,8 +236,8 @@ docker run --rm --runtime=runsc --read-only --network=none \
 - [x] `scripts/validateQuestionBundle.ts` dry-run 通过（2026-04-26：两份首批规模化 question bundle 均完成 `--run-sandbox --write` 校验，summary 为 30/30/0 与 20/20/0）
 - [x] `scripts/importQuestionBundle.ts --apply` 导入成功，并写入 `import_batches`（2026-04-26：reading bundle apply batch=`1f74c813-8425-4847-8ac8-17f072e76565`，completion bundle apply batch=`56fcb6ab-9ba9-4369-90fa-e8828b29afb9`）
 - [x] `cpp-runner` 健康检查通过（响应时间 < 200ms）
-- [x] 30 道阅读程序题经沙箱校验后入库（2026-04-26：`papers/2026/2026-04-26-reading_program-30.json` 全部 `sandboxVerified=true`，数据库回查 30/30；追加 LLM 判官逐题复核 30/30 通过）
-- [x] 20 道完善程序题经沙箱校验后入库（2026-04-26：`papers/2026/2026-04-26-completion_program-20.json` 全部 `sandboxVerified=true`，数据库回查 20/20；追加 LLM 判官逐题复核 20/20 通过）
+- [x] 30 道阅读程序题经沙箱校验后入库（2026-04-26：历史本地验收文件曾位于 `papers/2026/2026-04-26-reading_program-30.json`，数据库回查 30/30 且追加 LLM 判官逐题复核 30/30 通过；2026-04-27 后当前资产路径已收口为 `papers/2026/<runId>/question-bundles/`，不再允许 `papers/<year>/*.json` 旧布局）
+- [x] 20 道完善程序题经沙箱校验后入库（2026-04-26：历史本地验收文件曾位于 `papers/2026/2026-04-26-completion_program-20.json`，数据库回查 20/20 且追加 LLM 判官逐题复核 20/20 通过；2026-04-27 后当前资产路径已收口为 `papers/2026/<runId>/question-bundles/`，不再允许 `papers/<year>/*.json` 旧布局）
 - [x] 去重规则拦截近似题（2026-04-26：`scripts/verifyQuestionBundleGuards.ts` 构造同题干不同选项候选，触发 `DUPLICATE_JACCARD`）
 - [x] 判官二次校验拦截答案不一致的题（2026-04-26：`scripts/verifyQuestionBundleGuards.ts` 构造错误答案题，触发 `JUDGE_REJECTED`）
 - [x] `scripts/validatePrebuiltPaperBundle.ts` dry-run 通过（2026-04-26：历史验收产物曾使用 `artifacts/prebuilt-papers/paper-packs.json`，2026-04-27 后新产物改用 runId 持久化命名；校验 summary=1/1/0，`dbChecksSkipped=false`；校验前通过 `validate-import-artifacts.ts --write-metadata` 写回 validator 版本、校验时间与 item checksum manifest）
