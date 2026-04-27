@@ -27,7 +27,7 @@ COPY --from=builder /build/dist ./dist
 COPY --from=builder /build/node_modules ./node_modules
 COPY --from=builder /build/package.json ./
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
 # 创建非 root 用户
 RUN groupadd -r runner && useradd -r -g runner -s /bin/false runner
