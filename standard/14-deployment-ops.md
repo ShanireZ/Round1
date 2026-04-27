@@ -23,6 +23,18 @@ Round1 采用“两层架构”：
 - Sentry release/environment 配置正确。
 - 静态资源缓存策略明确。
 
+## 上线准备评审
+
+上线前应做一次轻量 readiness review，重点看能否安全失败和快速恢复：
+
+- 本次变更属于哪类：docs-only、frontend-only、api-compatible、stateful、ops/security。
+- 是否有明确 commit/tag、迁移清单、配置差异和负责人。
+- 是否知道第一条 smoke 失败时怎么停止继续发布。
+- 是否知道回滚后哪些缓存、worker、配置或前端静态资源需要同步处理。
+- 是否有观察窗口；stateful 与 ops/security 变更不应在无人观察时上线。
+
+readiness review 可以写在 PR、发布记录或 `docs/plans/YYYY-MM-DD-release-<topic>.md`，不要求复杂模板，但必须能被排障者找到。
+
 ## 变更类型
 
 不同变更使用不同上线强度，不把所有发布都做成重流程，也不把高风险发布当普通改动。
@@ -60,6 +72,19 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 - 上线后保留观察窗口；观察项包括 5xx、登录失败、autosave、submit、Admin audit。
 
 禁止在上线窗口内同时引入大范围 UI 重设、DB 不可逆迁移和部署拓扑变化。
+
+## 观察窗口
+
+发布后的观察窗口按风险决定：
+
+| 风险 | 观察重点 | 建议时长 |
+| --- | --- | --- |
+| frontend-only | 首屏、关键路由、Sentry 前端异常、静态资源 404 | 15-30 分钟 |
+| api-compatible | 5xx、p95、错误码分布、前端调用失败 | 30-60 分钟 |
+| stateful | migration、autosave/submit、import/admin audit、DB locks | 1-2 小时 |
+| ops/security | 登录、cookie/CSRF、TLS/CSP、邮件/OIDC、Sentry release | 1-2 小时 |
+
+观察窗口内发现 Page/SEV1 信号，优先止损和回滚，不继续叠加修复性发布，除非已确认回滚风险更高。
 
 ## 回滚
 
@@ -152,6 +177,19 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 4. 回滚或降级。
 5. 写复盘并补测试/监控/规范。
 
+## 运行演练
+
+以下演练不要求每次发布都做，但必须在里程碑或上线前完成并记录：
+
+- DB 备份恢复到临时库。
+- Redis 断开或重启后的登录/考试恢复。
+- PM2/API 优雅停机与重启。
+- Caddy/TLS/Cloudflare Full Strict 验证。
+- 邮件、OIDC、Turnstile、Sentry smoke。
+- prebuilt paper pool 为空时前端和 API 的降级文案。
+
+演练失败不是文档问题，应进入 backlog 并标注上线风险。
+
 ## 环境矩阵
 
 | 环境 | 组件 | 说明 |
@@ -191,6 +229,8 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 - 观察窗口结果。
 
 建议记录位置为 `docs/plans/YYYY-MM-DD-release-<topic>.md`、issue、PR 描述或运维台账，但必须能被后续排障者找到。
+
+发布记录完成后，应同步关闭或更新对应 backlog 项。若发布实际行为偏离原计划，优先更新 `plan/step-*` 或 `docs/plans/*followup*` 的当前对齐说明。
 
 ## 灾难恢复目标
 

@@ -46,6 +46,8 @@ npm run test:e2e
 - 测试断言必须验证结果，不只验证函数被调用。
 - 时间、随机数、UUID、外部 API 必须可控。
 - 不使用生产 secret、真实用户数据、不可重复外部服务作为测试前提。
+- 测试应覆盖用户可观察行为和业务不变量，避免只锁死内部调用顺序。
+- 高风险代码可以先补特征化测试再重构，确保重构前后行为一致。
 
 ## 风险分层
 
@@ -108,6 +110,18 @@ UI 改动必须检查：
 - UI 变更未对照 `plan/uiux_plan.md`。
 - 新脚本没有 `--help` 或 README 示例。
 
+## 验收证据
+
+验证结果必须让后来的人能复核，不只写“已测试”：
+
+- 自动化命令写明命令、范围和结果。
+- 手工验证写明页面、账号/角色类型、关键步骤和实际结果。
+- UI/打印验证保留截图、录屏、Playwright trace 或明确的人工观察记录。
+- 部署/运维验证写明环境、commit/tag、配置变化、备份位置和 smoke 结果。
+- LLM/内容生产验证写明 runId、bundle 路径、checksum、accepted/rejected/warnings。
+
+纯文档变更可以不跑代码测试，但必须至少检查路径、链接、术语和目标/现状口径。
+
 ## 测试数据
 
 - Fixture 放在 `scripts/tests/fixtures` 或对应测试目录。
@@ -138,6 +152,8 @@ UI 改动必须检查：
 | 隐私/日志 | 脱敏断言、权限过滤、导出字段检查、[21-privacy-and-data-lifecycle.md](21-privacy-and-data-lifecycle.md) |
 | 离线脚本 | script unit、CLI smoke、fixture validate |
 | 部署 | runbook smoke、health、备份恢复演练 |
+
+如果一次变更跨多个类型，测试要求取并集；如要降级，PR 必须说明哪些风险用人工 review、feature flag、回滚或观察窗口覆盖。
 
 ## 回归测试要求
 
@@ -187,3 +203,12 @@ UI 改动必须检查：
 - 没有临时 debug 输出。
 - 没有未处理 TODO 影响上线。
 - 文档/标准同步完成，并按 [22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md) 记录影响面。
+
+## 质量债处理
+
+质量债可以存在，但必须可见、可收口：
+
+- flaky、慢测试、缺 E2E、缺 runbook、缺截图基线都应记录到 issue、计划或 PR 后续项。
+- 质量债不得掩盖 S0/S1 风险；权限、数据丢失、考试提交、迁移恢复不能仅靠“后续补”。
+- 因时间原因降级验证时，必须写清恢复完整验证的触发条件。
+- 连续两次在同一领域出现回归，应把对应测试或 guard 提升一个采纳等级。

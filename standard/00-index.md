@@ -63,6 +63,7 @@
 - Microsoft Azure Well-Architected Framework: <https://learn.microsoft.com/en-us/azure/well-architected/>
 - Microsoft Fluent 2 Design System: <https://fluent2.microsoft.design/>
 - Microsoft REST API Guidelines: <https://github.com/microsoft/api-guidelines>
+- Microsoft Azure REST API Guidelines: <https://github.com/microsoft/api-guidelines/tree/vNext/azure>
 - ByteDance ByteStyles public values: <https://www.bytedance.com/api/>
 - Arco Design / ByteDance public design system repo: <https://github.com/arco-design/arco-design>
 - React docs: <https://react.dev/>
@@ -75,6 +76,7 @@
 - Google 工程实践强调代码健康、清晰命名、适当测试、评审速度与友善评论；Round1 落地为 [16-git-review-release.md](16-git-review-release.md) 的评审优先级和 [19-source-code-style.md](19-source-code-style.md) 的代码可读性要求。
 - Google Style Guides 强调一致性、可维护性和可工具化格式；Round1 落地为 ESLint/Prettier/TypeScript strict 与单一格式规范。
 - Microsoft REST API Guidelines 强调一致的资源建模、错误语义、版本化与长期兼容；Round1 落地为 [06-backend-api.md](06-backend-api.md) 的 envelope、错误码、分页、OpenAPI 和兼容策略。
+- Azure REST API Guidelines 强调资源路径清晰、幂等、错误码稳定、字段可变性明确和版本兼容；Round1 落地为 [03-naming-and-structure.md](03-naming-and-structure.md) 与 [06-backend-api.md](06-backend-api.md) 的命名、资源建模、重试和弃用规则。
 - Microsoft Azure Well-Architected Framework 强调标准化开发、可观测性、安全部署和持续改进；Round1 落地为 [12-observability-audit.md](12-observability-audit.md)、[14-deployment-ops.md](14-deployment-ops.md)、[22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md) 的信号、发布、回滚和漂移治理。
 - Microsoft Fluent 2 强调 token、组件、可达性、设计到开发一致性；Round1 落地为 [04-ui-ux.md](04-ui-ux.md)、[15-performance-accessibility-print.md](15-performance-accessibility-print.md) 的 UI 验收。
 - Arco Design 公开资料强调企业级组件、主题 token、自定义物料和中后台效率；Round1 落地为 shadcn/Radix 原子组件、`/dev/ui-gallery`、Admin/Coach utility 页面一致性。

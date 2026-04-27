@@ -65,6 +65,19 @@
 - API 新增或行为变化必须更新 OpenAPI registry 与 `plan/reference-api.md`。
 - 不得新增在线组卷、在线换题、运行时 AI 生成题目接口。
 
+## 资源建模
+
+API 应优先表达资源和状态，不把内部实现暴露成接口形状：
+
+- URL path 表示稳定资源层级，避免把一次性筛选条件塞进 path。
+- query 用于分页、排序、筛选；body 用于复杂输入。
+- response 返回调用方下一步需要的资源摘要或状态摘要，不要求前端再猜测当前状态。
+- 字段层级保持浅，复杂 JSON 只用于题目内容、答案、解析、报告等确有结构需求的领域。
+- 字段可变性必须清楚：create-only、updateable、read-only 不混用。客户端提交 read-only 字段时应拒绝或忽略，并在 schema/文档中明确。
+- create/update/delete/publish/archive/copy-version 的响应必须让前端能刷新局部数据，而不是只能全局 reload。
+
+动作端点只能用于真实领域动作。若只是普通字段更新，使用资源更新接口；若动作会触发状态迁移，则必须符合 [20-product-state-and-workflow.md](20-product-state-and-workflow.md)。
+
 ## API 成熟度
 
 新增 API 不应只做到“路由能通”。按影响面分为三档：
@@ -91,6 +104,8 @@
 - import apply 对同一 checksum/sourceFilename 的处理必须可追溯，不静默覆盖历史 batch。
 - 外部服务失败应区分可重试和不可重试，返回稳定错误码。
 - 前端可重试的写操作必须避免产生重复副作用；必要时增加 idempotency key 或唯一约束。
+- 429/503 等可恢复错误应尽量返回 `retryAfterSeconds` 或等价提示，便于前端给出可行动文案。
+- 任何“可能被用户重复点击”的写接口都要明确重复请求语义：幂等成功、409 冲突或稳定业务错误。
 
 ## 权限
 
@@ -123,6 +138,14 @@
 - 新路由必须有 unit 或 integration 测试。
 - 权限、校验失败、成功、边界状态至少各覆盖一条。
 - OpenAPI 生成不得失败。
+
+## 可诊断性
+
+- 每个请求应可关联 request id；日志、错误响应和审计记录尽量使用同一关联字段。
+- 业务错误必须有稳定 `ROUND1_*` code。错误 message 面向前端和操作者，不暴露内部 SQL、secret、provider 原始响应。
+- validation error 的 `details` 可以包含字段路径、期望类型、业务限制，但不得回显敏感输入。
+- rate limit、缺卷、外部 provider 不可用、step-up 过期等可恢复错误必须让前端知道下一步动作。
+- 对外部依赖失败，日志记录 provider、latency、error category；响应只返回稳定错误码和安全摘要。
 
 ## 路由模块结构
 
@@ -191,6 +214,9 @@ Admin 列表应支持筛选条件回显，避免前端猜测实际过滤。
 - 新字段默认可选，前端先兼容再依赖。
 - 字段重命名必须保留兼容期或新版本。
 - 行为变更必须更新 `plan/reference-api.md` 的当前对齐说明。
+- 已被前端、脚本或 Admin UI 使用的错误码、状态值、字段单位视为契约；不能因为实现方便直接改名。
+- 新增必填字段、改变分页默认排序、改变状态迁移结果，都属于兼容风险，必须补计划或迁移说明。
+- 弃用字段应先在文档标记 legacy，观察无读取后再删除；不得让前端在同一发布里既依赖新字段又失去旧字段回退。
 
 ## 后端 PR 检查清单
 
