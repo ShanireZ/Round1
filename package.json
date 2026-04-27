@@ -24,6 +24,7 @@
         "migrate:status": "tsx scripts/migrate.ts status",
         "migrate:rehearse:011-failure": "tsx scripts/rehearseMigration011Failure.ts",
         "verify:offline-artifacts": "tsx scripts/verifyOfflineArtifactNames.ts",
+        "verify:ui-tokens": "tsx scripts/verifyUiTokenUsage.ts",
         "lint": "eslint .",
         "format": "prettier --write .",
         "format:check": "prettier --check .",

@@ -18,6 +18,8 @@
   --color-success-foreground: #FFFFFF;
   --color-info: #0284C7;
   --color-info-foreground: #FFFFFF;
+  --color-code-background: #0B1120;
+  --color-code-foreground: #F1F5F9;
 
   /* ── 数据可视化色板（色盲友好） ── */
   --color-chart-1: #E63946;
@@ -67,6 +69,8 @@
   --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
   --shadow-lg: 0 12px 32px -4px rgba(15, 23, 42, 0.12);
   --shadow-glow: 0 0 0 4px rgba(230, 57, 70, 0.12);
+  --shadow-destructive-glow: 0 0 0 4px rgba(200, 16, 46, 0.12);
+  --shadow-primary-hover: 0 8px 20px -8px rgba(230, 57, 70, 0.35);
   --shadow-hero: 0 40px 80px -20px rgba(230, 57, 70, 0.25);
 
   /* ── 边框 ── */
@@ -179,6 +183,8 @@ html.dark {
   --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.4);
   --shadow-glow: 0 0 0 4px rgba(230, 57, 70, 0.2);
+  --shadow-destructive-glow: 0 0 0 4px rgba(225, 29, 72, 0.18);
+  --shadow-primary-hover: 0 8px 20px -8px rgba(230, 57, 70, 0.28);
   --shadow-hero: 0 40px 80px -20px rgba(230, 57, 70, 0.15);
 }
 

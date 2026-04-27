@@ -744,6 +744,7 @@ UI/UX 相关 PR 必须检查：
 
 ```bash
 npm run build --workspace=client
+npm run verify:ui-tokens
 npm run test:e2e
 ```
 

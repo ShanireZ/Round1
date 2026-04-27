@@ -123,9 +123,9 @@ function ResultHero({ data }: { data: ExamResultPayload }) {
   return (
     <Card
       variant="hero"
-      className="relative overflow-hidden border border-border bg-[radial-gradient(circle_at_top_left,rgba(230,57,70,0.14),transparent_36%),linear-gradient(135deg,rgba(255,255,255,0.98),rgba(248,244,241,0.98))]"
+      className="exam-result-hero-surface relative overflow-hidden border border-border"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,transparent_0%,rgba(230,57,70,0.08)_48%,transparent_100%)]" />
+      <div className="exam-result-hero-sheen pointer-events-none absolute inset-0" />
       <CardContent className="relative grid gap-8 lg:grid-cols-[1.4fr_0.9fr]">
         <div className="space-y-6">
           <div className="flex flex-wrap items-center gap-3">
@@ -170,19 +170,19 @@ function ResultHero({ data }: { data: ExamResultPayload }) {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
-            <Card variant="stat" className="border-primary/15 bg-white/75">
+            <Card variant="stat" className="border-primary/15 bg-card/75">
               <CardDescription>正确率</CardDescription>
               <CardTitle className="mt-2 text-3xl">{accuracy}%</CardTitle>
               <p className="mt-2 text-xs text-muted-foreground">
                 {correctAnswers} / {totalQuestions} 小题命中
               </p>
             </Card>
-            <Card variant="stat" className="border-border bg-white/75">
+            <Card variant="stat" className="border-border bg-card/75">
               <CardDescription>错题数</CardDescription>
               <CardTitle className="mt-2 text-3xl">{wrongCount}</CardTitle>
               <p className="mt-2 text-xs text-muted-foreground">可直接跳到下方题卡展开复盘</p>
             </Card>
-            <Card variant="stat" className="border-border bg-white/75">
+            <Card variant="stat" className="border-border bg-card/75">
               <CardDescription>Section 数</CardDescription>
               <CardTitle className="mt-2 text-3xl">{sectionEntries.length}</CardTitle>
               <p className="mt-2 text-xs text-muted-foreground">题型聚合已和 runtime grader 对齐</p>
@@ -194,7 +194,7 @@ function ResultHero({ data }: { data: ExamResultPayload }) {
           {sectionEntries.map(({ key, label, summary }) => {
             const value = summary.maxScore === 0 ? 0 : (summary.score / summary.maxScore) * 100;
             return (
-              <Card key={key} variant="flat" className="border-border/80 bg-white/80 backdrop-blur-sm">
+              <Card key={key} variant="flat" className="border-border/80 bg-card/80 backdrop-blur-sm">
                 <CardContent className="space-y-3">
                   <div className="flex items-center justify-between gap-4">
                     <div>
@@ -247,7 +247,7 @@ function ResultOverview({ data }: { data: ExamResultPayload }) {
               {wrongs.map((wrong) => (
                 <div
                   key={`${wrong.slotNo}-${wrong.subQuestionKey}`}
-                  className="rounded-[--radius-lg] border border-[#C8102E]/15 bg-[#C8102E]/[0.03] p-4"
+                  className="rounded-[--radius-lg] border border-destructive/15 bg-destructive/[0.03] p-4"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="text-sm font-medium text-foreground">
@@ -385,7 +385,7 @@ function ResultItemCard({ item, defaultOpen = false }: { item: ExamResultItem; d
                   className={`rounded-[--radius-lg] border p-4 ${
                     subQuestion.isCorrect
                       ? "border-success/25 bg-success/5"
-                      : "border-[#C8102E]/15 bg-[#C8102E]/[0.03]"
+                      : "border-destructive/15 bg-destructive/[0.03]"
                   }`}
                 >
                   <div className="flex flex-wrap items-center gap-2">
@@ -397,19 +397,19 @@ function ResultItemCard({ item, defaultOpen = false }: { item: ExamResultItem; d
                   </div>
 
                   <div className="mt-3 grid gap-3 md:grid-cols-2">
-                    <div className="rounded-[--radius-md] border border-border/70 bg-white/70 p-3">
+                    <div className="rounded-[--radius-md] border border-border/70 bg-card/70 p-3">
                       <div className="text-xs uppercase tracking-wide text-muted-foreground">你的答案</div>
                       <div className="mt-2 font-mono text-sm text-foreground">
                         {subQuestion.submittedAnswer ?? "未作答"}
                       </div>
                     </div>
-                    <div className="rounded-[--radius-md] border border-border/70 bg-white/70 p-3">
+                    <div className="rounded-[--radius-md] border border-border/70 bg-card/70 p-3">
                       <div className="text-xs uppercase tracking-wide text-muted-foreground">正确答案</div>
                       <div className="mt-2 font-mono text-sm text-foreground">{subQuestion.correctAnswer}</div>
                     </div>
                   </div>
 
-                  <div className="mt-3 rounded-[--radius-md] border border-border/70 bg-white/70 p-3 text-sm leading-6 text-muted-foreground">
+                  <div className="mt-3 rounded-[--radius-md] border border-border/70 bg-card/70 p-3 text-sm leading-6 text-muted-foreground">
                     {subQuestion.explanation ?? "当前没有解释文本。"}
                   </div>
                 </div>
@@ -452,8 +452,8 @@ function CeremonyReveal({
   const wrongCount = data.attempt.report?.wrongs.length ?? Math.max(totalQuestions - correctAnswers, 0);
 
   return (
-    <div className="fixed inset-0 z-[80] bg-[#09090b]/96 px-6 py-8 text-white" data-testid="exam-result-ceremony">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(230,57,70,0.36),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,196,0,0.16),transparent_32%)]" />
+    <div className="exam-result-ceremony-surface fixed inset-0 z-[--z-ceremony] px-6 py-8 text-white" data-testid="exam-result-ceremony">
+      <div className="exam-result-ceremony-aura absolute inset-0" />
       <div className="relative flex h-full items-center justify-center">
         <div className="w-full max-w-4xl text-center">
           <div className="mx-auto inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-2 text-xs uppercase tracking-[0.32em] text-white/70">
@@ -600,7 +600,7 @@ export default function ExamResultPage() {
 
   if (resultQuery.isError || !resultData) {
     return (
-      <Card variant="hero" className="border-destructive/20 bg-[linear-gradient(135deg,rgba(200,16,46,0.08),rgba(255,255,255,0.96))]">
+      <Card variant="hero" className="exam-session-error-surface border-destructive/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <AlertCircle className="h-5 w-5" />

@@ -98,7 +98,7 @@
 
 ### 7. UI/UX 与前端体验收口
 
-- [ ] UI 设计系统中的 tokens、字体托管、组件库、布局、品牌资产、打印样式与 `/dev/ui-gallery` 仍需按当前代码状态逐项验收。
+- [ ] UI 设计系统中的 tokens、字体托管、组件库、布局、品牌资产、打印样式与 `/dev/ui-gallery` 仍需按当前代码状态逐项验收。（2026-04-27：已新增 `npm run verify:ui-tokens`，阻断 `client/src` TS/TSX 中重新引入原始 hex/rgb/hsl magic color；截图、键盘、移动端、reduced motion 与打印视觉验收仍需继续收口。）
 - [ ] AI 智能建议文案模板为 v2 事项；MVP 可保持静态规则或占位。
 - [ ] QQ 互联登录视觉需随 feature flag 流程一起补齐。
 - [ ] i18n 多语言为未来扩展项。

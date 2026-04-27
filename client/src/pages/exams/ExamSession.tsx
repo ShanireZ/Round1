@@ -155,7 +155,7 @@ function AttemptSummary({
   const progressValue = totalParts === 0 ? 0 : Math.round((answeredParts / totalParts) * 100);
 
   return (
-    <Card variant="hero" className="relative overflow-hidden border border-border bg-[radial-gradient(circle_at_top_left,rgba(230,57,70,0.13),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,244,240,0.98))]">
+    <Card variant="hero" className="exam-session-hero-surface relative overflow-hidden border border-border">
       <CardContent className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-3">
@@ -177,17 +177,17 @@ function AttemptSummary({
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
-            <Card variant="stat" className="border-border bg-white/80">
+            <Card variant="stat" className="border-border bg-card/80">
               <CardDescription>答题进度</CardDescription>
               <CardTitle className="mt-2 text-lg">
                 {answeredParts} / {totalParts}
               </CardTitle>
             </Card>
-            <Card variant="stat" className="border-border bg-white/80">
+            <Card variant="stat" className="border-border bg-card/80">
               <CardDescription>Attempt ID</CardDescription>
               <CardTitle className="mt-2 text-lg">{session.attempt.id}</CardTitle>
             </Card>
-            <Card variant="stat" className="border-border bg-white/80">
+            <Card variant="stat" className="border-border bg-card/80">
               <CardDescription>试卷状态</CardDescription>
               <CardTitle className="mt-2 text-lg">{session.paper.status}</CardTitle>
             </Card>
@@ -202,7 +202,7 @@ function AttemptSummary({
           </div>
         </div>
 
-        <div className="space-y-4 rounded-[--radius-xl] border border-border/80 bg-white/75 p-5 backdrop-blur-sm">
+        <div className="space-y-4 rounded-[--radius-xl] border border-border/80 bg-card/75 p-5 backdrop-blur-sm">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
             <Clock3 className="h-4 w-4 text-primary" />
             当前考试会话
@@ -242,7 +242,7 @@ function AttemptSummary({
 
 function ConflictState({ paperId }: { paperId: string }) {
   return (
-    <Card variant="hero" className="border-warning/30 bg-[linear-gradient(180deg,rgba(245,158,11,0.08),rgba(255,255,255,0.98))]">
+    <Card variant="hero" className="exam-session-warning-surface border-warning/30">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
           <Clock3 className="h-5 w-5 text-warning" />
@@ -310,7 +310,7 @@ function SessionQuestionCard({
 
       <CardContent className="space-y-6">
         {renderable.code ? (
-          <pre className="overflow-x-auto rounded-[--radius-lg] border border-border/70 bg-[#0b1120] p-4 text-sm leading-6 text-slate-100">
+          <pre className="overflow-x-auto rounded-[--radius-lg] border border-border/70 bg-[--color-code-background] p-4 text-sm leading-6 text-[--color-code-foreground]">
             <code>{renderable.code}</code>
           </pre>
         ) : null}
@@ -338,7 +338,7 @@ function SessionQuestionCard({
                         htmlFor={optionId}
                         data-testid={`answer-option-${item.slotNo}-${part.key}-${option.value}`}
                         data-selected={currentValue === option.value ? "true" : "false"}
-                        className="flex cursor-pointer items-start gap-3 rounded-[--radius-md] border border-border/70 bg-white px-4 py-3 text-sm transition-colors hover:border-primary/50"
+                        className="flex cursor-pointer items-start gap-3 rounded-[--radius-md] border border-border/70 bg-card px-4 py-3 text-sm transition-colors hover:border-primary/50"
                       >
                         <RadioGroupItem id={optionId} value={option.value} />
                         <div className="space-y-1">
@@ -682,7 +682,7 @@ export default function ExamSessionPage() {
   if (startAttemptMutation.isError || !attempt) {
     return (
       <div className="grid h-full place-items-center px-6 py-10">
-        <Card variant="hero" className="w-full max-w-3xl border-destructive/20 bg-[linear-gradient(180deg,rgba(200,16,46,0.08),rgba(255,255,255,0.98))]">
+        <Card variant="hero" className="exam-session-error-surface w-full max-w-3xl border-destructive/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
               <AlertCircle className="h-5 w-5" />
@@ -710,7 +710,7 @@ export default function ExamSessionPage() {
   if (sessionQuery.isError) {
     return (
       <div className="grid h-full place-items-center px-6 py-10">
-        <Card variant="hero" className="w-full max-w-3xl border-destructive/20 bg-[linear-gradient(180deg,rgba(200,16,46,0.08),rgba(255,255,255,0.98))]">
+        <Card variant="hero" className="exam-session-error-surface w-full max-w-3xl border-destructive/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
               <AlertCircle className="h-5 w-5" />

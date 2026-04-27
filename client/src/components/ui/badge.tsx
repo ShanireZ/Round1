@@ -13,7 +13,7 @@ const badgeVariants = cva(
         destructive: "bg-destructive text-destructive-foreground",
         /* OJ 语义徽章 */
         ac: "bg-success text-success-foreground",
-        wa: "bg-[#C8102E] text-white",
+        wa: "bg-destructive text-destructive-foreground",
         tle: "bg-warning text-warning-foreground",
         mle: "border border-warning text-warning",
         re: "border border-destructive text-destructive",
@@ -21,7 +21,7 @@ const badgeVariants = cva(
         saved: "border border-info text-info",
         /* 试卷类型 */
         "csp-j": "border border-info text-info",
-        "csp-s": "border border-[#8B5CF6] text-[#8B5CF6]",
+        "csp-s": "border border-chart-5 text-chart-5",
         "gesp-low": "border border-success text-success",
         "gesp-high": "border border-warning text-warning",
         /* 难度 */

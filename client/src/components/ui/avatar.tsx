@@ -43,7 +43,7 @@ AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 function hashColor(str: string): string {
   const colors = [
     "bg-primary", "bg-info", "bg-success", "bg-warning",
-    "bg-[#8B5CF6]", "bg-[#EC4899]", "bg-[#F97316]", "bg-[#06B6D4]",
+    "bg-chart-5", "bg-destructive", "bg-chart-4", "bg-chart-2",
   ];
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
