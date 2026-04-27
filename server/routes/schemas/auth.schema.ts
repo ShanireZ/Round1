@@ -135,12 +135,21 @@ export const PasskeyLoginOptionsBody = registry.register(
   z.object({}).passthrough()
 );
 
+const PasskeyCredentialResponseBody = z
+  .object({
+    id: z.string().min(1),
+    rawId: z.string().optional(),
+    response: z.record(z.string(), z.unknown()),
+    type: z.string().optional(),
+    clientExtensionResults: z.record(z.string(), z.unknown()).optional(),
+    authenticatorAttachment: z.string().optional(),
+  })
+  .passthrough();
+
 // Passkey login verify body
 export const PasskeyLoginVerifyBody = registry.register(
   "PasskeyLoginVerifyBody",
-  z.object({
-    credential: z.any(),
-  })
+  PasskeyCredentialResponseBody
 );
 
 // Passkey register options
@@ -152,9 +161,7 @@ export const PasskeyRegisterOptionsBody = registry.register(
 // Passkey register verify
 export const PasskeyRegisterVerifyBody = registry.register(
   "PasskeyRegisterVerifyBody",
-  z.object({
-    credential: z.any(),
-  })
+  PasskeyCredentialResponseBody
 );
 
 // TOTP enroll start (empty body)
@@ -176,6 +183,14 @@ export const TotpReauthBody = registry.register(
   "TotpReauthBody",
   z.object({
     code: z.string().length(6),
+  })
+);
+
+// Password reauth
+export const PasswordReauthBody = registry.register(
+  "PasswordReauthBody",
+  z.object({
+    password: z.string().min(1),
   })
 );
 

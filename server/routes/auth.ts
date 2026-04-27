@@ -44,6 +44,11 @@ import {
   EmailChangeRequestBody,
   EmailChangeConfirmBody,
   CompleteProfileBody,
+  PasskeyLoginVerifyBody,
+  PasskeyRegisterVerifyBody,
+  PasswordReauthBody,
+  TotpEnrollVerifyBody,
+  TotpReauthBody,
 } from "./schemas/auth.schema.js";
 import { safeReturnTo } from "../../config/auth.js";
 import {
@@ -1082,6 +1087,7 @@ authRouter.post(
 // 17. POST /auth/login/passkey/verify
 authRouter.post(
   "/auth/login/passkey/verify",
+  validate(PasskeyLoginVerifyBody),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const expectedChallenge = req.session.passkeyChallenge;
@@ -1228,6 +1234,7 @@ authRouter.post(
 authRouter.post(
   "/auth/passkeys/register/verify",
   requireAuth,
+  validate(PasskeyRegisterVerifyBody),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const expectedChallenge = req.session.passkeyChallenge;
@@ -1506,6 +1513,7 @@ authRouter.delete(
 authRouter.post(
   "/auth/reauth/password",
   requireAuth,
+  validate(PasswordReauthBody),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { password } = req.body;
@@ -1591,6 +1599,7 @@ authRouter.post(
 authRouter.post(
   "/auth/reauth/passkey/verify",
   requireAuth,
+  validate(PasskeyLoginVerifyBody),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const expectedChallenge = req.session.passkeyChallenge;
@@ -1663,6 +1672,7 @@ authRouter.post(
 authRouter.post(
   "/auth/reauth/totp",
   requireAuth,
+  validate(TotpReauthBody),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { code } = req.body as { code?: string };
@@ -1742,6 +1752,7 @@ authRouter.post(
 authRouter.post(
   "/auth/totp/enroll/verify",
   requireAuth,
+  validate(TotpEnrollVerifyBody),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { code } = req.body as { code?: string };

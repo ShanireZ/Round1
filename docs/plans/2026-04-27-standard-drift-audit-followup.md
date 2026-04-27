@@ -8,6 +8,8 @@
 
 ## 本轮已修复
 
+- Auth schema 与运行时校验漂移：Passkey verify 请求体不再用 `z.any()`/伪 `credential` 包装，改为顶层 WebAuthn response schema；passkey verify、TOTP verify 与 password reauth 路由已补 `validate(...)`，避免 OpenAPI/运行时校验继续分叉。
+- Admin 审计 fail-closed：`server/middleware/adminAudit.ts` 不再 fire-and-forget 吞掉写入失败；敏感 admin mutation 会先创建审计记录，成功响应前补写 before/after，审计链不可用时返回 `ROUND1_ADMIN_AUDIT_FAILED`，并已同步到 `plan/reference-api.md`。
 - Production no-runner 口径：`plan/00-overview.md` 不再把 `cpp-runner` 写成生产启动健康前提，改为生产 `/api/v1/health` 与离线内容环境 runner/contentWorker 分层验收。
 - cpp-runner 代码注释：`server/services/sandbox/cppRunner.ts` 明确为离线内容环境与校验脚本客户端，避免误读为生产运行时依赖。
 - `/api/v1/config/client` 领域边界：从 `server/routes/auth.ts` 拆到 `server/routes/config.ts`，并补充 OpenAPI registry 与测试断言。

@@ -34,6 +34,7 @@ interface ErrorResponse {
 | `ROUND1_CHALLENGE_LOCKED`           | 400  | challenge 验证次数耗尽   |
 | `ROUND1_PREBUILT_PAPER_UNAVAILABLE` | 503  | 当前难度无可用预制卷     |
 | `ROUND1_IMPORT_BUNDLE_INVALID`      | 400  | 导入 bundle 校验失败     |
+| `ROUND1_ADMIN_AUDIT_FAILED`         | 500  | Admin 审计日志写入失败   |
 | `ROUND1_INTERNAL_ERROR`             | 500  | 服务器内部错误           |
 
 ### 前端配置端点
