@@ -20,6 +20,7 @@
 - 当前本地 step3 formal bundle meta：`papers/2026/2026-04-27-step3-llm-csp-j-medium-v01/question-bundles/` 与 `artifacts/prebuilt-papers/2026/2026-04-27-step3-llm-csp-j-medium-v01/` 下的 formal bundle 已把 `createdAt` 规范为 ISO datetime，避免路径合规但 schema 不合规。
 - UI/UX 旧口径：`plan/00-overview.md`、`plan/reference-config.md`、`plan/step-01-scaffold-and-db.md` 与 `plan/uiux_plan.md` 已从早期 Codeforces/纯白蓝橙/`apps/web` 路径口径同步到当前 `client/` 路径和 Modern Editorial × Contest Ceremony 定稿。
 - UI token 漂移 guard：`client/src` 中考试页、结果页与基础 UI primitive 的原始 hex/rgba 样式已收敛到 token、语义 Tailwind class 或共享 CSS utility；新增 `scripts/verifyUiTokenUsage.ts` 与 `npm run verify:ui-tokens` 防止 TS/TSX 重新引入 magic color。
+- UI 构建依赖漂移：`lucide-react@0.475.0` 的当前安装包 barrel export 会引用缺失的 icon 文件，导致 `npm run build --workspace=client` 在 Vite 阶段失败；已升级到 `lucide-react@1.11.0`，客户端生产构建恢复通过。
 - `plan/reference-config.md` 目录结构：已补 `server/routes/config.ts`，移除已不存在的 `csrf.ts` / `rateLimit.ts` middleware 口径，改为当前 `authRateLimit.ts` 与 app 内联 CSRF/rateLimit 结构。
 
 ## 验证
@@ -37,6 +38,7 @@ npm run test -- server/__tests__/pow.test.ts
 npm run test -- server/__tests__/admin-content.integration.test.ts
 npm run verify:offline-artifacts
 npm run verify:ui-tokens
+npm run build --workspace=client
 npm run build --workspace=server
 ```
 
