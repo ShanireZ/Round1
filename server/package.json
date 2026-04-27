@@ -4,7 +4,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "clean": "node ../scripts/clean-build-output.mjs ../dist/server",
+        "clean": "tsx ../scripts/clean-build-output.ts ../dist/server",
         "dev": "tsx watch --clear-screen=false index.ts",
         "build": "npm run clean && tsc",
         "start": "node dist/index.js",

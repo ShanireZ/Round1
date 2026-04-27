@@ -3,6 +3,7 @@ import path from "node:path";
 
 import { z } from "zod";
 
+import { defaultQuestionBundleOutputPath, formatOfflineRunId } from "./lib/paperPaths.js";
 import {
   DifficultySchema,
   ExamTypeSchema,
@@ -11,7 +12,6 @@ import {
   QuestionTypeSchema,
   computeChecksum,
 } from "./lib/bundleTypes.js";
-import { defaultQuestionBundleOutputPath } from "./lib/paperPaths.js";
 
 type ComputeContentHash = (stem: string, codeOrOptions: string) => string;
 
@@ -72,6 +72,9 @@ interface GenerateArgs {
   difficulty: string;
   count: number;
   output: string;
+  outputExplicit: boolean;
+  runId: string;
+  artifactVersion: number;
 }
 
 function printHelp() {
@@ -83,9 +86,20 @@ Options:
   --primary-kp-code <code>   Knowledge point code
   --difficulty <level>       easy | medium | hard
   --count <number>           Number of questions to generate (default: 1)
-  --output <path>            Output path (default: papers/<year>/YYYY-MM-DD-<questionType>-<count>.json)
+  --run-id <id>              Offline run id (default: YYYY-MM-DD-step3-llm-<exam-type>-<difficulty>-vNN)
+  --artifact-version <n>     Artifact version used in run id and file name (default: 1)
+  --output <path>            Explicit output override. Defaults to the persistent runId question-bundle path.
   --help                     Show this help message
 `);
+}
+
+function parsePositiveInteger(value: string | undefined, fallback: number, label: string): number {
+  const parsed = Number.parseInt(value ?? String(fallback), 10);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`--${label} must be a positive integer`);
+  }
+
+  return parsed;
 }
 
 function parseArgs(argv: string[]): GenerateArgs {
@@ -108,15 +122,44 @@ function parseArgs(argv: string[]): GenerateArgs {
   }
 
   const questionType = QuestionTypeSchema.parse(values.get("question-type"));
-  const count = Number.parseInt(values.get("count") ?? "1", 10);
+  const examType = ExamTypeSchema.parse(values.get("exam-type"));
+  const difficulty = DifficultySchema.parse(values.get("difficulty"));
+  const primaryKpCode = values.get("primary-kp-code")?.trim() ?? "";
+  const count = parsePositiveInteger(values.get("count"), 1, "count");
+  const artifactVersion = parsePositiveInteger(
+    values.get("artifact-version"),
+    1,
+    "artifact-version",
+  );
+  const runId =
+    values.get("run-id") ??
+    formatOfflineRunId({
+      date: new Date(),
+      pipeline: "step3-llm",
+      examType,
+      difficulty,
+      versionNo: artifactVersion,
+    });
+  const outputExplicit = values.has("output");
 
   return {
-    examType: ExamTypeSchema.parse(values.get("exam-type")),
+    examType,
     questionType,
-    primaryKpCode: values.get("primary-kp-code")?.trim() ?? "",
-    difficulty: DifficultySchema.parse(values.get("difficulty")),
+    primaryKpCode,
+    difficulty,
     count,
-    output: values.get("output") ?? defaultQuestionBundleOutputPath(questionType, count),
+    output:
+      values.get("output") ??
+      defaultQuestionBundleOutputPath({
+        runId,
+        questionType,
+        kpCode: primaryKpCode || "unknown-kp",
+        count,
+        versionNo: artifactVersion,
+      }),
+    outputExplicit,
+    runId,
+    artifactVersion,
   };
 }
 
@@ -127,7 +170,11 @@ function applyTemplate(template: string, replacements: Record<string, string>) {
   );
 }
 
-function getGeneratedQuestionSchema(questionType: string) {
+function getGeneratedQuestionSchema(questionType: string): {
+  schema: z.ZodSchema<unknown>;
+  schemaName: string;
+  maxTokens: number;
+} {
   if (questionType === "single_choice") {
     return {
       schema: generatedSingleChoiceSchema,
@@ -387,7 +434,11 @@ async function main() {
 
       const outputPath = path.resolve(process.cwd(), args.output);
       await mkdir(path.dirname(outputPath), { recursive: true });
-      await writeFile(outputPath, `${JSON.stringify(bundle, null, 2)}\n`, "utf8");
+      await writeFile(
+        outputPath,
+        `${JSON.stringify(bundle, null, 2)}\n`,
+        args.outputExplicit ? "utf8" : { encoding: "utf8", flag: "wx" },
+      );
       console.log(`Generated ${bundle.items.length} questions -> ${outputPath}`);
       return;
     }

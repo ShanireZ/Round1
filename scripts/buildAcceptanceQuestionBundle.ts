@@ -12,7 +12,7 @@ import {
   type QuestionBundleItem,
   type QuestionType,
 } from "./lib/bundleTypes.js";
-import { defaultQuestionBundleOutputPath } from "./lib/paperPaths.js";
+import { defaultQuestionBundleOutputPath, formatOfflineRunId } from "./lib/paperPaths.js";
 import { computeContentHash } from "../server/services/deduplicationService.js";
 
 interface Args {
@@ -22,7 +22,10 @@ interface Args {
   difficulty: Difficulty;
   count: number;
   output: string;
+  outputExplicit: boolean;
   batchId: string;
+  runId: string;
+  artifactVersion: number;
 }
 
 function printHelp() {
@@ -36,10 +39,21 @@ Options:
   --primary-kp-code <code>   Knowledge point code
   --difficulty <level>       easy | medium | hard
   --count <number>           Number of questions to generate (default: 1)
-  --output <path>            Output path (default: papers/<year>/YYYY-MM-DD-<questionType>-<count>.json)
+  --run-id <id>              Offline run id (default: YYYY-MM-DD-acceptance-<exam-type>-<difficulty>-vNN)
+  --artifact-version <n>     Artifact version used in run id and file name (default: 1)
+  --output <path>            Explicit output override. Defaults to the persistent runId question-bundle path.
   --batch-id <id>            Stable batch id (default: timestamp)
   --help                     Show this help message
 `);
+}
+
+function parsePositiveInteger(value: string | undefined, fallback: number, label: string): number {
+  const parsed = Number.parseInt(value ?? String(fallback), 10);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`--${label} must be a positive integer`);
+  }
+
+  return parsed;
 }
 
 function parseArgs(argv: string[]): Args {
@@ -62,16 +76,45 @@ function parseArgs(argv: string[]): Args {
   }
 
   const questionType = QuestionTypeSchema.parse(values.get("question-type"));
-  const count = Number.parseInt(values.get("count") ?? "1", 10);
+  const examType = ExamTypeSchema.parse(values.get("exam-type"));
+  const difficulty = DifficultySchema.parse(values.get("difficulty"));
+  const primaryKpCode = values.get("primary-kp-code")?.trim() ?? "";
+  const count = parsePositiveInteger(values.get("count"), 1, "count");
+  const artifactVersion = parsePositiveInteger(
+    values.get("artifact-version"),
+    1,
+    "artifact-version",
+  );
+  const runId =
+    values.get("run-id") ??
+    formatOfflineRunId({
+      date: new Date(),
+      pipeline: "acceptance",
+      examType,
+      difficulty,
+      versionNo: artifactVersion,
+    });
+  const outputExplicit = values.has("output");
 
   return {
-    examType: ExamTypeSchema.parse(values.get("exam-type")),
+    examType,
     questionType,
-    primaryKpCode: values.get("primary-kp-code")?.trim() ?? "",
-    difficulty: DifficultySchema.parse(values.get("difficulty")),
+    primaryKpCode,
+    difficulty,
     count,
-    output: values.get("output") ?? defaultQuestionBundleOutputPath(questionType, count),
+    output:
+      values.get("output") ??
+      defaultQuestionBundleOutputPath({
+        runId,
+        questionType,
+        kpCode: primaryKpCode || "unknown-kp",
+        count,
+        versionNo: artifactVersion,
+      }),
+    outputExplicit,
     batchId: values.get("batch-id") ?? new Date().toISOString().replace(/[:.]/g, "-"),
+    runId,
+    artifactVersion,
   };
 }
 
@@ -293,7 +336,11 @@ async function main() {
 
   const outputPath = path.resolve(process.cwd(), args.output);
   await mkdir(path.dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, `${JSON.stringify(bundle, null, 2)}\n`, "utf8");
+  await writeFile(
+    outputPath,
+    `${JSON.stringify(bundle, null, 2)}\n`,
+    args.outputExplicit ? "utf8" : { encoding: "utf8", flag: "wx" },
+  );
   console.log(`Built ${bundle.items.length} acceptance questions -> ${outputPath}`);
 }
 

@@ -4,7 +4,7 @@
 > **交付物**：知识点树 + 真题入库 + LLM 客户端 + question bundle 离线生成/校验/导入 + prebuilt paper bundle 离线构建/导入 + cpp-runner 沙箱
 > **可验证 demo**：question bundle dry-run/apply 通过；30 道阅读程序题经沙箱校验后入库；20 道完善程序题经沙箱校验后入库；首批预制卷导入并可发布
 
-> **对齐说明（2026-04-24）**：当前仓库仍处于 compatibility-first 过渡期。Step 03 收口目标已经明确为“开发环境离线产出可直接导入的 question bundle 与 prebuilt paper bundle，生产环境只做校验导入、发布、考试”；question bundle 标准存放路径为 `papers/<year>/YYYY-MM-DD-<questionType>-<count>.json`，任何旧的线上生成、库存补货、题目退役或实时换题逻辑都只能视为待删除遗留，不得继续扩张。
+> **对齐说明（2026-04-24，2026-04-27 更新命名口径）**：当前仓库仍处于 compatibility-first 过渡期。Step 03 收口目标已经明确为“开发环境离线产出可直接导入的 question bundle 与 prebuilt paper bundle，生产环境只做校验导入、发布、考试”；question bundle 标准存放路径为 `papers/<year>/<runId>/question-bundles/`，prebuilt paper bundle 标准存放路径为 `artifacts/prebuilt-papers/<year>/<runId>/`，任何旧的线上生成、库存补货、题目退役或实时换题逻辑都只能视为待删除遗留，不得继续扩张。
 
 > **当前推进状态（2026-04-26）**：离线 bundle 第一批最小可运行 slice 已经落地：`scripts/lib/bundleTypes.ts` 已定义 raw bundle 契约与统一 `ImportSummary`；`generateQuestionBundle.ts`、`validateQuestionBundle.ts`、`importQuestionBundle.ts` 以及 `buildPrebuiltPaperBundle.ts`、`validatePrebuiltPaperBundle.ts`、`importPrebuiltPaperBundle.ts` 六个 CLI entrypoint 已接入仓库；Admin 导入中心已直接接收 raw `QuestionBundleSchema` / `PrebuiltPaperBundleSchema` 并复用 scripts 侧 workflow。当前 Step 03 的剩余工作重点已经收敛为“更丰富的离线产物元数据与审计信息、批量内容生产实跑规模、知识点/真题复核批次，以及与 Step 04/05 的完整运行时闭环对齐”，而不是重新设计 bundle 基础契约。2026-04-26 已完成首批规模化本地确定性验收 question bundle 与程序题 sandbox 入库验收：阅读程序 30 道、完善程序 20 道均通过离线校验并 apply 入库，且规则去重/判官拦截守卫已实跑通过。该批次不等同于 LLM 出题批次；真实 LLM 生成题目仍需使用 `generateQuestionBundle.ts` 并显式跑 `validateQuestionBundle.ts --judge`。
 
@@ -102,8 +102,8 @@
 ### 8.1 question bundle 生成脚本
 
 - `scripts/generateQuestionBundle.ts` — 离线生成单选 / 阅读程序 / 完善程序题目 bundle
-- 输出 UTF-8 JSON 文件，标准产物存放在 `papers/<year>/`，命名为 `YYYY-MM-DD-<questionType>-<count>.json`
-- `papers/<year>/` 下只放已生成、已校验、可直接导入的 raw `QuestionBundleSchema` JSON；临时 LLM 草稿或未通过 sandbox 的程序题 bundle 不进入该目录
+- 输出 UTF-8 JSON 文件，标准产物存放在 `papers/<year>/<runId>/question-bundles/`，命名为 `<runId>__question-bundle__<question-type>__<kp-code>__n<count>__vNN.json`
+- `papers/<year>/<runId>/question-bundles/` 下只放已生成、已校验、可直接导入的 raw `QuestionBundleSchema` JSON；临时 LLM 草稿或未通过 sandbox 的程序题 bundle 不进入该目录
 - 输入参数至少包含：`examType`、`questionType`、`primaryKpCode`、`difficulty`、`count`
 
 **离线生成流水线**：
@@ -194,7 +194,7 @@ docker run --rm --runtime=runsc --read-only --network=none \
 ### 10.1 预制卷离线构建
 
 - `scripts/buildPrebuiltPaperBundle.ts` — 基于已发布题库与蓝图生成预制卷 bundle
-- 输出 UTF-8 JSON 文件，标准产物命名为 `artifacts/prebuilt-papers/paper-packs.json`
+- 输出 UTF-8 JSON 文件，标准产物命名为 `artifacts/prebuilt-papers/<year>/<runId>/<runId>__prebuilt-paper-bundle__blueprint-v<blueprintVersion>__n<count>__vNN.json`
 - 同一 exam_type + difficulty 下，尽量降低卷间 overlap score
 
 **构建规则**：
@@ -221,7 +221,7 @@ docker run --rm --runtime=runsc --read-only --network=none \
 ### 10.4 离线化收口修复
 
 - 题目资产目标生命周期已经收敛为 `draft → reviewed → published → archived`。拒收原因和审核链继续落在 `question_reviews` 与 import summary，不再作为题目主状态扩散到新接口；旧 `active/retired` 仅允许存在于历史迁移语义中。
-- 仓库内部实现名可以继续使用 `generateQuestionBundle.ts` / `buildPrebuiltPaperBundle.ts` / `validatePrebuiltPaperBundle.ts`，但 question bundle 对外交付标准统一为 `papers/<year>/YYYY-MM-DD-<questionType>-<count>.json`，prebuilt paper bundle 可继续以 `paper-packs.json` 作为离线产物名。如需统一命名，可后续增加薄封装脚本 `generate-offline-questions.ts` / `build-paper-packs.ts` / `validate-import-artifacts.ts`，但不得复制业务逻辑。
+- 仓库内部实现名可以继续使用 `generateQuestionBundle.ts` / `buildPrebuiltPaperBundle.ts` / `validatePrebuiltPaperBundle.ts`，但 question bundle 与 prebuilt paper bundle 的对外交付标准统一改为 runId 持久化命名；`paper-packs.json`、`latest.json`、`probe*.json` 等无 runId 名称只允许作为本地临时 alias，不得进入可导入/可审计资产目录。`generate-offline-questions.ts` / `build-paper-packs.ts` / `validate-import-artifacts.ts` 继续作为运营命名薄封装，不复制业务逻辑。
 - `question_bucket_stats`、`bucket_slot_counters`、`generation_jobs`、`manual_generation_jobs` 已删除；原手工导入批次/发起人/部分失败语义并入 `import_batches`，不再作为线上运行前提。
 
 ---
@@ -240,7 +240,7 @@ docker run --rm --runtime=runsc --read-only --network=none \
 - [x] 20 道完善程序题经沙箱校验后入库（2026-04-26：`papers/2026/2026-04-26-completion_program-20.json` 全部 `sandboxVerified=true`，数据库回查 20/20；追加 LLM 判官逐题复核 20/20 通过）
 - [x] 去重规则拦截近似题（2026-04-26：`scripts/verifyQuestionBundleGuards.ts` 构造同题干不同选项候选，触发 `DUPLICATE_JACCARD`）
 - [x] 判官二次校验拦截答案不一致的题（2026-04-26：`scripts/verifyQuestionBundleGuards.ts` 构造错误答案题，触发 `JUDGE_REJECTED`）
-- [x] `scripts/validatePrebuiltPaperBundle.ts` dry-run 通过（2026-04-26：`artifacts/prebuilt-papers/paper-packs.json` 校验 summary=1/1/0，`dbChecksSkipped=false`；校验前通过 `validate-import-artifacts.ts --write-metadata` 写回 validator 版本、校验时间与 item checksum manifest）
+- [x] `scripts/validatePrebuiltPaperBundle.ts` dry-run 通过（2026-04-26：历史验收产物曾使用 `artifacts/prebuilt-papers/paper-packs.json`，2026-04-27 后新产物改用 runId 持久化命名；校验 summary=1/1/0，`dbChecksSkipped=false`；校验前通过 `validate-import-artifacts.ts --write-metadata` 写回 validator 版本、校验时间与 item checksum manifest）
 - [x] `scripts/importPrebuiltPaperBundle.ts --apply` 导入成功，并可在后台发布（2026-04-26：apply batch=`a231db53-95ae-42de-9860-c5b057a9d791`；发布预制卷 `2a2e4c76-e7aa-48b3-9226-36c838220a0c` 后，运行时选卷查询可命中 GESP-1/easy，slot=20、totalPoints=100）
 - [ ] 管理员题库 CRUD 流程完整
 - [ ] 管理员预制卷库 CRUD 流程完整

@@ -22,8 +22,7 @@ tsx scripts/ingestRealPapers.ts
 
 # 5. 生成并校验 question bundle（离线内容环境执行）
 # 持久化输出：papers/<year>/<runId>/question-bundles/<runId>__question-bundle__<question-type>__<kp-code>__n<count>__vNN.json
-# 当前脚本未完全内建 runId 默认路径前，必须显式传 --output 到持久化路径
-tsx scripts/generateQuestionBundle.ts --exam-type <exam-type> --question-type <question-type> --primary-kp-code <kp-code> --difficulty <difficulty> --count <count> --output papers/<year>/<runId>/question-bundles/<bundle-file>.json
+tsx scripts/generateQuestionBundle.ts --exam-type <exam-type> --question-type <question-type> --primary-kp-code <kp-code> --difficulty <difficulty> --count <count> --run-id <runId>
 tsx scripts/validateQuestionBundle.ts papers/<year>/<runId>/question-bundles/<bundle-file>.json --run-sandbox --write
 
 # 6. 导入题目 bundle（生产环境可 dry-run / apply）
@@ -32,8 +31,7 @@ tsx scripts/importQuestionBundle.ts papers/<year>/<runId>/question-bundles/<bund
 
 # 7. 生成并校验 prebuilt paper bundle（离线内容环境执行）
 # 持久化输出：artifacts/prebuilt-papers/<year>/<runId>/<runId>__prebuilt-paper-bundle__blueprint-v<blueprintVersion>__n<count>__vNN.json
-# 当前脚本未完全内建 runId 默认路径前，必须显式传 --output 到持久化路径
-tsx scripts/buildPrebuiltPaperBundle.ts --exam-type <exam-type> --difficulty <difficulty> --count <count> --output artifacts/prebuilt-papers/<year>/<runId>/<bundle-file>.json
+tsx scripts/buildPrebuiltPaperBundle.ts --exam-type <exam-type> --difficulty <difficulty> --count <count> --run-id <runId> --blueprint-version <blueprintVersion>
 tsx scripts/validatePrebuiltPaperBundle.ts artifacts/prebuilt-papers/<year>/<runId>/<bundle-file>.json
 
 # 8. 导入预制卷 bundle（生产环境可 dry-run / apply）
@@ -49,6 +47,7 @@ tsx scripts/importPrebuiltPaperBundle.ts artifacts/prebuilt-papers/<year>/<runId
 ## 热路径查询性能预案
 
 针对 300~600 人同时考试场景：
+
 - `prebuilt_papers`：按 `exam_type + difficulty + status='published'` 查询，结合最近 `N` 次 attempts 做 paper 级软排除
 - `paper_question_slots`：创建草稿卷时批量复制 `prebuilt_paper_slots`，不再做在线抽题与库存统计
 - `attempts.answers_json` autosave：`jsonb_set()` 增量更新单题答案

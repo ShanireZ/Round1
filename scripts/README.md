@@ -22,10 +22,10 @@
 ## 导入类
 
 - ingestRealPapers.ts：把 `papers/real-papers` 下的 JSON 题库导入数据库，创建 `question_reviews`，默认走离线 `judge` 场景把记录推进到 `ai_reviewed`；支持 `--skip-ai-review`、`--limit`、`--timeout`。人工确认/拒绝通过 Admin `POST /admin/questions/:id/confirm` 与 `POST /admin/questions/:id/reject` 推进到 `confirmed` / `rejected`。
-- buildAcceptanceQuestionBundle.ts：生成确定性的首批规模化验收 question bundle，用于离线 sandbox、导入与验收基线；支持 `--exam-type`、`--question-type`、`--primary-kp-code`、`--difficulty`、`--count`、`--batch-id`、`--output`。默认输出到 `papers/<year>/YYYY-MM-DD-<questionType>-<count>.json`。该脚本不调用 LLM，bundle meta 使用 `local-deterministic` / `acceptance-question-template-v1` 标识本地模板来源。
+- buildAcceptanceQuestionBundle.ts：生成确定性的首批规模化验收 question bundle，用于离线 sandbox、导入与验收基线；支持 `--exam-type`、`--question-type`、`--primary-kp-code`、`--difficulty`、`--count`、`--run-id`、`--artifact-version`、`--batch-id`、`--output`。默认输出到 `papers/<year>/<runId>/question-bundles/<runId>__question-bundle__<question-type>__<kp-code>__n<count>__vNN.json`。该脚本不调用 LLM，bundle meta 使用 `local-deterministic` / `acceptance-question-template-v1` 标识本地模板来源。
 - validateQuestionBundle.ts：校验 question bundle 结构、蓝图映射、答案字段、去重与程序题 sandbox；`--run-sandbox` 会实际编译运行程序题，`--write` 会在全部通过后写回 `sandboxVerified=true`，`--write-metadata` 会写回 validator 版本、校验时间与 item checksum 清单，`--judge` 会调用 LLM 判官二次校验答案自洽性。
 - importQuestionBundle.ts：导入 question bundle，支持 `--dry-run` 与 `--apply`，并写入 `import_batches`。
-- buildPrebuiltPaperBundle.ts：基于已发布题库和蓝图构建 prebuilt paper bundle，bundle meta 记录 builder provider/model、prompt hash、source batch、source timestamp 与 overlap score。
+- buildPrebuiltPaperBundle.ts：基于已发布题库和蓝图构建 prebuilt paper bundle；支持 `--run-id`、`--artifact-version`、`--blueprint-version` 与 `--output` 显式覆盖。默认输出到 `artifacts/prebuilt-papers/<year>/<runId>/<runId>__prebuilt-paper-bundle__blueprint-v<blueprintVersion>__n<count>__vNN.json`，bundle meta 记录 builder provider/model、prompt hash、source batch、source timestamp 与 overlap score。
 - validatePrebuiltPaperBundle.ts：校验 prebuilt paper bundle 的题量、分值、题目引用和题目发布状态；`--write-metadata` 会写回 validator 版本、校验时间与 item checksum 清单。
 - importPrebuiltPaperBundle.ts：导入 prebuilt paper bundle，支持 `--dry-run` 与 `--apply`，并写入 `import_batches`。
 - generate-offline-questions.ts / build-paper-packs.ts / validate-import-artifacts.ts：运营命名薄封装，分别转发到 `generateQuestionBundle.ts`、`buildPrebuiltPaperBundle.ts` 和对应 bundle 类型的 validator，不复制底层业务逻辑。
@@ -42,6 +42,7 @@
 - reviewRealPapers.ts：逐题 LLM 复核脚本，统一复核 `questionType`、`difficulty`、知识点标签与 explanation；支持 `--metadata-only`、`--write`，并将低置信度或 stem/code 可疑项输出到 `scripts/.tmp/paper-review-report-*.json`。
 - verifyLlmTasks.ts：用合成 prompt 实跑 `generate` / `judge` 两类 LLM 任务，并回查 `llm_provider_logs` 是否记录 tokens、cost estimate、latency 与受控失败信息。
 - verifyQuestionBundleGuards.ts：构造临时候选题，验证规则去重可用 `DUPLICATE_JACCARD` 拦截近似题，并验证 LLM 判官可用 `JUDGE_REJECTED` 拦截答案不一致题。
+- verifyOfflineArtifactNames.ts：检查正式离线产物是否使用 runId 持久化命名，拒绝 `paper-packs.json`、`artifacts/llm-step3/probe*.json` 以及未 allowlist 的 `papers/<year>/*.json` 旧布局。
 - tests/verifyExamMappings.ts：校验共享考试映射是否包含关键批次。
 
 ## 初始化与维护类
@@ -77,10 +78,11 @@
 - 元数据回归：`npx tsx scripts/auditRealPapers.ts metadata --dir csp-j,csp-s`
 - explanation 定点重写：`npx tsx scripts/rewritePaperExplanations.ts --dir csp-s --file 2025.json --start-q 16 --end-q 18 --write --chunk-size 1 --timeout 180000`
 - 全量 metadata-only 复核：`npx tsx scripts/reviewRealPapers.ts --dir csp-j --write --chunk-size 1 --metadata-only`
-- 生成阅读程序验收 bundle：`npx tsx scripts/buildAcceptanceQuestionBundle.ts --exam-type GESP-1 --question-type reading_program --primary-kp-code CPP --difficulty easy --count 30 --batch-id 2026-04-26-scale-reading`
-- 生成完善程序验收 bundle：`npx tsx scripts/buildAcceptanceQuestionBundle.ts --exam-type GESP-1 --question-type completion_program --primary-kp-code CPP --difficulty easy --count 20 --batch-id 2026-04-26-scale-completion`
-- 程序题离线 sandbox 校验并写回：`npx tsx scripts/validateQuestionBundle.ts papers/2026/2026-04-26-reading_program-30.json --run-sandbox --write --write-metadata`
+- 生成阅读程序验收 bundle：`npx tsx scripts/buildAcceptanceQuestionBundle.ts --exam-type GESP-1 --question-type reading_program --primary-kp-code CPP --difficulty easy --count 30 --run-id 2026-04-26-acceptance-gesp-1-easy-v01 --batch-id 2026-04-26-scale-reading`
+- 生成完善程序验收 bundle：`npx tsx scripts/buildAcceptanceQuestionBundle.ts --exam-type GESP-1 --question-type completion_program --primary-kp-code CPP --difficulty easy --count 20 --run-id 2026-04-26-acceptance-gesp-1-easy-v02 --batch-id 2026-04-26-scale-completion`
+- 程序题离线 sandbox 校验并写回：`npx tsx scripts/validateQuestionBundle.ts papers/2026/<runId>/question-bundles/<bundle-file>.json --run-sandbox --write --write-metadata`
 - question bundle 守卫验证：`npx tsx scripts/verifyQuestionBundleGuards.ts`
+- 离线产物命名守卫：`npm run verify:offline-artifacts`
 
 ## Question bundle 来源口径
 

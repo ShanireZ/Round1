@@ -4,7 +4,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "clean": "node ../scripts/clean-build-output.mjs dist tsconfig.tsbuildinfo",
+        "clean": "tsx ../scripts/clean-build-output.ts dist tsconfig.tsbuildinfo",
         "dev": "vite",
         "build": "npm run clean && tsc -b && vite build",
         "preview": "vite preview",

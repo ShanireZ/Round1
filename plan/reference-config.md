@@ -52,7 +52,8 @@ Round1/
 ├─ data/backups/                   → Postgres 逻辑备份
 ├─ papers/                         → 真题源文件与可导入离线题目产物
 │   ├─ real-papers/                → 历年真题（csp-j/ csp-s/ gesp/）
-│   └─ <year>/                     → 已生成、已校验、可直接导入的 question bundle（YYYY-MM-DD-<questionType>-<count>.json）
+│   └─ <year>/<runId>/question-bundles/
+│                                    → 已生成、已校验、可直接导入的 question bundle（runId 持久化命名）
 ├─ prompts/                        → Prompt 模板 + few-shot + taxonomy + manual-output/
 ├─ config/                         → env.ts / auth.ts / llm.ts / blueprint.ts / sandbox.ts / temp-email-blocklist.txt
 ├─ server/
