@@ -88,3 +88,62 @@ test: cover prebuilt paper archive references
 - 回滚方案。
 - 事后补完整测试和复盘。
 
+## PR 大小
+
+推荐 PR 保持小而完整：
+
+- 一个业务目标。
+- 一组相关文件。
+- 可独立验证。
+- 文档同步在同一 PR。
+
+避免把 UI 重设、DB 迁移、API 行为、测试重写混在同一个 PR。
+
+## Review 评论规范
+
+参考 Google code review 的原则：
+
+- 先看代码健康，再看个人偏好。
+- 技术事实优先于意见。
+- 说明原因，而不是只给命令。
+- 可以指出问题并让作者选择方案。
+- 非阻塞项标记 `Nit:`。
+
+评论示例：
+
+```text
+[P1] 这里的 publish 没有检查 prebuilt_papers 是否已被 assignment 引用，
+会允许覆盖历史任务引用。请在同一事务内查询 references，并对 published 版本
+改为 copy-version 流程。
+```
+
+## Review 必看项
+
+- 每一行手写代码。
+- 新增依赖。
+- 权限和认证路径。
+- DB 迁移和数据回填。
+- 并发/CAS。
+- 错误码和前端文案。
+- UI/UX token 和布局。
+- 测试是否会在行为坏掉时失败。
+
+## 发布标签
+
+建议发布使用 tag：
+
+```text
+vYYYY.MM.DD.N
+```
+
+每个 tag 对应一份发布记录，包含迁移、配置、验证、回滚说明。
+
+## 回滚 PR
+
+回滚必须说明：
+
+- 回滚哪个 commit/tag。
+- 是否涉及 migration。
+- 是否需要恢复配置。
+- 用户数据是否受影响。
+- 回滚后 smoke 结果。

@@ -77,3 +77,64 @@ Agent 输出必须是结构化 JSON 或受 schema 约束的文本，不得直接
 - 禁止在公开文档或日志中记录 API key。
 - 禁止用 LLM 运行结果替代测试。
 
+## Prompt 资产管理
+
+- prompt 模板应放在 `prompts/` 或脚本内清晰常量，禁止散落在临时命令中。
+- 生产批次必须记录 prompt hash。
+- few-shot 示例必须标明来源和适用题型。
+- prompt 变更应有小批量回归，不直接用于规模化生产。
+- prompt 中的输出 schema 必须与 Zod/bundle schema 对齐。
+
+## 模型能力矩阵
+
+对每个 provider/model 维护以下能力认知：
+
+- 是否支持 reasoning effort。
+- 是否支持 thinking mode。
+- 是否支持 thinking budget。
+- 是否支持 reasoning summary。
+- 最大输入/输出 token。
+- JSON 输出稳定性。
+- 费用估算是否已配置。
+
+能力判断必须在 `config/llm.ts` 集中，不在各脚本分叉。
+
+## 成本控制
+
+- 规模化生产前先跑 probe。
+- 每批设置最大题数和失败阈值。
+- 超过预算或错误率阈值自动停止。
+- provider fallback 不能造成双倍重复生成而不记录。
+- cost_estimate 未配置费率时必须显式为 0 或 unknown，不得伪造。
+
+## 质量评估
+
+LLM 相关变更至少评估：
+
+- schema 通过率。
+- judge accept/reject 比例。
+- 空响应/截断比例。
+- 重复率。
+- 官方答案 mismatch。
+- 人工抽样问题数。
+
+规模化内容生产报告应进入 `artifacts/reports/<year>/<runId>/`。
+
+## 隐私与版权
+
+- 不向模型发送用户个人信息、session、邮箱、真实 IP。
+- 真题内容进入模型前必须确认用途属于内部审核/解析，不公开泄露第三方受限材料。
+- 模型输出不得声称“官方解析”，除非确有官方来源。
+- 引用外部资料时保留来源字段。
+
+## Agent 间协作
+
+多个 agent 参与内容生产时：
+
+- generate 只产候选。
+- judge 只判定，不修改原题。
+- rewrite 只能生成 delta。
+- human/admin 决定最终 publish。
+- import workflow 负责写库。
+
+禁止让一个 agent 同时生成、判定、发布同一批内容。

@@ -88,3 +88,70 @@
 - 权限、校验失败、成功、边界状态至少各覆盖一条。
 - OpenAPI 生成不得失败。
 
+## 路由模块结构
+
+每个领域路由应包含：
+
+- route handler：只解析请求、调用 service、返回响应。
+- schema：Zod body/query/params/response schema。
+- service：业务规则、事务、权限上下文。
+- repository 或 query helper：复杂 DB 读写。
+- OpenAPI registration：路径、方法、鉴权、错误响应。
+
+禁止在 route handler 中写大段 SQL、状态机或跨领域业务流程。
+
+## 分页与过滤
+
+列表接口必须支持：
+
+- `page` 或 cursor。
+- `pageSize` 且有最大值。
+- 稳定排序字段。
+- 返回总数或 `hasMore`，按性能选择。
+
+Admin 列表应支持筛选条件回显，避免前端猜测实际过滤。
+
+## OpenAPI 规范
+
+- 每个公开 API 必须注册 OpenAPI。
+- schema 名称使用 PascalCase。
+- 错误响应引用统一 ErrorResponse。
+- `student+`、`coach+`、`admin`、`admin(step-up)` 必须在描述中写明。
+- 现状未挂载的目标 API 不得在 OpenAPI 中伪装为可用。
+
+## 状态转换 API
+
+状态转换必须满足：
+
+- 请求体只包含必要输入。
+- 服务端读取当前状态并验证合法迁移。
+- 使用事务或 CAS。
+- 返回迁移后的最新资源或稳定摘要。
+- 写审计或事件日志。
+
+适用：`publish`、`archive`、`copy-version`、`startAttempt`、`submit`、`close assignment`。
+
+## 安全响应策略
+
+- 认证失败不暴露账号是否存在，除非流程明确需要。
+- 权限失败统一 403，不返回资源隐私细节。
+- 生产 5xx 响应只返回通用 message。
+- validation details 可以返回字段级错误，但不得包含 secret 原文。
+
+## API 兼容策略
+
+- `/api/v1` 内避免破坏性字段删除。
+- 新字段默认可选，前端先兼容再依赖。
+- 字段重命名必须保留兼容期或新版本。
+- 行为变更必须更新 `plan/reference-api.md` 的当前对齐说明。
+
+## 后端 PR 检查清单
+
+- 是否有 Zod 校验。
+- 是否有权限守卫。
+- 是否返回统一 envelope。
+- 是否注册 OpenAPI。
+- 是否处理并发/幂等。
+- 是否有审计。
+- 是否有 integration test。
+- 是否保持 prebuilt-only。

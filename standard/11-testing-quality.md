@@ -99,3 +99,56 @@ UI 改动必须检查：
 - 截图或日志位置。
 - 残余风险。
 
+## 按变更类型选择测试
+
+| 变更 | 必跑 |
+| --- | --- |
+| 纯文档 | 链接/路径/术语检查 |
+| 前端组件 | client build、组件测试或 UI gallery、截图 |
+| API 路由 | server build、integration test、OpenAPI |
+| DB 迁移 | migrate status、迁移测试、回滚/恢复说明 |
+| 认证权限 | auth integration、权限矩阵、审计检查 |
+| 考试状态机 | exams runtime integration、并发/CAS、E2E |
+| 离线脚本 | script unit、CLI smoke、fixture validate |
+| 部署 | runbook smoke、health、备份恢复演练 |
+
+## 回归测试要求
+
+以下问题修复必须补回归测试：
+
+- 数据覆盖或丢失。
+- 权限绕过。
+- 考试提交/自动保存/恢复异常。
+- bundle 导入口径漂移。
+- Admin 发布/归档/删除错误。
+- UI 关键流程不可操作。
+
+## Fixture 规范
+
+- Fixture 必须最小化。
+- 文件名表达场景。
+- 不包含真实 secret 或个人信息。
+- 大型题库批次不作为 unit fixture。
+- 需要真实题目结构时，优先脱敏/裁剪到最小样本。
+
+## Flaky 测试处理
+
+- 不允许简单 skip。
+- 先隔离根因：时间、随机数、网络、并发、外部服务。
+- 必须记录 issue/计划。
+- 对 CI 不稳定但本地稳定的测试，补日志和重试边界，而不是放宽断言。
+
+## 测试可读性
+
+测试应遵循 Arrange/Act/Assert。每个测试只验证一个行为主题。断言业务结果，不断言无关实现细节。
+
+## 发布前质量门禁
+
+发布前必须确认：
+
+- 当前 failing tests 已解释。
+- 关键 smoke 路径通过。
+- 迁移状态正确。
+- 没有临时 debug 输出。
+- 没有未处理 TODO 影响上线。
+- 文档/标准同步完成。

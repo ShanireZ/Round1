@@ -70,3 +70,62 @@
 - 禁止 Redis `FLUSHDB` 处理问题；必须按 key 前缀清理。
 - 禁止以 admin 后台创建用户；用户必须自助注册，角色提升通过 role patch。
 
+## 威胁模型
+
+Round1 必须默认防护：
+
+- 账号撞库和验证码轰炸。
+- CSRF 与 session fixation。
+- OIDC state/nonce/code replay。
+- 多标签页覆盖考试答案。
+- Admin 越权或敏感操作误触。
+- 导入恶意 bundle 覆盖内容资产。
+- LLM/日志泄密。
+- Redis/DB 短暂不可用导致考试数据丢失。
+
+## 分层防护
+
+| 层 | 防护 |
+| --- | --- |
+| Edge | Cloudflare WAF、TLS、基础频控 |
+| API | Helmet CSP、CSRF、rate limit、Zod 校验 |
+| Session | Redis store、`__Host-` cookie、session_version |
+| Auth | Turnstile、PoW、邮件 challenge、argon2id |
+| Admin | role guard、step-up、audit |
+| Data | 事务、CAS、引用保护、备份 |
+
+## 密钥轮换
+
+- `SESSION_SECRET` 轮换需要会话失效计划。
+- `TOTP_ENCRYPTION_KEK` 轮换必须有重新加密流程，不能直接替换导致无法解密。
+- Provider API key 轮换后需验证 LLM/邮件/OIDC smoke。
+- `.env.example` 只能写占位符。
+
+## Rate Limit
+
+必须分层限制：
+
+- 注册 challenge：按 email、IP。
+- 找回密码：按 email、IP。
+- 登录失败：按账号、设备、IP。
+- autosave：按 user/attempt。
+- Admin import：按 admin user 和 bundle size。
+
+触发频控必须返回稳定错误码和可理解文案。
+
+## CORS 与 CSP
+
+- 当前生产同源部署，无需 CORS。
+- 若未来拆域名，只能白名单具体 origin。
+- CSP 新增来源必须说明用途、页面、是否可替代。
+- `style-src 'unsafe-inline'` 只因当前样式方案需要保留；不得扩大 script 权限。
+
+## 安全 Review 检查清单
+
+- 是否新增 secret 或外部服务。
+- 是否新增 public route。
+- 是否改变 session/cookie/CSRF。
+- 是否改变 role/permission。
+- 是否新增 Admin 敏感操作但缺 step-up。
+- 是否新增日志字段可能泄密。
+- 是否新增 bundle/import 路径绕过校验。

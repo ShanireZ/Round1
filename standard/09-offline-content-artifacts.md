@@ -120,3 +120,81 @@ prebuilt paper bundle apply 前必须通过：
 - 禁止覆盖已发布预制卷。
 - 禁止无 runId 的正式资产进入审计目录。
 
+## CLI 标准
+
+离线脚本必须满足：
+
+- 支持 `--help`。
+- 参数名使用 kebab-case。
+- 写文件前确保目标目录存在。
+- 默认输出到标准持久化路径；`--output` 只作为显式 override。
+- 失败时非 0 exit code。
+- 输出 summary，包含 accepted/rejected/warnings。
+- 不在脚本中复制底层业务逻辑；薄封装只转发到共享 workflow。
+
+## Bundle Contract
+
+所有 bundle 必须：
+
+- 使用 UTF-8 JSON。
+- 顶层有 `meta` 和 `items`。
+- meta 包含 bundleType、schemaVersion、runId/sourceBatchId、createdAt。
+- items 顺序稳定。
+- 每个 item 有可定位 identifier，便于错误报告指向。
+- checksum manifest 可复算。
+
+## 导入生命周期
+
+```text
+local/tmp probe
+-> persistent bundle
+-> validate
+-> dry-run import batch
+-> apply import batch
+-> admin publish/archive
+```
+
+不得跳过 validate 直接 apply。dry-run 成功不代表已发布，只代表可导入。
+
+## 错误报告
+
+错误报告必须包含：
+
+- item index 或 identifier。
+- 错误码。
+- 人类可读原因。
+- 是否可修复后重试。
+- 相关字段路径。
+
+Admin UI 需要能展示错误报告并支持修复重试。
+
+## 资产保留策略
+
+| 路径 | 保留策略 |
+| --- | --- |
+| `papers/**` | 保留，审计输入 |
+| `artifacts/prebuilt-papers/**` | 保留，审计输入 |
+| `artifacts/reports/**` | 保留，审计/复盘 |
+| `artifacts/tmp/**` | 可清理 |
+
+清理脚本不得删除前三类，除非明确传入危险参数并有备份。
+
+## Guardrail
+
+应提供 guard 脚本检查：
+
+- 正式资产路径是否包含 runId。
+- 是否出现 `paper-packs.json` 等通用名。
+- tmp/probe 是否混入正式目录。
+- bundle meta 与文件名是否一致。
+- checksum manifest 是否可复算。
+
+## 内容发布检查清单
+
+- question bundle validate 通过。
+- prebuilt paper bundle validate 通过。
+- import dry-run summary 无 reject。
+- apply 写入 import batch。
+- Admin publish 成功。
+- 运行时 catalog 能看到对应 exam_type/difficulty。
+- 测试用户能创建 draft 并开始 attempt。

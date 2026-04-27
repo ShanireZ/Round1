@@ -64,3 +64,73 @@ npm run test
 
 涉及线上兼容性的迁移必须补 rehearsal 或临时库恢复验证。
 
+## 迁移分阶段策略
+
+高风险 DB 变更采用 expand -> migrate -> contract：
+
+1. Expand：新增表/列/索引，保持旧代码可运行。
+2. Backfill：用脚本或迁移填充数据，记录批次和校验。
+3. Switch：应用代码读取新结构，保留旧结构兼容。
+4. Contract：确认无旧读取后，另一次部署删除旧结构。
+
+禁止在同一部署中同时“新增新结构、切流量、删除旧结构”。
+
+## 索引规范
+
+新增查询必须说明是否需要索引。以下场景必须评估索引：
+
+- `WHERE status + exam_type + difficulty`。
+- `WHERE user_id + status`。
+- `WHERE assignment_id + user_id`。
+- import batch 按时间倒序。
+- audit/log 按 actor/action/time 查询。
+- `content_hash` 去重。
+
+索引命名应包含表和列含义，避免数据库自动名难以维护。
+
+## 事务规范
+
+必须用事务：
+
+- startAttempt 创建 attempt、激活 paper、推进 assignment progress。
+- submit/finalizer 写 attempt、paper、assignment progress。
+- publish/archive 检查引用并写状态。
+- import apply 写 batch 与业务表。
+- owner 转让或多教练关系变更。
+
+事务中不得执行外部网络调用或 LLM 调用。
+
+## 数据一致性红线
+
+禁止出现：
+
+- `attempts.status` finalized 但 `papers.status` 仍 active。
+- `assignment_progress.completed` 但没有 finalized attempt。
+- published prebuilt paper 指向未 published/reviewed 可用题目。
+- paper instance 缺少 slot snapshot。
+- import apply 无 import batch。
+
+这些不变量应有测试或巡检脚本覆盖。
+
+## 删除与归档
+
+- draft 且未引用才允许硬删。
+- 已引用数据只能 archive 或软删除。
+- 用户删除使用 `status='deleted'`，邮箱/用户名唯一约束保持占用。
+- 内容资产删除前必须展示引用摘要。
+
+## 数据审计与隐私
+
+- 审计日志保存摘要，不保存 secret。
+- IP、设备指纹等敏感标识应 hash 或按隐私策略保留。
+- LLM prompt/response 如包含题库资产，可保存 hash/摘要，谨慎保存全文。
+
+## DB Review 检查清单
+
+- migration 是否序号唯一。
+- 是否线上兼容。
+- 是否有回滚或恢复策略。
+- 是否有索引。
+- 是否更新 Drizzle schema 和 reference。
+- 是否有测试覆盖新状态/约束。
+- 是否考虑数据量和锁表风险。

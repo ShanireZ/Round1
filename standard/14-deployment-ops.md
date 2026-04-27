@@ -93,3 +93,60 @@ Round1 采用“两层架构”：
 4. 回滚或降级。
 5. 写复盘并补测试/监控/规范。
 
+## 环境矩阵
+
+| 环境 | 组件 | 说明 |
+| --- | --- | --- |
+| local | client/server/Redis/Postgres 可本机 | 本地 HTTPS，便于 cookie/OIDC 测试 |
+| test | 测试 DB/Redis 或 mock | 不依赖真实外部服务 |
+| offline-content | scripts/contentWorker/cpp-runner/LLM | 生成和校验内容 |
+| production-runtime | Caddy/API/Redis/Postgres | 在线服务，不跑内容生成 |
+
+## Caddy 与静态资源
+
+- Caddy 负责 TLS 和反代。
+- API 与静态资源同源部署时无需 CORS。
+- `client/dist` 静态资源应有长期缓存；HTML 不应长期缓存。
+- Cloudflare Full Strict 上线前验证。
+
+## PM2 / 进程
+
+当前仓库无版本化 `ecosystem.config.js`。若未来纳入：
+
+- API 可 cluster。
+- runtime worker 默认生产关闭，除非仅运行考试支持队列。
+- content worker 只在 offline-content 环境。
+- 每个进程设置明确 `application_name`。
+- 优雅停机先停止接新请求，再关闭 DB/Redis。
+
+## 发布批次记录
+
+每次上线记录：
+
+- commit/tag。
+- 迁移列表。
+- 配置变化。
+- 操作者。
+- 备份位置。
+- smoke 结果。
+- 观察窗口结果。
+
+## 灾难恢复目标
+
+最低要求：
+
+- 有最近可恢复 DB 备份。
+- 能在临时库验证 restore。
+- 能快速回滚代码到上一个 tag。
+- 内容资产可从 `papers/**` 和 `artifacts/**` 重新导入或追溯。
+
+## 上线冻结条件
+
+出现以下情况禁止上线：
+
+- 无 DB 备份。
+- migration 序号冲突。
+- auth/security 测试失败。
+- 考试 runtime integration 失败。
+- 生产 secret 缺失或权限不正确。
+- prebuilt paper pool 为空且影响目标考试类型。

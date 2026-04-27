@@ -73,3 +73,54 @@ app_settings > .env > 代码默认值
 - 前端配置端点不泄密。
 - 相关测试覆盖默认值与非法值。
 
+## 配置分类
+
+| 分类 | 示例 | 是否可运行时热更新 |
+| --- | --- | --- |
+| Secret | API key、SESSION_SECRET、KEK | 否 |
+| Process | PORT、NODE_ENV、TRUST_PROXY_HOPS | 否 |
+| Runtime setting | autosave、draft TTL、import size | 是 |
+| Feature flag | QQ 登录开关 | 可按实现决定 |
+| External endpoint | OIDC issuer、LLM base URL、R2 URL | 通常否 |
+
+Secret 不进入 `app_settings`。
+
+## Feature Flag
+
+- flag 默认关闭。
+- flag 名称表达 provider/功能和 enabled。
+- 前端展示必须由 `/config/client` 或 providers API 决定。
+- 后端必须在 flag 关闭时拒绝相关流程。
+- flag 开启前必须有 smoke 和回滚方式。
+
+## 启动校验
+
+应用启动时应 fail fast：
+
+- 必需 secret 缺失。
+- URL 格式非法。
+- 数字配置超范围。
+- provider default 指向未配置 provider。
+- 生产环境 cookie secure 未开启。
+- trust proxy 配置与部署拓扑不符。
+
+## 配置漂移控制
+
+- `.env.example` 是示例，不是真源。
+- `config/env.ts` 是解析真源。
+- `plan/reference-config.md` 是人类参考。
+- Admin settings 是运行时覆盖。
+
+发现四者冲突时，先看代码真源，再更新文档和示例。
+
+## Secret 轮换记录
+
+每次轮换应记录：
+
+- 轮换对象。
+- 生效时间。
+- 影响服务。
+- 验证方式。
+- 回滚方式。
+
+不得在记录中写 secret 值。

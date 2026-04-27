@@ -38,6 +38,7 @@
 | [16-git-review-release.md](16-git-review-release.md) | Git、代码评审、发布与回归 |
 | [17-docs-plan-maintenance.md](17-docs-plan-maintenance.md) | 文档、计划、知识库维护 |
 | [18-agent-and-tool-calling.md](18-agent-and-tool-calling.md) | AI agent 协作、工具调用、执行边界 |
+| [19-source-code-style.md](19-source-code-style.md) | TypeScript、注释、复杂度、格式化与代码组织 |
 
 ## 关键词
 
@@ -64,6 +65,14 @@
 - Express docs: <https://expressjs.com/>
 - Drizzle ORM docs: <https://orm.drizzle.team/>
 
+## 外部实践落地方式
+
+- Google 工程实践强调代码健康、清晰命名、适当测试、评审速度与友善评论；Round1 落地为 [16-git-review-release.md](16-git-review-release.md) 的评审优先级和 [19-source-code-style.md](19-source-code-style.md) 的代码可读性要求。
+- Google Style Guides 强调一致性、可维护性和可工具化格式；Round1 落地为 ESLint/Prettier/TypeScript strict 与单一格式规范。
+- Microsoft REST API Guidelines 强调一致的资源建模、错误语义、版本化与长期兼容；Round1 落地为 [06-backend-api.md](06-backend-api.md) 的 envelope、错误码、分页、OpenAPI 和兼容策略。
+- Microsoft Fluent 2 强调 token、组件、可达性、设计到开发一致性；Round1 落地为 [04-ui-ux.md](04-ui-ux.md)、[15-performance-accessibility-print.md](15-performance-accessibility-print.md) 的 UI 验收。
+- Arco Design 公开资料强调企业级组件、主题 token、自定义物料和中后台效率；Round1 落地为 shadcn/Radix 原子组件、`/dev/ui-gallery`、Admin/Coach utility 页面一致性。
+
 ## 最小执行流程
 
 1. 需求进入时，先确认是否触碰 UI/UX、考试状态机、安全、数据迁移、离线内容产物或部署。
@@ -71,4 +80,3 @@
 3. 实现前写清测试与验收路径；高风险变更先补计划或 ADR。
 4. 实现后运行对应检查：lint、typecheck、unit、integration、E2E、视觉、迁移演练或部署演练。
 5. PR/提交说明必须写明：变更内容、原因、验证结果、未覆盖风险。
-

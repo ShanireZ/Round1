@@ -59,3 +59,51 @@
 - 禁止在新代码中重新引入 `generation job`、`inventory`、`replacement`、`cooldown` 等旧运行时组卷语义。
 - 禁止用 `utils.ts` 容纳跨领域业务逻辑；`utils` 只能放通用、纯函数、小范围工具。
 
+## TypeScript 命名细则
+
+| 类型 | 规则 | 说明 |
+| --- | --- | --- |
+| 领域服务 | `<domain><Action>Service` 或清晰动词 | `runtimeConfigService` |
+| 路由 schema | `<domain>.schema.ts` | `exams.schema.ts` |
+| 测试 fixture | `<scenario>.sample.json` | `question-bundle.sample.json` |
+| React hook | `useXxx` | 只在 hook 内调用其他 hooks |
+| Query key | 领域数组 | `["admin", "imports", filters]` |
+| Error helper | `toXxxError` / `isXxxError` | 不用模糊 `handleError` |
+
+避免把类型写进名字：`userId` 足够，不写 `userIdString`。
+
+## 数据库命名细则
+
+- 主键默认 `id`，关联列 `<table_singular>_id`。
+- 时间列使用 `_at` 后缀，类型 `TIMESTAMPTZ`。
+- JSON 列使用 `_json` 后缀。
+- boolean 列使用清晰谓词，如 `sandbox_verified`。
+- 多对多表用两个领域名组合：`question_exam_types`、`class_coaches`。
+- 状态列统一 `status` 或具体状态名，不混用 `state`。
+
+## 事件与队列命名
+
+- Redis key 必须有前缀：`sess:*`、`rl:*`、`cfg:*`、`bull:*`。
+- Redis pub/sub channel 使用领域冒号：`config:change`。
+- BullMQ job name 使用 kebab-case：`attempt-auto-submit`。
+- 日志 event/action 使用 snake_case 或 kebab-case，但同一表内必须一致。
+
+## Artifact 命名
+
+正式离线资产命名以 [09-offline-content-artifacts.md](09-offline-content-artifacts.md) 为准。简要规则：
+
+- `runId`: `YYYY-MM-DD-<pipeline>-<exam-type-slug>-<difficulty>-vNN`
+- question bundle: `<runId>__question-bundle__<question-type>__<kp-code>__n<count>__vNN.json`
+- prebuilt paper bundle: `<runId>__prebuilt-paper-bundle__blueprint-v<blueprintVersion>__n<count>__vNN.json`
+
+## 路径变更规则
+
+移动或重命名文件时必须同步：
+
+- import 路径。
+- 测试路径。
+- README/plan/reference。
+- 脚本帮助文本。
+- `00-index.md` 或相关索引。
+
+不得只改文件名而保留旧文档入口。

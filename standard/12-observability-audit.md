@@ -87,3 +87,58 @@
 - 修复与回归测试。
 - 规范或计划是否需要更新。
 
+## 日志字段标准
+
+应用日志应尽量包含：
+
+- `requestId`
+- `userId` 或匿名标识 hash
+- `role`
+- `route`
+- `statusCode`
+- `latencyMs`
+- `errorCode`
+- `action`
+- `targetType`
+- `targetId`
+
+不得包含：
+
+- password、验证码、token、secret。
+- 完整 session id。
+- TOTP secret。
+- 未脱敏邮箱批量列表。
+
+## 审计不可抵赖
+
+Admin 审计记录必须写在业务操作同一事务或可证明的同一操作链中。不能出现业务状态已变更但审计丢失。若审计写入失败，敏感操作应失败。
+
+## Dashboard 建议
+
+应建立最小运维看板：
+
+- API health 与 5xx。
+- DB pool。
+- Redis availability。
+- autosave rate/conflict。
+- active attempts。
+- prebuilt paper availability by exam_type/difficulty。
+- import batch result。
+- LLM cost/error。
+
+## 事故等级
+
+| 等级 | 示例 | 响应 |
+| --- | --- | --- |
+| SEV1 | 考试数据丢失、无法登录、权限越权 | 立即冻结发布、回滚/降级、复盘 |
+| SEV2 | Admin 导入失败、部分考试类型无卷 | 当日修复或发布 workaround |
+| SEV3 | 单页 UI 异常、非关键统计延迟 | 排入短期修复 |
+| SEV4 | 文档漂移、低风险警告 | 常规维护 |
+
+## 可观测性 PR 检查
+
+- 新关键流程是否有日志。
+- 新敏感操作是否有审计。
+- 新后台任务是否有成功/失败计数。
+- 新外部服务是否有 latency/error 记录。
+- 新错误码是否能在日志中搜索。

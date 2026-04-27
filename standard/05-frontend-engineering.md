@@ -75,3 +75,65 @@ npm run build --workspace=client
 
 涉及逻辑 helper 时运行对应 `*.test.ts`。涉及关键流程、布局或打印时补 Playwright/截图验收。
 
+## 分层结构
+
+| 层 | 职责 | 禁止 |
+| --- | --- | --- |
+| `pages/` | 路由页面、数据编排、页面级布局 | 放可复用业务算法 |
+| `components/ui/` | shadcn/Radix primitive | 调业务 API |
+| `components/layout/` | AppShell/Auth/Focus/Ceremony | 放页面业务状态 |
+| `components/brand/` | Logo、Mesh、Backdrop、Noise | 临时页面文案 |
+| `lib/` | API client、纯函数、领域 helper | React 组件 |
+| `styles/` | tokens/globals/print | 页面私有 magic color |
+
+新增目录前必须证明现有层无法表达。
+
+## React 规则
+
+- 组件和 hooks 必须遵守 React purity：同输入同输出。
+- `useEffect` 只用于同步外部系统；能在 render 中派生的值不得放 effect。
+- 不在 effect 中无依赖 setState 造成循环。
+- 不直接 mutate props、state、query result。
+- 列表 key 必须稳定，不用数组 index 表示可重排数据。
+- `useMemo/useCallback` 只用于性能或引用稳定需求，不作为默认仪式。
+- Error boundary 用于页面级崩溃隔离；表单错误不用 Error boundary。
+
+## TanStack Query 规则
+
+- Query key 必须结构化，包含领域和过滤条件。
+- Mutation 成功后只 invalidate 受影响 key。
+- 后端 401/403/409/429 必须由统一 API 层标准化。
+- 可恢复错误在页面展示，不只 console.error。
+- 对考试/提交等关键 mutation，按钮 loading 期间应防重复提交。
+
+## React Router 规则
+
+- 路由路径集中定义，不在组件中散落硬编码 path。
+- 导航菜单使用同一配置源。
+- 受保护路由前端只做体验 gate，后端必须兜底。
+- App 启动恢复考试必须优先于普通 dashboard 跳转。
+
+## shadcn/Radix 规则
+
+- 不破坏 Radix 的 aria、focus trap、keyboard navigation。
+- 包装组件时必须透传 `ref` 和关键 props。
+- Dialog/Sheet/Popover 关闭后 focus 应回到触发器。
+- Dropdown destructive item 必须有清晰样式和确认策略。
+
+## 考试前端可靠性
+
+- `tabNonce` 存在 `sessionStorage`，请求用 `X-Tab-Nonce`。
+- autosave 只发送 pending patches。
+- submit 应携带最后 pending patches。
+- keepalive 保存不保证成功，UI 不得把它当唯一可靠保存。
+- 进入 Exam 页时必须能从服务端 active attempt 恢复。
+
+## 前端 PR 检查清单
+
+- 是否新增 magic color、magic spacing 或新字体。
+- 是否破坏 UI/UX 定稿的布局与组件规则。
+- 是否处理 loading/empty/error/disabled。
+- 是否处理移动端和 dark mode。
+- 是否有 keyboard/focus/aria。
+- 是否有错误码到文案映射。
+- 是否有测试或 `/dev/ui-gallery` 展示。

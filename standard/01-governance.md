@@ -54,3 +54,74 @@
 
 采用 Google 工程实践中“持续改善代码健康”的思路：评审不追求个人偏好，优先看设计合理性、用户影响、复杂度、测试、命名、注释、文档和一致性。纯样式偏好不得覆盖本目录和 UI/UX 定稿。
 
+## 决策记录模板
+
+触碰 S0/S1 的变更必须在 `docs/plans/` 或 ADR 中写清：
+
+```markdown
+# YYYY-MM-DD Topic
+
+## Context
+
+## Decision
+
+## Alternatives Considered
+
+## Impact
+
+## Migration Plan
+
+## Verification
+
+## Rollback
+```
+
+## Round1 不变量
+
+以下不变量在普通需求中不得被推翻：
+
+- 生产运行时不生成题、不跑 cpp-runner、不在线换题。
+- UI/UX 定稿不被单页面重设。
+- Admin 敏感操作必须 step-up 和审计。
+- 已发布预制卷不可原地覆盖。
+- 可导入内容资产必须有 `runId`、checksum 和 import batch。
+- `config/env.ts`、`config/llm.ts`、DB schema、OpenAPI registry 是代码真源。
+
+## 角色职责
+
+| 角色 | 职责 |
+| --- | --- |
+| Feature owner | 明确目标、风险、验收和文档同步 |
+| Implementer | 小步实现、补测试、维护现有约束 |
+| Reviewer | 审查安全、数据、状态机、UI/UX、测试 |
+| Release operator | 执行部署、备份、健康检查、回滚准备 |
+| Content operator | 生产、校验、导入、发布离线内容资产 |
+
+AI agent 执行任务时同时承担 implementer 职责，但不能替代 reviewer 的独立判断。
+
+## 完成定义
+
+一项任务只有同时满足以下条件才算完成：
+
+- 代码或文档已落地。
+- 相关测试/验证已运行并记录。
+- 计划/reference/标准中被影响部分已同步。
+- 已说明未覆盖风险。
+- 没有引入未授权的架构、UI、数据或安全例外。
+
+## 例外到期
+
+例外不得永久存在。每个例外必须有：
+
+- 到期日期，或
+- 触发收口的事件，例如“Coach API 挂载后删除兼容路径”，或
+- 明确 legacy 标记和迁移计划。
+
+## 文档漂移处理
+
+发现 plan、standard、代码、测试冲突时：
+
+1. 先确定当前代码是否代表目标状态。
+2. 如果代码是临时兼容，文档应写“当前/目标”双口径。
+3. 如果代码已代表新目标，更新旧计划并追加状态说明。
+4. 如果无法判断，暂停扩大修改，补调查记录。

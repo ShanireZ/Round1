@@ -59,3 +59,92 @@ V1 单账号单角色。coach/admin 以学生身份体验答题时，其 attempt
 
 采用中文单语 MVP。文案使用“你”，避免“您”；面向青少年清晰直接。错误提示必须说明下一步，如“请重新登录后继续作答”，而不是只给错误码。
 
+## 核心流程
+
+### 学生自练
+
+```text
+选择 exam_type + difficulty
+-> 服务端从 published prebuilt_papers 选模板
+-> 克隆为个人 paper draft
+-> startAttempt 写 tab_nonce 并调度 auto-submit
+-> autosave patches
+-> submit/finalizer
+-> result payload
+```
+
+硬约束：
+
+- 只能从已发布预制卷克隆。
+- 最近作答软排除只作用于预制卷模板层，不作用于题目替换。
+- 无可用模板返回 `ROUND1_PREBUILT_PAPER_UNAVAILABLE`。
+
+### 教练任务
+
+```text
+coach 创建班级
+-> 邀请学生入班
+-> 绑定固定 prebuilt paper 创建 assignment
+-> 学生一次作答
+-> assignment_progress 更新
+-> CoachReport 统计班级 attempts
+```
+
+硬约束：
+
+- 同一 assignment 同一学生只能有一次作答。
+- 报表只统计 student 角色。
+- coach 只能访问自己参与的班级，admin 可管理全部。
+
+### Admin 内容库
+
+```text
+导入 bundle dry-run
+-> 查看 summary / errors
+-> apply
+-> publish/archive/copy-version
+-> 引用摘要辅助决策
+```
+
+硬约束：
+
+- dry-run/apply 复用 scripts workflow。
+- 已引用资产不能硬删。
+- 已发布预制卷只能 copy-version 后修改。
+
+## 题型与计分
+
+| 题型 | 结构 | 计分 |
+| --- | --- | --- |
+| 单选 | 15 题 | 每题独立计分 |
+| 阅读程序 | 3 组 x 5 子题 | 子题级聚合 |
+| 完善程序 | 2 组 x 5 子题 | 子题级聚合 |
+
+总分固定 100。阅读/完善程序在缺少显式子题分值时，按 slot points 均分并将余数前置。
+
+## 内容准入标准
+
+一批题目进入 `published` 前必须满足：
+
+- 题面、选项、答案、解析结构完整。
+- 题型和知识点匹配目标 exam_type。
+- content hash 和 Jaccard 去重通过。
+- 程序题 sandbox verified。
+- 真题官方答案比对通过，或有人工备注解释差异。
+- LLM 判官拒收/警告项已处理。
+
+## 内容质量红线
+
+禁止发布：
+
+- 答案与解析自相矛盾的题。
+- 题面依赖外部图片/链接才能作答的题。
+- 代码题无法确定 C++ 标准或输入输出行为的题。
+- 超出 CSP-J/S、GESP 当前级别范围且未标注为提高内容的题。
+- 含版权不明大段复制内容且无来源记录的题。
+
+## 后续扩展边界
+
+- AI 智能建议属于 v2，可保留 Dashboard 占位或静态规则。
+- QQ 登录属于 feature flag，未启用前不得在 UI 主路径强展示。
+- i18n 为未来扩展，当前不要为多语言牺牲中文体验质量。
