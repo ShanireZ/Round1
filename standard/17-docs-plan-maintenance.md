@@ -12,6 +12,22 @@
 
 禁止新增 `docs/plan/` 单数目录。
 
+## 单一真源矩阵
+
+遇到冲突时按下表判断，不靠“哪个文件更新得近”简单覆盖：
+
+| 主题 | 第一真源 | 同步对象 |
+| --- | --- | --- |
+| 产品与阶段目标 | `plan/00-overview.md`、`plan/step-*.md` | `standard/`、`docs/plans/` |
+| DB schema / JSON 字段 | Drizzle schema、migration、`plan/reference-schema.md` | API、测试、standard |
+| API 契约 | OpenAPI registry、路由测试、`plan/reference-api.md` | 前端 client、standard |
+| UI/UX | `plan/uiux_plan.md` | `standard/04-ui-ux.md`、代码、截图 |
+| 配置 | `config/env.ts`、runtime setting definitions | `.env.example`、`plan/reference-config.md` |
+| 内容产物命名 | `standard/09-offline-content-artifacts.md`、最新 `docs/plans/*naming*` | scripts README、runbook |
+| 未完成任务 | 最新 backlog/followup 文档 | 对应 step/reference 验证清单 |
+
+如果代码现状、plan 和 standard 三者冲突，先写现状说明和决策记录，再改实现或改规范。
+
 ## 写作规则
 
 - 重要文档使用中文，保留必要英文术语。
@@ -20,6 +36,8 @@
 - 使用“必须/禁止/应该/可以”表达约束强度。
 - 命令必须给出工作目录或上下文。
 - 不写无主语的“后续优化”；必须写 owner 或触发条件。
+- 避免八股式价值观段落；每条标准都要能被 review、测试、脚本或人工验收。
+- 不把“业内最佳实践”当结论；必须写清为什么适合 Round1 当前约束。
 
 ## 计划文档
 
@@ -41,6 +59,17 @@ docs/plans/YYYY-MM-DD-<topic>.md
 
 旧计划被新实现覆盖时，必须追加状态说明或归档标记，避免误读。
 
+## 当前态与目标态
+
+文档必须显式区分：
+
+- `现状契约`：当前代码、测试或实跑已经支持。
+- `目标契约`：计划要达到，但尚未完全落地。
+- `过渡口径`：为兼容旧实现临时存在，并有收口条件。
+- `历史记录`：保留审计价值，不再指导新实现。
+
+不得把未挂载 API、未验收 UI、未演练部署写成“已完成”。如果需要保留目标设计，必须写清缺口和下一步验证。
+
 ## Reference 文档
 
 以下变化必须同步 reference：
@@ -58,6 +87,7 @@ docs/plans/YYYY-MM-DD-<topic>.md
 - 公司规范参照优先使用官方公开资料。
 - 引用资料要写链接，不复制大段原文。
 - ByteDance 相关公开参照以 Arco Design 公开仓库/官网为准，不臆造内部规范。
+- Google、Microsoft、ByteDance 等外部资料只能作为方法论或设计参照；落地条款必须改写成 Round1 的路径、命令、状态和验收方式。
 
 ## 文档验收
 
@@ -74,6 +104,28 @@ docs/plans/YYYY-MM-DD-<topic>.md
 - 每完成一个大项，同步更新对应 `plan/step-*.md` 验证清单。
 - 每次发布前检查 `docs/plans/2026-04-26-remaining-unfinished-work.md` 或后续 backlog 是否需要更新。
 - 标准目录每次重大架构决策后复核一次。
+
+## Backlog 维护
+
+`docs/plans/2026-04-26-remaining-unfinished-work.md` 或后续替代文件是未完成事项的聚合视图，不是唯一真源。维护规则：
+
+- 每完成一项，先更新对应 `plan/step-*` 或 `plan/reference-*`，再更新 backlog 摘要。
+- 新增未完成项必须写明触发来源：计划缺口、代码审计、测试失败、上线演练或用户需求。
+- 已延期事项必须标记 `deferred`，并说明重新启动条件。
+- 已阻塞事项必须标记 `blocked`，并说明外部依赖和临时防护。
+- 不把 wishlist 混入主 backlog；没有明确用户价值或风险依据的想法进入单独 brainstorm/idea 文档。
+
+## 文档变更触发器
+
+以下变更必须同步文档：
+
+- 新增或删除路由、环境变量、数据库表、状态值、脚本参数。
+- 改变错误码、权限边界、导入产物格式、配置优先级。
+- 改变页面 IA、核心文案、可见 feature flag 行为。
+- 改变部署拓扑、备份恢复、健康检查、Sentry/日志策略。
+- 引入新的外部服务、LLM provider、邮件/OIDC 供应商。
+
+若暂时不更新，PR 必须写明为什么不会造成使用者误操作。
 
 ## 写作风格
 
@@ -106,6 +158,8 @@ docs/plans/YYYY-MM-DD-<topic>.md
 - 是否与 standard 冲突。
 - 是否有过期路径或旧术语。
 - 是否出现 secret 或隐私数据。
+- 是否能被执行者按步骤完成。
+- 是否写清现状缺口，而不是只描述理想形态。
 
 ## 链接和路径
 

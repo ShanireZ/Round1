@@ -47,6 +47,19 @@ npm run test:e2e
 - 时间、随机数、UUID、外部 API 必须可控。
 - 不使用生产 secret、真实用户数据、不可重复外部服务作为测试前提。
 
+## 风险分层
+
+测试强度按风险决定，避免普通改动被重流程拖慢，也避免高风险改动只跑单测。
+
+| 风险 | 示例 | 最低验证 |
+| --- | --- | --- |
+| R0 | 权限、认证、考试提交、迁移、导入 apply | 单元 + 集成 + 关键 E2E/演练 + 回滚说明 |
+| R1 | API 行为、状态机、Admin 设置、Coach 报表 | 集成测试 + 前端/后端契约验证 |
+| R2 | 普通 UI、列表筛选、非敏感脚本 | build + 相关单测/截图或手工验收 |
+| R3 | 文档、注释、低风险样式 | 链接/路径/格式检查 |
+
+PR 描述应写明选择的风险级别。降级验证必须说明原因和残余风险。
+
 ## 覆盖要求
 
 必须覆盖：
@@ -70,6 +83,19 @@ UI 改动必须检查：
 - `prefers-reduced-motion`。
 - 长中文、长英文、错误态、加载态、空态。
 - 关键流程截图无重叠、溢出、遮挡。
+
+## 契约测试
+
+跨层契约必须有测试或生成校验：
+
+- API envelope、错误码、分页字段。
+- `/api/v1/config/client` 暴露字段与前端读取字段。
+- DB enum 与服务端状态机允许迁移。
+- question/prebuilt bundle schema 与 validator/importer。
+- Admin dry-run/apply summary 与 UI 展示。
+- CoachReport 聚合口径只包含 assignment attempts。
+
+不得只靠 TypeScript 编译证明运行时契约正确。
 
 ## 质量门禁
 
@@ -138,6 +164,14 @@ UI 改动必须检查：
 - 先隔离根因：时间、随机数、网络、并发、外部服务。
 - 必须记录 issue/计划。
 - 对 CI 不稳定但本地稳定的测试，补日志和重试边界，而不是放宽断言。
+
+## 外部服务测试
+
+- 默认使用 fake/mock provider，避免 CI 依赖真实邮件、OIDC、Turnstile、LLM。
+- 真实 provider smoke 只在本地、预发或上线演练执行，并记录时间、账号、结果摘要。
+- LLM 实跑测试必须使用小 prompt、预算上限和受控失败样本。
+- 邮件 smoke 不记录验证码、完整链接或收件人批量列表。
+- OIDC smoke 必须覆盖 state/nonce/PKCE/redirect_uri 失败路径。
 
 ## 测试可读性
 

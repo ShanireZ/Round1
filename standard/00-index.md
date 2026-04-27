@@ -60,8 +60,10 @@
 - Google JavaScript Style Guide: <https://google.github.io/styleguide/jsguide.html>
 - Material Design: <https://m3.material.io/>
 - Microsoft Writing Style Guide: <https://learn.microsoft.com/en-us/style-guide/welcome/>
+- Microsoft Azure Well-Architected Framework: <https://learn.microsoft.com/en-us/azure/well-architected/>
 - Microsoft Fluent 2 Design System: <https://fluent2.microsoft.design/>
 - Microsoft REST API Guidelines: <https://github.com/microsoft/api-guidelines>
+- ByteDance ByteStyles public values: <https://www.bytedance.com/api/>
 - Arco Design / ByteDance public design system repo: <https://github.com/arco-design/arco-design>
 - React docs: <https://react.dev/>
 - Tailwind CSS docs: <https://tailwindcss.com/docs>
@@ -73,8 +75,10 @@
 - Google 工程实践强调代码健康、清晰命名、适当测试、评审速度与友善评论；Round1 落地为 [16-git-review-release.md](16-git-review-release.md) 的评审优先级和 [19-source-code-style.md](19-source-code-style.md) 的代码可读性要求。
 - Google Style Guides 强调一致性、可维护性和可工具化格式；Round1 落地为 ESLint/Prettier/TypeScript strict 与单一格式规范。
 - Microsoft REST API Guidelines 强调一致的资源建模、错误语义、版本化与长期兼容；Round1 落地为 [06-backend-api.md](06-backend-api.md) 的 envelope、错误码、分页、OpenAPI 和兼容策略。
+- Microsoft Azure Well-Architected Framework 强调标准化开发、可观测性、安全部署和持续改进；Round1 落地为 [12-observability-audit.md](12-observability-audit.md)、[14-deployment-ops.md](14-deployment-ops.md)、[22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md) 的信号、发布、回滚和漂移治理。
 - Microsoft Fluent 2 强调 token、组件、可达性、设计到开发一致性；Round1 落地为 [04-ui-ux.md](04-ui-ux.md)、[15-performance-accessibility-print.md](15-performance-accessibility-print.md) 的 UI 验收。
 - Arco Design 公开资料强调企业级组件、主题 token、自定义物料和中后台效率；Round1 落地为 shadcn/Radix 原子组件、`/dev/ui-gallery`、Admin/Coach utility 页面一致性。
+- ByteDance 公开 ByteStyles 中的敏捷、效率、简洁、事实驱动和坦诚沟通，只作为组织协作参照；Round1 落地为小步可验证 PR、少流程但有审计、用数据和现状契约说话，不臆造或引用未公开内部规范。
 - 大型工程组织普遍要求决策可追溯、例外有期限、标准可自动化检查；Round1 落地为 [20-product-state-and-workflow.md](20-product-state-and-workflow.md)、[21-privacy-and-data-lifecycle.md](21-privacy-and-data-lifecycle.md)、[22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md) 的状态机、隐私和采纳审计。
 
 ## 最小执行流程

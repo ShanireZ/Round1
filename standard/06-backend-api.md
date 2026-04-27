@@ -42,6 +42,14 @@
 - 422 可用于语义合法但业务规则不满足；当前如未统一，可继续用 400 但必须带稳定错误码。
 - 503 用于当前无可用预制卷等可恢复服务状态。
 
+错误码新增必须满足：
+
+- 代码名表达业务原因，不表达实现细节。
+- 前端能据此给出可行动文案。
+- 日志能按错误码搜索。
+- `plan/reference-api.md` 或 OpenAPI 错误响应同步。
+- 不把 secret、SQL、堆栈、内部 provider 原文放入 `message`。
+
 ## 输入校验
 
 - 所有写接口必须用 Zod 校验 body。
@@ -57,12 +65,32 @@
 - API 新增或行为变化必须更新 OpenAPI registry 与 `plan/reference-api.md`。
 - 不得新增在线组卷、在线换题、运行时 AI 生成题目接口。
 
+## API 成熟度
+
+新增 API 不应只做到“路由能通”。按影响面分为三档：
+
+| 档位 | 适用 | 最低要求 |
+| --- | --- | --- |
+| internal | 仅脚本、本地诊断、开发辅助 | 鉴权清楚、错误码稳定、不得被前端主路径依赖 |
+| beta | 已给前端或 Admin 使用，但还在收口 | OpenAPI、测试、文档写明缺口和兼容策略 |
+| stable | 核心用户路径或生产依赖 | 权限/校验/并发/审计/监控/回滚全部覆盖 |
+
+考试、认证、Admin 设置、导入 apply、assignment 状态迁移默认按 stable 要求处理。
+
 ## 并发与幂等
 
 - `startAttempt`、`submit/finalizer`、assignment progress 更新必须用 CAS 或事务保护。
 - finalized attempt 再次 submit 必须幂等返回已有结果。
 - autosave 只接受匹配 `X-Tab-Nonce` 的请求，不匹配返回 409。
 - import dry-run 不写业务表；apply 必须可追溯到 import batch。
+
+## 幂等与重试语义
+
+- 重复提交同一 finalized attempt 必须返回已有结果，不重新评分。
+- 重复加入同一班级应返回当前 membership，不制造重复记录。
+- import apply 对同一 checksum/sourceFilename 的处理必须可追溯，不静默覆盖历史 batch。
+- 外部服务失败应区分可重试和不可重试，返回稳定错误码。
+- 前端可重试的写操作必须避免产生重复副作用；必要时增加 idempotency key 或唯一约束。
 
 ## 权限
 
@@ -82,6 +110,14 @@
 
 不得暴露 secret、provider API key、内部 base URL。
 
+字段规则：
+
+- 字段名必须稳定；新增字段先可选，前端兼容后再依赖。
+- 布尔 feature flag 必须表达 enabled/disabled，不让前端反推。
+- 时间配置统一用 seconds 或 minutes，字段名写单位。
+- 考试类型、难度、认证 provider 等枚举必须来自后端可用配置，不由前端写死。
+- 如果 app_settings、env、默认值发生冲突，响应应体现最终生效值，而不是泄露配置来源细节。
+
 ## API 验证
 
 - 新路由必须有 unit 或 integration 测试。
@@ -99,6 +135,17 @@
 - OpenAPI registration：路径、方法、鉴权、错误响应。
 
 禁止在 route handler 中写大段 SQL、状态机或跨领域业务流程。
+
+## 领域 API 边界
+
+- `auth` 只处理身份、会话、安全绑定，不夹带业务角色页面数据。
+- `exams` 只处理自练考试、attempt、result、active recovery。
+- `coach` 只处理班级、邀请、assignment、班级报表，必须基于 class coach membership 授权。
+- `admin` 处理全局内容、用户、系统设置和审核队列，敏感写操作必须 step-up。
+- `config` 只暴露非敏感客户端配置。
+- `health/docs` 只服务运维和开发，不承载业务状态修改。
+
+跨领域读模型可以由 service 组合，但不能让前端调用多个内部端点拼出权限边界。
 
 ## 分页与过滤
 
@@ -155,3 +202,4 @@ Admin 列表应支持筛选条件回显，避免前端猜测实际过滤。
 - 是否有审计。
 - 是否有 integration test。
 - 是否保持 prebuilt-only。
+- 是否写清 API 档位、兼容策略和错误码语义。

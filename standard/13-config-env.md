@@ -32,6 +32,14 @@ app_settings > .env > 代码默认值
 
 前端只能通过 `/api/v1/config/client` 获取非敏感运行时配置。构建时变量不得包含 secret。
 
+前端配置字段必须遵守：
+
+- 字段名包含单位，例如 `autosaveIntervalSeconds`。
+- 只返回最终生效值，不返回 secret 来源、内部 base URL 或 provider key。
+- feature flag 默认关闭；前端只按 enabled 字段展示入口。
+- 新增字段先让前端容错，再把它作为必需依赖。
+- 可枚举配置（考试类型、难度、登录方式）由后端返回当前可用集合。
+
 ## LLM 配置
 
 - 使用 provider-direct lane。
@@ -73,6 +81,18 @@ app_settings > .env > 代码默认值
 - 前端配置端点不泄密。
 - 相关测试覆盖默认值与非法值。
 
+## 配置发布策略
+
+配置变更按风险分级：
+
+| 风险 | 示例 | 要求 |
+| --- | --- | --- |
+| low | UI 开关、非敏感阈值小幅调整 | Admin audit + smoke |
+| medium | autosave、draft TTL、rate limit | 观察指标 + 回滚值 |
+| high | cookie、OIDC、邮件域名、secret 轮换 | 计划、维护窗口、回滚/失效策略 |
+
+运行时配置必须保留旧值或回滚方式。高风险配置不得和大版本发布混在一起，除非同一计划明确验证顺序。
+
 ## 配置分类
 
 | 分类 | 示例 | 是否可运行时热更新 |
@@ -113,6 +133,14 @@ Secret 不进入 `app_settings`。
 
 发现四者冲突时，先看代码真源，再更新文档和示例。
 
+漂移审计应检查：
+
+- `config/env.ts` 是否有 `.env.example` 对应项。
+- runtime setting definitions 是否有 Admin UI 展示与权限控制。
+- `plan/reference-config.md` 是否仍描述当前优先级和默认值。
+- 部署文档是否写清生产必须外置的 secret。
+- 前端是否仍硬编码已改为后端配置的枚举。
+
 ## Secret 轮换记录
 
 每次轮换应记录：
@@ -124,3 +152,11 @@ Secret 不进入 `app_settings`。
 - 回滚方式。
 
 不得在记录中写 secret 值。
+
+## 配置失败处理
+
+- 启动必需配置缺失时 fail fast，不进入半可用状态。
+- 运行时配置保存失败必须让 Admin 明确看到失败，不显示“已生效”。
+- Redis `config:change` 失败时，要么回滚写入，要么提示需重启/刷新缓存。
+- provider 配置缺失导致调用失败时，错误码应表达 provider unavailable，不暴露 key 名和值。
+- 配置回滚后必须做对应 smoke，例如登录、邮件、autosave 或导入。

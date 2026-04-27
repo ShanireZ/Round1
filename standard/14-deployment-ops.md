@@ -23,6 +23,20 @@ Round1 采用“两层架构”：
 - Sentry release/environment 配置正确。
 - 静态资源缓存策略明确。
 
+## 变更类型
+
+不同变更使用不同上线强度，不把所有发布都做成重流程，也不把高风险发布当普通改动。
+
+| 类型 | 示例 | 必须额外确认 |
+| --- | --- | --- |
+| docs-only | standard/plan/README | 链接、路径、术语 |
+| frontend-only | 页面、组件、样式 | build、视觉/响应式、可达性、打印相关页面 |
+| api-compatible | 新增可选字段、新只读接口 | OpenAPI、integration test、前端兼容 |
+| stateful | migration、状态机、权限、导入 apply | 备份、回滚/恢复、审计、并发测试 |
+| ops/security | Caddy、PM2、cookie、CSP、secret | smoke、回滚、访问控制、监控观察 |
+
+stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值守时段上线。
+
 ## 生产上线步骤
 
 1. 拉取代码。
@@ -35,12 +49,35 @@ Round1 采用“两层架构”：
 8. 验证登录、配置端点、考试 catalog、Admin 关键页。
 9. 观察日志和 Sentry。
 
+## 渐进发布
+
+当前 Round1 规模较小，可以不引入复杂发布平台，但仍应遵循渐进原则：
+
+- 先在 local/test 完成迁移和 smoke。
+- 生产执行前确认备份和回滚点。
+- API 重启后先验证只读健康，再验证写路径。
+- 高风险功能优先通过 feature flag、Admin 限定入口或小范围数据启用。
+- 上线后保留观察窗口；观察项包括 5xx、登录失败、autosave、submit、Admin audit。
+
+禁止在上线窗口内同时引入大范围 UI 重设、DB 不可逆迁移和部署拓扑变化。
+
 ## 回滚
 
 - 代码回滚必须回到明确 release tag 或 commit。
 - 如果迁移可逆，按迁移工具回滚。
 - 如果迁移不可逆，按最近备份恢复到临时库验证后再恢复生产。
 - 回滚后必须验证健康检查、登录、考试恢复、Admin 入口。
+
+## 回滚策略矩阵
+
+| 变更 | 首选回滚 | 注意 |
+| --- | --- | --- |
+| 前端静态资源 | 回滚到上一构建或 tag | HTML 不长期缓存，避免旧 JS 找不到资源 |
+| 后端代码 | 回滚 commit/tag 并重启 | 确认新 DB 字段是否仍被旧代码忽略 |
+| 可逆 migration | 执行 down 或补偿 migration | 先备份，先在临时库演练 |
+| 不可逆 migration | 从备份恢复或写补偿脚本 | 必须先评估数据损失窗口 |
+| 配置变更 | 恢复 env/app_settings | 记录生效时间，验证 Redis config refresh |
+| 内容导入 | archive/copy-version，不硬删历史 | 保留 import batch 和 checksum |
 
 ## 数据库备份
 
@@ -71,6 +108,19 @@ Round1 采用“两层架构”：
 - contentWorker 不属于生产运行时。
 - 内容产物必须输出到 [09-offline-content-artifacts.md](09-offline-content-artifacts.md) 规定路径。
 
+## 离线到生产交接
+
+离线内容进入生产前必须有交接记录：
+
+- `runId`、bundle 路径、checksum manifest。
+- 生成/校验工具版本或 commit。
+- sandbox/judge/人工复核结果。
+- dry-run summary 与错误报告。
+- apply batch id 与发布对象。
+- 回滚方式：archive、copy-version 或重新导入。
+
+生产环境只接收已校验资产，不重新运行 LLM 生成或 cpp-runner 校验。
+
 ## 健康检查
 
 当前仓库仍无统一 `scripts/healthcheck.ts`，部署验证以 runbook 和人工演练为主。若后续纳入仓库，脚本必须覆盖：
@@ -82,6 +132,15 @@ Round1 采用“两层架构”：
 - 邮件 provider smoke。
 - Turnstile smoke。
 - 离线内容环境 runner/content worker smoke。
+
+健康检查分层：
+
+- `liveness`：进程是否活着。
+- `readiness`：DB/Redis/静态资源是否可用。
+- `business smoke`：登录、配置、选卷、autosave/submit、Admin step-up 是否可用。
+- `external smoke`：邮件、Turnstile、OIDC、Sentry release 是否可用。
+
+生产负载均衡或 Caddy 只应依赖轻量 readiness；business/external smoke 用于上线验收，不应每秒打外部服务。
 
 ## 事故响应
 
@@ -131,6 +190,8 @@ Round1 采用“两层架构”：
 - smoke 结果。
 - 观察窗口结果。
 
+建议记录位置为 `docs/plans/YYYY-MM-DD-release-<topic>.md`、issue、PR 描述或运维台账，但必须能被后续排障者找到。
+
 ## 灾难恢复目标
 
 最低要求：
@@ -150,3 +211,5 @@ Round1 采用“两层架构”：
 - 考试 runtime integration 失败。
 - 生产 secret 缺失或权限不正确。
 - prebuilt paper pool 为空且影响目标考试类型。
+- 关键 smoke 无法执行且没有人工替代验证。
+- 无法定位上一可回滚 tag/commit。
