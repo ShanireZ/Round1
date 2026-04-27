@@ -14,7 +14,7 @@
 
 - [x] Task 1 path helpers and lightweight tests are implemented in `scripts/lib/paperPaths.ts` and `scripts/tests/offlineArtifactPaths.test.ts`.
 - [x] Task 2 CLI defaults and help text are implemented for `generateQuestionBundle.ts`, `buildAcceptanceQuestionBundle.ts`, and `buildPrebuiltPaperBundle.ts`; `--output` remains an explicit override.
-- [ ] Task 3 current artifact migration remains pending because `papers/` and `artifacts/` are ignored runtime asset directories and were not present in this worktree.
+- [x] Task 3 current artifact migration is complete for the local ignored runtime assets present in this worktree.
 - [x] Task 4 guardrails are implemented in `scripts/verifyOfflineArtifactNames.ts` and exposed as `npm run verify:offline-artifacts`.
 
 ---
@@ -27,10 +27,11 @@
   - `plan/reference-ops.md` 的 runbook 曾示例为 `artifacts/prebuilt-papers/paper-packs.json`。
 - 已修复问题：
   - `generateQuestionBundle.ts`、`buildAcceptanceQuestionBundle.ts`、`buildPrebuiltPaperBundle.ts` 的默认输出已改为 runId 持久化路径；`--output` 仅保留为显式覆盖。
-- 仍需迁移的历史资产问题：
-  - `artifacts/prebuilt-papers/paper-packs.json` 这类通用名会被下一次构建覆盖，无法长期审计。
-  - `artifacts/llm-step3/probe*.json` 混在正式产物目录层级中，命名没有 runId、用途、版本和可清理边界。
-  - `papers/2026/step3-llm-2026-04-27/2026-04-27-*.json` 已经比默认格式更接近批次目录，但目录 token 顺序与文件名仍不统一，且缺少考试类型/难度/version。
+- 2026-04-27 复核修复：
+  - `papers/2026/step3-llm-2026-04-27/2026-04-27-*.json` 已迁移到 `papers/2026/2026-04-27-step3-llm-csp-j-medium-v01/question-bundles/`。
+  - `artifacts/prebuilt-papers/step3-llm-cspj-medium-paper-packs.json` 已迁移到 `artifacts/prebuilt-papers/2026/2026-04-27-step3-llm-csp-j-medium-v01/`。
+  - `artifacts/llm-step3/probe*.json` 已迁移到 `artifacts/tmp/2026/2026-04-27-step3-llm-csp-j-medium-v01/`。
+  - 迁移时补齐 bundle/probe meta 的 `schemaVersion`、`runId`、`createdAt` 字段；后续 raw bundle schema 将要求新资产显式携带这些字段。
 
 ## Persistent Naming Convention
 
@@ -187,11 +188,13 @@ Expected: help text documents runId and persistent output paths.
 
 ## Task 3: Migrate Current Step3 Artifacts
 
+**Status (2026-04-27): completed for current local assets.**
+
 **Files:**
 
-- Move: `papers/2026/step3-llm-2026-04-27/*.json`
-- Move: `artifacts/prebuilt-papers/step3-llm-cspj-medium-paper-packs.json`
-- Move: `artifacts/llm-step3/probe*.json`
+- Moved: `papers/2026/step3-llm-2026-04-27/*.json`
+- Moved: `artifacts/prebuilt-papers/step3-llm-cspj-medium-paper-packs.json`
+- Moved: `artifacts/llm-step3/probe*.json`
 
 **Step 1: Create target directories**
 

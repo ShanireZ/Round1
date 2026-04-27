@@ -1,10 +1,17 @@
 {
     "meta": {
         "bundleType": "question_bundle",
+        "schemaVersion": "2026-04-26.1",
+        "runId": "2026-04-25-fixture-csp-j-easy-v01",
+        "createdAt": "2026-04-25T00:00:00.000Z",
         "generatedAt": "2026-04-25T00:00:00.000Z",
         "provider": "fixture",
         "model": "fixture-model",
         "promptHash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "sourceBatchId": "fixture-question-bundle:CSP-J:single_choice:BAS:easy:2026-04-25T00:00:00.000Z",
+        "sourceBatchIds": [
+            "fixture-question-bundle:CSP-J:single_choice:BAS:easy:2026-04-25T00:00:00.000Z"
+        ],
         "sourceTimestamp": "2026-04-25T00:00:00.000Z",
         "examType": "CSP-J",
         "questionType": "single_choice",

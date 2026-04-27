@@ -569,10 +569,17 @@ describe("admin content api", () => {
     const body = {
       meta: {
         bundleType: "question_bundle",
+        schemaVersion: "2026-04-26.1",
+        runId: "2026-04-25-admin-import-csp-j-easy-v01",
+        createdAt: "2026-04-25T00:00:00.000Z",
         generatedAt: "2026-04-25T00:00:00.000Z",
         provider: "fixture",
         model: "fixture-model",
         promptHash: "1111111111111111111111111111111111111111111111111111111111111111",
+        sourceBatchId: "fixture-question-bundle:CSP-J:single_choice:BAS:easy:2026-04-25T00:00:00.000Z",
+        sourceBatchIds: [
+          "fixture-question-bundle:CSP-J:single_choice:BAS:easy:2026-04-25T00:00:00.000Z",
+        ],
         sourceTimestamp: "2026-04-25T00:00:00.000Z",
         examType: "CSP-J",
         questionType: "single_choice",
@@ -647,10 +654,17 @@ describe("admin content api", () => {
     const body = {
       meta: {
         bundleType: "question_bundle",
+        schemaVersion: "2026-04-26.1",
+        runId: "2026-04-25-admin-code-csp-j-easy-v01",
+        createdAt: "2026-04-25T00:00:00.000Z",
         generatedAt: "2026-04-25T00:00:00.000Z",
         provider: "fixture",
         model: "fixture-model",
         promptHash: "2222222222222222222222222222222222222222222222222222222222222222",
+        sourceBatchId: "fixture-question-bundle:CSP-J:reading_program:BAS:easy:2026-04-25T00:00:00.000Z",
+        sourceBatchIds: [
+          "fixture-question-bundle:CSP-J:reading_program:BAS:easy:2026-04-25T00:00:00.000Z",
+        ],
         sourceTimestamp: "2026-04-25T00:00:00.000Z",
         examType: "CSP-J",
         questionType: "reading_program",
@@ -723,7 +737,14 @@ describe("admin content api", () => {
     const body = {
       meta: {
         bundleType: "prebuilt_paper_bundle",
+        schemaVersion: "2026-04-26.1",
+        runId: "2026-04-25-admin-prebuilt-csp-j-easy-v01",
+        createdAt: "2026-04-25T00:00:00.000Z",
         builtAt: "2026-04-25T00:00:00.000Z",
+        sourceBatchId: "fixture-prebuilt-paper-bundle:CSP-J:easy:2026-04-25T00:00:00.000Z",
+        sourceBatchIds: [
+          "fixture-prebuilt-paper-bundle:CSP-J:easy:2026-04-25T00:00:00.000Z",
+        ],
         sourceTimestamp: "2026-04-25T00:00:00.000Z",
         examType: "CSP-J",
         difficulty: "easy",

@@ -4,7 +4,12 @@ import { z } from "zod";
 import { EXAM_TYPES } from "../../config/examTypes.js";
 
 export const BUNDLE_VALIDATOR_VERSION = "round1-bundle-validator/2026-04-26.1";
+export const BUNDLE_SCHEMA_VERSION = "2026-04-26.1";
 export const CHECKSUM_ALGORITHM = "sha256";
+export const OfflineRunIdSchema = z.string().regex(
+  /^\d{4}-\d{2}-\d{2}-[a-z0-9-]+-[a-z0-9-]+-[a-z0-9-]+-v\d{2}$/,
+  "runId must match YYYY-MM-DD-<pipeline>-<exam-type-slug>-<difficulty>-vNN",
+);
 
 export const QuestionTypeSchema = z.enum([
   "single_choice",
@@ -144,12 +149,15 @@ export const QuestionBundleItemSchema = z.discriminatedUnion("type", [
 
 export const QuestionBundleMetaSchema = z.object({
   bundleType: z.literal("question_bundle"),
+  schemaVersion: z.literal(BUNDLE_SCHEMA_VERSION),
+  runId: OfflineRunIdSchema,
+  createdAt: z.string().datetime(),
   generatedAt: z.string().datetime(),
   provider: z.string().min(1),
   model: z.string().min(1),
   promptHash: z.string().length(64),
-  sourceBatchId: z.string().min(1).optional(),
-  sourceBatchIds: z.array(z.string().min(1)).default([]),
+  sourceBatchId: z.string().min(1),
+  sourceBatchIds: z.array(z.string().min(1)).min(1),
   sourceTimestamp: z.string().datetime(),
   examType: ExamTypeSchema,
   questionType: QuestionTypeSchema,
@@ -198,12 +206,15 @@ export const PrebuiltPaperBundleItemSchema = z.object({
 
 export const PrebuiltPaperBundleMetaSchema = z.object({
   bundleType: z.literal("prebuilt_paper_bundle"),
+  schemaVersion: z.literal(BUNDLE_SCHEMA_VERSION),
+  runId: OfflineRunIdSchema,
+  createdAt: z.string().datetime(),
   builtAt: z.string().datetime(),
   provider: z.string().min(1).optional(),
   model: z.string().min(1).optional(),
   promptHash: z.string().length(64).optional(),
-  sourceBatchId: z.string().min(1).optional(),
-  sourceBatchIds: z.array(z.string().min(1)).default([]),
+  sourceBatchId: z.string().min(1),
+  sourceBatchIds: z.array(z.string().min(1)).min(1),
   sourceTimestamp: z.string().datetime(),
   examType: ExamTypeSchema,
   difficulty: DifficultySchema,

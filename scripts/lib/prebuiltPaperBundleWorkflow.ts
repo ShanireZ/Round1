@@ -19,6 +19,7 @@ import {
   type PrebuiltPaperBundleItem,
   type PrebuiltPaperSlot,
   PrebuiltPaperBundleSchema,
+  BUNDLE_SCHEMA_VERSION,
   buildImportSummary,
   computeChecksum,
   computeJsonChecksum,
@@ -43,6 +44,7 @@ export interface BuildPrebuiltPaperArgs {
   examType: keyof typeof blueprintSpecs;
   difficulty: "easy" | "medium" | "hard";
   count: number;
+  runId: string;
   blueprintVersion?: number;
 }
 
@@ -230,6 +232,9 @@ export async function buildPrebuiltPaperBundle(
   return {
     meta: {
       bundleType: "prebuilt_paper_bundle",
+      schemaVersion: BUNDLE_SCHEMA_VERSION,
+      runId: args.runId,
+      createdAt: builtAt,
       builtAt,
       provider,
       model,

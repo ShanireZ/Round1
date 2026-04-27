@@ -5,6 +5,7 @@ import { knowledgePoints } from "../server/db/schema/knowledgePoints.js";
 import { questions } from "../server/db/schema/questions.js";
 import { computeContentHash } from "../server/services/deduplicationService.js";
 import {
+  BUNDLE_SCHEMA_VERSION,
   QuestionBundleSchema,
   computeChecksum,
   type QuestionBundle,
@@ -53,14 +54,22 @@ function makeSingleChoiceItem(params: {
 }
 
 function makeBundle(item: QuestionBundleItem, requestedCount = 1): QuestionBundle {
+  const createdAt = new Date().toISOString();
+  const sourceBatchId = `question-bundle-guard:${item.primaryKpCode}:${createdAt}`;
+
   return QuestionBundleSchema.parse({
     meta: {
       bundleType: "question_bundle",
-      generatedAt: new Date().toISOString(),
+      schemaVersion: BUNDLE_SCHEMA_VERSION,
+      runId: "2026-04-27-guard-gesp-1-easy-v01",
+      createdAt,
+      generatedAt: createdAt,
       provider: "guard",
       model: "guard-fixture",
       promptHash: computeChecksum("question-bundle-guard"),
-      sourceTimestamp: new Date().toISOString(),
+      sourceBatchId,
+      sourceBatchIds: [sourceBatchId],
+      sourceTimestamp: createdAt,
       examType: "GESP-1",
       questionType: item.type,
       primaryKpCode: item.primaryKpCode,

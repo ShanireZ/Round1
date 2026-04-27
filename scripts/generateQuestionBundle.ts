@@ -10,6 +10,7 @@ import {
   QuestionBundleItemSchema,
   QuestionBundleSchema,
   QuestionTypeSchema,
+  BUNDLE_SCHEMA_VERSION,
   computeChecksum,
 } from "./lib/bundleTypes.js";
 
@@ -416,7 +417,10 @@ async function main() {
       const bundle = QuestionBundleSchema.parse({
         meta: {
           bundleType: "question_bundle",
-          generatedAt: new Date().toISOString(),
+          schemaVersion: BUNDLE_SCHEMA_VERSION,
+          runId: args.runId,
+          createdAt: sourceTimestamp,
+          generatedAt: sourceTimestamp,
           provider: result.provider,
           model: result.model,
           promptHash,

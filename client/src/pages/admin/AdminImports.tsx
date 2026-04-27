@@ -61,10 +61,17 @@ const bundlePlaceholders: Record<AdminImportBundleType, string> = {
   question_bundle: `{
   "meta": {
     "bundleType": "question_bundle",
+    "schemaVersion": "2026-04-26.1",
+    "runId": "2026-04-25-step3-llm-csp-j-easy-v01",
+    "createdAt": "2026-04-25T00:00:00.000Z",
     "generatedAt": "2026-04-25T00:00:00.000Z",
     "provider": "openai_compatible",
     "model": "model-name",
     "promptHash": "<64-char sha256>",
+    "sourceBatchId": "generate-question-bundle-v1:CSP-J:single_choice:BAS:easy:2026-04-25T00:00:00.000Z",
+    "sourceBatchIds": [
+      "generate-question-bundle-v1:CSP-J:single_choice:BAS:easy:2026-04-25T00:00:00.000Z"
+    ],
     "sourceTimestamp": "2026-04-25T00:00:00.000Z",
     "examType": "CSP-J",
     "questionType": "single_choice",
@@ -77,7 +84,14 @@ const bundlePlaceholders: Record<AdminImportBundleType, string> = {
   prebuilt_paper_bundle: `{
   "meta": {
     "bundleType": "prebuilt_paper_bundle",
+    "schemaVersion": "2026-04-26.1",
+    "runId": "2026-04-25-prebuilt-csp-j-easy-v01",
+    "createdAt": "2026-04-25T00:00:00.000Z",
     "builtAt": "2026-04-25T00:00:00.000Z",
+    "sourceBatchId": "prebuilt-paper-builder-v1:CSP-J:easy:2026-04-25T00:00:00.000Z",
+    "sourceBatchIds": [
+      "prebuilt-paper-builder-v1:CSP-J:easy:2026-04-25T00:00:00.000Z"
+    ],
     "sourceTimestamp": "2026-04-25T00:00:00.000Z",
     "examType": "CSP-J",
     "difficulty": "easy",

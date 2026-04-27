@@ -6,6 +6,7 @@ import {
   ExamTypeSchema,
   QuestionBundleSchema,
   QuestionTypeSchema,
+  BUNDLE_SCHEMA_VERSION,
   computeChecksum,
   type Difficulty,
   type ExamType,
@@ -318,6 +319,9 @@ async function main() {
   const bundle = QuestionBundleSchema.parse({
     meta: {
       bundleType: "question_bundle",
+      schemaVersion: BUNDLE_SCHEMA_VERSION,
+      runId: args.runId,
+      createdAt: sourceTimestamp,
       generatedAt: sourceTimestamp,
       provider: "local-deterministic",
       model: "acceptance-question-template-v1",

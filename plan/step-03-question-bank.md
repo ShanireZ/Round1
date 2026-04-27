@@ -4,7 +4,7 @@
 > **交付物**：知识点树 + 真题入库 + LLM 客户端 + question bundle 离线生成/校验/导入 + prebuilt paper bundle 离线构建/导入 + cpp-runner 沙箱
 > **可验证 demo**：question bundle dry-run/apply 通过；30 道阅读程序题经沙箱校验后入库；20 道完善程序题经沙箱校验后入库；首批预制卷导入并可发布
 
-> **对齐说明（2026-04-24，2026-04-27 更新命名口径）**：当前仓库仍处于 compatibility-first 过渡期。Step 03 收口目标已经明确为“开发环境离线产出可直接导入的 question bundle 与 prebuilt paper bundle，生产环境只做校验导入、发布、考试”；question bundle 标准存放路径为 `papers/<year>/<runId>/question-bundles/`，prebuilt paper bundle 标准存放路径为 `artifacts/prebuilt-papers/<year>/<runId>/`，任何旧的线上生成、库存补货、题目退役或实时换题逻辑都只能视为待删除遗留，不得继续扩张。
+> **对齐说明（2026-04-24，2026-04-27 更新命名口径）**：当前仓库仍处于 compatibility-first 过渡期。Step 03 收口目标已经明确为“开发环境离线产出可直接导入的 question bundle 与 prebuilt paper bundle，生产环境只做校验导入、发布、考试”；question bundle 标准存放路径为 `papers/<year>/<runId>/question-bundles/`，prebuilt paper bundle 标准存放路径为 `artifacts/prebuilt-papers/<year>/<runId>/`，任何旧的线上生成、库存补货、题目退役或实时换题逻辑都只能视为待删除遗留，不得继续扩张。2026-04-27 标准漂移复核已将当前本地 step3 产物迁到 `2026-04-27-step3-llm-csp-j-medium-v01` runId 路径，并把 `schemaVersion`、`runId`、`createdAt` 收紧为 raw bundle 必填元数据。
 
 > **当前推进状态（2026-04-26）**：离线 bundle 第一批最小可运行 slice 已经落地：`scripts/lib/bundleTypes.ts` 已定义 raw bundle 契约与统一 `ImportSummary`；`generateQuestionBundle.ts`、`validateQuestionBundle.ts`、`importQuestionBundle.ts` 以及 `buildPrebuiltPaperBundle.ts`、`validatePrebuiltPaperBundle.ts`、`importPrebuiltPaperBundle.ts` 六个 CLI entrypoint 已接入仓库；Admin 导入中心已直接接收 raw `QuestionBundleSchema` / `PrebuiltPaperBundleSchema` 并复用 scripts 侧 workflow。当前 Step 03 的剩余工作重点已经收敛为“更丰富的离线产物元数据与审计信息、批量内容生产实跑规模、知识点/真题复核批次，以及与 Step 04/05 的完整运行时闭环对齐”，而不是重新设计 bundle 基础契约。2026-04-26 已完成首批规模化本地确定性验收 question bundle 与程序题 sandbox 入库验收：阅读程序 30 道、完善程序 20 道均通过离线校验并 apply 入库，且规则去重/判官拦截守卫已实跑通过。该批次不等同于 LLM 出题批次；真实 LLM 生成题目仍需使用 `generateQuestionBundle.ts` 并显式跑 `validateQuestionBundle.ts --judge`。
 
@@ -241,6 +241,7 @@ docker run --rm --runtime=runsc --read-only --network=none \
 - [x] 去重规则拦截近似题（2026-04-26：`scripts/verifyQuestionBundleGuards.ts` 构造同题干不同选项候选，触发 `DUPLICATE_JACCARD`）
 - [x] 判官二次校验拦截答案不一致的题（2026-04-26：`scripts/verifyQuestionBundleGuards.ts` 构造错误答案题，触发 `JUDGE_REJECTED`）
 - [x] `scripts/validatePrebuiltPaperBundle.ts` dry-run 通过（2026-04-26：历史验收产物曾使用 `artifacts/prebuilt-papers/paper-packs.json`，2026-04-27 后新产物改用 runId 持久化命名；校验 summary=1/1/0，`dbChecksSkipped=false`；校验前通过 `validate-import-artifacts.ts --write-metadata` 写回 validator 版本、校验时间与 item checksum manifest）
+- [x] 当前本地 step3 LLM 产物命名 guard 通过（2026-04-27：`papers/2026/step3-llm-2026-04-27/*.json`、`artifacts/prebuilt-papers/step3-llm-cspj-medium-paper-packs.json` 与 `artifacts/llm-step3/probe*.json` 已迁移到 `2026-04-27-step3-llm-csp-j-medium-v01` runId 目录；后续以 `npm run verify:offline-artifacts` 作为命名 guard。）
 - [x] `scripts/importPrebuiltPaperBundle.ts --apply` 导入成功，并可在后台发布（2026-04-26：apply batch=`a231db53-95ae-42de-9860-c5b057a9d791`；发布预制卷 `2a2e4c76-e7aa-48b3-9226-36c838220a0c` 后，运行时选卷查询可命中 GESP-1/easy，slot=20、totalPoints=100）
 - [ ] 管理员题库 CRUD 流程完整
 - [ ] 管理员预制卷库 CRUD 流程完整
