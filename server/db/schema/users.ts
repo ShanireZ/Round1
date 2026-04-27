@@ -8,6 +8,7 @@ import {
   timestamp,
   index,
   check,
+  boolean,
 } from 'drizzle-orm/pg-core';
 
 export const users = pgTable(
@@ -17,6 +18,7 @@ export const users = pgTable(
     username: varchar('username', { length: 50 }).unique().notNull(),
     displayName: varchar('display_name', { length: 100 }).notNull(),
     passwordHash: text('password_hash'),
+    passwordChangeRequired: boolean('password_change_required').notNull().default(false),
     role: text('role').notNull().default('student'),
     sessionVersion: integer('session_version').notNull().default(1),
     status: text('status').notNull().default('active'),

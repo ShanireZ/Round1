@@ -1,7 +1,7 @@
 # Reference — 部署运维
 
 > 本文件从 [01-reference.md](01-reference.md) 拆分而来。完整参考索引见 [01-reference.md](01-reference.md)。
-> **当前对齐说明（2026-04-26）**：Step 06 当前已经明确为“两层架构 + production no-runner”。生产运行时不依赖 `cpp-runner`，离线内容环境单独承载 `scripts/workers/contentWorker.ts` 与 sandbox/生成链路。当前仓库仍没有统一的 `scripts/healthcheck.ts` 或版本化 PM2 ecosystem，因此本文件以“人工 runbook + 明确边界”作为当前现状，而不是声明一键自动化部署已完成。
+> **当前对齐说明（2026-04-27）**：Step 06 当前已经明确为“两层架构 + production no-runner”。生产运行时不依赖 `cpp-runner`，离线内容环境单独承载 `scripts/workers/contentWorker.ts` 与 sandbox/生成链路。当前仓库已补 `scripts/healthcheck.ts` 与版本化 `ecosystem.config.cjs`，但真实域名、Caddy/TLS、PM2 reload、外部服务 smoke 与回滚仍需要部署环境演练。
 
 ---
 
@@ -39,7 +39,9 @@ tsx scripts/importPrebuiltPaperBundle.ts artifacts/prebuilt-papers/<year>/<runId
 tsx scripts/importPrebuiltPaperBundle.ts artifacts/prebuilt-papers/<year>/<runId>/<bundle-file>.json --apply
 
 # 9. 创建首个管理员账号
-# 当前仓库暂无 scripts/initAdmin.ts；首个管理员通过数据库手工设置 role 或后续补专用脚本
+ROUND1_INITIAL_ADMIN_PASSWORD='<临时强密码>' tsx scripts/initAdmin.ts --dry-run
+ROUND1_INITIAL_ADMIN_PASSWORD='<临时强密码>' tsx scripts/initAdmin.ts
+# 固定用户名 elder；脚本只用于首个管理员引导，首次登录后会被 password_change_required 强制要求改密
 ```
 
 ---

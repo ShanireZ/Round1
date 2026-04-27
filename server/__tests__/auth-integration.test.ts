@@ -850,3 +850,57 @@ describe("Logout", () => {
     expect(res.body.data.message).toContain("退出");
   });
 });
+
+describe("Forced password change", () => {
+  it("blocks protected flows until password_change_required is cleared", async () => {
+    const [user] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.username, testUsername))
+      .limit(1);
+
+    expect(user).toBeTruthy();
+    await db
+      .update(users)
+      .set({ passwordChangeRequired: true })
+      .where(eq(users.id, user!.id));
+
+    const forcedAgent = supertest.agent(server);
+    const loginCsrf = await getCsrf(forcedAgent);
+    const loginRes = await forcedAgent
+      .post("/api/v1/auth/login/password")
+      .set("X-CSRF-Token", loginCsrf)
+      .send({ identifier: testUsername, password: "Ch4ngedP@ss!Str0ng" });
+
+    expect(loginRes.status).toBe(200);
+    expect(loginRes.body.data.passwordChangeRequired).toBe(true);
+
+    const csrf = await getCsrf(forcedAgent);
+    const blockedRes = await forcedAgent
+      .post("/api/v1/auth/passkeys/register/options")
+      .set("X-CSRF-Token", csrf)
+      .send({});
+
+    expect(blockedRes.status).toBe(403);
+    expect(blockedRes.body.error.code).toBe("ROUND1_PASSWORD_CHANGE_REQUIRED");
+
+    const changeRes = await forcedAgent
+      .post("/api/v1/auth/password/change")
+      .set("X-CSRF-Token", csrf)
+      .send({
+        currentPassword: "Ch4ngedP@ss!Str0ng",
+        newPassword: "correct-horse-battery-staple-2026!",
+      });
+
+    expect(changeRes.status).toBe(200);
+    expect(changeRes.body.data.passwordChangeRequired).toBe(false);
+
+    const [updated] = await db
+      .select({ passwordChangeRequired: users.passwordChangeRequired })
+      .from(users)
+      .where(eq(users.id, user!.id))
+      .limit(1);
+
+    expect(updated?.passwordChangeRequired).toBe(false);
+  });
+});

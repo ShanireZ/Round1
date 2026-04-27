@@ -4,7 +4,7 @@
 > **交付物**：独立域名可访问的生产环境，含完整监控、备份与优雅停机
 > **可验证 demo**：独立域名可访问，健康检查全绿
 > **配置参考**：数据库 Schema、.env 模板、目录结构等详见 [01-reference.md](01-reference.md)
-> **当前对齐说明（2026-04-26）**：本文件描述的是目标部署形态，不是“当前仓库已具备一键上线能力”的现状快照。当前仓库已经完成“两层架构 + production no-runner”方向的代码收口：`scripts/workers/contentWorker.ts` 明确只属于离线内容环境，`config/processTypes.ts` 已把 `runtime-worker` / `content-worker` 进程身份中性化；但仓库内仍没有版本化 `ecosystem.config.js` 或统一的 `scripts/healthcheck.ts`，因此 Step 06 目前仍以部署 runbook 和人工演练清单为主，不能把 PM2 / 健康检查 / 域名验证描述成已自动化落地。
+> **当前对齐说明（2026-04-27）**：本文件描述的是目标部署形态，不是“当前仓库已完成生产上线”的现状快照。当前仓库已经完成“两层架构 + production no-runner”方向的代码收口，并补齐版本化 `ecosystem.config.cjs` 与统一 `scripts/healthcheck.ts`；但真实域名、Caddy/TLS、PM2 reload、外部服务 smoke 与回滚仍需要部署环境演练，不能把生产验收描述成已完成。
 
 ---
 
@@ -69,11 +69,11 @@
 
 ### 14.3 PM2 配置
 
-- `Round1-api`：cluster 模式 2 实例，端口 5100
+- `round1-api`：由 `ecosystem.config.cjs` 管理，cluster 模式默认 2 实例，端口默认 5100
 - 生产默认**不启动 Worker**；当前目标运行时仅保留 Caddy + API + Redis + Postgres
-- 若未来恢复运行时延迟任务，`Round1-worker` 只允许承载运行时队列，禁止消费 `generation` / `sandbox-verify`
-- `Round1-content-worker` 仅存在于离线内容环境，不部署到生产运行时
-- 当前仓库未提供版本化 `ecosystem.config.js`；PM2 app 名称与 ecosystem 文件路径应由部署环境自行管理
+- 若未来恢复运行时延迟任务，`round1-runtime-worker` 仅在 `ROUND1_PM2_ENABLE_RUNTIME_WORKER=1` 时启用，且只允许承载运行时队列，禁止消费 `generation` / `sandbox-verify`
+- `round1-content-worker` 仅存在于离线内容环境，通过 `ROUND1_PM2_ENABLE_CONTENT_WORKER=1` 显式启用，不部署到生产运行时
+- PM2 reload 命令统一使用 `pm2 reload ecosystem.config.cjs --env production`
 - 连接池配置详见 [01-reference.md — 连接池配置](01-reference.md)
 
 ### 14.4 生产构建与静态文件
@@ -153,15 +153,14 @@ Redis 不可用时：
 
 ### 14.12 健康检查
 
-当前仓库没有统一的 `scripts/healthcheck.ts`，部署时使用以下检查组合：
+当前仓库提供统一的 `scripts/healthcheck.ts`，部署时使用以下检查组合：
 
-- `curl -fsS https://round1.example.com/api/v1/health`：检查 Express / Postgres / Redis。
-- 邮件通道：执行 SMTP EHLO 或对应邮件供应商 API 探活。
-- Turnstile：确认站点 key / secret 已配置，并完成一次真实验票。
+- `npm run healthcheck -- --api-url https://round1.example.com/api/v1/health --frontend-url https://round1.example.com --pm2`：检查 Express / Postgres / Redis、前端静态资源与 PM2 进程。
+- `npm run healthcheck -- --include-external`：确认邮件 provider 与 Turnstile 关键配置已存在；真实邮件投递、Turnstile 验票仍保留为人工验收项。
 
 离线内容环境单独执行：
 
-- `curl -fsS http://127.0.0.1:6100/health`：检查 cpp-runner 可达。
+- `npm run healthcheck -- --include-offline --runner-url http://127.0.0.1:6100/health`：检查 cpp-runner 可达。
 - `scripts/workers/contentWorker.ts` 启动日志：确认只消费 `generation` / `sandbox-verify`。
 
 > 应用专属运行时变量使用 `ROUND1_*` 前缀，其余按功能模块分组（如 `DATABASE_*`、`SESSION_*`、`AUTH_*`、`LLM_*` 等），详见 [01-reference.md — 环境变量配置](reference-config.md#环境变量配置env)。
@@ -189,10 +188,10 @@ mkdir -p data/backups && pg_dump -Fc "$DATABASE_URL" -f data/backups/predeploy-$
 tsx scripts/migrate.ts up
 
 # 6. 平滑重启（零停机）
-pm2 reload <pm2-app-or-ecosystem>
+pm2 reload ecosystem.config.cjs --env production
 
 # 7. 健康检查
-curl -fsS https://round1.example.com/api/v1/health
+npm run healthcheck -- --api-url https://round1.example.com/api/v1/health --frontend-url https://round1.example.com --pm2
 
 # 8. 验证关键页面可访问
 curl -sS https://round1.example.com/api/v1/health | jq
@@ -217,10 +216,10 @@ npm ci && npm run build
 tsx scripts/migrate.ts --down 1
 
 # 4. 重启
-pm2 reload <pm2-app-or-ecosystem>
+pm2 reload ecosystem.config.cjs --env production
 
 # 5. 健康检查
-curl -fsS https://round1.example.com/api/v1/health
+npm run healthcheck -- --api-url https://round1.example.com/api/v1/health --frontend-url https://round1.example.com --pm2
 ```
 
 > **版本管理约定**：每次部署前打 tag（格式 `v{date}-{seq}`，如 `v20260412-1`）。回滚后需创建新分支 `hotfix/<issue>` 修复问题，再合入主干并打新 tag 部署。
@@ -310,14 +309,14 @@ curl -fsS https://round1.example.com/api/v1/health
 - [x] 生产运行时不再把 `cpp-runner` 视为在线健康前提；runner 健康检查已收敛到离线内容环境
 - [x] `scripts/workers/contentWorker.ts` 只消费 `generation` / `sandbox-verify`，不属于生产运行时
 - [x] `config/processTypes.ts` 已统一 `runtime-worker` / `content-worker` 进程身份与 DB application name 规则
-- [x] 当前仓库仍无版本化 `ecosystem.config.js` 与统一 `scripts/healthcheck.ts`，部署验证仍以 runbook + 人工演练为主
+- [x] 当前仓库已补版本化 `ecosystem.config.cjs` 与统一 `scripts/healthcheck.ts`；真实生产部署验证仍以脚本 + 人工演练共同完成
 
 ### 目标部署演练待验证
 
 - [ ] 独立域名可访问
 - [ ] `GET /api/v1/health` 返回 ok，且邮件 / Turnstile 已按清单验证；离线内容环境单独验证 `cpp-runner` 与 `contentWorker`
 - [ ] PM2 cluster 模式 2 实例启动正常，生产默认不启动运行时 worker
-- [ ] 优雅停机：`pm2 reload <pm2-app-or-ecosystem>` 期间无请求丢失
+- [ ] 优雅停机：`pm2 reload ecosystem.config.cjs --env production` 期间无请求丢失
 - [ ] Caddy TLS 证书正确（Cloudflare Full Strict）
 - [ ] 静态资源长期缓存头正确
 - [ ] `pg_dump` 备份 + `pg_restore` 到临时库的恢复校验通过

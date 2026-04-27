@@ -36,7 +36,7 @@
 - 邮件发送采用 HTML + 纯文本双版本；模板变量通过字符串替换注入，所有用户可控内容先做 HTML 实体转义
 
 **用户名规则**：4~20 位，仅允许大小写字母与数字
-**密码规则**：至少 8 位，允许大小写字母、数字与常见符号；服务端使用 `zxcvbn` 库进行弱密码检测（score < 3 拒绝）
+**密码规则**：普通用户至少 8 位且 `zxcvbn` score >= 3；管理员至少 14 位且 score >= 4。服务端统一通过 `server/services/auth/passwordPolicy.ts` 校验，注册、complete-profile、重置密码与已登录改密必须复用同一策略。
 
 ### 2.3 密码登录
 
@@ -149,7 +149,7 @@
 ### 4.4 统一 complete-profile
 
 - `POST /api/v1/auth/complete-profile` — 消费 `completeProfileTicket`，设置用户名+密码
-- 密码规则与邮箱注册一致
+- 密码规则与邮箱注册一致；若目标账号为管理员，必须满足管理员密码强度策略
 - 未设密码不得完成注册
 
 ### 4.5 provider_email 采用规则
@@ -227,6 +227,7 @@
   - 班级关联、作答历史等保留，仅屏蔽显示
 
 > **用户创建**：所有用户（含 coach/admin）均只能通过自助注册流程创建，Admin 不提供后台创建用户接口。角色提升通过 `PATCH` 修改。
+> **首个管理员引导**：唯一例外是部署引导脚本 `scripts/initAdmin.ts`。脚本固定引导用户名 `elder`，从 `ROUND1_INITIAL_ADMIN_PASSWORD` 读取临时密码，必须满足管理员密码强度，并写入 `password_change_required=true`；首次登录后仅允许改密或登出，改密成功后清除此标记并递增 `session_version`。
 
 ### 6.3 Admin Step-up（Passkey / TOTP）
 

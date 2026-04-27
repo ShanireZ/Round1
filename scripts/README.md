@@ -53,6 +53,8 @@
 - workers/contentWorker.ts：离线内容 worker 入口，仅运行 generation / sandbox verify，不属于生产运行时入口。
 - bootstrapKnowledgePoints.ts：初始化知识点树。
 - seedBlueprint.ts：初始化蓝图配置。
+- initAdmin.ts：首个管理员引导脚本，固定用户名 `elder`，读取 `ROUND1_INITIAL_ADMIN_PASSWORD`，写入 admin 角色与 `password_change_required=true`；支持 `--dry-run` 与 `--rotate`。
+- healthcheck.ts：统一健康检查脚本，默认检查 API readiness，可选检查前端静态资源、外部配置、离线 runner 与 PM2 进程。
 - db-stats.cjs：查看题库与数据表统计。
 
 ## 共享库
@@ -84,6 +86,8 @@
 - 程序题离线 sandbox 校验并写回：`npx tsx scripts/validateQuestionBundle.ts papers/2026/<runId>/question-bundles/<bundle-file>.json --run-sandbox --write --write-metadata`
 - question bundle 守卫验证：`npx tsx scripts/verifyQuestionBundleGuards.ts`
 - 离线产物命名守卫：`npm run verify:offline-artifacts`
+- 首个管理员 dry-run：`ROUND1_INITIAL_ADMIN_PASSWORD='<临时强密码>' npm run init:admin -- --dry-run`
+- 生产健康检查：`npm run healthcheck -- --api-url https://round1.example.com/api/v1/health --frontend-url https://round1.example.com --pm2`
 
 ## Question bundle 来源口径
 

@@ -1,7 +1,7 @@
 # Reference — 配置与目录结构
 
 > 本文件从 [01-reference.md](01-reference.md) 拆分而来。完整参考索引见 [01-reference.md](01-reference.md)。
-> **当前对齐说明（2026-04-26）**：本文件描述的是“仓库内已存在的配置与目录结构”，不是部署环境的外部资产清单。`config/env.ts` 是环境变量的唯一代码级真源；PM2 ecosystem 文件当前不在仓库版本管理内。Step 06 已收口到“两层架构 + production no-runner”：运行时 worker 入口位于 `server/services/worker/worker.ts`，离线内容 worker 入口位于 `scripts/workers/contentWorker.ts`。
+> **当前对齐说明（2026-04-27）**：本文件描述的是“仓库内已存在的配置与目录结构”，不是部署环境的外部资产清单。`config/env.ts` 是环境变量的唯一代码级真源；版本化 PM2 ecosystem 位于 `ecosystem.config.cjs`，运行时 worker 与离线内容 worker 均通过显式环境变量开关启用。Step 06 已收口到“两层架构 + production no-runner”：运行时 worker 入口位于 `server/services/worker/worker.ts`，离线内容 worker 入口位于 `scripts/workers/contentWorker.ts`。
 
 ---
 
@@ -45,7 +45,7 @@ Round1/
 ├─ tsconfig.json                   → TypeScript 基础配置
 ├─ vitest.config.ts / playwright.config.ts
 ├─ .env / .gitignore / eslint.config.js / prettier.config.js
-│                                   → PM2 ecosystem 文件由部署环境自行维护，当前不在仓库版本管理内
+├─ ecosystem.config.cjs             → 版本化 PM2 ecosystem：API cluster + 可选 runtime/content worker
 ├─ cpp-runner/                     → 独立 C++ 隔离执行器
 │   ├─ Dockerfile / entrypoint.sh / package.json
 ├─ certs/                          → 本地 HTTPS 开发证书（.gitignore）
@@ -84,7 +84,7 @@ Round1/
 ├─ scripts/
 │   ├─ generateQuestionBundle.ts / validateQuestionBundle.ts / importQuestionBundle.ts
 │   ├─ buildPrebuiltPaperBundle.ts / validatePrebuiltPaperBundle.ts / importPrebuiltPaperBundle.ts
-│   ├─ auditRealPapers / reviewRealPapers / rewritePaperExplanations / ingestRealPapers / importManualQuestions / updateAnswersInDB / bootstrapKnowledgePoints / seedBlueprint / dev-setup / migrate / db-stats
+│   ├─ auditRealPapers / reviewRealPapers / rewritePaperExplanations / ingestRealPapers / importManualQuestions / updateAnswersInDB / bootstrapKnowledgePoints / seedBlueprint / dev-setup / migrate / db-stats / initAdmin / healthcheck
 │   └─ workers/contentWorker.ts    → 离线内容环境 worker 入口
 ```
 
@@ -96,6 +96,15 @@ Round1/
 # 服务
 PORT=5100
 NODE_ENV=development
+ROUND1_PM2_API_INSTANCES=2
+ROUND1_PM2_ENABLE_RUNTIME_WORKER=0
+ROUND1_PM2_ENABLE_CONTENT_WORKER=0
+ROUND1_HEALTHCHECK_API_URL=
+ROUND1_HEALTHCHECK_FRONTEND_URL=
+ROUND1_HEALTHCHECK_TIMEOUT_MS=5000
+ROUND1_HEALTHCHECK_INCLUDE_OFFLINE=0
+ROUND1_HEALTHCHECK_INCLUDE_EXTERNAL=0
+ROUND1_HEALTHCHECK_PM2=0
 
 # 数据库
 DATABASE_URL=postgres://round1:round1@127.0.0.1:5432/round1
@@ -111,6 +120,7 @@ SESSION_COOKIE_SAMESITE=lax
 SESSION_IDLE_MINUTES=480
 SESSION_ABSOLUTE_MINUTES=10080
 EXAM_DRAFT_TTL_MINUTES=1440
+ROUND1_INITIAL_ADMIN_PASSWORD=
 SESSION_STORE=redis
 AUTH_TURNSTILE_SITE_KEY=
 AUTH_TURNSTILE_SECRET_KEY=

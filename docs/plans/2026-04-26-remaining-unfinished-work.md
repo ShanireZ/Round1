@@ -78,8 +78,8 @@
 - [x] `/api/v1/config/client` 补齐前端运行时配置字段。（2026-04-27 标准漂移复核：路由已拆到 `server/routes/config.ts`，返回 `autosaveIntervalSeconds`、`examDraftTtlMinutes`、`availableExamTypes`、`availableDifficulties`、`enabledAuthProviders`，并补 OpenAPI 注册和测试覆盖。）
 - [x] `/api/v1/docs` Swagger UI 现状口径已对齐。（2026-04-27：`server/routes/health.ts` 仅在 `NODE_ENV=development` 挂载 `/api/v1/docs`；生产不暴露。）
 - [x] `app_settings` 的运行时优先级链已落地到运行时配置读取。（2026-04-27 复核：`initializeRuntimeConfigRuntime()` 启动加载 `app_settings`，运行时配置以 `app_settings > .env > 代码默认值` 形成最终生效值；当前适用于 `RUNTIME_SETTING_DEFINITIONS` 中登记的运行时设置。）
-- [ ] 补 `scripts/initAdmin.ts` 或明确长期采用数据库手工设置首个管理员角色。
-- [ ] 若继续保留人工 runbook，需在部署文档中明确哪些配置外置；若要自动化，则补版本化 PM2 ecosystem 与统一健康检查脚本。
+- [x] 补 `scripts/initAdmin.ts` 设置首个管理员角色。（2026-04-27：脚本固定用户名 `elder`，从 `ROUND1_INITIAL_ADMIN_PASSWORD` 读取临时密码，强制管理员密码策略，并写入 `password_change_required=true`；首次登录后只能改密或登出。）
+- [x] 补版本化 PM2 ecosystem 与统一健康检查脚本。（2026-04-27：新增 `ecosystem.config.cjs`、`scripts/healthcheck.ts`、`npm run healthcheck` 与相关 `ROUND1_*` 环境变量；真实部署演练仍留在运维验收清单。）
 
 ### 6. 部署、运维与安全演练
 
@@ -95,7 +95,7 @@
 - [ ] 应用层安全加固：`.env` 权限 600、`NODE_ENV=production`、Helmet CSP、CSRF、`__Host-` cookie、`trust proxy = 1`、argon2id。
 - [ ] 数据库层安全加固：Postgres 内网监听、应用用户最小权限、`statement_timeout=30s`、备份权限 600。
 - [ ] 手动部署 SOP 与回滚流程演练。
-- [ ] 仍无 `scripts/healthcheck.ts` 和版本化 `ecosystem.config.js`；需要决定是继续外置管理还是纳入仓库。
+- [x] 已纳入 `scripts/healthcheck.ts` 和版本化 `ecosystem.config.cjs`；真实域名、Caddy/TLS、PM2 reload、外部服务 smoke 与回滚仍需实机演练。
 
 ### 7. UI/UX 与前端体验收口
 

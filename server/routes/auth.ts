@@ -2,7 +2,6 @@ import { Router, type Request, type Response, type NextFunction } from "express"
 import crypto from "node:crypto";
 import { eq, and, sql } from "drizzle-orm";
 import argon2 from "argon2";
-import zxcvbn from "zxcvbn";
 
 import { db } from "../db.js";
 import { env } from "../../config/env.js";
@@ -66,6 +65,10 @@ import {
 import { isTempEmail } from "../services/auth/blocklistService.js";
 import { passkeyCredentials } from "../db/schema/passkeyCredentials.js";
 import {
+  validatePasswordStrength,
+  type PasswordPolicyResult,
+} from "../services/auth/passwordPolicy.js";
+import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
   generateAuthenticationOptions,
@@ -112,6 +115,13 @@ async function writeAuditLog(opts: {
     ip: opts.ip,
     deviceIdHash: opts.deviceIdHash ?? null,
     result: opts.result,
+  });
+}
+
+function failWeakPassword(res: Response, result: PasswordPolicyResult): void {
+  res.fail(result.code ?? "ROUND1_WEAK_PASSWORD", result.message ?? "密码强度不足", 400, {
+    minLength: result.minLength,
+    minScore: result.minScore,
   });
 }
 
@@ -288,10 +298,15 @@ authRouter.post(
         return;
       }
 
-      // zxcvbn password strength check
-      const strength = zxcvbn(password);
-      if (strength.score < 3) {
-        res.fail("ROUND1_WEAK_PASSWORD", "密码强度不足，请使用更复杂的密码", 400);
+      const passwordStrength = validatePasswordStrength({
+        password,
+        role: "student",
+        username,
+        displayName,
+        email,
+      });
+      if (!passwordStrength.ok) {
+        failWeakPassword(res, passwordStrength);
         return;
       }
 
@@ -407,6 +422,7 @@ authRouter.post(
         role: string;
         sessionVersion: number;
         status: string;
+        passwordChangeRequired: boolean;
       } | null = null;
 
       // Try email lookup
@@ -426,6 +442,7 @@ authRouter.post(
             role: users.role,
             sessionVersion: users.sessionVersion,
             status: users.status,
+            passwordChangeRequired: users.passwordChangeRequired,
           })
           .from(users)
           .where(eq(users.id, emailRow.userId))
@@ -442,6 +459,7 @@ authRouter.post(
             role: users.role,
             sessionVersion: users.sessionVersion,
             status: users.status,
+            passwordChangeRequired: users.passwordChangeRequired,
           })
           .from(users)
           .where(eq(users.username, identifier))
@@ -521,6 +539,7 @@ authRouter.post(
         username: user.username,
         displayName: user.displayName,
         role: user.role,
+        passwordChangeRequired: user.passwordChangeRequired,
       });
     } catch (err) {
       if (err instanceof AppError) {
@@ -653,10 +672,30 @@ authRouter.post(
         return;
       }
 
-      // zxcvbn check
-      const strength = zxcvbn(newPassword);
-      if (strength.score < 3) {
-        res.fail("ROUND1_WEAK_PASSWORD", "密码强度不足，请使用更复杂的密码", 400);
+      const [user] = await db
+        .select({
+          username: users.username,
+          displayName: users.displayName,
+          role: users.role,
+        })
+        .from(users)
+        .where(eq(users.id, emailRow.userId))
+        .limit(1);
+
+      if (!user) {
+        res.fail("ROUND1_USER_NOT_FOUND", "用户不存在", 404);
+        return;
+      }
+
+      const passwordStrength = validatePasswordStrength({
+        password: newPassword,
+        role: user.role,
+        username: user.username,
+        displayName: user.displayName,
+        email,
+      });
+      if (!passwordStrength.ok) {
+        failWeakPassword(res, passwordStrength);
         return;
       }
 
@@ -669,6 +708,7 @@ authRouter.post(
         .update(users)
         .set({
           passwordHash,
+          passwordChangeRequired: false,
           sessionVersion: sql`${users.sessionVersion} + 1`,
         })
         .where(eq(users.id, emailRow.userId));
@@ -705,7 +745,12 @@ authRouter.post(
 
       // Verify current password
       const [user] = await db
-        .select({ passwordHash: users.passwordHash })
+        .select({
+          passwordHash: users.passwordHash,
+          role: users.role,
+          username: users.username,
+          displayName: users.displayName,
+        })
         .from(users)
         .where(eq(users.id, userId))
         .limit(1);
@@ -721,10 +766,14 @@ authRouter.post(
         return;
       }
 
-      // zxcvbn check
-      const strength = zxcvbn(newPassword);
-      if (strength.score < 3) {
-        res.fail("ROUND1_WEAK_PASSWORD", "密码强度不足，请使用更复杂的密码", 400);
+      const passwordStrength = validatePasswordStrength({
+        password: newPassword,
+        role: user.role,
+        username: user.username,
+        displayName: user.displayName,
+      });
+      if (!passwordStrength.ok) {
+        failWeakPassword(res, passwordStrength);
         return;
       }
 
@@ -737,6 +786,7 @@ authRouter.post(
         .update(users)
         .set({
           passwordHash,
+          passwordChangeRequired: false,
           sessionVersion: sql`${users.sessionVersion} + 1`,
         })
         .where(eq(users.id, userId))
@@ -756,7 +806,7 @@ authRouter.post(
         result: "success",
       });
 
-      res.ok({ message: "密码已修改" });
+      res.ok({ message: "密码已修改", passwordChangeRequired: false });
     } catch (err) {
       if (err instanceof AppError) {
         res.fail(err.code, err.message, err.status);
@@ -953,10 +1003,15 @@ authRouter.post(
         return;
       }
 
-      // zxcvbn password strength check
-      const strength = zxcvbn(password, [username]);
-      if (strength.score < 3) {
-        res.fail("ROUND1_WEAK_PASSWORD", "密码强度不足，请选择更复杂的密码", 400);
+      const passwordStrength = validatePasswordStrength({
+        password,
+        role: "student",
+        username,
+        displayName,
+        email: profileData.providerEmail,
+      });
+      if (!passwordStrength.ok) {
+        failWeakPassword(res, passwordStrength);
         return;
       }
 

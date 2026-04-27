@@ -12,7 +12,7 @@ Schema 采用版本化迁移（`server/db/migrations/` + `scripts/migrate.ts` + 
 
 > **当前对齐说明（2026-04-26）**：Phase 11 当前已挂载的运行时会在 `startAttempt` 时调度 BullMQ delayed auto-submit job 并回写 `attempts.auto_submit_job_id`；submit / auto-submit finalizer 会写入 `attempts.score`、`attempts.per_section_json`、`attempts.per_primary_kp_json`、`attempts.ai_report_json`、`attempts.report_status`。若请求到达时已超过 `min(started_at + blueprint.duration_minutes, assignment.due_at)`，则将 `attempts.status` 写为 `auto_submitted`。API 与 runtime worker 现在均会启动 5 分钟一次的运行时维护循环，用于补漏超时 auto-submit 与过期 draft 回收。
 
-**连接池**：`pg.Pool` — API 进程 `max=10`、作业进程 `max=5`（PM2 cluster 2 API + 1 job runner = 总计 25 连接）、`idleTimeoutMillis=30000`、`statement_timeout=30s`、API 进程 `application_name=round1-api`、运行时 worker `application_name=round1-worker`、离线内容 worker `application_name=round1-content-worker`。通过 `.env` 中 `DATABASE_POOL_MAX_API` 和 `DATABASE_POOL_MAX_WORKER` 分别配置。
+**连接池**：`pg.Pool` — API 进程 `max=10`、作业进程 `max=5`（PM2 cluster 默认 2 API = 20 连接；runtime/content worker 均为显式开关，启用后按 worker 数量追加）、`idleTimeoutMillis=30000`、`statement_timeout=30s`、API 进程 `application_name=round1-api`、运行时 worker `application_name=round1-worker`、离线内容 worker `application_name=round1-content-worker`。通过 `.env` 中 `DATABASE_POOL_MAX_API` 和 `DATABASE_POOL_MAX_WORKER` 分别配置。
 
 > **Redis 客户端分工**：`connect-redis`（session store）和 `rate-limit-redis` 使用 `node-redis` 客户端；BullMQ delayed jobs 使用 `ioredis` 客户端。两个客户端连接同一 Redis 实例。
 
@@ -20,7 +20,7 @@ Schema 采用版本化迁移（`server/db/migrations/` + `scripts/migrate.ts` + 
 
 | 表                     | 关键列                                                                                                                                                                                                                                             | 用途                                                                                                                                                                     |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `users`                | `id`(PK)、`username`(唯一)、`display_name`、`password_hash`、`role`(student/coach/admin)、`session_version`、`status`(active/locked/deleted)、`deleted_at`(可空)、`last_strong_auth_at`、`totp_secret_enc`(可空)、`totp_enabled_at`(可空)          | 用户主表；TOTP 使用 AES-256-GCM + 信封加密（DEK+KEK）：随机 12 字节 IV，存储格式 `IV:encryptedDEK:ciphertext:authTag`；软删除通过 `status='deleted'` + `deleted_at` 实现 |
+| `users`                | `id`(PK)、`username`(唯一)、`display_name`、`password_hash`、`password_change_required`、`role`(student/coach/admin)、`session_version`、`status`(active/locked/deleted)、`deleted_at`(可空)、`last_strong_auth_at`、`totp_secret_enc`(可空)、`totp_enabled_at`(可空)          | 用户主表；TOTP 使用 AES-256-GCM + 信封加密（DEK+KEK）：随机 12 字节 IV，存储格式 `IV:encryptedDEK:ciphertext:authTag`；软删除通过 `status='deleted'` + `deleted_at` 实现 |
 | `user_emails`          | `id`(PK)、`user_id`(唯一)、`email`(唯一)、`verified_at`、`source`                                                                                                                                                                                  | 用户唯一邮箱真源                                                                                                                                                         |
 | `external_identities`  | `id`(PK)、`user_id`、`provider`、`provider_type`、`provider_user_id`、`provider_email`                                                                                                                                                             | 第三方身份绑定（QQ互联 / CppLearn OIDC）                                                                                                                                 |
 | `passkey_credentials`  | `id`(PK)、`user_id`、`credential_id`(唯一)、`public_key`、`counter`、`transports_json`、`backup_eligible`、`backup_state`                                                                                                                          | Passkey(WebAuthn) 凭据                                                                                                                                                   |
@@ -79,6 +79,7 @@ Schema 采用版本化迁移（`server/db/migrations/` + `scripts/migrate.ts` + 
 - **单账号单角色**：`student`（默认）、`coach`、`admin`
 - **统一账号**：邮箱、密码、第三方身份、Passkey 都绑定同一 `user_id`
 - **密码强制**：所有可登录账号必须持有 `password_hash`
+- **首次改密强制**：`password_change_required=true` 的用户仅允许访问改密与登出流程；成功改密或密码重置后必须清为 `false` 并递增 `session_version`
 - **session_version**：密码重置/强制下线后递增，会话恢复时必须匹配
 - **邮箱唯一**：每账号同时只能绑定 1 个邮箱，不支持解绑为空
 

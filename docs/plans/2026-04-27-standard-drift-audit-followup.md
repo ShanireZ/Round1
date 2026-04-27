@@ -33,6 +33,10 @@
 - Vite / React lint 工具链兼容：`client/vite.config.ts` 改用 `import.meta.dirname` 适配 Vite 8 ESM；`eslint-plugin-react-hooks@7` 保留最新包版本，但当前未启用 React Compiler，因此 lint 配置显式保留稳定 hooks 基线 `rules-of-hooks` 与 `exhaustive-deps`，避免把 Compiler adoption 重构混入依赖升级。
 - Zod 4 PATCH default 兼容：`AdminQuestionUpdateBody` 与 `PrebuiltPaperUpdateBody` 不再从带 `default()` 的 create/upsert schema 直接 `.partial()`；创建接口保留默认值，更新接口只包含调用方显式传入的字段，避免 PATCH 隐式清空辅助 KP 或写入空 metadata。
 - 考试 session API reference 漏登记：`server/routes/exams.ts`、前端 `fetchExamSession` 与 `exams-runtime.integration.test.ts` 已依赖 `GET /api/v1/exams/:id/session`，但 `plan/reference-api.md` 与 `plan/step-04-exam-and-grading.md` 当前 surface 未列出；本轮已补为现状契约。
+- 首个管理员引导：新增 `scripts/initAdmin.ts`、`ROUND1_INITIAL_ADMIN_PASSWORD` 与 `users.password_change_required`，固定引导用户名 `elder`，强制管理员密码策略，且首次登录后由 `ROUND1_PASSWORD_CHANGE_REQUIRED` 只放行改密/登出流程。
+- 密码强度策略漂移：注册、complete-profile、重置密码与已登录改密已收口到 `server/services/auth/passwordPolicy.ts`；普通用户维持 8 位 + score >= 3，管理员提高到 14 位 + score >= 4。
+- PM2 / 健康检查自动化：新增版本化 `ecosystem.config.cjs` 与统一 `scripts/healthcheck.ts`，API cluster 默认 2 实例，runtime/content worker 均显式开关启用；健康检查默认覆盖 API/DB/Redis，并可选覆盖前端静态、外部配置、离线 runner 与 PM2 进程状态。
+- 部署配置文档漂移：`standard/14-deployment-ops.md`、`plan/step-06-deployment.md`、`plan/reference-config.md`、`plan/reference-ops.md` 与 remaining backlog 已从“无 healthcheck/ecosystem/initAdmin”更新为当前仓库现状，同时保留真实域名、Caddy/TLS、PM2 reload、外部服务 smoke 与回滚的实机演练待办。
 
 ## 验证
 

@@ -4,12 +4,22 @@ import { db } from "../db.js";
 import { users } from "../db/schema/users.js";
 import { env } from "../../config/env.js";
 
+function allowsPasswordChangeRequiredFlow(req: Request): boolean {
+  const path = req.path.replace(/^\/api\/v1/, "");
+
+  return (
+    (req.method === "POST" && path === "/auth/password/change") ||
+    (req.method === "POST" && path === "/auth/logout")
+  );
+}
+
 /**
  * Require an authenticated session. Validates:
  * 1. Session has userId
  * 2. Absolute TTL has not expired
  * 3. session_version matches DB
  * 4. User status is 'active'
+ * 5. password_change_required users can only change password or log out
  */
 export function requireAuth(
   req: Request,
@@ -39,6 +49,7 @@ export function requireAuth(
         sessionVersion: users.sessionVersion,
         status: users.status,
         role: users.role,
+        passwordChangeRequired: users.passwordChangeRequired,
       })
       .from(users)
       .where(eq(users.id, req.session.userId!))
@@ -53,6 +64,13 @@ export function requireAuth(
     if (user.sessionVersion !== req.session.sessionVersion) {
       req.session.destroy(() => {});
       res.fail("ROUND1_UNAUTHENTICATED", "会话已失效，请重新登录", 401);
+      return;
+    }
+
+    if (user.passwordChangeRequired && !allowsPasswordChangeRequiredFlow(req)) {
+      res.fail("ROUND1_PASSWORD_CHANGE_REQUIRED", "首次登录需要先修改密码", 403, {
+        passwordChangeRequired: true,
+      });
       return;
     }
 

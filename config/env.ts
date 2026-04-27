@@ -147,6 +147,14 @@ const llmProviderModelSchema = z
   .default("")
   .transform((value) => value.trim());
 
+const booleanFlagSchema = z
+  .string()
+  .default("0")
+  .transform((value) => {
+    const normalized = value.trim().toLowerCase();
+    return normalized === "1" || normalized === "true" || normalized === "yes";
+  });
+
 const llmOpenRouterModelSchema = z
   .string()
   .default("")
@@ -193,6 +201,16 @@ const envSchema = z.object({
   // Service
   PORT: z.coerce.number().default(5100),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  ROUND1_PM2_API_INSTANCES: z.coerce.number().default(2),
+  ROUND1_PM2_ENABLE_RUNTIME_WORKER: booleanFlagSchema,
+  ROUND1_PM2_ENABLE_CONTENT_WORKER: booleanFlagSchema,
+  ROUND1_HEALTHCHECK_API_URL: z.string().default(""),
+  ROUND1_HEALTHCHECK_FRONTEND_URL: z.string().default(""),
+  ROUND1_HEALTHCHECK_TIMEOUT_MS: z.coerce.number().default(5000),
+  ROUND1_HEALTHCHECK_INCLUDE_OFFLINE: booleanFlagSchema,
+  ROUND1_HEALTHCHECK_INCLUDE_EXTERNAL: booleanFlagSchema,
+  ROUND1_HEALTHCHECK_PM2: booleanFlagSchema,
+  ROUND1_INITIAL_ADMIN_PASSWORD: z.string().default(""),
 
   // Database
   DATABASE_URL: z.string().url(),

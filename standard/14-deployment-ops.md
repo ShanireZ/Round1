@@ -155,15 +155,13 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 
 ## 健康检查
 
-当前仓库仍无统一 `scripts/healthcheck.ts`，部署验证以 runbook 和人工演练为主。若后续纳入仓库，脚本必须覆盖：
+仓库内提供统一 `scripts/healthcheck.ts`，部署验证应优先使用该脚本，再配合必要的人工业务验收。脚本必须覆盖并明确区分：
 
-- API health。
-- DB 连接。
-- Redis 连接。
-- 前端静态文件可访问。
-- 邮件 provider smoke。
-- Turnstile smoke。
-- 离线内容环境 runner/content worker smoke。
+- API readiness，并从 `/api/v1/health` 汇总 DB / Redis 状态。
+- 前端静态文件可访问，需通过 `ROUND1_HEALTHCHECK_FRONTEND_URL` 或 `--frontend-url` 显式开启。
+- 邮件 provider 与 Turnstile 配置 smoke，默认跳过，需通过 `ROUND1_HEALTHCHECK_INCLUDE_EXTERNAL=1` 或 `--include-external` 开启。
+- 离线内容环境 runner/content worker smoke，默认跳过，需通过 `ROUND1_HEALTHCHECK_INCLUDE_OFFLINE=1` 或 `--include-offline` 开启。
+- PM2 进程状态，默认跳过，需通过 `ROUND1_HEALTHCHECK_PM2=1` 或 `--pm2` 开启。
 
 健康检查分层：
 
@@ -215,13 +213,13 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 
 ## PM2 / 进程
 
-当前仓库无版本化 `ecosystem.config.js`。若未来纳入：
+当前仓库提供版本化 `ecosystem.config.cjs`：
 
-- API 可 cluster。
-- runtime worker 默认生产关闭，除非仅运行考试支持队列。
-- content worker 只在 offline-content 环境。
-- 每个进程设置明确 `application_name`。
-- 优雅停机先停止接新请求，再关闭 DB/Redis。
+- API 使用 cluster 模式，默认 2 实例，可通过 `ROUND1_PM2_API_INSTANCES` 调整。
+- runtime worker 默认生产关闭，仅在明确设置 `ROUND1_PM2_ENABLE_RUNTIME_WORKER=1` 时启用。
+- content worker 只在 offline-content 环境，通过 `ROUND1_PM2_ENABLE_CONTENT_WORKER=1` 显式启用。
+- 每个进程设置明确 `ROUND1_PROCESS_TYPE`，数据库连接层据此设置 `application_name`。
+- 优雅停机先停止接新请求，再关闭 DB/Redis；PM2 配置使用 `kill_timeout: 35000` 对齐 API 30s graceful shutdown。
 
 ## 发布批次记录
 
