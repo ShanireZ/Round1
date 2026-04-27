@@ -1,8 +1,8 @@
 /**
  * cpp-runner RPC 客户端 — 与 Docker 沙箱通信
  *
- * 生产环境通过 Unix socket / loopback HTTP 调用 cpp-runner 服务
- * 开发环境下如果 runner 不可用，返回 stub 结果
+ * 仅供离线内容环境和内容校验脚本调用；生产运行时不部署也不依赖 cpp-runner。
+ * 本地/离线环境下如果 runner 不可用，返回 stub 结果。
  */
 import { sandboxConfig, type CppRunnerRequest, type CppRunnerResponse } from '../../../config/sandbox.js';
 import { logger } from '../../logger.js';

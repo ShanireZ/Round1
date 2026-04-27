@@ -74,9 +74,9 @@
 
 ### 5. API 与配置契约补齐
 
-- [ ] `/api/v1/config/client` 当前只返回最小字段；目标契约仍缺 `autosaveIntervalSeconds`、`examDraftTtlMinutes`、`availableExamTypes`、`availableDifficulties`、`enabledAuthProviders`。
-- [ ] `/api/v1/docs` Swagger UI 当前在参考文档中仍标为目标契约，需确认是否恢复开发环境挂载。
-- [ ] `app_settings` 的运行时优先级链需要落地到实际配置读取：`app_settings > .env > 代码默认值`。
+- [x] `/api/v1/config/client` 补齐前端运行时配置字段。（2026-04-27 标准漂移复核：路由已拆到 `server/routes/config.ts`，返回 `autosaveIntervalSeconds`、`examDraftTtlMinutes`、`availableExamTypes`、`availableDifficulties`、`enabledAuthProviders`，并补 OpenAPI 注册和测试覆盖。）
+- [x] `/api/v1/docs` Swagger UI 现状口径已对齐。（2026-04-27：`server/routes/health.ts` 仅在 `NODE_ENV=development` 挂载 `/api/v1/docs`；生产不暴露。）
+- [x] `app_settings` 的运行时优先级链已落地到运行时配置读取。（2026-04-27 复核：`initializeRuntimeConfigRuntime()` 启动加载 `app_settings`，运行时配置以 `app_settings > .env > 代码默认值` 形成最终生效值；当前适用于 `RUNTIME_SETTING_DEFINITIONS` 中登记的运行时设置。）
 - [ ] 补 `scripts/initAdmin.ts` 或明确长期采用数据库手工设置首个管理员角色。
 - [ ] 若继续保留人工 runbook，需在部署文档中明确哪些配置外置；若要自动化，则补版本化 PM2 ecosystem 与统一健康检查脚本。
 

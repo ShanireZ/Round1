@@ -97,7 +97,7 @@ External: CppLearn OIDC Provider
 - **单元/集成测试**：Vitest — 认证服务、内容导入、预制卷选择、批改、班级、沙箱等核心模块
 - **协议集成测试**：完整 flow 测试（注册→登录→选卷→答题→报告→班级→任务）
 - **E2E**：Playwright — 覆盖注册、登录、选卷、答题、打印、班级入班、管理后台内容库等核心场景
-- **启动健康检查**：`GET /api/v1/health`（应用 + Postgres + Redis）+ `GET ${SANDBOX_RUNNER_URL}/health`（cpp-runner）+ 邮件 / Turnstile 配置按部署清单手工校验
+- **启动健康检查**：生产运行时使用 `GET /api/v1/health`（应用 + Postgres + Redis）；邮件 / Turnstile 按部署清单手工校验；离线内容环境单独检查 `GET ${SANDBOX_RUNNER_URL}/health`（cpp-runner）与 `scripts/workers/contentWorker.ts`。
 
 ---
 

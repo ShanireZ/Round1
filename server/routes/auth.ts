@@ -6,7 +6,6 @@ import zxcvbn from "zxcvbn";
 
 import { db } from "../db.js";
 import { env } from "../../config/env.js";
-import { EXAM_TYPES } from "../../config/examTypes.js";
 import { csrfGenerateToken } from "../app.js";
 import { AppError } from "../lib/errors.js";
 import { requireAuth } from "../middleware/auth.js";
@@ -60,7 +59,6 @@ import {
   handleCallback,
 } from "../services/auth/oidcService.js";
 import { isTempEmail } from "../services/auth/blocklistService.js";
-import { getRuntimeNumberSetting } from "../services/runtimeConfigService.js";
 import { passkeyCredentials } from "../db/schema/passkeyCredentials.js";
 import {
   generateRegistrationOptions,
@@ -143,35 +141,7 @@ authRouter.get("/auth/providers", (_req: Request, res: Response) => {
   res.ok({ providers });
 });
 
-// 2b. GET /config/client — public runtime config for the frontend
-authRouter.get("/config/client", (_req: Request, res: Response) => {
-  const enabledAuthProviders: string[] = ["password", "passkey"];
-  if (env.CPPLEARN_OIDC_ISSUER) {
-    enabledAuthProviders.push("cpplearn");
-  }
-  if (env.AUTH_PROVIDER_QQ_ENABLED) {
-    enabledAuthProviders.push("qq");
-  }
-
-  res.ok({
-    turnstileSiteKey: env.AUTH_TURNSTILE_SITE_KEY,
-    powEnabled: env.AUTH_POW_ENABLED,
-    powBaseDifficulty: env.AUTH_POW_BASE_DIFFICULTY,
-    autosaveIntervalSeconds: getRuntimeNumberSetting(
-      "exam.autosaveIntervalSeconds",
-      env.AUTOSAVE_INTERVAL_SECONDS,
-    ),
-    examDraftTtlMinutes: getRuntimeNumberSetting(
-      "exam.draftTtlMinutes",
-      env.EXAM_DRAFT_TTL_MINUTES,
-    ),
-    availableExamTypes: [...EXAM_TYPES],
-    availableDifficulties: ["easy", "medium", "hard"],
-    enabledAuthProviders,
-  });
-});
-
-// 2c. GET /auth/pow-challenge — issue a PoW challenge
+// 2b. GET /auth/pow-challenge — issue a PoW challenge
 authRouter.get(
   "/auth/pow-challenge",
   async (_req: Request, res: Response, next: NextFunction) => {

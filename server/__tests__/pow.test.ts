@@ -123,12 +123,20 @@ describe("PoW integration — challenge / verify flow", () => {
     expect(typeof res.body.data.difficulty).toBe("number");
   });
 
-  it("GET /config/client — exposes powEnabled and powBaseDifficulty", async () => {
+  it("GET /config/client — exposes non-sensitive frontend runtime config", async () => {
     const res = await supertest(server).get("/api/v1/config/client");
     expect(res.status).toBe(200);
     expect(res.body.data.powEnabled).toBe(true);
     expect(typeof res.body.data.powBaseDifficulty).toBe("number");
     expect(res.body.data.turnstileSiteKey).toBeDefined();
+    expect(typeof res.body.data.autosaveIntervalSeconds).toBe("number");
+    expect(typeof res.body.data.examDraftTtlMinutes).toBe("number");
+    expect(res.body.data.availableExamTypes).toContain("CSP-J");
+    expect(res.body.data.availableDifficulties).toEqual(["easy", "medium", "hard"]);
+    expect(res.body.data.enabledAuthProviders).toEqual(
+      expect.arrayContaining(["password", "passkey"]),
+    );
+    expect(JSON.stringify(res.body.data)).not.toContain("API_KEY");
   });
 
   it("register rejects request without PoW solution when PoW enabled", async () => {

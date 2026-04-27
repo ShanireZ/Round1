@@ -243,5 +243,5 @@ docker run --rm --runtime=runsc --read-only --network=none \
 - [x] `scripts/validatePrebuiltPaperBundle.ts` dry-run 通过（2026-04-26：历史验收产物曾使用 `artifacts/prebuilt-papers/paper-packs.json`，2026-04-27 后新产物改用 runId 持久化命名；校验 summary=1/1/0，`dbChecksSkipped=false`；校验前通过 `validate-import-artifacts.ts --write-metadata` 写回 validator 版本、校验时间与 item checksum manifest）
 - [x] 当前本地 step3 LLM 产物命名 guard 通过（2026-04-27：`papers/2026/step3-llm-2026-04-27/*.json`、`artifacts/prebuilt-papers/step3-llm-cspj-medium-paper-packs.json` 与 `artifacts/llm-step3/probe*.json` 已迁移到 `2026-04-27-step3-llm-csp-j-medium-v01` runId 目录；后续以 `npm run verify:offline-artifacts` 作为命名 guard。）
 - [x] `scripts/importPrebuiltPaperBundle.ts --apply` 导入成功，并可在后台发布（2026-04-26：apply batch=`a231db53-95ae-42de-9860-c5b057a9d791`；发布预制卷 `2a2e4c76-e7aa-48b3-9226-36c838220a0c` 后，运行时选卷查询可命中 GESP-1/easy，slot=20、totalPoints=100）
-- [ ] 管理员题库 CRUD 流程完整
-- [ ] 管理员预制卷库 CRUD 流程完整
+- [x] 管理员题库 CRUD 流程完整（2026-04-27 复核：`server/__tests__/admin-content.integration.test.ts` 覆盖 create/edit/delete draft、publish/archive 与 references；`/admin/questions` 已接入列表、筛选、详情 JSON 编辑与引用摘要。）
+- [x] 管理员预制卷库 CRUD 流程完整（2026-04-27 复核：`server/__tests__/admin-content.integration.test.ts` 覆盖 create/edit/delete draft、publish/archive、copy-version 与 references；`/admin/papers` 已接入 slot/metadata 编辑、发布、归档、复制版本与引用摘要。）

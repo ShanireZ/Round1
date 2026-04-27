@@ -12,6 +12,7 @@ import { responseWrapper } from "./middleware/responseWrapper.js";
 import { logger } from "./logger.js";
 import { healthRouter } from "./routes/health.js";
 import { authRouter } from "./routes/auth.js";
+import { configRouter } from "./routes/config.js";
 import { adminRouter } from "./routes/admin.js";
 import { examsRouter } from "./routes/exams.js";
 // Ensure common schemas are registered
@@ -112,6 +113,7 @@ export function createApp(): Express {
 
   // ── 8. Routes ───────────────────────────────────────────────────────
   app.use("/api/v1", healthRouter);
+  app.use("/api/v1", configRouter);
   app.use("/api/v1", authRouter);
   app.use("/api/v1", adminRouter);
   app.use("/api/v1", examsRouter);
