@@ -22,6 +22,9 @@
 - UI token 漂移 guard：`client/src` 中考试页、结果页与基础 UI primitive 的原始 hex/rgba 样式已收敛到 token、语义 Tailwind class 或共享 CSS utility；新增 `scripts/verifyUiTokenUsage.ts` 与 `npm run verify:ui-tokens` 防止 TS/TSX 重新引入 magic color。
 - UI 构建依赖漂移：`lucide-react@0.475.0` 的当前安装包 barrel export 会引用缺失的 icon 文件，导致 `npm run build --workspace=client` 在 Vite 阶段失败；已升级到 `lucide-react@1.11.0`，客户端生产构建恢复通过。
 - `plan/reference-config.md` 目录结构：已补 `server/routes/config.ts`，移除已不存在的 `csrf.ts` / `rateLimit.ts` middleware 口径，改为当前 `authRateLimit.ts` 与 app 内联 CSRF/rateLimit 结构。
+- 考试页前端配置消费：`/api/v1/config/client` 已暴露 `autosaveIntervalSeconds`，但 `ExamSession` 只保留本地 30s debounce，未按计划使用后端配置做基础 autosave flush；本轮新增 `client/src/lib/client-config.ts`，考试页用该配置周期性 flush pending patches，同时保留 30s debounce 与 beforeunload keepalive。
+- 前端测试入口漂移：仓库已有 `client/vitest.config.ts` 与 `client/src/**/*.test.ts`，但根 `npm run test` 只发现 server 测试；本轮补 `npm run client:test`，避免前端 helper 单测继续沉默。
+- 考试 session API reference 漏登记：`server/routes/exams.ts`、前端 `fetchExamSession` 与 `exams-runtime.integration.test.ts` 已依赖 `GET /api/v1/exams/:id/session`，但 `plan/reference-api.md` 与 `plan/step-04-exam-and-grading.md` 当前 surface 未列出；本轮已补为现状契约。
 
 ## 验证
 
@@ -36,19 +39,23 @@
 ```bash
 npm run test -- server/__tests__/pow.test.ts
 npm run test -- server/__tests__/admin-content.integration.test.ts
+npm run test -- server/__tests__/exams-runtime.integration.test.ts
+npm run test -- server/__tests__/auth-integration.test.ts
 npm run verify:offline-artifacts
 npm run verify:ui-tokens
+npm run client:test -- src/lib/client-config.test.ts src/lib/exam-runtime.test.ts src/lib/exam-session.test.ts
+npm run lint
 npm run build --workspace=client
 npm run build --workspace=server
 ```
 
 ## 剩余标准债务
 
-| standard | gap | risk | mitigation | trigger | owner |
-| --- | --- | --- | --- | --- | --- |
-| `standard/06-backend-api.md` OpenAPI 规范 | 当前 `GET /api/v1/config/client` 已补注册，但历史 auth/admin/exam 路由仍未全量注册 OpenAPI | API reference 仍可能依赖人工维护，新增字段或错误码容易漂移 | 本轮先补受影响 config 端点；后续按 auth/admin/exams 分批补 registry，并以生成检查守住 | 下一轮触碰对应路由或发布 API 契约前 | backend owner |
-| `standard/04-ui-ux.md` UI/UX 视觉验收 | 已新增 TS/TSX magic color guard，但尚未完成全路由截图、移动端、键盘、reduced motion 与打印视觉验收 | UI 已完成项仍可能存在运行时视觉/交互漂移，尤其是 ExamResult ceremony 与 Dashboard/Coach 图表 | 本轮先阻断新 magic color；保留 UI/UX backlog，后续用 Playwright/截图分批收口 | 下次触碰前端页面或发布前视觉验收 | frontend owner |
-| `standard/22-standard-adoption-and-audit.md` L2/L3 guard | docs/plan 与代码漂移仍主要靠人工 `rg` 复核 | 已完成项可能再次和 reference/backlog 脱节 | 保留本 follow-up；后续可新增链接/路径/状态词 guard | 发布前或完成教练/API 主线后 | docs owner |
+| standard                                                 | gap                                                                                                | risk                                                                                         | mitigation                                                                            | trigger                             | owner          |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------- | -------------- |
+| `standard/06-backend-api.md` OpenAPI 规范                | 当前 `GET /api/v1/config/client` 已补注册，但历史 auth/admin/exam 路由仍未全量注册 OpenAPI         | API reference 仍可能依赖人工维护，新增字段或错误码容易漂移                                   | 本轮先补受影响 config 端点；后续按 auth/admin/exams 分批补 registry，并以生成检查守住 | 下一轮触碰对应路由或发布 API 契约前 | backend owner  |
+| `standard/04-ui-ux.md` UI/UX 视觉验收                    | 已新增 TS/TSX magic color guard，但尚未完成全路由截图、移动端、键盘、reduced motion 与打印视觉验收 | UI 已完成项仍可能存在运行时视觉/交互漂移，尤其是 ExamResult ceremony 与 Dashboard/Coach 图表 | 本轮先阻断新 magic color；保留 UI/UX backlog，后续用 Playwright/截图分批收口          | 下次触碰前端页面或发布前视觉验收    | frontend owner |
+| `standard/22-standard-adoption-and-audit.md` L2/L3 guard | docs/plan 与代码漂移仍主要靠人工 `rg` 复核                                                         | 已完成项可能再次和 reference/backlog 脱节                                                    | 保留本 follow-up；后续可新增链接/路径/状态词 guard                                    | 发布前或完成教练/API 主线后         | docs owner     |
 
 ## 后续最小动作
 

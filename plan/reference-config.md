@@ -15,7 +15,7 @@
 | 4   | 数据库                  | `postgreSQL 18` 独立数据库 `round1`，通过 `pg` 驱动 + `drizzle-orm` 访问（schema 版本化迁移）；自有 `users` 表；session 不落库，交给 Redis                                                           |
 | 5   | LLM 客户端              | 基于 `Vercel AI SDK (ai)` 统一多供应商路由；server 与 scripts 共享 `config/llm.ts` 的 scene 路由，支持 `provider:model` 级别配置（`generate` / `judge` / `rewrite` / `paper_audit` / `answer_fill`） |
 | 6   | 内容生产策略            | 开发环境离线生成 question bundle 与 prebuilt paper bundle；生产环境只支持导入、发布、归档                                                                                                            |
-| 7   | 视觉风格                | Modern Editorial × Contest Ceremony，Light / Dark 双主题，品牌红 + 中性灰阶；当前视觉真源为 `plan/uiux_plan.md` 与 `standard/04-ui-ux.md`                                                              |
+| 7   | 视觉风格                | Modern Editorial × Contest Ceremony，Light / Dark 双主题，品牌红 + 中性灰阶；当前视觉真源为 `plan/uiux_plan.md` 与 `standard/04-ui-ux.md`                                                            |
 | 8   | 用户与权限              | 自有账号体系，`role` 字段区分 student / coach / admin；V1 单账号单角色                                                                                                                               |
 | 9   | Worker                  | `BullMQ + Redis` 仅承担考试超时自动提交等运行时作业，不再承担题目生成与库存补货                                                                                                                      |
 | 10  | 试卷类型                | 10 个试卷类型：CSP-J、CSP-S、GESP-1 ~ GESP-8                                                                                                                                                         |
@@ -224,7 +224,7 @@ ROUND1_WORKER_CONCURRENCY=3
 
 # 其他
 MIN_ASSIGNMENT_START_MINUTES=1
-AUTOSAVE_INTERVAL_SECONDS=180          # 前端轮询间隔（通过 GET /api/v1/config/client 下发）；后端另有 1次/30s 兜底限频
+AUTOSAVE_INTERVAL_SECONDS=180          # 前端周期性 autosave flush 间隔（通过 GET /api/v1/config/client 下发）；后端 per-user 限频默认由 exam.autosaveRateLimitSeconds=30 管理
 
 ```
 

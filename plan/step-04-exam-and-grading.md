@@ -3,7 +3,7 @@
 > **前置依赖**：Step 01（DB）、Step 02（认证）、Step 03（题库与预制卷库已发布内容）
 > **交付物**：完整的选卷→预览→答题→自动保存→提交→批改→解析→打印流程
 > **可验证 demo**：学生按考试类型和难度创建试卷、开始答题、提交后看到分数与每题解析、浏览器打印输出与真题对比
-> **当前对齐说明（2026-04-26）**：本文件描述的是 Phase 11 目标状态机与完整目标路由契约。当前 worktree 已挂载的运行时 slice 已扩展为：`GET /api/v1/exams/catalog`、`GET /api/v1/exams/active-draft`、`POST /api/v1/exams`、`POST /api/v1/exams/:id/attempts`、`GET /api/v1/exams/:id/result`、`PATCH /api/v1/attempts/:id`、`POST /api/v1/attempts/:id/submit`、`GET /api/v1/attempts/active`、`GET /api/v1/users/me/attempts`、`GET /api/v1/users/me/stats`。当前实现已经锁定“只能从已发布预制卷克隆实例，禁止在线组卷/换题”的约束；`server/__tests__/exams-runtime.integration.test.ts` 已覆盖 catalog、active draft 查询、重复建 draft 复用、拒绝在线拼题/换题 payload、按已发布预制卷克隆 draft、最近 finalized attempts 的模板级软排除、无模板时返回 `ROUND1_PREBUILT_PAPER_UNAVAILABLE`、startAttempt CAS 与 delayed auto-submit 调度、任务模式 `assignment_progress.pending → in_progress`、autosave `patches[] + jsonb_set()` 增量保存与 nonce 冲突、submit finalized 幂等返回、阅读/完善程序子题级聚合、wrongs 报告、独立 result payload、超时落 `auto_submitted`、`attempts/active` 剩余时间恢复 payload、以及 users/me 历史与统计。前端已接入 App 启动恢复、30s autosave debounce、beforeunload keepalive 保存、Dashboard 与打印样式。
+> **当前对齐说明（2026-04-26，2026-04-27 复核更新）**：本文件描述的是 Phase 11 目标状态机与完整目标路由契约。当前 worktree 已挂载的运行时 slice 已扩展为：`GET /api/v1/exams/catalog`、`GET /api/v1/exams/active-draft`、`POST /api/v1/exams`、`POST /api/v1/exams/:id/attempts`、`GET /api/v1/exams/:id/session`、`GET /api/v1/exams/:id/result`、`PATCH /api/v1/attempts/:id`、`POST /api/v1/attempts/:id/submit`、`GET /api/v1/attempts/active`、`GET /api/v1/users/me/attempts`、`GET /api/v1/users/me/stats`。当前实现已经锁定“只能从已发布预制卷克隆实例，禁止在线组卷/换题”的约束；`server/__tests__/exams-runtime.integration.test.ts` 已覆盖 catalog、active draft 查询、重复建 draft 复用、拒绝在线拼题/换题 payload、按已发布预制卷克隆 draft、最近 finalized attempts 的模板级软排除、无模板时返回 `ROUND1_PREBUILT_PAPER_UNAVAILABLE`、startAttempt CAS 与 delayed auto-submit 调度、任务模式 `assignment_progress.pending → in_progress`、session payload 返回题面与当前答案、autosave `patches[] + jsonb_set()` 增量保存与 nonce 冲突、submit finalized 幂等返回、阅读/完善程序子题级聚合、wrongs 报告、独立 result payload、超时落 `auto_submitted`、`attempts/active` 剩余时间恢复 payload、以及 users/me 历史与统计。前端已接入 App 启动恢复、`/api/v1/config/client.autosaveIntervalSeconds` 周期性 pending patch flush、30s autosave debounce、beforeunload keepalive 保存、Dashboard 与打印样式。
 
 ---
 
@@ -15,6 +15,7 @@
 - 若后续补上“近期 attempts 软排除”或更复杂的模板策略，再抽离为 `server/services/prebuiltPaperSelector.ts`
 
 **选择规则**：
+
 - 输入至少包含 `examType` + `difficulty`
 - 只允许选择 `prebuilt_papers.status='published'`
 - 优先排除用户最近 `paper.selection.recentExcludeAttempts` 次 submitted attempts 使用过的 `prebuilt_paper_id`
@@ -32,6 +33,7 @@
 - `EXAM_DRAFT_TTL_MINUTES` 默认 1440（24h），超期回收为 `abandoned`
 
 **创建草稿卷**：
+
 1. `prebuiltPaperSelector` 选中模板
 2. 创建 `papers(status='draft')`
 3. 批量复制 `prebuilt_paper_slots` → `paper_question_slots`
@@ -60,6 +62,7 @@
 > **当前实现（2026-04-26）**：路由已挂载，并已覆盖“started attempt + 正确 `X-Tab-Nonce` 可保存”与“nonce 冲突返回 `409`”两条基础语义。当前请求体为 `patches[]`，服务端用 `jsonb_set()` 按 `slotNo/subKey` 增量更新 `answers_json`；同时新增 per-user autosave 频控，默认 30s。
 
 **前端 autosave 策略**：
+
 - 基础轮询间隔：180s（通过 `GET /api/v1/config/client` 下发）
 - 答案变更 debounce：30s（用户停止操作 30s 后触发，与后端 per-user 限频对齐）
 - `beforeunload` 事件：关闭/刷新页面时最终保存（`fetch(..., { keepalive: true })`）— 支持自定义 method/headers（PATCH + X-Tab-Nonce + X-CSRF-Token）；属于 best-effort，不保证送达；与后端 autosave 已有数据互补，不作为唯一可靠性手段
@@ -76,6 +79,7 @@
 > **当前最小实现（2026-04-26）**：路由已挂载，并已覆盖 finalized attempt 幂等返回、服务端计时截止判定、`submitted` / `auto_submitted` 两条基础状态流、将对应 `paper` 标记为 `completed`、manual submit 时取消 delayed auto-submit job，以及 `score` / `perPrimaryKpJson` / `perSectionJson` / `aiReportJson` / `reportStatus` 回写。独立 result 接口已经把这些聚合字段与题面/解析拼成稳定 payload；更细的 CAS 并发细化与 richer teacher/runtime 联动仍属于后续目标契约。
 
 **超时自动提交**：
+
 - 当前最小实现：startAttempt 已调度 BullMQ delayed job；如果 submit 请求到达时已超过 `started_at + duration`，则同步落库为 `auto_submitted`；runtime worker 也会复用同一 finalizer 处理 delayed auto-submit job
 - 主机制：BullMQ delayed job，jobId 存入 `attempts.auto_submit_job_id`
 - 兜底：API 与 runtime worker 每 5 分钟扫描 `status='started'` attempt，按 `min(started_at + duration, assignment.due_at)` 补漏落 `auto_submitted`
@@ -147,6 +151,7 @@
 > 状态枚举与完整状态机定义见 [reference-schema.md#状态枚举附录](reference-schema.md#状态枚举附录)。
 
 补充规则（本文件特有）：
+
 - `draft` 状态下只允许预览，不允许在线替换题目
 - `draft` 状态下只允许预览；不提供在线换题入口，也不再引入新的 replacement 表或 replacement API
 - session 过期后重新登录可在 `started` 状态继续答题
@@ -173,6 +178,7 @@
 - [x] 无可用预制卷时返回 `ROUND1_PREBUILT_PAPER_UNAVAILABLE`
 - [x] `POST /api/v1/exams/:id/attempts` 成功创建 started attempt 并返回 `tabNonce`
 - [x] 任务模式 startAttempt 推进 `assignment_progress.pending → in_progress`
+- [x] `GET /api/v1/exams/:id/session` 返回 started attempt、题面 slots 与当前 `answersJson`
 - [x] autosave 通过 `patches[] + jsonb_set()` 增量写入 `answersJson`
 - [x] autosave + `X-Tab-Nonce` 冲突返回 `409`
 - [x] submit 基础状态切换成功（attempt → `submitted`，paper → `completed`）

@@ -14,13 +14,7 @@ import { Link, useNavigate, useParams } from "react-router";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -51,6 +45,7 @@ import {
 } from "@/lib/exam-session";
 import { formatDifficultyLabel } from "@/lib/exam-results";
 import type { ExamResultNavigationState } from "@/lib/exam-results";
+import { fetchClientRuntimeConfig, getAutosaveIntervalMs } from "@/lib/client-config";
 
 const AUTOSAVE_DEBOUNCE_MS = 30_000;
 
@@ -155,7 +150,10 @@ function AttemptSummary({
   const progressValue = totalParts === 0 ? 0 : Math.round((answeredParts / totalParts) * 100);
 
   return (
-    <Card variant="hero" className="exam-session-hero-surface relative overflow-hidden border border-border">
+    <Card
+      variant="hero"
+      className="exam-session-hero-surface border-border relative overflow-hidden border"
+    >
       <CardContent className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-3">
@@ -163,16 +161,24 @@ function AttemptSummary({
             <Badge variant={autosaveBadge.variant}>{autosaveBadge.label}</Badge>
             <Badge variant="secondary">{session.paper.examType}</Badge>
             <Badge variant="outline">{formatDifficultyLabel(session.paper.difficulty)}</Badge>
-            <Badge variant={getCountdownBadgeVariant(countdownWarningLevel)} data-testid="exam-countdown-badge">
+            <Badge
+              variant={getCountdownBadgeVariant(countdownWarningLevel)}
+              data-testid="exam-countdown-badge"
+            >
               {countdownLabel}
             </Badge>
           </div>
 
           <div className="space-y-3">
-            <p className="font-mono text-xs uppercase tracking-[0.28em] text-primary/70">Focus Session</p>
-            <div className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">题面与答题状态已接通</div>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-              当前页直接消费 runtime session 接口，展示题面、读取既有 answersJson，并通过 autosave 接口持续回写答题状态。交卷成功后仍会自动跳转到结果页。
+            <p className="text-primary/70 font-mono text-xs tracking-[0.28em] uppercase">
+              Focus Session
+            </p>
+            <div className="text-foreground text-4xl font-semibold tracking-tight sm:text-5xl">
+              题面与答题状态已接通
+            </div>
+            <p className="text-muted-foreground max-w-2xl text-sm leading-6">
+              当前页直接消费 runtime session 接口，展示题面、读取既有 answersJson，并通过 autosave
+              接口持续回写答题状态。交卷成功后仍会自动跳转到结果页。
             </p>
           </div>
 
@@ -194,7 +200,7 @@ function AttemptSummary({
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex items-center justify-between text-sm">
               <span>已作答题目覆盖率</span>
               <span>{progressValue}%</span>
             </div>
@@ -202,12 +208,12 @@ function AttemptSummary({
           </div>
         </div>
 
-        <div className="space-y-4 rounded-[--radius-xl] border border-border/80 bg-card/75 p-5 backdrop-blur-sm">
-          <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-            <Clock3 className="h-4 w-4 text-primary" />
+        <div className="border-border/80 bg-card/75 space-y-4 rounded-[--radius-xl] border p-5 backdrop-blur-sm">
+          <div className="text-foreground flex items-center gap-2 text-sm font-medium">
+            <Clock3 className="text-primary h-4 w-4" />
             当前考试会话
           </div>
-          <div className="space-y-3 text-sm text-muted-foreground">
+          <div className="text-muted-foreground space-y-3 text-sm">
             <div className="flex items-center justify-between gap-3">
               <span>GET /exams/:id/session</span>
               <Badge variant="saved">已接通</Badge>
@@ -229,8 +235,8 @@ function AttemptSummary({
           <Separator />
 
           <div>
-            <div className="text-xs uppercase tracking-wide text-muted-foreground">Tab Nonce</div>
-            <div className="mt-2 rounded-[--radius-md] border border-border bg-subtle/20 px-3 py-2 font-mono text-sm text-foreground">
+            <div className="text-muted-foreground text-xs tracking-wide uppercase">Tab Nonce</div>
+            <div className="border-border bg-subtle/20 text-foreground mt-2 rounded-[--radius-md] border px-3 py-2 font-mono text-sm">
               {session.attempt.tabNonce}
             </div>
           </div>
@@ -245,7 +251,7 @@ function ConflictState({ paperId }: { paperId: string }) {
     <Card variant="hero" className="exam-session-warning-surface border-warning/30">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
-          <Clock3 className="h-5 w-5 text-warning" />
+          <Clock3 className="text-warning h-5 w-5" />
           当前试卷已不在可开始状态
         </CardTitle>
         <CardDescription>
@@ -285,13 +291,25 @@ function SessionQuestionCard({
   ).length;
 
   return (
-    <Card id={`slot-${item.slotNo}`} variant="flat" className="question-card scroll-mt-24 border-border bg-card">
+    <Card
+      id={`slot-${item.slotNo}`}
+      variant="flat"
+      className="question-card border-border bg-card scroll-mt-24"
+    >
       <CardHeader className="space-y-4">
         <div className="flex flex-wrap items-center gap-3">
           <Badge variant="outline">Q{item.slotNo}</Badge>
           <Badge variant="secondary">{formatQuestionTypeLabel(item.questionType)}</Badge>
           <Badge variant="outline">{item.points} 分</Badge>
-          <Badge variant={answeredParts === renderable.parts.length ? "ac" : answeredParts > 0 ? "saved" : "unanswered"}>
+          <Badge
+            variant={
+              answeredParts === renderable.parts.length
+                ? "ac"
+                : answeredParts > 0
+                  ? "saved"
+                  : "unanswered"
+            }
+          >
             {answeredParts === renderable.parts.length
               ? "已完成"
               : answeredParts > 0
@@ -303,14 +321,15 @@ function SessionQuestionCard({
         <div className="space-y-2">
           <CardTitle className="text-xl leading-8">{renderable.prompt}</CardTitle>
           <CardDescription>
-            当前题型会按 runtime grader 的 slot/subQuestion key 结构写回 answersJson，不再依赖本地临时 submit payload。
+            当前题型会按 runtime grader 的 slot/subQuestion key 结构写回
+            answersJson，不再依赖本地临时 submit payload。
           </CardDescription>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-6">
         {renderable.code ? (
-          <pre className="overflow-x-auto rounded-[--radius-lg] border border-border/70 bg-[--color-code-background] p-4 text-sm leading-6 text-[--color-code-foreground]">
+          <pre className="border-border/70 overflow-x-auto rounded-[--radius-lg] border bg-[--color-code-background] p-4 text-sm leading-6 text-[--color-code-foreground]">
             <code>{renderable.code}</code>
           </pre>
         ) : null}
@@ -318,11 +337,14 @@ function SessionQuestionCard({
         {renderable.parts.map((part, index) => {
           const currentValue = getDraftAnswerValue(answers, item.slotNo, part.key);
           return (
-            <div key={`${item.slotNo}-${part.key}`} className="space-y-3 rounded-[--radius-lg] border border-border/70 bg-subtle/10 p-4">
-              <div className="text-sm font-medium text-foreground">
+            <div
+              key={`${item.slotNo}-${part.key}`}
+              className="border-border/70 bg-subtle/10 space-y-3 rounded-[--radius-lg] border p-4"
+            >
+              <div className="text-foreground text-sm font-medium">
                 {renderable.parts.length > 1 ? `第 ${index + 1} 小题` : "作答区域"}
               </div>
-              <div className="text-sm leading-6 text-muted-foreground">{part.prompt}</div>
+              <div className="text-muted-foreground text-sm leading-6">{part.prompt}</div>
 
               {part.inputMode === "choice" ? (
                 <RadioGroup
@@ -338,12 +360,12 @@ function SessionQuestionCard({
                         htmlFor={optionId}
                         data-testid={`answer-option-${item.slotNo}-${part.key}-${option.value}`}
                         data-selected={currentValue === option.value ? "true" : "false"}
-                        className="flex cursor-pointer items-start gap-3 rounded-[--radius-md] border border-border/70 bg-card px-4 py-3 text-sm transition-colors hover:border-primary/50"
+                        className="border-border/70 bg-card hover:border-primary/50 flex cursor-pointer items-start gap-3 rounded-[--radius-md] border px-4 py-3 text-sm transition-colors"
                       >
                         <RadioGroupItem id={optionId} value={option.value} />
                         <div className="space-y-1">
-                          <div className="font-medium text-foreground">{option.value}</div>
-                          <div className="leading-6 text-muted-foreground">{option.label}</div>
+                          <div className="text-foreground font-medium">{option.value}</div>
+                          <div className="text-muted-foreground leading-6">{option.label}</div>
                         </div>
                       </label>
                     );
@@ -405,6 +427,13 @@ export default function ExamSessionPage() {
     onSuccess: (result) => {
       setAttempt(result);
     },
+  });
+
+  const clientConfigQuery = useQuery({
+    queryKey: ["client-runtime-config"],
+    queryFn: fetchClientRuntimeConfig,
+    retry: false,
+    staleTime: 5 * 60_000,
   });
 
   const submitAttemptMutation = useMutation({
@@ -571,6 +600,36 @@ export default function ExamSessionPage() {
     };
   }, [answers, autosaveMutation, sessionQuery.data?.attempt, submitAttemptMutation.isPending]);
 
+  useEffect(() => {
+    const sessionAttempt = sessionQuery.data?.attempt;
+    if (!sessionAttempt || autosaveMutation.isPending || submitAttemptMutation.isPending) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      const patches = takePendingPatches();
+      if (patches.length === 0) {
+        return;
+      }
+
+      setAutosavePhase("saving");
+      autosaveMutation.mutate({
+        attemptId: sessionAttempt.id,
+        tabNonce: sessionAttempt.tabNonce,
+        patches,
+      });
+    }, getAutosaveIntervalMs(clientConfigQuery.data));
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [
+    autosaveMutation,
+    clientConfigQuery.data,
+    sessionQuery.data?.attempt,
+    submitAttemptMutation.isPending,
+  ]);
+
   const hasPendingBeforeUnloadGuard = shouldBlockBeforeUnload({
     autosavePhase,
     answers,
@@ -651,9 +710,9 @@ export default function ExamSessionPage() {
   if (!paperId) {
     return (
       <div className="grid h-full place-items-center px-6 py-10">
-        <Card variant="flat" className="w-full max-w-2xl border-destructive/30 bg-destructive/5">
+        <Card variant="flat" className="border-destructive/30 bg-destructive/5 w-full max-w-2xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
+            <CardTitle className="text-destructive flex items-center gap-2">
               <AlertCircle className="h-5 w-5" />
               缺少试卷 ID
             </CardTitle>
@@ -682,9 +741,12 @@ export default function ExamSessionPage() {
   if (startAttemptMutation.isError || !attempt) {
     return (
       <div className="grid h-full place-items-center px-6 py-10">
-        <Card variant="hero" className="exam-session-error-surface w-full max-w-3xl border-destructive/20">
+        <Card
+          variant="hero"
+          className="exam-session-error-surface border-destructive/20 w-full max-w-3xl"
+        >
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
+            <CardTitle className="text-destructive flex items-center gap-2">
               <AlertCircle className="h-5 w-5" />
               无法启动答题流程
             </CardTitle>
@@ -710,14 +772,19 @@ export default function ExamSessionPage() {
   if (sessionQuery.isError) {
     return (
       <div className="grid h-full place-items-center px-6 py-10">
-        <Card variant="hero" className="exam-session-error-surface w-full max-w-3xl border-destructive/20">
+        <Card
+          variant="hero"
+          className="exam-session-error-surface border-destructive/20 w-full max-w-3xl"
+        >
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
+            <CardTitle className="text-destructive flex items-center gap-2">
               <AlertCircle className="h-5 w-5" />
               无法读取考试题面
             </CardTitle>
             <CardDescription>
-              {sessionQuery.error instanceof Error ? sessionQuery.error.message : "读取 exam session 时发生未知错误。"}
+              {sessionQuery.error instanceof Error
+                ? sessionQuery.error.message
+                : "读取 exam session 时发生未知错误。"}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
@@ -776,10 +843,10 @@ export default function ExamSessionPage() {
         ) : null}
 
         <div className="flex items-center justify-between gap-4">
-          <div className="rounded-full border border-border/80 bg-card/80 px-4 py-2 text-xs tracking-[0.24em] text-muted-foreground uppercase">
+          <div className="border-border/80 bg-card/80 text-muted-foreground rounded-full border px-4 py-2 text-xs tracking-[0.24em] uppercase">
             Exam Runtime
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-3 text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex flex-wrap items-center justify-end gap-3 text-xs">
             <div className="flex items-center gap-3">
               <Save className="h-4 w-4" />
               当前页已切到真实题面读取与 autosave 提交流
@@ -804,7 +871,7 @@ export default function ExamSessionPage() {
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-6">
             {autosaveError ? (
-              <div className="rounded-[--radius-lg] border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+              <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-[--radius-lg] border p-4 text-sm">
                 {autosaveError}
               </div>
             ) : null}
@@ -831,14 +898,17 @@ export default function ExamSessionPage() {
                 <div className="grid grid-cols-4 gap-3 sm:grid-cols-5">
                   {questionViews.map((entry) => {
                     const answeredCount = entry.renderable.parts.filter(
-                      (part) => getDraftAnswerValue(answers, entry.item.slotNo, part.key).trim().length > 0,
+                      (part) =>
+                        getDraftAnswerValue(answers, entry.item.slotNo, part.key).trim().length > 0,
                     ).length;
                     const isCompleted = answeredCount === entry.renderable.parts.length;
                     return (
                       <Button
                         key={entry.item.slotNo}
                         type="button"
-                        variant={isCompleted ? "primary" : answeredCount > 0 ? "secondary" : "ghost"}
+                        variant={
+                          isCompleted ? "primary" : answeredCount > 0 ? "secondary" : "ghost"
+                        }
                         className="h-11"
                         onClick={() => {
                           document.getElementById(`slot-${entry.item.slotNo}`)?.scrollIntoView({
@@ -855,7 +925,7 @@ export default function ExamSessionPage() {
 
                 <Separator />
 
-                <div className="space-y-3 text-sm text-muted-foreground">
+                <div className="text-muted-foreground space-y-3 text-sm">
                   <div className="flex items-center justify-between gap-3">
                     <span>题目数</span>
                     <span>{session.items.length}</span>
@@ -868,7 +938,10 @@ export default function ExamSessionPage() {
                   </div>
                   <div className="flex items-center justify-between gap-3">
                     <span>自动保存状态</span>
-                    <Badge variant={getAutosaveBadge(autosavePhase).variant} data-testid="autosave-status">
+                    <Badge
+                      variant={getAutosaveBadge(autosavePhase).variant}
+                      data-testid="autosave-status"
+                    >
                       {getAutosaveBadge(autosavePhase).label}
                     </Badge>
                   </div>
@@ -905,7 +978,7 @@ export default function ExamSessionPage() {
                   </Button>
 
                   {submitAttemptMutation.isError ? (
-                    <div className="rounded-[--radius-lg] border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                    <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-[--radius-lg] border p-4 text-sm">
                       {submitAttemptMutation.error instanceof Error
                         ? submitAttemptMutation.error.message
                         : "交卷失败，请稍后重试。"}

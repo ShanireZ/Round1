@@ -53,4 +53,4 @@ tsx scripts/importPrebuiltPaperBundle.ts artifacts/prebuilt-papers/<year>/<runId
 - `attempts.answers_json` autosave：`jsonb_set()` 增量更新单题答案
 - **startAttempt 并发峰值**：事务 10~30ms，pg.Pool max=10×2=20，理论吞吐 ~400 TPS（provisional — 需实测验证）
 - **班级任务尖峰**：前端 0~3s 随机抖动缓冲
-- **autosave 频控**：per-user 1 次/30s
+- **autosave 频控**：per-user 默认 1 次/30s，由 `exam.autosaveRateLimitSeconds` 运行时配置控制；前端另通过 `/api/v1/config/client.autosaveIntervalSeconds` 做周期性 pending patch flush

@@ -37,12 +37,14 @@
 ### 12.2 班级码与邀请链接
 
 **班级码**：
+
 - 6 位大写字母 + 数字，每个班级同一时间仅一个有效码
 - 教练可随时轮换（旧码立即失效）
 - 学生通过 `POST /api/v1/classes/join` 提交班级码入班
 - 入班接口限流 + 错误次数节流
 
 **邀请链接**：
+
 - `server/services/classInviteService.ts`
 - 高熵 token（`crypto.randomBytes(32).toString('base64url')`）
 - 可设置：过期时间、最大使用次数
@@ -50,6 +52,7 @@
 - 加入前二次确认页面
 
 **入班并发规则**：
+
 - 归档班级拒绝加入
 - 邀请链接原子扣减（`UPDATE class_invites SET use_count = use_count + 1 WHERE use_count < max_uses AND revoked_at IS NULL AND expires_at > now()` + 检查班级未归档）
 - 重复加入幂等成功（已在班成员再次提交不报错）
@@ -72,6 +75,7 @@
 > 状态枚举与完整状态转换表见 [reference-schema.md#状态枚举附录](reference-schema.md#状态枚举附录)。
 
 补充规则（本文件特有）：
+
 - 任务绑定一张明确的 `prebuilt_paper_id`，保证同任务下学生面向同一份内容
 - 单任务单次作答：同一 assignment 同一学生只能提交一次 attempt
 - 自动提交调度规则：`submitAt = min(started_at + duration, assignment.due_at)`
@@ -120,6 +124,7 @@
 - `POST /api/v1/admin/questions/:id/archive` — 归档
 
 **管理规则**：
+
 - `draft` 可编辑、可删除
 - `published` 可归档，不允许直接硬删
 - `archived` 保留历史引用，可重新发布或继续归档
@@ -137,6 +142,7 @@
 - `POST /api/v1/admin/prebuilt-papers/:id/archive` — 归档
 
 **管理规则**：
+
 - 预制卷必须引用已存在且允许用于该 exam_type 的题目
 - 发布前必须通过题量、分值、知识点配额校验
 - 已被 assignment 或 paper instance 使用的预制卷只能 archive，不能硬删
@@ -152,6 +158,7 @@
 - `POST /api/v1/admin/import-batches/prebuilt-papers/apply` — 预制卷 bundle 正式导入
 
 **导入规则**：
+
 - 请求体直接使用 raw bundle JSON：题目导入对齐 `QuestionBundleSchema`，预制卷导入对齐 `PrebuiltPaperBundleSchema`；不再额外包一层 `sourceFilename` / `checksum` / `items` 的 admin wrapper DTO
 - 服务端统一计算 `checksum` 与 admin 侧 `sourceFilename`，并复用 scripts/lib workflow 做 dry-run / apply
 - dry-run 与 apply 返回统一 `ImportSummary` 语义：对合法 batch，dry-run 也返回 `importedCount = accepted item count`、`rejectedCount = 0`，避免 admin/API/CLI 三套摘要口径漂移
@@ -162,7 +169,7 @@
 ### 13.5 Admin 设置
 
 - `app_settings` 表（key-value）
-- 可调参数：`exam.autosaveIntervalSeconds`、`exam.draftTtlMinutes`、`paper.selection.recentExcludeAttempts`、`import.maxBundleSizeMb`
+- 可调参数：`exam.autosaveIntervalSeconds`、`exam.autosaveRateLimitSeconds`、`exam.draftTtlMinutes`、`paper.selection.recentExcludeAttempts`、`import.maxBundleSizeMb`
 - 设置变更写入 `admin_audit_logs`
 - **热更新范围**：变更后通过 Redis `PUBLISH config:change` 通知所有 API/作业进程重新加载，无需重启
 

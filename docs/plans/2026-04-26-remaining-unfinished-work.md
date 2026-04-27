@@ -46,7 +46,7 @@
 - [x] 选卷策略补“最近 attempts 的预制卷软排除”，并保证只作用于模板级，不回到题目级换题/冷却表。（2026-04-26：`POST /exams` 会读取最近 finalized attempts 的 `prebuilt_paper_id`，在同 `examType+difficulty` 的 published 模板候选中软排除；若全部命中排除窗口则降级复用模板，不触碰题目级替换、冷却或库存语义。）
 - [x] `startAttempt` 与 submit/finalizer 的并发/CAS 细节继续收口。（2026-04-26：startAttempt 在 `papers.status='draft'` 上 CAS 激活；并发命中已有 started attempt 时幂等返回。finalizer 继续用 `attempts.status='started'` CAS，并把 assignment dueAt 纳入超时判定。）
 - [x] autosave 从整包 `answersJson` 覆写收敛到 `jsonb_set()` 单题增量更新。（2026-04-26：`PATCH /attempts/:id` 接收 `patches[]`，按 `slotNo/subKey` 用 `jsonb_set()` 增量写入 `answers_json`。）
-- [x] autosave 补 per-user 频控，并与前端 debounce/轮询策略对齐。（2026-04-26：新增 `exam.autosaveRateLimitSeconds=30`，Redis 优先、内存 fallback；前端答题变更 debounce 调整为 30s，并只发送待保存 patch。）
+- [x] autosave 补 per-user 频控，并与前端 debounce/轮询策略对齐。（2026-04-26：新增 `exam.autosaveRateLimitSeconds=30`，Redis 优先、内存 fallback；前端答题变更 debounce 调整为 30s，并只发送待保存 patch。2026-04-27 复核补齐前端对 `/api/v1/config/client.autosaveIntervalSeconds` 的消费，用该后端配置做周期性 pending patch flush，避免持续输入时长期只依赖 idle debounce。）
 - [x] 验证 `beforeunload` 最终保存链路，特别是 `fetch(..., { keepalive: true })` 与 `X-Tab-Nonce` / CSRF header 的兼容性。（2026-04-26：前端预取 CSRF token，beforeunload 时用 keepalive PATCH 发送 pending patches，保留 `X-Tab-Nonce` 与 `X-CSRF-Token`；`exam-runtime.test.ts` 已覆盖请求形状。）
 - [x] cron 兜底 auto-submit：每 5 分钟扫描超时未提交 attempt，补漏 delayed job 失败场景。（2026-04-26：新增 `examRuntimeMaintenance`，API 与 runtime worker 每 5 分钟扫描 started attempts，按 `min(started_at+duration, assignment.due_at)` 调用 finalizer 落 `auto_submitted`。）
 - [x] `GET /api/v1/attempts/active` 补剩余时间字段，前端在 App 启动时自动检测并跳转恢复考试。（2026-04-26：active attempt 返回 `startedAt`、`submitAt`、`remainingMs`、paper 元信息与 `resumePath`；`App.tsx` 启动后自动跳转到 `/exams/:paperId`。）
