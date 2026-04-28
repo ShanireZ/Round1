@@ -1,5 +1,10 @@
-import { MessageProcessor, type A2uiClientAction, type A2uiMessage } from "@a2ui/web_core/v0_9";
-import { basicCatalog } from "@a2ui/react/v0_9";
+import {
+  MessageProcessor,
+  type A2uiClientAction,
+  type A2uiMessage,
+  type Catalog,
+} from "@a2ui/web_core/v0_9";
+import { basicCatalog, type ReactComponentImplementation } from "@a2ui/react/v0_9";
 
 const A2UI_VERSION = "v0.9";
 const ROUND1_A2UI_DRAFT_ROOT = "/draft";
@@ -22,6 +27,10 @@ const ROUND1_A2UI_DRAFT = {
   density: 72,
   dueAt: "2026-04-28T18:00:00+08:00",
   enabled: true,
+  students: 128,
+  averageScore: 86,
+  completionRate: 0.74,
+  printReady: true,
   note: "Validate agent-authored surfaces against Round1 tokens before production use.",
   checks: ["theme", "keyboard"],
   target: "utility-first, token-bound, keyboard-safe",
@@ -49,6 +58,12 @@ const ROUND1_A2UI_CHECKPOINTS = [
 ] as const;
 
 type Round1A2uiDraft = typeof ROUND1_A2UI_DRAFT;
+type Round1A2uiCatalog = Catalog<ReactComponentImplementation>;
+
+type Round1A2uiMessageOptions = {
+  catalog?: Round1A2uiCatalog;
+  includeRound1Snapshot?: boolean;
+};
 
 type A2uiComponentPayload = {
   id: string;
@@ -213,7 +228,9 @@ function createCheckpointComponents(): A2uiComponentPayload[] {
   });
 }
 
-function createRound1A2uiComponents(): A2uiComponentPayload[] {
+function createRound1A2uiComponents(
+  options: { includeRound1Snapshot?: boolean } = {},
+): A2uiComponentPayload[] {
   return [
     {
       id: "root",
@@ -228,6 +245,7 @@ function createRound1A2uiComponents(): A2uiComponentPayload[] {
         "summary",
         "section-divider",
         "design-tabs",
+        ...(options.includeRound1Snapshot ? ["round1-report-snapshot"] : []),
         "media-card",
         "checkpoint-list",
         "notes",
@@ -338,6 +356,20 @@ function createRound1A2uiComponents(): A2uiComponentPayload[] {
       component: "Text",
       text: ROUND1_A2UI_COPY.actionLabel,
     },
+    ...(options.includeRound1Snapshot
+      ? [
+          {
+            id: "round1-report-snapshot",
+            component: "Round1CoachReportSnapshot",
+            title: bindDraftField("page"),
+            students: bindDraftField("students"),
+            averageScore: bindDraftField("averageScore"),
+            completionRate: bindDraftField("completionRate"),
+            printReady: bindDraftField("printReady"),
+            tone: "improving",
+          },
+        ]
+      : []),
     {
       id: "checkpoint-list",
       component: "List",
@@ -427,6 +459,27 @@ function getComponentActionEventName(component: A2uiComponentPayload): string | 
   return typeof event["name"] === "string" ? event["name"] : undefined;
 }
 
+function assertNoFunctionBindings(value: unknown, componentId: string, path: string): void {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => {
+      assertNoFunctionBindings(item, componentId, `${path}.${index}`);
+    });
+    return;
+  }
+
+  if (!isRecord(value)) {
+    return;
+  }
+
+  if (typeof value["call"] === "string" && isRecord(value["args"])) {
+    throw new Error(`A2UI function bindings are not allowed: ${componentId}.${path}`);
+  }
+
+  for (const [key, child] of Object.entries(value)) {
+    assertNoFunctionBindings(child, componentId, path ? `${path}.${key}` : key);
+  }
+}
+
 function isAllowedDataModelPath(path: string): boolean {
   return path === ROUND1_A2UI_DRAFT_ROOT || path.startsWith(`${ROUND1_A2UI_DRAFT_ROOT}/`);
 }
@@ -443,7 +496,10 @@ export function getRound1A2uiBasicCatalogComponents(): string[] {
   return [...basicCatalog.components.keys()].sort((left, right) => left.localeCompare(right));
 }
 
-export function assertRound1A2uiMessages(messages: readonly A2uiMessage[]): void {
+export function assertRound1A2uiMessages(
+  messages: readonly A2uiMessage[],
+  catalog: Round1A2uiCatalog = basicCatalog,
+): void {
   if (messages.length > ROUND1_A2UI_LIMITS.maxMessages) {
     throw new Error(`A2UI payload has too many messages: ${messages.length}`);
   }
@@ -461,7 +517,7 @@ export function assertRound1A2uiMessages(messages: readonly A2uiMessage[]): void
       throw new Error(`Unexpected A2UI surface id: ${surfaceId ?? "missing"}`);
     }
 
-    if ("createSurface" in message && message.createSurface.catalogId !== basicCatalog.id) {
+    if ("createSurface" in message && message.createSurface.catalogId !== catalog.id) {
       throw new Error(`Unexpected A2UI catalog id: ${message.createSurface.catalogId}`);
     }
 
@@ -489,7 +545,7 @@ export function assertRound1A2uiMessages(messages: readonly A2uiMessage[]): void
         throw new Error(`Duplicate A2UI component id: ${component.id}`);
       }
 
-      const catalogEntry = basicCatalog.components.get(component.component);
+      const catalogEntry = catalog.components.get(component.component);
       if (!catalogEntry) {
         throw new Error(`Unsupported A2UI component: ${component.component}`);
       }
@@ -497,6 +553,8 @@ export function assertRound1A2uiMessages(messages: readonly A2uiMessage[]): void
       const props = Object.fromEntries(
         Object.entries(component).filter(([key]) => key !== "id" && key !== "component"),
       );
+      const actionName = getComponentActionEventName(component);
+      assertNoFunctionBindings(props, component.id, "props");
       const validation = catalogEntry.schema.safeParse(props);
       if (!validation.success) {
         const issue = validation.error.issues[0];
@@ -508,7 +566,6 @@ export function assertRound1A2uiMessages(messages: readonly A2uiMessage[]): void
         );
       }
 
-      const actionName = getComponentActionEventName(component);
       if (actionName && actionName !== ROUND1_A2UI_ACTION_NAME) {
         throw new Error(`Unsupported A2UI action event: ${actionName}`);
       }
@@ -531,13 +588,14 @@ export function assertRound1A2uiMessages(messages: readonly A2uiMessage[]): void
   }
 }
 
-export function createRound1A2uiMessages(): A2uiMessage[] {
+export function createRound1A2uiMessages(options: Round1A2uiMessageOptions = {}): A2uiMessage[] {
+  const catalog = options.catalog ?? basicCatalog;
   const messages: A2uiMessage[] = [
     {
       version: A2UI_VERSION,
       createSurface: {
         surfaceId: ROUND1_A2UI_SURFACE_ID,
-        catalogId: basicCatalog.id,
+        catalogId: catalog.id,
         sendDataModel: true,
       },
     },
@@ -553,21 +611,26 @@ export function createRound1A2uiMessages(): A2uiMessage[] {
       version: A2UI_VERSION,
       updateComponents: {
         surfaceId: ROUND1_A2UI_SURFACE_ID,
-        components: createRound1A2uiComponents(),
+        components: createRound1A2uiComponents({
+          includeRound1Snapshot: options.includeRound1Snapshot,
+        }),
       },
     },
   ];
 
-  assertRound1A2uiMessages(messages);
+  assertRound1A2uiMessages(messages, catalog);
   return messages;
 }
 
 export const ROUND1_A2UI_MESSAGES = createRound1A2uiMessages();
 
-export function createRound1A2uiProcessor(actionHandler?: (action: A2uiClientAction) => void) {
-  return new MessageProcessor([basicCatalog], actionHandler);
+export function createRound1A2uiProcessor(
+  actionHandler?: (action: A2uiClientAction) => void,
+  catalog: Round1A2uiCatalog = basicCatalog,
+) {
+  return new MessageProcessor([catalog], actionHandler);
 }
 
-export function getRound1A2uiCapabilities() {
-  return createRound1A2uiProcessor().getClientCapabilities();
+export function getRound1A2uiCapabilities(catalog: Round1A2uiCatalog = basicCatalog) {
+  return createRound1A2uiProcessor(undefined, catalog).getClientCapabilities();
 }

@@ -522,6 +522,8 @@ Hero Band -> 最近考试/能力雷达双栏 -> 错题热力图 -> 智能建议
 
 必须以热力图为主视觉，点击学生行打开右侧 Sheet 下钻，不离开报告页。
 
+规模化班级必须对热力图和学生列表做分页、窗口化或虚拟化，首屏仍优先显示 KPI、题型统计和第一页热力图；打印版必须隐藏筛选、分页、导出等操作控件，只保留正式报告内容。
+
 ### 12.6 Admin
 
 Admin 是 Utility 风格：
@@ -713,6 +715,7 @@ ease-ceremony: cubic-bezier(0.16, 1, 0.3, 1)
 - Exam 相关题目组件样式。
 - A2UI agent surface 的 Round1 token bridge 示例，确保声明式 agent UI 不脱离当前视觉系统；示例必须由 basic catalog / payload factory 生成并经过 schema 校验，不得在页面中散落硬编码长 JSON。
 - A2UI 示例 surface 必须覆盖已安装 basic catalog 的主要能力：surface lifecycle、data model binding、Text/Card/Row/Column/List/Tabs/Divider/Icon、Image/AudioPlayer/Video/Modal、Button action、TextField、CheckBox、Slider、DateTimeInput、ChoicePicker、动态目录与 sanitizer markdown 渲染。
+- A2UI 示例必须至少包含一个 Round1 BYOC custom catalog 组件，用本地 Card/Badge/Progress 等 primitive 渲染真实页面验收片段；custom schema、动态绑定和 action guard 必须有测试覆盖。
 
 生产环境可隐藏 dev 入口，但组件展示页应保留给本地验收。
 

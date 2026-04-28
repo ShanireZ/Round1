@@ -118,6 +118,10 @@
   width: 100%;
 }
 
+.round1-a2ui-surface .a2ui-round1-snapshot {
+  width: 100%;
+}
+
 .round1-a2ui-surface label,
 .round1-a2ui-surface strong {
   color: var(--color-foreground);

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { ROUND1_A2UI_CATALOG_ID, round1A2uiCatalog } from "@/components/a2ui/round1A2uiCatalog";
 import {
   ROUND1_A2UI_MESSAGES,
   ROUND1_A2UI_SURFACE_ID,
@@ -70,6 +71,27 @@ describe("Round1 A2UI design surface", () => {
     expect(surface?.dataModel.get("/draft/enabled")).toBe(true);
   });
 
+  it("can render Round1 design-system BYOC components through a guarded catalog", () => {
+    const processor = createRound1A2uiProcessor(undefined, round1A2uiCatalog);
+    const messages = createRound1A2uiMessages({
+      catalog: round1A2uiCatalog,
+      includeRound1Snapshot: true,
+    });
+
+    assertRound1A2uiMessages(messages, round1A2uiCatalog);
+    processor.processMessages(messages);
+
+    const surface = processor.model.getSurface(ROUND1_A2UI_SURFACE_ID);
+    expect(messages[0]).toMatchObject({
+      createSurface: { catalogId: ROUND1_A2UI_CATALOG_ID },
+    });
+    expect(surface?.componentsModel.get("round1-report-snapshot")?.type).toBe(
+      "Round1CoachReportSnapshot",
+    );
+    expect(surface?.dataModel.get("/draft/students")).toBe(128);
+    expect(surface?.dataModel.get("/draft/printReady")).toBe(true);
+  });
+
   it("rejects A2UI payloads that drift from installed component schemas", () => {
     expect(() =>
       assertRound1A2uiMessages([
@@ -136,6 +158,37 @@ describe("Round1 A2UI design surface", () => {
         },
       ]),
     ).toThrow(/function actions are not allowed/);
+  });
+
+  it("rejects dynamic function bindings until catalog functions are audited", () => {
+    expect(() =>
+      assertRound1A2uiMessages([
+        {
+          version: "v0.9",
+          createSurface: {
+            surfaceId: ROUND1_A2UI_SURFACE_ID,
+            catalogId: "https://a2ui.org/specification/v0_9/basic_catalog.json",
+          },
+        },
+        {
+          version: "v0.9",
+          updateComponents: {
+            surfaceId: ROUND1_A2UI_SURFACE_ID,
+            components: [
+              {
+                id: "root",
+                component: "Text",
+                text: {
+                  call: "unsafe_agent_function",
+                  args: {},
+                  returnType: "string",
+                },
+              },
+            ],
+          },
+        },
+      ]),
+    ).toThrow(/function bindings are not allowed/);
   });
 
   it("rejects data model paths that only share the draft prefix", () => {

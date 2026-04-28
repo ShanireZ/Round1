@@ -1,0 +1,113 @@
+import { Catalog } from "@a2ui/web_core/v0_9";
+import {
+  basicCatalog,
+  createComponentImplementation,
+  type ReactComponentImplementation,
+} from "@a2ui/react/v0_9";
+import { z } from "zod/v3";
+
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { scoreOrDash } from "@/lib/coach";
+
+export const ROUND1_A2UI_CATALOG_ID = "round1://a2ui/catalog/design-system/v1";
+
+const DataBindingSchema = z.object({ path: z.string() });
+const DynamicStringSchema = z.union([z.string(), DataBindingSchema]);
+const DynamicNumberSchema = z.union([z.number(), DataBindingSchema]);
+const DynamicBooleanSchema = z.union([z.boolean(), DataBindingSchema]);
+
+const Round1CoachReportSnapshotSchema = z.object({
+  title: DynamicStringSchema,
+  students: DynamicNumberSchema,
+  averageScore: DynamicNumberSchema,
+  completionRate: DynamicNumberSchema,
+  printReady: DynamicBooleanSchema,
+  tone: z.enum(["stable", "risk", "improving"]).default("stable"),
+});
+
+const Round1CoachReportSnapshotApi = {
+  name: "Round1CoachReportSnapshot",
+  schema: Round1CoachReportSnapshotSchema as unknown as ReactComponentImplementation["schema"],
+};
+
+const toneBadgeVariant = {
+  stable: "outline",
+  risk: "tle",
+  improving: "saved",
+} as const;
+
+const toneLabel = {
+  stable: "稳定",
+  risk: "需跟进",
+  improving: "改善中",
+} as const;
+
+type Round1SnapshotTone = keyof typeof toneLabel;
+
+function isRound1SnapshotTone(value: unknown): value is Round1SnapshotTone {
+  return typeof value === "string" && value in toneLabel;
+}
+
+const Round1CoachReportSnapshot = createComponentImplementation(
+  Round1CoachReportSnapshotApi,
+  ({ props }) => {
+    const title = props.title ?? "CoachReport";
+    const students = props.students ?? 0;
+    const averageScore = props.averageScore ?? 0;
+    const completionRate = props.completionRate ?? 0;
+    const printReady = props.printReady ?? false;
+    const tone = props.tone ?? "stable";
+    const safeTone = isRound1SnapshotTone(tone) ? tone : "stable";
+    const completionPercent = Math.min(Math.max(Math.round(completionRate * 100), 0), 100);
+
+    return (
+      <Card variant="flat" className="a2ui-round1-snapshot border-border bg-card">
+        <CardContent className="space-y-4 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="text-muted-foreground text-xs">Round1 BYOC</div>
+              <div className="text-foreground mt-1 text-lg font-semibold">{title}</div>
+            </div>
+            <Badge variant={toneBadgeVariant[safeTone]}>{toneLabel[safeTone]}</Badge>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <div className="text-muted-foreground text-xs">学生</div>
+              <div className="text-foreground mt-1 text-xl font-semibold tabular-nums">
+                {students}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground text-xs">均分</div>
+              <div className="text-foreground mt-1 text-xl font-semibold tabular-nums">
+                {scoreOrDash(averageScore)}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground text-xs">打印</div>
+              <div className="text-foreground mt-1 text-sm font-medium">
+                {printReady ? "已标记" : "待验收"}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">完成率</span>
+              <span className="text-foreground tabular-nums">{completionPercent}%</span>
+            </div>
+            <Progress value={completionPercent} variant="exam" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  },
+);
+
+export const round1A2uiCatalog = new Catalog<ReactComponentImplementation>(ROUND1_A2UI_CATALOG_ID, [
+  ...basicCatalog.components.values(),
+  Round1CoachReportSnapshot,
+]);

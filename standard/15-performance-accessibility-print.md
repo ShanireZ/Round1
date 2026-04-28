@@ -15,6 +15,7 @@
 - 字体默认通过同源 `/font/` 代理从公开 `R2_PUBLIC_BASE_URL/font/` 加载；CppLearn 字标可由 `CPPLEARN_FONT_PUBLIC_BASE_URL` 作为同源代理后端；Geist/HarmonyOS 关键字重可 preload；Fraunces/思源宋体 Heavy 只在 Hero/ExamResult/AuthLayout 场景加载。
 - 图表库按需 lazy load。
 - 大型 JSON、报告、题库详情不得一次性渲染全量；列表分页或虚拟化。
+- CoachReport 热力图和学生表在规模化班级中必须分页、窗口化或虚拟化，禁止一次性渲染全量 student × knowledge point 矩阵；分页大小等渲染上限应集中在领域 helper 常量中，不能散落硬编码。
 - 代码块和题目渲染器要避免输入时全页重渲染。
 - Exam autosave debounce 当前按 30s 与后端频控对齐。
 
@@ -66,6 +67,7 @@
 - 每题避免跨页截断。
 - FillBlank input 转下划线空格。
 - 页眉包含 R1/试卷编号/页码，页脚包含生成时间。
+- 报告型页面必须显式标记打印区和非打印控件，例如 `data-print-surface` 与 `data-no-print`，避免 CSV/筛选/分页控件进入正式打印材料。
 
 ## 视觉回归
 

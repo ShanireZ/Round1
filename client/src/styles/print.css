@@ -33,7 +33,7 @@
 
   /* 字体切换为印刷字体 */
   body {
-    font-family: 'SimSun', '宋体', serif !important;
+    font-family: "SimSun", "宋体", serif !important;
     font-size: 11pt !important;
     line-height: 1.6 !important;
     color: #000 !important;
@@ -54,14 +54,21 @@
   }
 
   /* 英文衬线 */
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Times New Roman', 'SimSun', serif !important;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Times New Roman", "SimSun", serif !important;
     page-break-after: avoid;
   }
 
   /* 代码块 Courier New */
-  code, pre, .font-mono {
-    font-family: 'Courier New', monospace !important;
+  code,
+  pre,
+  .font-mono {
+    font-family: "Courier New", monospace !important;
     font-size: 9pt !important;
     border: 1px solid #ccc !important;
     padding: 0.5em !important;
@@ -77,6 +84,24 @@
   }
 
   [data-print-surface] {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 12pt !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  th,
+  td {
+    border: 1px solid #ccc !important;
+    padding: 6pt !important;
+    vertical-align: top !important;
+  }
+
+  tr {
     page-break-inside: avoid;
     break-inside: avoid;
   }

@@ -16,7 +16,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -25,16 +31,28 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  COACH_REPORT_RENDER_LIMITS,
   buildCoachReportCsv,
+  clampCoachReportPage,
   fetchCoachClasses,
   fetchCoachClassReport,
   formatCoachPercent,
+  getCoachReportPageCount,
+  getCoachReportPageItems,
   heatmapBucket,
   scoreOrDash,
   type CoachClassReport,
   type CoachKpReportSummary,
+  type CoachQuestionTypeReportSummary,
   type CoachStudentReport,
 } from "@/lib/coach";
 import { fetchAuthSession } from "@/lib/auth";
@@ -118,7 +136,7 @@ function HeatmapCell({ value }: { value: CoachKpReportSummary }) {
   const bucket = heatmapBucket(value);
   return (
     <div
-      className={`grid h-10 min-w-14 place-items-center rounded-[--radius-sm] border border-border/70 text-xs font-medium tabular-nums ${heatmapBucketClasses[bucket]}`}
+      className={`border-border/70 grid h-10 min-w-14 place-items-center rounded-[--radius-sm] border text-xs font-medium tabular-nums ${heatmapBucketClasses[bucket]}`}
       title={`${value.correct}/${value.total} · ${formatCoachPercent(value.accuracy)}`}
       aria-label={`知识点 ${value.kpId} 正确率 ${formatCoachPercent(value.accuracy)}`}
     >
@@ -134,59 +152,101 @@ function ClassHeatmap({
   report: CoachClassReport;
   onSelectStudent: (student: CoachStudentReport) => void;
 }) {
+  const [page, setPage] = useState(1);
+
   if (report.heatmap.knowledgePointIds.length === 0 || report.heatmap.students.length === 0) {
     return <EmptyReport />;
   }
 
   const studentMap = new Map(report.students.map((student) => [student.userId, student]));
+  const pageSize = COACH_REPORT_RENDER_LIMITS.heatmapStudentPageSize;
+  const safePage = clampCoachReportPage(page, report.heatmap.students.length, pageSize);
+  const pageCount = getCoachReportPageCount(report.heatmap.students.length, pageSize);
+  const visibleStudents = getCoachReportPageItems(report.heatmap.students, safePage, pageSize);
+  const rangeStart = (safePage - 1) * pageSize + 1;
+  const rangeEnd = rangeStart + visibleStudents.length - 1;
 
   return (
-    <div className="overflow-x-auto">
-      <div className="min-w-[720px]">
-        <div className="flex gap-2">
-          <div className="text-muted-foreground w-40 shrink-0 px-2 text-xs font-medium">
-            学生 / KP
-          </div>
-          {report.heatmap.knowledgePointIds.map((kpId) => (
-            <div
-              key={kpId}
-              className="text-muted-foreground min-w-14 flex-1 px-1 text-center text-xs tabular-nums"
-            >
-              KP {kpId}
+    <div className="space-y-4" data-print-surface>
+      <div className="overflow-x-auto">
+        <div className="min-w-[720px]">
+          <div className="flex gap-2">
+            <div className="text-muted-foreground w-40 shrink-0 px-2 text-xs font-medium">
+              学生 / KP
             </div>
-          ))}
-        </div>
-        <div className="mt-2 space-y-2">
-          {report.heatmap.students.map((student) => {
-            const detail = studentMap.get(student.userId);
-            return (
+            {report.heatmap.knowledgePointIds.map((kpId) => (
               <div
-                key={student.userId}
-                className="flex gap-2"
+                key={kpId}
+                className="text-muted-foreground min-w-14 flex-1 px-1 text-center text-xs tabular-nums"
               >
-                <button
-                  type="button"
-                  className="border-border bg-card hover:bg-accent-wash text-foreground w-40 shrink-0 rounded-[--radius-md] border px-3 text-left text-sm font-medium transition-colors focus-visible:shadow-[--shadow-glow]"
-                  onClick={() => detail && onSelectStudent(detail)}
-                >
-                  {student.displayName}
-                </button>
-                {student.values.map((value) => (
-                  <div key={`${student.userId}-${value.kpId}`} className="min-w-14 flex-1">
-                    <HeatmapCell value={value} />
-                  </div>
-                ))}
+                KP {kpId}
               </div>
-            );
-          })}
+            ))}
+          </div>
+          <div className="mt-2 space-y-2">
+            {visibleStudents.map((student) => {
+              const detail = studentMap.get(student.userId);
+              return (
+                <div key={student.userId} className="flex gap-2">
+                  <button
+                    type="button"
+                    className="border-border bg-card hover:bg-accent-wash text-foreground w-40 shrink-0 rounded-[--radius-md] border px-3 text-left text-sm font-medium transition-colors focus-visible:shadow-[--shadow-glow]"
+                    aria-label={`从热力图查看 ${student.displayName} 详情`}
+                    onClick={() => detail && onSelectStudent(detail)}
+                  >
+                    {student.displayName}
+                  </button>
+                  {student.values.map((value) => (
+                    <div key={`${student.userId}-${value.kpId}`} className="min-w-14 flex-1">
+                      <HeatmapCell value={value} />
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
+
+      {pageCount > 1 ? (
+        <div
+          className="text-muted-foreground flex flex-wrap items-center justify-between gap-3 text-xs"
+          data-no-print
+        >
+          <span className="tabular-nums">
+            {rangeStart}-{rangeEnd} / {report.heatmap.students.length}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setPage(safePage - 1)}
+              disabled={safePage <= 1}
+            >
+              上一页
+            </Button>
+            <span className="font-mono tabular-nums">
+              {safePage}/{pageCount}
+            </span>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setPage(safePage + 1)}
+              disabled={safePage >= pageCount}
+            >
+              下一页
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
 
-function QuestionTypeStats({ report }: { report: CoachClassReport }) {
-  if (report.questionTypeStats.length === 0) {
+function QuestionTypeStats({ stats }: { stats: CoachQuestionTypeReportSummary[] }) {
+  if (stats.length === 0) {
     return (
       <div className="border-border bg-subtle/10 text-muted-foreground rounded-[--radius-lg] border border-dashed p-6 text-sm">
         暂无题型统计。
@@ -196,7 +256,7 @@ function QuestionTypeStats({ report }: { report: CoachClassReport }) {
 
   return (
     <div className="space-y-4">
-      {report.questionTypeStats.map((item) => (
+      {stats.map((item) => (
         <div key={item.questionType} className="space-y-2">
           <div className="flex items-center justify-between gap-3 text-sm">
             <span className="text-foreground font-medium">
@@ -220,56 +280,111 @@ function StudentTable({
   report: CoachClassReport;
   onSelectStudent: (student: CoachStudentReport) => void;
 }) {
+  const [page, setPage] = useState(1);
+
   if (report.students.length === 0) {
     return <EmptyReport />;
   }
 
+  const pageSize = COACH_REPORT_RENDER_LIMITS.studentTablePageSize;
+  const safePage = clampCoachReportPage(page, report.students.length, pageSize);
+  const pageCount = getCoachReportPageCount(report.students.length, pageSize);
+  const visibleStudents = getCoachReportPageItems(report.students, safePage, pageSize);
+  const rangeStart = (safePage - 1) * pageSize + 1;
+  const rangeEnd = rangeStart + visibleStudents.length - 1;
+
   return (
-    <div className="overflow-hidden rounded-[--radius-lg] border border-border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>学生</TableHead>
-            <TableHead>状态</TableHead>
-            <TableHead className="text-right">均分</TableHead>
-            <TableHead className="text-right">最近提交</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {report.students.map((student) => (
-            <TableRow
-              key={student.userId}
-              className="cursor-pointer"
-              onClick={() => onSelectStudent(student)}
-              tabIndex={0}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  onSelectStudent(student);
-                }
-              }}
-            >
-              <TableCell>
-                <div className="font-medium">{student.displayName}</div>
-                <div className="text-muted-foreground text-xs">{student.username}</div>
-              </TableCell>
-              <TableCell>
-                <div className="flex flex-wrap gap-1.5">
-                  <Badge variant="saved">完成 {student.completed}</Badge>
-                  {student.missed > 0 ? <Badge variant="tle">错过 {student.missed}</Badge> : null}
-                  {student.inProgress > 0 ? <Badge variant="outline">进行中</Badge> : null}
-                </div>
-              </TableCell>
-              <TableCell className="text-right tabular-nums">
-                {scoreOrDash(student.averageScore)}
-              </TableCell>
-              <TableCell className="text-muted-foreground text-right text-xs">
-                {formatDate(student.latestSubmittedAt)}
-              </TableCell>
+    <div className="space-y-4" data-print-surface>
+      <div className="border-border overflow-hidden rounded-[--radius-lg] border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>学生</TableHead>
+              <TableHead>状态</TableHead>
+              <TableHead className="text-right">均分</TableHead>
+              <TableHead className="text-right">最近提交</TableHead>
+              <TableHead className="w-24 text-right" data-no-print>
+                详情
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {visibleStudents.map((student) => (
+              <TableRow
+                key={student.userId}
+                className="hover:bg-accent-wash/60 cursor-pointer"
+                onClick={() => onSelectStudent(student)}
+              >
+                <TableCell>
+                  <div className="font-medium">{student.displayName}</div>
+                  <div className="text-muted-foreground text-xs">{student.username}</div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1.5">
+                    <Badge variant="saved">完成 {student.completed}</Badge>
+                    {student.missed > 0 ? <Badge variant="tle">错过 {student.missed}</Badge> : null}
+                    {student.inProgress > 0 ? <Badge variant="outline">进行中</Badge> : null}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {scoreOrDash(student.averageScore)}
+                </TableCell>
+                <TableCell className="text-muted-foreground text-right text-xs">
+                  {formatDate(student.latestSubmittedAt)}
+                </TableCell>
+                <TableCell className="text-right" data-no-print>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    aria-label={`查看 ${student.displayName} 趋势详情`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onSelectStudent(student);
+                    }}
+                  >
+                    查看
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {pageCount > 1 ? (
+        <div
+          className="text-muted-foreground flex flex-wrap items-center justify-between gap-3 text-xs"
+          data-no-print
+        >
+          <span className="tabular-nums">
+            {rangeStart}-{rangeEnd} / {report.students.length}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setPage(safePage - 1)}
+              disabled={safePage <= 1}
+            >
+              上一页
+            </Button>
+            <span className="font-mono tabular-nums">
+              {safePage}/{pageCount}
+            </span>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setPage(safePage + 1)}
+              disabled={safePage >= pageCount}
+            >
+              下一页
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -283,6 +398,16 @@ function StudentDetailSheet({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const visibleTrend =
+    student?.trend.slice(0, COACH_REPORT_RENDER_LIMITS.studentDetailTrendLimit) ?? [];
+  const visibleKpStats =
+    student?.kpStats.slice(0, COACH_REPORT_RENDER_LIMITS.studentDetailKpLimit) ?? [];
+  const visibleQuestionTypeStats =
+    student?.questionTypeStats.slice(
+      0,
+      COACH_REPORT_RENDER_LIMITS.studentDetailQuestionTypeLimit,
+    ) ?? [];
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
@@ -296,7 +421,11 @@ function StudentDetailSheet({
         {student ? (
           <div className="mt-6 space-y-6">
             <div className="grid grid-cols-3 gap-3">
-              <KpiCard label="均分" value={scoreOrDash(student.averageScore)} description="已评分任务" />
+              <KpiCard
+                label="均分"
+                value={scoreOrDash(student.averageScore)}
+                description="已评分任务"
+              />
               <KpiCard label="完成" value={String(student.completed)} description="completed" />
               <KpiCard label="错过" value={String(student.missed)} description="missed" />
             </div>
@@ -307,22 +436,29 @@ function StudentDetailSheet({
                 <CardDescription>按任务截止时间排序。</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {student.trend.map((item) => (
-                  <div
-                    key={`${student.userId}-${item.assignmentId}`}
-                    className="border-border flex items-center justify-between gap-3 rounded-[--radius-md] border p-3"
-                  >
-                    <div className="min-w-0">
-                      <div className="text-foreground truncate text-sm font-medium">{item.title}</div>
-                      <div className="text-muted-foreground mt-1 text-xs">
-                        {progressStatusLabel(item.progressStatus)} · {formatDate(item.submittedAt)}
+                {visibleTrend.length === 0 ? (
+                  <div className="text-muted-foreground text-sm">暂无趋势数据。</div>
+                ) : (
+                  visibleTrend.map((item) => (
+                    <div
+                      key={`${student.userId}-${item.assignmentId}`}
+                      className="border-border flex items-center justify-between gap-3 rounded-[--radius-md] border p-3"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-foreground truncate text-sm font-medium">
+                          {item.title}
+                        </div>
+                        <div className="text-muted-foreground mt-1 text-xs">
+                          {progressStatusLabel(item.progressStatus)} ·{" "}
+                          {formatDate(item.submittedAt)}
+                        </div>
                       </div>
+                      <Badge variant={item.progressStatus === "completed" ? "saved" : "outline"}>
+                        {scoreOrDash(item.score)}
+                      </Badge>
                     </div>
-                    <Badge variant={item.progressStatus === "completed" ? "saved" : "outline"}>
-                      {scoreOrDash(item.score)}
-                    </Badge>
-                  </div>
-                ))}
+                  ))
+                )}
               </CardContent>
             </Card>
 
@@ -331,10 +467,10 @@ function StudentDetailSheet({
                 <CardTitle className="text-lg">知识点</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {student.kpStats.length === 0 ? (
+                {visibleKpStats.length === 0 ? (
                   <div className="text-muted-foreground text-sm">暂无知识点统计。</div>
                 ) : (
-                  student.kpStats.slice(0, 8).map((item) => (
+                  visibleKpStats.map((item) => (
                     <div key={item.kpId} className="space-y-2">
                       <div className="flex items-center justify-between gap-3 text-sm">
                         <span className="font-medium">KP {item.kpId}</span>
@@ -346,6 +482,15 @@ function StudentDetailSheet({
                     </div>
                   ))
                 )}
+              </CardContent>
+            </Card>
+
+            <Card variant="flat">
+              <CardHeader>
+                <CardTitle className="text-lg">题型</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <QuestionTypeStats stats={visibleQuestionTypeStats} />
               </CardContent>
             </Card>
           </div>
@@ -410,7 +555,8 @@ export default function CoachReport() {
   });
   const session = sessionQuery.data;
   const canReadCoachReport =
-    session?.authenticated === true && (session.user.role === "coach" || session.user.role === "admin");
+    session?.authenticated === true &&
+    (session.user.role === "coach" || session.user.role === "admin");
 
   const classesQuery = useQuery({
     queryKey: ["coach-classes"],
@@ -428,6 +574,18 @@ export default function CoachReport() {
   const activeClass = useMemo(
     () => classes.find((item) => item.id === activeClassId) ?? null,
     [activeClassId, classes],
+  );
+  const generatedAt = useMemo(
+    () =>
+      new Date().toLocaleString("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }),
+    [],
   );
 
   function exportCsv() {
@@ -477,6 +635,9 @@ export default function CoachReport() {
 
   return (
     <div className="space-y-6">
+      <div className="print-header hidden">
+        R1 班级报告 · {activeClass?.name ?? "当前班级"} · {generatedAt}
+      </div>
       <Card variant="hero" className="overflow-hidden">
         <CardHeader className="gap-5 md:flex-row md:items-end md:justify-between">
           <div>
@@ -486,7 +647,7 @@ export default function CoachReport() {
               仅统计当前班级固定任务的学生作答，群体热力图用于快速定位共同弱项。
             </CardDescription>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2" data-no-print>
             <Select
               value={activeClassId ?? undefined}
               onValueChange={(value) => {
@@ -521,28 +682,40 @@ export default function CoachReport() {
         <LoadingCoachReport />
       ) : report ? (
         <>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <KpiCard label="学生数" value={String(report.totals.students)} description={activeClass?.name ?? "当前班级"} />
-            <KpiCard label="完成" value={String(report.totals.completed)} description="assignment progress" />
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" data-print-surface>
+            <KpiCard
+              label="学生数"
+              value={String(report.totals.students)}
+              description={activeClass?.name ?? "当前班级"}
+            />
+            <KpiCard
+              label="完成"
+              value={String(report.totals.completed)}
+              description="assignment progress"
+            />
             <KpiCard label="错过" value={String(report.totals.missed)} description="需要教练跟进" />
-            <KpiCard label="均分" value={scoreOrDash(report.totals.averageScore)} description="已评分 attempts" />
+            <KpiCard
+              label="均分"
+              value={scoreOrDash(report.totals.averageScore)}
+              description="已评分 attempts"
+            />
           </div>
 
           <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
-            <Card variant="flat" className="border-border bg-card">
+            <Card variant="flat" className="border-border bg-card" data-print-surface>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl">
                   <Flame className="text-primary h-5 w-5" />
                   群体热力图
                 </CardTitle>
-                <CardDescription>知识点 × 学生矩阵，点击学生行可打开右侧下钻。</CardDescription>
+                <CardDescription>知识点 × 学生矩阵，用于定位共同弱项与个体差异。</CardDescription>
               </CardHeader>
               <CardContent>
                 <ClassHeatmap report={report} onSelectStudent={setSelectedStudent} />
               </CardContent>
             </Card>
 
-            <Card variant="flat" className="border-border bg-card">
+            <Card variant="flat" className="border-border bg-card" data-print-surface>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl">
                   <BarChart3 className="text-primary h-5 w-5" />
@@ -551,18 +724,18 @@ export default function CoachReport() {
                 <CardDescription>按题型聚合的得分率。</CardDescription>
               </CardHeader>
               <CardContent>
-                <QuestionTypeStats report={report} />
+                <QuestionTypeStats stats={report.questionTypeStats} />
               </CardContent>
             </Card>
           </div>
 
-          <Card variant="flat" className="border-border bg-card">
+          <Card variant="flat" className="border-border bg-card" data-print-surface>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl">
                 <TrendingUp className="text-primary h-5 w-5" />
                 学生趋势与下钻
               </CardTitle>
-              <CardDescription>表格支持键盘 Enter/Space 打开学生详情 Sheet。</CardDescription>
+              <CardDescription>按学生聚合固定任务表现、最近提交和下钻详情。</CardDescription>
             </CardHeader>
             <CardContent>
               <StudentTable report={report} onSelectStudent={setSelectedStudent} />
@@ -582,6 +755,9 @@ export default function CoachReport() {
           }
         }}
       />
+      <div className="print-footer hidden">
+        Round1 CoachReport · assignment-only · {generatedAt}
+      </div>
     </div>
   );
 }

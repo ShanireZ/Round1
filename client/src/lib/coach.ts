@@ -85,6 +85,14 @@ export type CoachClassReport = {
   students: CoachStudentReport[];
 };
 
+export const COACH_REPORT_RENDER_LIMITS = {
+  heatmapStudentPageSize: 24,
+  studentTablePageSize: 25,
+  studentDetailTrendLimit: 12,
+  studentDetailKpLimit: 8,
+  studentDetailQuestionTypeLimit: 8,
+} as const;
+
 type ApiPayload<T> =
   | {
       success: true;
@@ -180,6 +188,43 @@ export function heatmapBucket(value: CoachKpReportSummary): 0 | 1 | 2 | 3 | 4 {
   return 1;
 }
 
+export function getCoachReportPageCount(totalItems: number, pageSize: number): number {
+  if (totalItems <= 0 || pageSize <= 0) {
+    return 1;
+  }
+
+  return Math.ceil(totalItems / pageSize);
+}
+
+export function clampCoachReportPage(page: number, totalItems: number, pageSize: number): number {
+  const pageCount = getCoachReportPageCount(totalItems, pageSize);
+  if (!Number.isFinite(page)) {
+    return 1;
+  }
+
+  return Math.min(Math.max(Math.trunc(page), 1), pageCount);
+}
+
+export function getCoachReportPageItems<T>(
+  items: readonly T[],
+  page: number,
+  pageSize: number,
+): T[] {
+  const safePage = clampCoachReportPage(page, items.length, pageSize);
+  const start = (safePage - 1) * pageSize;
+
+  return items.slice(start, start + pageSize);
+}
+
+function escapeCoachReportCsvCell(cell: string): string {
+  const startsWithSpreadsheetControl = /^[=+\-@\t\r]/.test(cell);
+  const trimsIntoFormula = /^\s*[=+\-@]/.test(cell);
+  const safeCell = startsWithSpreadsheetControl || trimsIntoFormula ? `'${cell}` : cell;
+  const escaped = safeCell.replace(/"/g, '""');
+
+  return /[",\n]/.test(escaped) ? `"${escaped}"` : escaped;
+}
+
 export function buildCoachReportCsv(report: CoachClassReport): string {
   const rows = [
     ["student", "completed", "missed", "averageScore", "latestSubmittedAt"],
@@ -192,14 +237,7 @@ export function buildCoachReportCsv(report: CoachClassReport): string {
     ]),
   ];
 
-  const escaped = rows.map((row) =>
-    row
-      .map((cell) => {
-        const normalized = cell.replace(/"/g, '""');
-        return /[",\n]/.test(normalized) ? `"${normalized}"` : normalized;
-      })
-      .join(","),
-  );
+  const escaped = rows.map((row) => row.map((cell) => escapeCoachReportCsvCell(cell)).join(","));
 
   return `\uFEFF${escaped.join("\n")}`;
 }

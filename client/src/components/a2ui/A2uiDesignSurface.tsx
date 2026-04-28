@@ -10,6 +10,7 @@ import {
   formatRound1A2uiActionSummary,
 } from "@/lib/a2ui-design-surface";
 import { useTheme } from "@/lib/theme";
+import { round1A2uiCatalog } from "./round1A2uiCatalog";
 
 type Round1A2uiSurfaceModel = SurfaceModel<ReactComponentImplementation>;
 
@@ -21,7 +22,7 @@ export function A2uiDesignSurface() {
   const [processor] = useState(() =>
     createRound1A2uiProcessor((action) => {
       setLastAction(formatRound1A2uiActionSummary(action));
-    }),
+    }, round1A2uiCatalog),
   );
 
   useEffect(() => {
@@ -34,7 +35,12 @@ export function A2uiDesignSurface() {
           deleteSurface: { surfaceId: ROUND1_A2UI_SURFACE_ID },
         },
       ]);
-      processor.processMessages(createRound1A2uiMessages());
+      processor.processMessages(
+        createRound1A2uiMessages({
+          catalog: round1A2uiCatalog,
+          includeRound1Snapshot: true,
+        }),
+      );
       setSurface(processor.model.getSurface(ROUND1_A2UI_SURFACE_ID) ?? null);
     } catch (error) {
       setSurface(null);

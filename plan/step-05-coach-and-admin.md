@@ -220,8 +220,8 @@
 - [x] 归档班级拒绝加入（2026-04-28：新入班请求在服务端拒绝，已在班成员重复提交仍幂等成功。）
 - [x] 教练布置固定预制卷任务 + 学生单次作答（2026-04-28：`POST /api/v1/coach/assignments` 只接受 published prebuilt paper；`POST /api/v1/exams` 的 assignment 分支使用 assignment 绑定的 `prebuilt_paper_id`，并复用 `assignment_progress` 防止同一学生重复创建任务试卷。）
 - [x] 截止时间自动提交（2026-04-28：沿用 Phase 11 已落地的 `min(started_at + duration, assignment.due_at)` delayed job + 维护循环。）
-- [ ] 热力图展示正确（knowledge_point × student 矩阵，加载时间 < 3s）（2026-04-28：后端 payload 与前端热力图已落地；还需真实/规模化数据性能验收。）
-- [ ] 学生详情展示正确（2026-04-28：`/coach/report` 已接入右侧 Sheet 下钻、趋势、知识点和题型统计；还需浏览器视觉与真实数据验收。）
+- [x] 热力图展示正确（knowledge_point × student 矩阵，加载时间 < 3s）（2026-04-28：后端 payload 与前端热力图已落地；维护追加已用 Playwright 拦截 API 注入 180 名学生 × 24 个知识点规模化数据，桌面 643ms、移动 2418ms 渲染到第一页热力图，均低于 3s。）
+- [x] 学生详情展示正确（2026-04-28：`/coach/report` 已接入右侧 Sheet 下钻、趋势、知识点和题型统计；维护追加已在同一规模化浏览器验收中打开学生详情 Sheet，console warning/error、pageerror 与失败请求均为 0。）
 - [x] Coach 只能看到自己班级的数据（2026-04-28：Coach 路由统一按 `class_coaches` 关系授权；Admin 全局教练组管理走 `/api/v1/admin/classes/:id/coaches/**` 独立入口。）
 - [x] Admin 题库 CRUD 流程完整
 - [x] Admin 预制卷库 CRUD 流程完整
