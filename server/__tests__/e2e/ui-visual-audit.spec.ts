@@ -447,7 +447,10 @@ test("A2UI gallery renders Round1 BYOC surface without browser problems", async 
 
   await page.goto("/dev/ui-gallery#plate-11");
   await expect(page.getByTestId("round1-a2ui-surface")).toBeVisible();
-  await expect(page.getByText("Round1 BYOC")).toBeVisible();
+  await expect(page.getByText("Round1 BYOC").first()).toBeVisible();
+  await expect(page.getByText("AdminQuestionLibrary")).toBeVisible();
+  await expect(page.getByText("AdminPaperLibrary")).toBeVisible();
+  await expect(page.getByText("AdminImports")).toBeVisible();
   await waitForFonts(page);
   expect(await hasHorizontalOverflow(page)).toBe(false);
   expect(problems).toEqual([]);

@@ -103,6 +103,15 @@ describe("Round1 A2UI design surface", () => {
     expect(surface?.componentsModel.get("round1-auth-snapshot")?.type).toBe(
       "Round1AuthEntrySnapshot",
     );
+    expect(surface?.componentsModel.get("round1-admin-question-snapshot")?.type).toBe(
+      "Round1AdminQuestionSnapshot",
+    );
+    expect(surface?.componentsModel.get("round1-admin-paper-snapshot")?.type).toBe(
+      "Round1AdminPaperSnapshot",
+    );
+    expect(surface?.componentsModel.get("round1-admin-import-snapshot")?.type).toBe(
+      "Round1AdminImportSnapshot",
+    );
     expect(surface?.dataModel.get("/draft/students")).toBe(128);
     expect(surface?.dataModel.get("/draft/printReady")).toBe(true);
     expect(surface?.dataModel.get("/draft/openAssignments")).toBe(4);
@@ -111,6 +120,9 @@ describe("Round1 A2UI design surface", () => {
     expect(surface?.dataModel.get("/draft/emailVerified")).toBe(true);
     expect(surface?.dataModel.get("/draft/authPages")).toBe(5);
     expect(surface?.dataModel.get("/draft/authCallbackReady")).toBe(true);
+    expect(surface?.dataModel.get("/draft/adminPublishedQuestions")).toBe(46);
+    expect(surface?.dataModel.get("/draft/adminPublishedPapers")).toBe(18);
+    expect(surface?.dataModel.get("/draft/adminSharedSummaryReady")).toBe(true);
   });
 
   it("rejects A2UI payloads that drift from installed component schemas", () => {

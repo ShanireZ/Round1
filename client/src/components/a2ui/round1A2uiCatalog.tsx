@@ -75,6 +75,39 @@ const Round1AuthEntrySnapshotSchema = z.object({
   tone: z.enum(["stable", "risk", "improving"]).default("stable"),
 });
 
+const Round1AdminQuestionSnapshotSchema = z.object({
+  title: DynamicStringSchema,
+  draftQuestions: DynamicNumberSchema,
+  reviewedQuestions: DynamicNumberSchema,
+  publishedQuestions: DynamicNumberSchema,
+  archivedQuestions: DynamicNumberSchema,
+  referenceChecks: DynamicNumberSchema,
+  sandboxCoverage: DynamicNumberSchema,
+  tone: z.enum(["stable", "risk", "improving"]).default("stable"),
+});
+
+const Round1AdminPaperSnapshotSchema = z.object({
+  title: DynamicStringSchema,
+  draftPapers: DynamicNumberSchema,
+  publishedPapers: DynamicNumberSchema,
+  archivedPapers: DynamicNumberSchema,
+  slotCount: DynamicNumberSchema,
+  copyVersionReady: DynamicBooleanSchema,
+  immutableReady: DynamicBooleanSchema,
+  tone: z.enum(["stable", "risk", "improving"]).default("stable"),
+});
+
+const Round1AdminImportSnapshotSchema = z.object({
+  title: DynamicStringSchema,
+  dryRuns: DynamicNumberSchema,
+  appliedImports: DynamicNumberSchema,
+  failedImports: DynamicNumberSchema,
+  rejectedItems: DynamicNumberSchema,
+  sharedSummaryReady: DynamicBooleanSchema,
+  repairReady: DynamicBooleanSchema,
+  tone: z.enum(["stable", "risk", "improving"]).default("stable"),
+});
+
 const Round1CoachReportSnapshotApi = {
   name: "Round1CoachReportSnapshot",
   schema: Round1CoachReportSnapshotSchema as unknown as ReactComponentImplementation["schema"],
@@ -105,6 +138,21 @@ const Round1AuthEntrySnapshotApi = {
   schema: Round1AuthEntrySnapshotSchema as unknown as ReactComponentImplementation["schema"],
 };
 
+const Round1AdminQuestionSnapshotApi = {
+  name: "Round1AdminQuestionSnapshot",
+  schema: Round1AdminQuestionSnapshotSchema as unknown as ReactComponentImplementation["schema"],
+};
+
+const Round1AdminPaperSnapshotApi = {
+  name: "Round1AdminPaperSnapshot",
+  schema: Round1AdminPaperSnapshotSchema as unknown as ReactComponentImplementation["schema"],
+};
+
+const Round1AdminImportSnapshotApi = {
+  name: "Round1AdminImportSnapshot",
+  schema: Round1AdminImportSnapshotSchema as unknown as ReactComponentImplementation["schema"],
+};
+
 const toneBadgeVariant = {
   stable: "outline",
   risk: "tle",
@@ -125,6 +173,24 @@ function isRound1SnapshotTone(value: unknown): value is Round1SnapshotTone {
 
 function clampPercent(value: number): number {
   return Math.min(Math.max(Math.round(value), 0), 100);
+}
+
+function SnapshotMetric({
+  label,
+  value,
+  caption,
+}: {
+  label: string;
+  value: number | string;
+  caption?: string;
+}) {
+  return (
+    <div>
+      <div className="text-muted-foreground text-xs">{label}</div>
+      <div className="text-foreground mt-1 text-xl font-semibold tabular-nums">{value}</div>
+      {caption ? <div className="text-muted-foreground mt-1 text-xs">{caption}</div> : null}
+    </div>
+  );
 }
 
 const Round1CoachReportSnapshot = createComponentImplementation(
@@ -492,6 +558,156 @@ const Round1AuthEntrySnapshot = createComponentImplementation(
   },
 );
 
+const Round1AdminQuestionSnapshot = createComponentImplementation(
+  Round1AdminQuestionSnapshotApi,
+  ({ props }) => {
+    const title = props.title ?? "AdminQuestionLibrary";
+    const draftQuestions = props.draftQuestions ?? 0;
+    const reviewedQuestions = props.reviewedQuestions ?? 0;
+    const publishedQuestions = props.publishedQuestions ?? 0;
+    const archivedQuestions = props.archivedQuestions ?? 0;
+    const referenceChecks = props.referenceChecks ?? 0;
+    const sandboxCoverage = props.sandboxCoverage ?? 0;
+    const tone = props.tone ?? "stable";
+    const safeTone = isRound1SnapshotTone(tone) ? tone : "stable";
+    const totalQuestions =
+      draftQuestions + reviewedQuestions + publishedQuestions + archivedQuestions;
+    const sandboxPercent = clampPercent(sandboxCoverage * 100);
+
+    return (
+      <Card variant="flat" className="a2ui-round1-snapshot border-border bg-card">
+        <CardContent className="space-y-4 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="text-muted-foreground text-xs">Round1 BYOC</div>
+              <div className="text-foreground mt-1 text-lg font-semibold">{title}</div>
+            </div>
+            <Badge variant={toneBadgeVariant[safeTone]}>{toneLabel[safeTone]}</Badge>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <SnapshotMetric label="Draft" value={draftQuestions} />
+            <SnapshotMetric label="Reviewed" value={reviewedQuestions} />
+            <SnapshotMetric label="Published" value={publishedQuestions} />
+            <SnapshotMetric label="Archived" value={archivedQuestions} />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">
+                {referenceChecks} reference checks / {totalQuestions} lifecycle items
+              </span>
+              <span className="text-foreground tabular-nums">{sandboxPercent}% sandbox</span>
+            </div>
+            <Progress value={sandboxPercent} variant="exam" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  },
+);
+
+const Round1AdminPaperSnapshot = createComponentImplementation(
+  Round1AdminPaperSnapshotApi,
+  ({ props }) => {
+    const title = props.title ?? "AdminPaperLibrary";
+    const draftPapers = props.draftPapers ?? 0;
+    const publishedPapers = props.publishedPapers ?? 0;
+    const archivedPapers = props.archivedPapers ?? 0;
+    const slotCount = props.slotCount ?? 0;
+    const copyVersionReady = props.copyVersionReady ?? false;
+    const immutableReady = props.immutableReady ?? false;
+    const tone = props.tone ?? "stable";
+    const safeTone = isRound1SnapshotTone(tone) ? tone : "stable";
+    const governancePercent = clampPercent(
+      ((copyVersionReady ? 1 : 0) + (immutableReady ? 1 : 0) + (publishedPapers > 0 ? 1 : 0)) *
+        (100 / 3),
+    );
+
+    return (
+      <Card variant="flat" className="a2ui-round1-snapshot border-border bg-card">
+        <CardContent className="space-y-4 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="text-muted-foreground text-xs">Round1 BYOC</div>
+              <div className="text-foreground mt-1 text-lg font-semibold">{title}</div>
+            </div>
+            <Badge variant={toneBadgeVariant[safeTone]}>{toneLabel[safeTone]}</Badge>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <SnapshotMetric label="Draft" value={draftPapers} />
+            <SnapshotMetric label="Published" value={publishedPapers} />
+            <SnapshotMetric label="Archived" value={archivedPapers} />
+            <SnapshotMetric label="Slots" value={slotCount} />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">
+                {copyVersionReady ? "copy-version ready" : "copy-version pending"} /{" "}
+                {immutableReady ? "immutable published" : "immutability pending"}
+              </span>
+              <span className="text-foreground tabular-nums">{governancePercent}% governed</span>
+            </div>
+            <Progress value={governancePercent} variant="exam" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  },
+);
+
+const Round1AdminImportSnapshot = createComponentImplementation(
+  Round1AdminImportSnapshotApi,
+  ({ props }) => {
+    const title = props.title ?? "AdminImports";
+    const dryRuns = props.dryRuns ?? 0;
+    const appliedImports = props.appliedImports ?? 0;
+    const failedImports = props.failedImports ?? 0;
+    const rejectedItems = props.rejectedItems ?? 0;
+    const sharedSummaryReady = props.sharedSummaryReady ?? false;
+    const repairReady = props.repairReady ?? false;
+    const tone = props.tone ?? "stable";
+    const safeTone = isRound1SnapshotTone(tone) ? tone : "stable";
+    const totalBatches = appliedImports + failedImports;
+    const appliedPercent =
+      totalBatches > 0 ? clampPercent((appliedImports / totalBatches) * 100) : 0;
+
+    return (
+      <Card variant="flat" className="a2ui-round1-snapshot border-border bg-card">
+        <CardContent className="space-y-4 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="text-muted-foreground text-xs">Round1 BYOC</div>
+              <div className="text-foreground mt-1 text-lg font-semibold">{title}</div>
+            </div>
+            <Badge variant={toneBadgeVariant[safeTone]}>{toneLabel[safeTone]}</Badge>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <SnapshotMetric label="Dry runs" value={dryRuns} />
+            <SnapshotMetric label="Applied" value={appliedImports} />
+            <SnapshotMetric label="Failed" value={failedImports} />
+            <SnapshotMetric label="Rejected" value={rejectedItems} />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">
+                {sharedSummaryReady ? "shared summary" : "summary pending"} /{" "}
+                {repairReady ? "repair retry ready" : "repair retry pending"}
+              </span>
+              <span className="text-foreground tabular-nums">{appliedPercent}% applied</span>
+            </div>
+            <Progress value={appliedPercent} variant="exam" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  },
+);
+
 export const round1A2uiCatalog = new Catalog<ReactComponentImplementation>(ROUND1_A2UI_CATALOG_ID, [
   ...basicCatalog.components.values(),
   Round1CoachReportSnapshot,
@@ -500,4 +716,7 @@ export const round1A2uiCatalog = new Catalog<ReactComponentImplementation>(ROUND
   Round1StudentClassSnapshot,
   Round1AccountSecuritySnapshot,
   Round1AuthEntrySnapshot,
+  Round1AdminQuestionSnapshot,
+  Round1AdminPaperSnapshot,
+  Round1AdminImportSnapshot,
 ]);
