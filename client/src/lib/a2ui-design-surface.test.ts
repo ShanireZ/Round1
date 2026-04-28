@@ -6,6 +6,7 @@ import {
   assertRound1A2uiMessages,
   createRound1A2uiMessages,
   createRound1A2uiProcessor,
+  formatRound1A2uiActionSummary,
   getRound1A2uiBasicCatalogComponents,
   getRound1A2uiCapabilities,
 } from "./a2ui-design-surface";
@@ -61,6 +62,10 @@ describe("Round1 A2UI design surface", () => {
     expect(surface?.componentsModel.get("section-divider")?.type).toBe("Divider");
     expect(surface?.componentsModel.get("checkpoint-token-icon")?.type).toBe("Icon");
     expect(surface?.componentsModel.get("catalog-list")?.type).toBe("List");
+    expect(surface?.componentsModel.get("media-image")?.type).toBe("Image");
+    expect(surface?.componentsModel.get("media-modal")?.type).toBe("Modal");
+    expect(surface?.componentsModel.get("media-video")?.type).toBe("Video");
+    expect(surface?.componentsModel.get("media-audio")?.type).toBe("AudioPlayer");
     expect(surface?.dataModel.get("/draft/page")).toBe("CoachReport");
     expect(surface?.dataModel.get("/draft/enabled")).toBe(true);
   });
@@ -92,5 +97,91 @@ describe("Round1 A2UI design surface", () => {
         },
       ]),
     ).toThrow(/Invalid A2UI Slider component "root"/);
+  });
+
+  it("rejects function actions until an explicit agent bridge exists", () => {
+    expect(() =>
+      assertRound1A2uiMessages([
+        {
+          version: "v0.9",
+          createSurface: {
+            surfaceId: ROUND1_A2UI_SURFACE_ID,
+            catalogId: "https://a2ui.org/specification/v0_9/basic_catalog.json",
+          },
+        },
+        {
+          version: "v0.9",
+          updateComponents: {
+            surfaceId: ROUND1_A2UI_SURFACE_ID,
+            components: [
+              {
+                id: "root",
+                component: "Button",
+                child: "label",
+                action: {
+                  functionCall: {
+                    call: "unsafe_agent_function",
+                    args: {},
+                    returnType: "void",
+                  },
+                },
+              },
+              {
+                id: "label",
+                component: "Text",
+                text: "Run",
+              },
+            ],
+          },
+        },
+      ]),
+    ).toThrow(/function actions are not allowed/);
+  });
+
+  it("rejects data model paths that only share the draft prefix", () => {
+    expect(() =>
+      assertRound1A2uiMessages([
+        {
+          version: "v0.9",
+          updateDataModel: {
+            surfaceId: ROUND1_A2UI_SURFACE_ID,
+            path: "/drafty",
+            value: { enabled: false },
+          },
+        },
+      ]),
+    ).toThrow(/escapes \/draft/);
+  });
+
+  it("validates dynamic list component references", () => {
+    expect(() =>
+      assertRound1A2uiMessages([
+        {
+          version: "v0.9",
+          updateComponents: {
+            surfaceId: ROUND1_A2UI_SURFACE_ID,
+            components: [
+              {
+                id: "root",
+                component: "List",
+                children: {
+                  componentId: "missing-row-template",
+                  path: "/draft/items",
+                },
+                direction: "vertical",
+              },
+            ],
+          },
+        },
+      ]),
+    ).toThrow(/missing-row-template/);
+  });
+
+  it("formats action summaries without assuming optional context exists", () => {
+    const action = {
+      name: "round1_a2ui_review",
+    } as Parameters<typeof formatRound1A2uiActionSummary>[0];
+
+    expect(formatRound1A2uiActionSummary(action)).toBe("round1_a2ui_review · 未设置 · 0项");
   });
 });

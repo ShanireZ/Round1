@@ -22,6 +22,14 @@
 - 结果页返回路径漂移：`ExamResult` 的返回 CTA 从旧 `/exams` 占位页改为 `/dashboard`，保留“再来一次”指向 `/exams/new`。
 - Coach class 测试漂移：`server/__tests__/coach-classes.integration.test.ts` 的 UUID fixture 改为符合 RFC variant 的值，避免路由 schema 在进入 owner / assignment 业务逻辑前返回 400，恢复已完成 Coach class 流程的回归覆盖。
 
+## 2026-04-28 维护追加
+
+- A2UI basic catalog 覆盖继续扩展：`/dev/ui-gallery` 的 Round1 surface 在原有 Text/Card/Row/Column/List/Tabs/Divider/Icon 与交互组件基础上，补入 Image、Modal、AudioPlayer、Video 的 guarded payload，避免“动态目录展示了组件但实际 surface 未覆盖”的验收漂移。
+- A2UI action guard 收紧：本地 payload validator 现在显式拒绝 `functionCall` action。真实 agent bridge、权限边界、审计和后端执行策略未设计前，前端 renderer 只允许已登记 event action。
+- A2UI data model guard 收紧：`updateDataModel.path` 必须是 `/draft` 或 `/draft/*`，不再接受 `/drafty` 这类仅共享字符串前缀的路径。
+- A2UI 引用完整性收口：动态 `List.children.componentId` 模板也纳入引用校验，避免 agent payload 在列表模板缺失时进入渲染阶段才出错。
+- A2UI 浏览器错误防护：`A2uiDesignSurface` 不再假设 action context 一定存在；surface 初始化异常会渲染 inline error，不让 React effect 异常升级成 console error / pageerror。
+
 ## 文档同步
 
 - `standard/05-frontend-engineering.md` 已补 A2UI 使用边界：只能作为 agent-facing renderer / 设计辅助 surface，必须继承 Round1 token bridge。
@@ -29,6 +37,7 @@
 - `standard/05-frontend-engineering.md` 与 `standard/04-ui-ux.md` 已补 A2UI 防硬编码要求：payload 由 factory/basic catalog 生成，按 installed package schema 校验后再渲染。
 - `standard/04-ui-ux.md`、`standard/14-deployment-ops.md`、`standard/15-performance-accessibility-print.md` 与 `plan/uiux_plan.md` 已把同源 `/font/` 到 R2 `/font/` 的字体代理纳入当前契约。
 - `standard/04-ui-ux.md` 与 `plan/uiux_plan.md` 已把 A2UI token bridge 纳入 `/dev/ui-gallery` / 交付物口径。
+- `standard/04-ui-ux.md`、`standard/05-frontend-engineering.md` 与 `plan/uiux_plan.md` 已补 A2UI media/modal 覆盖、`functionCall` 禁止、data model 路径边界和动态 List 模板引用校验口径。
 - `plan/reference-config.md` 已补 R2 环境变量示例，说明前端字体依赖 `R2_PUBLIC_BASE_URL/font/*.woff2`。
 - `plan/reference-api.md` 已补 `/account/class` 前端路由表项。
 - `docs/plans/2026-04-26-remaining-unfinished-work.md` 已记录 A2UI 本轮安装与视觉验收边界，UI/UX 截图、移动端、键盘、reduced motion 与打印视觉验收仍未整体关闭。
@@ -37,15 +46,15 @@
 
 - `npm run lint`：通过。
 - `npm run verify:ui-tokens`：通过，`verifyUiTokenUsage: ok (76 files checked)`，现已实际扫描 CSS 并阻断 `min-height:auto` / `min-width:auto` 兼容告警回归。
-- `npm run client:test -- client/src/lib/a2ui-design-surface.test.ts`：通过，1 file / 4 tests。
+- `npm run client:test -- client/src/lib/a2ui-design-surface.test.ts`：通过，1 file / 8 tests。
 - `npm run verify:offline-artifacts`：通过，`verifyOfflineArtifactNames: ok (137 files checked)`。
 - `npm run test -- server/__tests__/safeReturnTo.test.ts`：通过，18 tests。
 - `npm run test -- server/__tests__/coach-classes.integration.test.ts`：修复 UUID fixture 后通过，6 tests。
 - `npm run test`：通过，29 files / 217 tests。
-- `npm run client:test`：通过，7 files / 38 tests。
+- `npm run client:test`：通过，7 files / 42 tests。
 - `npm run build:server`：通过。
 - `npm run build:client`：通过。
-- Browser check：`https://127.0.0.1:5175/dev/ui-gallery#plate-11` headless Chromium 桌面视口中 A2UI surface 真实渲染，console badCount=0（0 errors / 0 warnings / 0 pageerror）。
+- Browser check：`https://127.0.0.1:5175/dev/ui-gallery#plate-11` headless Chromium 桌面视口中 A2UI surface 真实渲染，console badCount=0（0 errors / 0 warnings / 0 pageerror）。2026-04-28 维护追加后复查仍为 0 warnings / 0 errors，并截图确认 `Surface ready`、media/modal 预览入口和 token bridge 卡片渲染。
 
 ## 剩余风险
 

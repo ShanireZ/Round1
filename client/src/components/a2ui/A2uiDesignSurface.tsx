@@ -7,6 +7,7 @@ import {
   ROUND1_A2UI_SURFACE_ID,
   createRound1A2uiMessages,
   createRound1A2uiProcessor,
+  formatRound1A2uiActionSummary,
 } from "@/lib/a2ui-design-surface";
 import { useTheme } from "@/lib/theme";
 
@@ -16,25 +17,29 @@ export function A2uiDesignSurface() {
   const { resolvedTheme } = useTheme();
   const [lastAction, setLastAction] = useState("等待交互");
   const [surface, setSurface] = useState<Round1A2uiSurfaceModel | null>(null);
+  const [surfaceError, setSurfaceError] = useState<string | null>(null);
   const [processor] = useState(() =>
     createRound1A2uiProcessor((action) => {
-      const density =
-        typeof action.context.density === "number" ? `${action.context.density}%` : "未设置";
-      const checks = Array.isArray(action.context.checks) ? action.context.checks.length : 0;
-      setLastAction(`${action.name} · ${density} · ${checks}项`);
+      setLastAction(formatRound1A2uiActionSummary(action));
     }),
   );
 
   useEffect(() => {
-    setSurface(null);
-    processor.processMessages([
-      {
-        version: "v0.9",
-        deleteSurface: { surfaceId: ROUND1_A2UI_SURFACE_ID },
-      },
-    ]);
-    processor.processMessages(createRound1A2uiMessages());
-    setSurface(processor.model.getSurface(ROUND1_A2UI_SURFACE_ID) ?? null);
+    try {
+      setSurface(null);
+      setSurfaceError(null);
+      processor.processMessages([
+        {
+          version: "v0.9",
+          deleteSurface: { surfaceId: ROUND1_A2UI_SURFACE_ID },
+        },
+      ]);
+      processor.processMessages(createRound1A2uiMessages());
+      setSurface(processor.model.getSurface(ROUND1_A2UI_SURFACE_ID) ?? null);
+    } catch (error) {
+      setSurface(null);
+      setSurfaceError(error instanceof Error ? error.message : "A2UI surface 初始化失败。");
+    }
   }, [processor]);
 
   return (
@@ -56,7 +61,14 @@ export function A2uiDesignSurface() {
         </div>
       </div>
 
-      {surface ? (
+      {surfaceError ? (
+        <div
+          role="alert"
+          className="border-destructive/60 bg-subtle text-destructive rounded-[--radius-md] border p-4 text-sm"
+        >
+          {surfaceError}
+        </div>
+      ) : surface ? (
         <MarkdownContext.Provider value={renderMarkdown}>
           <A2uiSurface surface={surface} />
         </MarkdownContext.Provider>

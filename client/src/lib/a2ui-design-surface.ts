@@ -11,6 +11,12 @@ const ROUND1_A2UI_LIMITS = {
 
 export const ROUND1_A2UI_SURFACE_ID = "round1-design-assistant";
 
+const ROUND1_A2UI_MEDIA = {
+  imageUrl: "/favicon.svg",
+  audioUrl: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=",
+  videoUrl: "data:video/mp4;base64,",
+} as const;
+
 const ROUND1_A2UI_DRAFT = {
   page: "CoachReport",
   density: 72,
@@ -78,6 +84,92 @@ function createCatalogSummaryComponents(): A2uiComponentPayload[] {
   ];
 }
 
+function createMediaComponents(): A2uiComponentPayload[] {
+  return [
+    {
+      id: "media-card",
+      component: "Card",
+      child: "media-layout",
+    },
+    {
+      id: "media-layout",
+      component: "Column",
+      children: ["media-image", "media-summary", "media-modal"],
+    },
+    {
+      id: "media-image",
+      component: "Image",
+      url: ROUND1_A2UI_MEDIA.imageUrl,
+      description: "Round1 R1 monogram preview",
+      fit: "contain",
+      variant: "smallFeature",
+      accessibility: {
+        label: "Round1 logo preview",
+      },
+    },
+    {
+      id: "media-summary",
+      component: "Text",
+      variant: "caption",
+      text: "Image, Modal, AudioPlayer, and Video are included in the guarded basic catalog surface.",
+    },
+    {
+      id: "media-modal",
+      component: "Modal",
+      trigger: "media-modal-trigger",
+      content: "media-modal-content",
+    },
+    {
+      id: "media-modal-trigger",
+      component: "Button",
+      variant: "borderless",
+      child: "media-modal-trigger-label",
+      action: {
+        event: {
+          name: ROUND1_A2UI_ACTION_NAME,
+          context: {
+            page: bindDraftField("page"),
+            target: "media-catalog-preview",
+          },
+        },
+      },
+    },
+    {
+      id: "media-modal-trigger-label",
+      component: "Text",
+      text: "打开媒体组件预览",
+    },
+    {
+      id: "media-modal-content",
+      component: "Column",
+      children: ["media-modal-title", "media-video", "media-audio"],
+    },
+    {
+      id: "media-modal-title",
+      component: "Text",
+      variant: "h4",
+      text: "A2UI media components",
+    },
+    {
+      id: "media-video",
+      component: "Video",
+      url: ROUND1_A2UI_MEDIA.videoUrl,
+      accessibility: {
+        label: "Video component schema preview",
+      },
+    },
+    {
+      id: "media-audio",
+      component: "AudioPlayer",
+      url: ROUND1_A2UI_MEDIA.audioUrl,
+      description: "AudioPlayer component schema preview",
+      accessibility: {
+        label: "Audio component schema preview",
+      },
+    },
+  ];
+}
+
 function createCheckpointComponents(): A2uiComponentPayload[] {
   return ROUND1_A2UI_CHECKPOINTS.flatMap((checkpoint) => {
     const idPrefix = `checkpoint-${checkpoint.key}`;
@@ -136,6 +228,7 @@ function createRound1A2uiComponents(): A2uiComponentPayload[] {
         "summary",
         "section-divider",
         "design-tabs",
+        "media-card",
         "checkpoint-list",
         "notes",
       ],
@@ -253,6 +346,7 @@ function createRound1A2uiComponents(): A2uiComponentPayload[] {
     },
     ...createCheckpointComponents(),
     ...createCatalogSummaryComponents(),
+    ...createMediaComponents(),
     {
       id: "notes",
       component: "Text",
@@ -295,6 +389,8 @@ function getComponentReferences(component: A2uiComponentPayload): string[] {
   }
   if (Array.isArray(children)) {
     references.push(...children.filter((item): item is string => typeof item === "string"));
+  } else if (isRecord(children) && typeof children["componentId"] === "string") {
+    references.push(children["componentId"]);
   }
   if (typeof trigger === "string") {
     references.push(trigger);
@@ -313,18 +409,34 @@ function getComponentReferences(component: A2uiComponentPayload): string[] {
   return references;
 }
 
-function getComponentActionName(component: A2uiComponentPayload): string | undefined {
+function getComponentActionEventName(component: A2uiComponentPayload): string | undefined {
   const action = component["action"];
   if (!isRecord(action)) {
     return undefined;
   }
 
+  if (isRecord(action["functionCall"])) {
+    throw new Error(`A2UI function actions are not allowed: ${component.id}`);
+  }
+
   const event = action["event"];
   if (!isRecord(event)) {
-    return undefined;
+    throw new Error(`Unsupported A2UI action shape: ${component.id}`);
   }
 
   return typeof event["name"] === "string" ? event["name"] : undefined;
+}
+
+function isAllowedDataModelPath(path: string): boolean {
+  return path === ROUND1_A2UI_DRAFT_ROOT || path.startsWith(`${ROUND1_A2UI_DRAFT_ROOT}/`);
+}
+
+export function formatRound1A2uiActionSummary(action: A2uiClientAction): string {
+  const context = isRecord(action.context) ? action.context : {};
+  const density = typeof context["density"] === "number" ? `${context["density"]}%` : "未设置";
+  const checks = Array.isArray(context["checks"]) ? context["checks"].length : 0;
+
+  return `${action.name} · ${density} · ${checks}项`;
 }
 
 export function getRound1A2uiBasicCatalogComponents(): string[] {
@@ -355,7 +467,7 @@ export function assertRound1A2uiMessages(messages: readonly A2uiMessage[]): void
 
     if ("updateDataModel" in message) {
       const modelPath = message.updateDataModel.path ?? ROUND1_A2UI_DRAFT_ROOT;
-      if (!modelPath.startsWith(ROUND1_A2UI_DRAFT_ROOT)) {
+      if (!isAllowedDataModelPath(modelPath)) {
         throw new Error(`A2UI data model update escapes ${ROUND1_A2UI_DRAFT_ROOT}: ${modelPath}`);
       }
     }
@@ -396,7 +508,7 @@ export function assertRound1A2uiMessages(messages: readonly A2uiMessage[]): void
         );
       }
 
-      const actionName = getComponentActionName(component);
+      const actionName = getComponentActionEventName(component);
       if (actionName && actionName !== ROUND1_A2UI_ACTION_NAME) {
         throw new Error(`Unsupported A2UI action event: ${actionName}`);
       }

@@ -57,6 +57,17 @@
   --a2ui-choicepicker-gap: var(--space-2);
   --a2ui-choicepicker-chip-padding: var(--space-1) var(--space-3);
   --a2ui-choicepicker-chip-border-radius: var(--radius-full);
+  --a2ui-image-border-radius: var(--radius-md);
+  --a2ui-image-small-feature-size: 96px;
+  --a2ui-image-large-feature-size: 320px;
+  --a2ui-image-header-size: 180px;
+  --a2ui-video-border-radius: var(--radius-md);
+  --a2ui-audioplayer-background: var(--color-subtle);
+  --a2ui-audioplayer-border-radius: var(--radius-md);
+  --a2ui-audioplayer-padding: var(--space-3);
+  --a2ui-modal-overlay-color: var(--color-ceremony-surface);
+  --a2ui-modal-padding: var(--space-6);
+  --a2ui-modal-border-radius: var(--radius-lg);
   color: var(--color-foreground);
   font-family: var(--font-sans);
 }
@@ -95,6 +106,16 @@
 
 .round1-a2ui-surface input[type="range"] {
   accent-color: var(--color-primary);
+}
+
+.round1-a2ui-surface img,
+.round1-a2ui-surface video {
+  border: var(--border-hair) solid var(--color-border);
+  background: var(--color-subtle);
+}
+
+.round1-a2ui-surface audio {
+  width: 100%;
 }
 
 .round1-a2ui-surface label,
