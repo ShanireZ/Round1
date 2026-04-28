@@ -59,19 +59,19 @@
 
 ### 4. 教练后台与班级/任务闭环
 
-- [ ] 挂载 `/api/v1/classes/join`。
-- [ ] 挂载 `/api/v1/coach/**` 路由组与后端服务：班级、成员、邀请、任务、报表。
-- [ ] 教练创建/编辑/归档班级，生成与轮换班级码。
-- [ ] 邀请链接签发、加入、撤销、过期与最大使用次数原子扣减。
-- [ ] 学生通过班级码或邀请链接入班；重复入班幂等成功；归档班级拒绝加入。
-- [ ] 多教练模型完整实现：owner/collaborator 权限、添加/移除教练、转让 owner、Admin 可管理任意班级教练组。
-- [ ] 教练布置固定预制卷任务，并保证同一 assignment 同一学生只允许一次作答。
-- [ ] assignment 截止时间与考试时长共同决定自动提交时间，补 cron 兜底。
-- [ ] `assignment_progress` 补完整 `pending -> in_progress -> completed / missed` 状态流。
-- [ ] 教练报表只包含班级 assignment attempts，不混入学生自练数据。
-- [ ] coach/admin 以学生身份体验答题的数据需在班级统计中排除。
+- [x] 挂载 `/api/v1/classes/join`。（2026-04-28：`server/routes/coach.ts` 已挂载，支持 `code` 或 `inviteToken` 二选一。）
+- [x] 挂载 `/api/v1/coach/**` 路由组与后端服务：班级、成员、邀请、任务、报表。（2026-04-28：后端 slice 覆盖 classes/members/invites/coaches/assignments/report；Coach 前端页面仍为后续项。）
+- [x] 教练创建/编辑/归档班级，生成与轮换班级码。（2026-04-28：创建者自动成为 owner，归档后拒绝新入班和新邀请。）
+- [x] 邀请链接签发、加入、撤销、过期与最大使用次数原子扣减。（2026-04-28：邀请 token 服务端只存 hash，join 用 `UPDATE class_invites SET use_count = use_count + 1` 的条件更新扣减。）
+- [x] 学生通过班级码或邀请链接入班；重复入班幂等成功；归档班级拒绝加入。（2026-04-28：重复 membership 返回当前记录，不制造重复行；归档班级拒绝新 membership。）
+- [x] 多教练模型完整实现：owner/collaborator 权限、添加/移除教练、转让 owner、Admin 可管理任意班级教练组。（2026-04-28：Coach 路由按 `class_coaches` 授权，Admin 通过 `/api/v1/admin/classes/:id/coaches/**` + step-up/audit 管理任意班级教练组。）
+- [x] 教练布置固定预制卷任务，并保证同一 assignment 同一学生只允许一次作答。（2026-04-28：assignment 只绑定 published `prebuilt_paper`；考试创建的 assignment 分支不再重新选卷，改用 `assignments.prebuilt_paper_id`。）
+- [x] assignment 截止时间与考试时长共同决定自动提交时间，补 cron 兜底。（2026-04-28：沿用 Phase 11 delayed job + 5 分钟维护循环，assignment draft 创建已接回固定预制卷。）
+- [x] `assignment_progress` 补完整 `pending -> in_progress -> completed / missed` 状态流。（2026-04-28：创建 assignment 时给当前 student 成员写 pending；startAttempt/finalizer/维护循环已推进 in_progress/completed/missed。）
+- [x] 教练报表只包含班级 assignment attempts，不混入学生自练数据。（2026-04-28：`GET /api/v1/coach/report/:classId` 从 `assignments -> assignment_progress -> attempts` 聚合。）
+- [x] coach/admin 以学生身份体验答题的数据需在班级统计中排除。（2026-04-28：基础报表聚合显式过滤 `users.role = 'student'`。）
 - [ ] 群体热力图、题型统计、学生详情、学生趋势与下钻 Sheet 需要落地和性能验收。
-- [ ] Coach 权限边界验收：只能看到自己参与班级的数据。
+- [x] Coach 权限边界验收：只能看到自己参与班级的数据。（2026-04-28：后端 Coach API 均通过 `class_coaches` 关系授权；Coach 前端页面接入与视觉验收仍随下一条 UI 项推进。）
 
 ### 5. API 与配置契约补齐
 

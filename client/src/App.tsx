@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router";
 
 import { AppRouter } from "./router";
 import { Toaster } from "./components/ui/sonner";
+import { fetchAuthSession } from "./lib/auth";
 import { fetchActiveAttempt } from "./lib/exam-runtime";
 
 function shouldSkipActiveAttemptRedirect(pathname: string) {
@@ -26,9 +27,18 @@ function shouldSkipActiveAttemptRedirect(pathname: string) {
 function ActiveAttemptResumeGate() {
   const navigate = useNavigate();
   const location = useLocation();
+  const skipActiveAttemptRedirect = shouldSkipActiveAttemptRedirect(location.pathname);
+  const sessionQuery = useQuery({
+    queryKey: ["auth-session"],
+    queryFn: fetchAuthSession,
+    retry: false,
+    refetchOnWindowFocus: false,
+    staleTime: 30_000,
+  });
   const activeAttemptQuery = useQuery({
     queryKey: ["active-attempt"],
     queryFn: fetchActiveAttempt,
+    enabled: sessionQuery.data?.authenticated === true && !skipActiveAttemptRedirect,
     retry: false,
     refetchOnWindowFocus: false,
     staleTime: 30_000,
@@ -36,12 +46,12 @@ function ActiveAttemptResumeGate() {
 
   useEffect(() => {
     const activeAttempt = activeAttemptQuery.data;
-    if (!activeAttempt || shouldSkipActiveAttemptRedirect(location.pathname)) {
+    if (!activeAttempt || skipActiveAttemptRedirect) {
       return;
     }
 
     navigate(activeAttempt.resumePath, { replace: true });
-  }, [activeAttemptQuery.data, location.pathname, navigate]);
+  }, [activeAttemptQuery.data, navigate, skipActiveAttemptRedirect]);
 
   return null;
 }

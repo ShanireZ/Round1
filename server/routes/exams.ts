@@ -23,6 +23,11 @@ import { buildAttemptResultItems } from "../services/grader.js";
 import { consumeAutosaveRateLimit } from "../services/autosaveRateLimit.js";
 import { getRuntimeNumberSetting } from "../services/runtimeConfigService.js";
 import {
+  ClassServiceError,
+  findExistingAssignmentPaper,
+  resolveAssignmentPrebuiltPaper,
+} from "../services/classService.js";
+import {
   AutosaveAttemptBodySchema,
   CreateExamDraftBodySchema,
   StartAttemptBodySchema,
@@ -146,10 +151,7 @@ async function findExistingDraft(
 }
 
 async function selectPublishedPrebuiltPaper(userId: string, examType: string, difficulty: string) {
-  const recentExcludeAttempts = getRuntimeNumberSetting(
-    "paper.selection.recentExcludeAttempts",
-    3,
-  );
+  const recentExcludeAttempts = getRuntimeNumberSetting("paper.selection.recentExcludeAttempts", 3);
   const recentRows =
     recentExcludeAttempts > 0
       ? await db
@@ -264,14 +266,57 @@ examsRouter.post(
     try {
       const userId = req.session.userId!;
       const body = req.body as CreateExamDraftBody;
-      const existingDraft = await findExistingDraft(userId, body);
+      const assignmentSelection = body.assignmentId
+        ? await resolveAssignmentPrebuiltPaper(userId, body.assignmentId)
+        : null;
+
+      if (assignmentSelection?.existingPaperId) {
+        const existingPaper = await findExistingAssignmentPaper(
+          userId,
+          assignmentSelection.existingPaperId,
+        );
+        if (existingPaper) {
+          res.ok(existingPaper);
+          return;
+        }
+      }
+
+      const effectiveBody = assignmentSelection
+        ? {
+            ...body,
+            examType: assignmentSelection.examType,
+            difficulty: assignmentSelection.difficulty as "easy" | "medium" | "hard",
+          }
+        : body;
+
+      if (
+        assignmentSelection &&
+        (body.examType !== assignmentSelection.examType ||
+          body.difficulty !== assignmentSelection.difficulty)
+      ) {
+        res.fail("ROUND1_ASSIGNMENT_PAPER_MISMATCH", "任务考试必须使用任务绑定的预制卷口径", 422, {
+          examType: assignmentSelection.examType,
+          difficulty: assignmentSelection.difficulty,
+        });
+        return;
+      }
+
+      const existingDraft = await findExistingDraft(userId, effectiveBody);
 
       if (existingDraft) {
         res.ok(existingDraft);
         return;
       }
 
-      const selected = await selectPublishedPrebuiltPaper(userId, body.examType, body.difficulty);
+      const selected = assignmentSelection
+        ? {
+            id: assignmentSelection.prebuiltPaperId,
+            examType: assignmentSelection.examType,
+            difficulty: assignmentSelection.difficulty,
+            blueprintVersion: assignmentSelection.blueprintVersion,
+          }
+        : await selectPublishedPrebuiltPaper(userId, body.examType, body.difficulty);
+
       if (!selected) {
         res.fail("ROUND1_PREBUILT_PAPER_UNAVAILABLE", "当前难度无可用预制卷", 503);
         return;
@@ -331,11 +376,31 @@ examsRouter.post(
           );
         }
 
+        if (body.assignmentId) {
+          await tx
+            .update(assignmentProgress)
+            .set({
+              paperId: created.id,
+              updatedAt: new Date(),
+            })
+            .where(
+              and(
+                eq(assignmentProgress.assignmentId, body.assignmentId),
+                eq(assignmentProgress.userId, userId),
+                eq(assignmentProgress.status, "pending"),
+              ),
+            );
+        }
+
         return created;
       });
 
       res.ok(createdDraft, 201);
     } catch (err) {
+      if (err instanceof ClassServiceError) {
+        res.fail(err.code, err.message, err.status, err.details);
+        return;
+      }
       next(err);
     }
   },
@@ -870,7 +935,13 @@ examsRouter.patch(
           answersJson: buildAnswersJsonPatchExpression(body.patches),
           updatedAt: new Date(),
         })
-        .where(and(eq(attempts.id, attemptId), eq(attempts.userId, userId), eq(attempts.status, "started")))
+        .where(
+          and(
+            eq(attempts.id, attemptId),
+            eq(attempts.userId, userId),
+            eq(attempts.status, "started"),
+          ),
+        )
         .returning({
           id: attempts.id,
           paperId: attempts.paperId,
@@ -940,7 +1011,13 @@ examsRouter.post(
             answersJson: buildAnswersJsonPatchExpression(body.patches),
             updatedAt: new Date(),
           })
-          .where(and(eq(attempts.id, attemptId), eq(attempts.userId, userId), eq(attempts.status, "started")))
+          .where(
+            and(
+              eq(attempts.id, attemptId),
+              eq(attempts.userId, userId),
+              eq(attempts.status, "started"),
+            ),
+          )
           .returning({
             id: attempts.id,
           });

@@ -6,19 +6,14 @@ import {
   ChartNoAxesColumnIncreasing,
   Clock3,
   Lightbulb,
+  LogIn,
   ListChecks,
   Target,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -27,6 +22,7 @@ import {
   type UserAttemptHistoryItem,
   type UserWeakPrimaryKp,
 } from "@/lib/exam-runtime";
+import { fetchAuthSession } from "@/lib/auth";
 import { formatDifficultyLabel } from "@/lib/exam-results";
 
 function formatDate(value: string | null) {
@@ -80,6 +76,35 @@ function LoadingDashboard() {
   );
 }
 
+function LoginRequiredDashboard() {
+  return (
+    <div className="h-full overflow-y-auto px-6 py-8">
+      <div className="mx-auto grid min-h-[60vh] max-w-3xl place-items-center">
+        <div className="border-border bg-card w-full rounded-[--radius-lg] border p-8 text-center shadow-sm">
+          <LogIn className="text-primary mx-auto h-9 w-9" />
+          <h1 className="text-foreground mt-5 text-2xl font-semibold tracking-tight">
+            登录后查看训练概览
+          </h1>
+          <p className="text-muted-foreground mx-auto mt-3 max-w-lg text-sm leading-6">
+            成绩趋势、答题历史和弱项统计会绑定到你的账号。当前浏览器没有有效登录会话。
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Button asChild variant="primary">
+              <Link to="/login">
+                登录
+                <ArrowRight />
+              </Link>
+            </Button>
+            <Button asChild variant="secondary">
+              <Link to="/register">注册</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ScoreTrend({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
   const points = attempts
     .filter((attempt) => typeof attempt.score === "number")
@@ -88,10 +113,10 @@ function ScoreTrend({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
 
   if (points.length === 0) {
     return (
-      <div className="grid min-h-64 place-items-center rounded-[--radius-lg] border border-dashed border-border bg-subtle/10 p-8 text-center">
+      <div className="border-border bg-subtle/10 grid min-h-64 place-items-center rounded-[--radius-lg] border border-dashed p-8 text-center">
         <div className="space-y-3">
-          <ChartNoAxesColumnIncreasing className="mx-auto h-8 w-8 text-muted-foreground" />
-          <div className="text-sm text-muted-foreground">完成一次模拟后会显示成绩曲线。</div>
+          <ChartNoAxesColumnIncreasing className="text-muted-foreground mx-auto h-8 w-8" />
+          <div className="text-muted-foreground text-sm">完成一次模拟后会显示成绩曲线。</div>
         </div>
       </div>
     );
@@ -100,24 +125,26 @@ function ScoreTrend({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
   return (
     <div className="space-y-5">
       <div className="grid h-64 grid-cols-[auto_1fr] gap-4">
-        <div className="flex flex-col justify-between py-2 text-xs text-muted-foreground">
+        <div className="text-muted-foreground flex flex-col justify-between py-2 text-xs">
           <span>100</span>
           <span>75</span>
           <span>50</span>
           <span>25</span>
           <span>0</span>
         </div>
-        <div className="grid grid-cols-8 items-end gap-3 border-l border-b border-border/80 px-4 py-2">
+        <div className="border-border/80 grid grid-cols-8 items-end gap-3 border-b border-l px-4 py-2">
           {points.map((attempt, index) => {
             const score = Math.max(0, Math.min(100, attempt.score ?? 0));
             return (
               <div key={attempt.id} className="flex min-w-0 flex-col items-center gap-2">
                 <div
-                  className="w-full rounded-t-[--radius-sm] bg-primary/85 transition-all"
+                  className="bg-primary/85 w-full rounded-t-[--radius-sm] transition-all"
                   style={{ height: `${Math.max(score, 4)}%` }}
                   title={`${attempt.examType} ${formatScore(attempt.score)} 分`}
                 />
-                <span className="w-full truncate text-center text-xs text-muted-foreground">#{index + 1}</span>
+                <span className="text-muted-foreground w-full truncate text-center text-xs">
+                  #{index + 1}
+                </span>
               </div>
             );
           })}
@@ -126,12 +153,17 @@ function ScoreTrend({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {points.slice(-4).map((attempt) => (
-          <div key={attempt.id} className="rounded-[--radius-md] border border-border bg-white/70 p-3">
+          <div
+            key={attempt.id}
+            className="border-border rounded-[--radius-md] border bg-white/70 p-3"
+          >
             <div className="flex items-center justify-between gap-2">
-              <span className="truncate text-xs text-muted-foreground">{attempt.examType}</span>
+              <span className="text-muted-foreground truncate text-xs">{attempt.examType}</span>
               <Badge variant="outline">{formatScore(attempt.score)}</Badge>
             </div>
-            <div className="mt-2 text-xs text-muted-foreground">{formatDate(attempt.submittedAt)}</div>
+            <div className="text-muted-foreground mt-2 text-xs">
+              {formatDate(attempt.submittedAt)}
+            </div>
           </div>
         ))}
       </div>
@@ -142,7 +174,7 @@ function ScoreTrend({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
 function WeaknessList({ items }: { items: UserWeakPrimaryKp[] }) {
   if (items.length === 0) {
     return (
-      <div className="rounded-[--radius-lg] border border-dashed border-border bg-subtle/10 p-6 text-sm text-muted-foreground">
+      <div className="border-border bg-subtle/10 text-muted-foreground rounded-[--radius-lg] border border-dashed p-6 text-sm">
         暂无弱项统计。
       </div>
     );
@@ -155,7 +187,7 @@ function WeaknessList({ items }: { items: UserWeakPrimaryKp[] }) {
         return (
           <div key={item.kpId} className="space-y-2">
             <div className="flex items-center justify-between gap-3 text-sm">
-              <span className="font-medium text-foreground">KP {item.kpId}</span>
+              <span className="text-foreground font-medium">KP {item.kpId}</span>
               <span className="text-muted-foreground">
                 {item.correct}/{item.total} · {accuracy}%
               </span>
@@ -171,9 +203,9 @@ function WeaknessList({ items }: { items: UserWeakPrimaryKp[] }) {
 function AttemptHistory({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
   if (attempts.length === 0) {
     return (
-      <div className="rounded-[--radius-lg] border border-dashed border-border bg-subtle/10 p-8 text-center">
-        <BookOpenText className="mx-auto h-8 w-8 text-muted-foreground" />
-        <div className="mt-3 text-sm text-muted-foreground">还没有答题历史。</div>
+      <div className="border-border bg-subtle/10 rounded-[--radius-lg] border border-dashed p-8 text-center">
+        <BookOpenText className="text-muted-foreground mx-auto h-8 w-8" />
+        <div className="text-muted-foreground mt-3 text-sm">还没有答题历史。</div>
         <Button asChild variant="primary" className="mt-5">
           <Link to="/exams/new">
             开始模拟
@@ -185,12 +217,12 @@ function AttemptHistory({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
   }
 
   return (
-    <div className="divide-y divide-border overflow-hidden rounded-[--radius-lg] border border-border">
+    <div className="divide-border border-border divide-y overflow-hidden rounded-[--radius-lg] border">
       {attempts.slice(0, 8).map((attempt) => (
         <Link
           key={attempt.id}
           to={`/exams/${attempt.paperId}/result`}
-          className="grid gap-3 bg-card p-4 transition-colors hover:bg-subtle/20 sm:grid-cols-[1fr_auto]"
+          className="bg-card hover:bg-subtle/20 grid gap-3 p-4 transition-colors sm:grid-cols-[1fr_auto]"
         >
           <div className="min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
@@ -200,11 +232,13 @@ function AttemptHistory({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
                 {statusLabel(attempt.status)}
               </Badge>
             </div>
-            <div className="text-sm text-muted-foreground">{formatDate(attempt.submittedAt)}</div>
+            <div className="text-muted-foreground text-sm">{formatDate(attempt.submittedAt)}</div>
           </div>
           <div className="flex items-center justify-between gap-4 sm:justify-end">
-            <div className="text-2xl font-semibold text-foreground">{formatScore(attempt.score)}</div>
-            <ArrowRight className="h-4 w-4 text-muted-foreground" />
+            <div className="text-foreground text-2xl font-semibold">
+              {formatScore(attempt.score)}
+            </div>
+            <ArrowRight className="text-muted-foreground h-4 w-4" />
           </div>
         </Link>
       ))}
@@ -213,14 +247,31 @@ function AttemptHistory({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
 }
 
 export default function Dashboard() {
+  const sessionQuery = useQuery({
+    queryKey: ["auth-session"],
+    queryFn: fetchAuthSession,
+    retry: false,
+    staleTime: 30_000,
+  });
+  const isAuthenticated = sessionQuery.data?.authenticated === true;
   const historyQuery = useQuery({
     queryKey: ["user-attempt-history", 1, 20],
     queryFn: () => fetchUserAttemptHistory({ page: 1, pageSize: 20 }),
+    enabled: isAuthenticated,
   });
   const statsQuery = useQuery({
     queryKey: ["user-stats"],
     queryFn: fetchUserStats,
+    enabled: isAuthenticated,
   });
+
+  if (sessionQuery.isPending) {
+    return <LoadingDashboard />;
+  }
+
+  if (!isAuthenticated) {
+    return <LoginRequiredDashboard />;
+  }
 
   if (historyQuery.isPending || statsQuery.isPending) {
     return <LoadingDashboard />;
@@ -241,8 +292,8 @@ export default function Dashboard() {
         <section className="grid gap-6 lg:grid-cols-[1fr_auto]">
           <div className="space-y-3">
             <Badge variant="outline">Dashboard</Badge>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground">我的训练概览</h1>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            <h1 className="text-foreground text-3xl font-semibold tracking-tight">我的训练概览</h1>
+            <p className="text-muted-foreground max-w-2xl text-sm leading-6">
               成绩趋势、答题历史、弱项统计和下一步建议会跟随运行时结果同步更新。
             </p>
           </div>
@@ -266,7 +317,7 @@ export default function Dashboard() {
           <Card variant="flat" className="border-border bg-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl">
-                <ChartNoAxesColumnIncreasing className="h-5 w-5 text-primary" />
+                <ChartNoAxesColumnIncreasing className="text-primary h-5 w-5" />
                 成绩曲线
               </CardTitle>
               <CardDescription>最近 8 次已完成模拟的分数变化。</CardDescription>
@@ -280,7 +331,7 @@ export default function Dashboard() {
             <Card variant="flat" className="border-border bg-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl">
-                  <Target className="h-5 w-5 text-primary" />
+                  <Target className="text-primary h-5 w-5" />
                   弱项统计
                 </CardTitle>
                 <CardDescription>按 primary KP 聚合的低准确率区间。</CardDescription>
@@ -293,12 +344,12 @@ export default function Dashboard() {
             <Card variant="flat" className="border-border bg-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl">
-                  <Lightbulb className="h-5 w-5 text-primary" />
+                  <Lightbulb className="text-primary h-5 w-5" />
                   建议
                 </CardTitle>
                 <CardDescription>当前为规则型静态建议区。</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm leading-6 text-muted-foreground">
+              <CardContent className="text-muted-foreground space-y-3 text-sm leading-6">
                 <div>先复盘最近一次低分题，再做同一 exam type 的中等难度卷。</div>
                 <div>弱项 KP 正确率低于 50% 时，优先回看错题解析和对应知识点笔记。</div>
                 <div>连续两次超过 85 分后，再切到更高难度或限时训练。</div>
@@ -310,7 +361,7 @@ export default function Dashboard() {
         <Card variant="flat" className="border-border bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
-              <ListChecks className="h-5 w-5 text-primary" />
+              <ListChecks className="text-primary h-5 w-5" />
               答题历史
             </CardTitle>
             <CardDescription className="flex items-center gap-2">

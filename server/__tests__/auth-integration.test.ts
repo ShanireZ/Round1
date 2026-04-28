@@ -148,6 +148,13 @@ describe("Phase 2 — Email Registration", () => {
     expect(res.body.data.providers).toContain("passkey");
   });
 
+  it("GET /auth/session — returns an anonymous session state without 401", async () => {
+    const res = await supertest(server).get("/api/v1/auth/session");
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toEqual({ authenticated: false });
+  });
+
   it("POST /auth/register/email/request-challenge — sends code email", async () => {
     const csrf = await getCsrf(agent);
     sentEmails.length = 0;
@@ -860,10 +867,7 @@ describe("Forced password change", () => {
       .limit(1);
 
     expect(user).toBeTruthy();
-    await db
-      .update(users)
-      .set({ passwordChangeRequired: true })
-      .where(eq(users.id, user!.id));
+    await db.update(users).set({ passwordChangeRequired: true }).where(eq(users.id, user!.id));
 
     const forcedAgent = supertest.agent(server);
     const loginCsrf = await getCsrf(forcedAgent);

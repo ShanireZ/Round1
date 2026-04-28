@@ -1,4 +1,4 @@
-import { ipKeyGenerator, rateLimit } from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 import { RedisStore } from "rate-limit-redis";
 import { redisClient } from "../redis.js";
 import { env } from "../../config/env.js";
@@ -23,7 +23,7 @@ const failMessage = {
   },
 };
 
-const requestIpKey = (req: Request) => ipKeyGenerator(req.ip ?? "");
+const requestIpKey = (req: Request) => req.ip ?? "unknown";
 
 // 1. Email challenge sending: per-email per-hour
 export const challengePerEmailLimiter = rateLimit({

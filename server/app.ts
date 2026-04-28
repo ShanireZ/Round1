@@ -15,6 +15,7 @@ import { authRouter } from "./routes/auth.js";
 import { configRouter } from "./routes/config.js";
 import { adminRouter } from "./routes/admin.js";
 import { examsRouter } from "./routes/exams.js";
+import { coachRouter } from "./routes/coach.js";
 // Ensure common schemas are registered
 import "./routes/schemas/common.schema.js";
 import "./routes/schemas/auth.schema.js";
@@ -116,6 +117,7 @@ export function createApp(): Express {
   app.use("/api/v1", configRouter);
   app.use("/api/v1", authRouter);
   app.use("/api/v1", adminRouter);
+  app.use("/api/v1", coachRouter);
   app.use("/api/v1", examsRouter);
 
   // ── 9. Global error handler (JSON) ────────────────────────────────

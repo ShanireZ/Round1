@@ -2,6 +2,7 @@ import { Router, type Request, type Response, type NextFunction } from "express"
 import crypto from "node:crypto";
 import { eq, and, sql } from "drizzle-orm";
 import argon2 from "argon2";
+import { z } from "zod";
 
 import { db } from "../db.js";
 import { env } from "../../config/env.js";
@@ -10,10 +11,7 @@ import { AppError } from "../lib/errors.js";
 import { requireAuth } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
 import { verifyTurnstile } from "../services/auth/turnstileService.js";
-import {
-  createPowChallenge,
-  verifyPowSolution,
-} from "../services/auth/powService.js";
+import { createPowChallenge, verifyPowSolution } from "../services/auth/powService.js";
 import {
   createChallenge,
   verifyCode,
@@ -48,6 +46,7 @@ import {
   PasswordReauthBody,
   TotpEnrollVerifyBody,
   TotpReauthBody,
+  AuthSessionResponse,
 } from "./schemas/auth.schema.js";
 import { safeReturnTo } from "../../config/auth.js";
 import {
@@ -58,10 +57,7 @@ import {
   forgotPerEmailLimiter,
   registerPerIpLimiter,
 } from "../middleware/authRateLimit.js";
-import {
-  buildAuthorizationUrl,
-  handleCallback,
-} from "../services/auth/oidcService.js";
+import { buildAuthorizationUrl, handleCallback } from "../services/auth/oidcService.js";
 import { isTempEmail } from "../services/auth/blocklistService.js";
 import { passkeyCredentials } from "../db/schema/passkeyCredentials.js";
 import {
@@ -79,6 +75,7 @@ import type {
   RegistrationResponseJSON,
   AuthenticationResponseJSON,
 } from "@simplewebauthn/server";
+import { registry } from "../openapi/registry.js";
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -132,17 +129,14 @@ export const authRouter = Router();
 // ─── Phase 2: Register + Login ───────────────────────────────────────
 
 // 1. GET /auth/csrf-token
-authRouter.get(
-  "/auth/csrf-token",
-  (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const csrfToken = csrfGenerateToken(req);
-      res.ok({ csrfToken });
-    } catch (err) {
-      next(err);
-    }
-  },
-);
+authRouter.get("/auth/csrf-token", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const csrfToken = csrfGenerateToken(req);
+    res.ok({ csrfToken });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // 2. GET /auth/providers
 authRouter.get("/auth/providers", (_req: Request, res: Response) => {
@@ -156,22 +150,70 @@ authRouter.get("/auth/providers", (_req: Request, res: Response) => {
   res.ok({ providers });
 });
 
-// 2b. GET /auth/pow-challenge — issue a PoW challenge
-authRouter.get(
-  "/auth/pow-challenge",
-  async (_req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (!env.AUTH_POW_ENABLED) {
-        res.fail("ROUND1_POW_DISABLED", "PoW is not enabled", 400);
-        return;
-      }
-      const challenge = await createPowChallenge();
-      res.ok(challenge);
-    } catch (err) {
-      next(err);
-    }
+registry.registerPath({
+  method: "get",
+  path: "/api/v1/auth/session",
+  summary: "Read the current browser session without requiring authentication",
+  responses: {
+    200: {
+      description: "Current session state",
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.literal(true),
+            data: AuthSessionResponse,
+          }),
+        },
+      },
+    },
   },
-);
+});
+
+// 2a. GET /auth/session — frontend auth gate without noisy 401s
+authRouter.get("/auth/session", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.session?.userId;
+    if (!userId) {
+      res.ok({ authenticated: false });
+      return;
+    }
+
+    const [user] = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        displayName: users.displayName,
+        role: users.role,
+        status: users.status,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (!user || user.status !== "active") {
+      res.ok({ authenticated: false });
+      return;
+    }
+
+    res.ok({ authenticated: true, user });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 2b. GET /auth/pow-challenge — issue a PoW challenge
+authRouter.get("/auth/pow-challenge", async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!env.AUTH_POW_ENABLED) {
+      res.fail("ROUND1_POW_DISABLED", "PoW is not enabled", 400);
+      return;
+    }
+    const challenge = await createPowChallenge();
+    res.ok(challenge);
+  } catch (err) {
+    next(err);
+  }
+});
 
 // 3. POST /auth/register/email/request-challenge
 authRouter.post(
@@ -518,10 +560,7 @@ authRouter.post(
       req.session.lastStrongAuthAt = Date.now();
 
       // Update last_strong_auth_at in DB
-      await db
-        .update(users)
-        .set({ lastStrongAuthAt: new Date() })
-        .where(eq(users.id, user.id));
+      await db.update(users).set({ lastStrongAuthAt: new Date() }).where(eq(users.id, user.id));
 
       // Audit log
       await writeAuditLog({
@@ -830,7 +869,9 @@ authRouter.get(
         return;
       }
 
-      let sessionData: { userId: string; sessionIdHash: string; sessionVersion: number } | undefined;
+      let sessionData:
+        | { userId: string; sessionIdHash: string; sessionVersion: number }
+        | undefined;
       if (intent === "bind") {
         if (!req.session.userId) {
           res.fail("ROUND1_AUTH_REQUIRED", "绑定操作需要先登录", 401);
@@ -933,10 +974,7 @@ authRouter.get(
       // login / register flow
       if (existingBinding) {
         // Already bound — create session regardless of intent
-        const [user] = await db
-          .select()
-          .from(users)
-          .where(eq(users.id, existingBinding.userId));
+        const [user] = await db.select().from(users).where(eq(users.id, existingBinding.userId));
         if (!user || user.status !== "active") {
           res.fail("ROUND1_ACCOUNT_LOCKED", "账号已被禁用", 403);
           return;
@@ -972,7 +1010,10 @@ authRouter.get(
       };
       req.session.save((err) => {
         if (err) return next(err);
-        res.redirect(302, safeReturnTo(`/auth/complete-profile?ticket=${encodeURIComponent(ticket)}`));
+        res.redirect(
+          302,
+          safeReturnTo(`/auth/complete-profile?ticket=${encodeURIComponent(ticket)}`),
+        );
       });
     } catch (err) {
       if (err instanceof AppError) {
@@ -993,7 +1034,10 @@ authRouter.post(
       const { ticket, username, password, displayName, deviceIdHash } = req.body;
 
       // Verify ticket
-      if (!req.session.completeProfileTicketHash || sha256(ticket) !== req.session.completeProfileTicketHash) {
+      if (
+        !req.session.completeProfileTicketHash ||
+        sha256(ticket) !== req.session.completeProfileTicketHash
+      ) {
         res.fail("ROUND1_INVALID_TICKET", "无效或过期的 ticket", 400);
         return;
       }
@@ -1195,11 +1239,7 @@ authRouter.post(
         .where(eq(passkeyCredentials.id, row.id));
 
       // Get user
-      const [user] = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, row.userId))
-        .limit(1);
+      const [user] = await db.select().from(users).where(eq(users.id, row.userId)).limit(1);
 
       if (!user || user.status !== "active") {
         res.fail("ROUND1_USER_DISABLED", "账号已被禁用", 403);
@@ -1313,8 +1353,7 @@ authRouter.post(
         return;
       }
 
-      const { id, publicKey, counter, transports } =
-        verification.registrationInfo.credential;
+      const { id, publicKey, counter, transports } = verification.registrationInfo.credential;
       const { credentialBackedUp: backupState, credentialDeviceType } =
         verification.registrationInfo;
       const backupEligible = credentialDeviceType === "multiDevice";
@@ -1376,20 +1415,16 @@ authRouter.delete(
 // ─── Phase 6: Admin + Step-up + TOTP + Logout ────────────────────────
 
 // 19. POST /auth/logout
-authRouter.post(
-  "/auth/logout",
-  requireAuth,
-  (req: Request, res: Response, next: NextFunction) => {
-    req.session.destroy((err) => {
-      if (err) {
-        next(err);
-        return;
-      }
-      res.clearCookie("__Host-Round1.sid", { path: "/" });
-      res.ok({ message: "已退出登录" });
-    });
-  },
-);
+authRouter.post("/auth/logout", requireAuth, (req: Request, res: Response, next: NextFunction) => {
+  req.session.destroy((err) => {
+    if (err) {
+      next(err);
+      return;
+    }
+    res.clearCookie("__Host-Round1.sid", { path: "/" });
+    res.ok({ message: "已退出登录" });
+  });
+});
 
 // 20. POST /auth/email/change/request-challenge
 authRouter.post(
@@ -1499,10 +1534,7 @@ authRouter.post(
       const newEmail = ticketData.email;
 
       // Update user email
-      await db
-        .update(userEmails)
-        .set({ email: newEmail })
-        .where(eq(userEmails.userId, userId));
+      await db.update(userEmails).set({ email: newEmail }).where(eq(userEmails.userId, userId));
 
       // Audit log
       await writeAuditLog({
@@ -1536,10 +1568,7 @@ authRouter.delete(
       await db
         .delete(externalIdentities)
         .where(
-          and(
-            eq(externalIdentities.userId, userId),
-            eq(externalIdentities.provider, provider),
-          ),
+          and(eq(externalIdentities.userId, userId), eq(externalIdentities.provider, provider)),
         );
 
       // Audit log

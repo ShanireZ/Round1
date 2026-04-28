@@ -19,7 +19,17 @@ import { requireRole } from "../middleware/auth.js";
 import { requireRecentAuth } from "../middleware/requireRecentAuth.js";
 import { adminAudit } from "../middleware/adminAudit.js";
 import { validate } from "../middleware/validate.js";
+import {
+  addClassCoach,
+  ClassServiceError,
+  listClassCoaches,
+  removeClassCoach,
+  transferClassOwner,
+  type ActorContext,
+  type ActorRole,
+} from "../services/classService.js";
 import { AdminUpdateUserBody } from "./schemas/auth.schema.js";
+import { AddClassCoachBodySchema } from "./schemas/coach.schema.js";
 import { PaginationQuerySchema } from "./schemas/common.schema.js";
 import {
   BlocklistAddBody,
@@ -70,6 +80,22 @@ type QuestionReviewStore = Pick<typeof db, "select" | "insert" | "update">;
 
 function getActorUserId(req: Request) {
   return req.session?.userId ?? null;
+}
+
+function actorFromRequest(req: Request): ActorContext {
+  return {
+    userId: req.session.userId!,
+    role: req.session.role as ActorRole,
+  };
+}
+
+function sendClassServiceError(err: unknown, res: Response, next: NextFunction): void {
+  if (err instanceof ClassServiceError) {
+    res.fail(err.code, err.message, err.status, err.details);
+    return;
+  }
+
+  next(err);
 }
 
 function isCodeQuestionType(type: string) {
@@ -336,6 +362,96 @@ adminRouter.post(
   },
 );
 
+// ─── Admin Class Coach Management ─────────────────────────────────────
+
+adminRouter.get(
+  "/admin/classes/:id/coaches",
+  requireAuth,
+  requireRole("admin"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.ok({
+        items: await listClassCoaches(actorFromRequest(req), req.params.id as string, true),
+      });
+    } catch (err) {
+      sendClassServiceError(err, res, next);
+    }
+  },
+);
+
+adminRouter.post(
+  "/admin/classes/:id/coaches",
+  requireAuth,
+  requireRole("admin"),
+  requireRecentAuth,
+  adminAudit("add_class_coach", "class"),
+  validate(AddClassCoachBodySchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const classId = req.params.id as string;
+      const coach = await addClassCoach(
+        actorFromRequest(req),
+        classId,
+        req.body.userId as string,
+        true,
+      );
+      res.locals.adminAudit.targetId = classId;
+      res.locals.adminAudit.after = coach;
+      res.ok(coach, 201);
+    } catch (err) {
+      sendClassServiceError(err, res, next);
+    }
+  },
+);
+
+adminRouter.delete(
+  "/admin/classes/:id/coaches/:userId",
+  requireAuth,
+  requireRole("admin"),
+  requireRecentAuth,
+  adminAudit("remove_class_coach", "class"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const classId = req.params.id as string;
+      const removed = await removeClassCoach(
+        actorFromRequest(req),
+        classId,
+        req.params.userId as string,
+        true,
+      );
+      res.locals.adminAudit.targetId = classId;
+      res.locals.adminAudit.before = removed;
+      res.ok(removed);
+    } catch (err) {
+      sendClassServiceError(err, res, next);
+    }
+  },
+);
+
+adminRouter.post(
+  "/admin/classes/:id/coaches/:userId/transfer-owner",
+  requireAuth,
+  requireRole("admin"),
+  requireRecentAuth,
+  adminAudit("transfer_class_owner", "class"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const classId = req.params.id as string;
+      const owner = await transferClassOwner(
+        actorFromRequest(req),
+        classId,
+        req.params.userId as string,
+        true,
+      );
+      res.locals.adminAudit.targetId = classId;
+      res.locals.adminAudit.after = owner;
+      res.ok(owner);
+    } catch (err) {
+      sendClassServiceError(err, res, next);
+    }
+  },
+);
+
 // ─── Blocklist Management ────────────────────────────────────────────
 
 // GET /admin/blocklist/stats — summary counts
@@ -530,17 +646,13 @@ adminRouter.patch(
       };
 
       const [updated] = current
-        ? await db
-            .update(appSettings)
-            .set(values)
-            .where(eq(appSettings.key, key))
-            .returning({
-              key: appSettings.key,
-              valueJson: appSettings.valueJson,
-              updatedBy: appSettings.updatedBy,
-              createdAt: appSettings.createdAt,
-              updatedAt: appSettings.updatedAt,
-            })
+        ? await db.update(appSettings).set(values).where(eq(appSettings.key, key)).returning({
+            key: appSettings.key,
+            valueJson: appSettings.valueJson,
+            updatedBy: appSettings.updatedBy,
+            createdAt: appSettings.createdAt,
+            updatedAt: appSettings.updatedAt,
+          })
         : await db
             .insert(appSettings)
             .values({
@@ -705,9 +817,7 @@ adminRouter.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const query = QuestionReviewQuerySchema.parse(req.query);
-      const whereClause = query.status
-        ? eq(questionReviews.reviewStatus, query.status)
-        : undefined;
+      const whereClause = query.status ? eq(questionReviews.reviewStatus, query.status) : undefined;
 
       const [countResult] = await db
         .select({ count: sql<number>`count(*)::int` })

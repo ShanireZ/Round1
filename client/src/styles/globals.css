@@ -7,12 +7,12 @@
 @import "./print.css";
 
 /* ── @font-face 声明 ── */
-/* Cloudflare R2 CDN 托管 — https://r3.betaoi.cc/font/ */
+/* 字体文件随前端静态资源发布，避免本地/离线环境依赖外部 CDN。 */
 
 /* Geist Sans (Variable) */
 @font-face {
-  font-family: 'Geist';
-  src: url('https://r3.betaoi.cc/font/GeistVF.woff2') format('woff2');
+  font-family: "Geist";
+  src: url("/fonts/GeistVF.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -20,8 +20,8 @@
 
 /* Geist Mono (Variable) */
 @font-face {
-  font-family: 'Geist Mono';
-  src: url('https://r3.betaoi.cc/font/GeistMonoVF.woff2') format('woff2');
+  font-family: "Geist Mono";
+  src: url("/fonts/GeistMonoVF.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -29,8 +29,8 @@
 
 /* Fraunces (Variable) — Display 字体，懒加载 */
 @font-face {
-  font-family: 'Fraunces';
-  src: url('https://r3.betaoi.cc/font/Fraunces-Variable.woff2') format('woff2');
+  font-family: "Fraunces";
+  src: url("/fonts/Fraunces-Variable.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -38,24 +38,24 @@
 
 /* HarmonyOS Sans SC — 中文正文 */
 @font-face {
-  font-family: 'HarmonyOS Sans SC';
-  src: url('https://r3.betaoi.cc/font/HarmonyOS_Sans_SC_Regular.woff2') format('woff2');
+  font-family: "HarmonyOS Sans SC";
+  src: url("/fonts/HarmonyOS_Sans_SC_Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'HarmonyOS Sans SC';
-  src: url('https://r3.betaoi.cc/font/HarmonyOS_Sans_SC_Medium.woff2') format('woff2');
+  font-family: "HarmonyOS Sans SC";
+  src: url("/fonts/HarmonyOS_Sans_SC_Medium.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'HarmonyOS Sans SC';
-  src: url('https://r3.betaoi.cc/font/HarmonyOS_Sans_SC_Bold.woff2') format('woff2');
+  font-family: "HarmonyOS Sans SC";
+  src: url("/fonts/HarmonyOS_Sans_SC_Bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -63,8 +63,8 @@
 
 /* Source Han Serif SC Heavy — 中文 Display，懒加载 */
 @font-face {
-  font-family: 'Source Han Serif SC';
-  src: url('https://r3.betaoi.cc/font/SourceHanSerifSC-Heavy.woff2') format('woff2');
+  font-family: "Source Han Serif SC";
+  src: url("/fonts/SourceHanSerifSC-Heavy.woff2") format("woff2");
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -131,23 +131,45 @@
 
 /* ── Keyframes ── */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slide-down {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.96) translateY(8px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* ── Base Layer ── */
@@ -203,42 +225,88 @@
   }
 
   .mesh-gradient-hero {
-    background-image: radial-gradient(ellipse 60% 50% at 20% 30%, var(--color-accent-wash) 0%, transparent 70%), radial-gradient(ellipse 50% 60% at 80% 20%, hsl(var(--color-primary-hsl, 355 78% 56%) / 0.12) 0%, transparent 70%), conic-gradient(from 180deg at 50% 50%, transparent 0%, hsl(var(--color-primary-hsl, 355 78% 56%) / 0.06) 50%, transparent 100%);
+    background-image:
+      radial-gradient(ellipse 60% 50% at 20% 30%, var(--color-accent-wash) 0%, transparent 70%),
+      radial-gradient(
+        ellipse 50% 60% at 80% 20%,
+        hsl(var(--color-primary-hsl, 355 78% 56%) / 0.12) 0%,
+        transparent 70%
+      ),
+      conic-gradient(
+        from 180deg at 50% 50%,
+        transparent 0%,
+        hsl(var(--color-primary-hsl, 355 78% 56%) / 0.06) 50%,
+        transparent 100%
+      );
   }
 
   .mesh-gradient-card {
-    background-image: radial-gradient(ellipse 80% 60% at 50% 0%, var(--color-accent-wash) 0%, transparent 70%);
+    background-image: radial-gradient(
+      ellipse 80% 60% at 50% 0%,
+      var(--color-accent-wash) 0%,
+      transparent 70%
+    );
   }
 
   .mesh-gradient-subtle {
-    background-image: radial-gradient(ellipse 50% 50% at 50% 50%, hsl(var(--color-primary-hsl, 355 78% 56%) / 0.04) 0%, transparent 80%);
+    background-image: radial-gradient(
+      ellipse 50% 50% at 50% 50%,
+      hsl(var(--color-primary-hsl, 355 78% 56%) / 0.04) 0%,
+      transparent 80%
+    );
   }
 
   .exam-session-hero-surface {
     background-image:
-      radial-gradient(circle at top left, color-mix(in oklab, var(--color-primary) 13%, transparent), transparent 34%),
-      linear-gradient(180deg, color-mix(in oklab, var(--color-surface) 98%, var(--color-background)), color-mix(in oklab, var(--color-background) 82%, var(--color-surface)));
+      radial-gradient(
+        circle at top left,
+        color-mix(in oklab, var(--color-primary) 13%, transparent),
+        transparent 34%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--color-surface) 98%, var(--color-background)),
+        color-mix(in oklab, var(--color-background) 82%, var(--color-surface))
+      );
   }
 
   .exam-session-warning-surface {
-    background-image:
-      linear-gradient(180deg, color-mix(in oklab, var(--color-warning) 8%, transparent), color-mix(in oklab, var(--color-surface) 98%, var(--color-background)));
+    background-image: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-warning) 8%, transparent),
+      color-mix(in oklab, var(--color-surface) 98%, var(--color-background))
+    );
   }
 
   .exam-session-error-surface {
-    background-image:
-      linear-gradient(180deg, color-mix(in oklab, var(--color-destructive) 8%, transparent), color-mix(in oklab, var(--color-surface) 98%, var(--color-background)));
+    background-image: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-destructive) 8%, transparent),
+      color-mix(in oklab, var(--color-surface) 98%, var(--color-background))
+    );
   }
 
   .exam-result-hero-surface {
     background-image:
-      radial-gradient(circle at top left, color-mix(in oklab, var(--color-primary) 14%, transparent), transparent 36%),
-      linear-gradient(135deg, color-mix(in oklab, var(--color-surface) 98%, var(--color-background)), color-mix(in oklab, var(--color-background) 84%, var(--color-surface)));
+      radial-gradient(
+        circle at top left,
+        color-mix(in oklab, var(--color-primary) 14%, transparent),
+        transparent 36%
+      ),
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--color-surface) 98%, var(--color-background)),
+        color-mix(in oklab, var(--color-background) 84%, var(--color-surface))
+      );
   }
 
   .exam-result-hero-sheen {
-    background-image:
-      linear-gradient(120deg, transparent 0%, color-mix(in oklab, var(--color-primary) 8%, transparent) 48%, transparent 100%);
+    background-image: linear-gradient(
+      120deg,
+      transparent 0%,
+      color-mix(in oklab, var(--color-primary) 8%, transparent) 48%,
+      transparent 100%
+    );
   }
 
   .exam-result-ceremony-surface {
@@ -247,12 +315,30 @@
 
   .exam-result-ceremony-aura {
     background-image:
-      radial-gradient(circle at top, color-mix(in oklab, var(--color-primary) 36%, transparent), transparent 30%),
-      radial-gradient(circle at bottom right, color-mix(in oklab, var(--color-warning) 16%, transparent), transparent 32%);
+      radial-gradient(
+        circle at top,
+        color-mix(in oklab, var(--color-primary) 36%, transparent),
+        transparent 30%
+      ),
+      radial-gradient(
+        circle at bottom right,
+        color-mix(in oklab, var(--color-warning) 16%, transparent),
+        transparent 32%
+      );
   }
 
   .ui-gallery-grid-backdrop {
-    background-image: linear-gradient(to right, color-mix(in oklab, var(--color-border) 60%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in oklab, var(--color-border) 60%, transparent) 1px, transparent 1px);
+    background-image:
+      linear-gradient(
+        to right,
+        color-mix(in oklab, var(--color-border) 60%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in oklab, var(--color-border) 60%, transparent) 1px,
+        transparent 1px
+      );
     background-size: 64px 64px;
     -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 40%, transparent 80%);
     mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 40%, transparent 80%);
@@ -323,7 +409,7 @@
 
 /* ── Dark 模式微噪点纹理 ── */
 html.dark body::before {
-  content: '';
+  content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
