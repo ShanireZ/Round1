@@ -43,6 +43,14 @@
 - CSV 导出安全收口：`buildCoachReportCsv()` 对以 `= + - @` 开头、前置空白后变成公式、或以 tab / carriage return 开头的单元格加前缀，避免学生姓名等字段在表格软件中被当作公式执行。
 - 浏览器验收过程记录：针对 App 级启动请求，Playwright mock 不能只覆盖当前页面 API，还必须覆盖 `/api/v1/config/client`、`/api/v1/auth/session` 与 `/api/v1/attempts/active`；关闭页面前等待 `document.fonts.ready`，避免把字体加载中的正常 abort 误判成页面缺陷。
 
+## 2026-04-28 维护追加（三）
+
+- 布局 token 漂移收口：`AppShell`、`TopBar`、`Sidebar` 不再引用未定义的 `--layout-*` 变量，改回 `tokens.css` 中已存在的 `--content-max-width`、`--topbar-height`、`--sidebar-width` 与响应式 gutter class；Sidebar 选中态补回 2px 品牌红左边界。
+- Dashboard IA 推进：`/dashboard` 从“成绩曲线 + 弱项进度条”调整为 `Hero Band -> 最近考试/能力雷达 -> 弱项热力图 -> 成绩曲线/智能建议`，能力雷达与弱项热力图均由当前 runtime stats 派生，不伪造趋势数据，不引入新图表库，不写 JSX inline style。
+- Dashboard helper 收口：新增 `client/src/lib/dashboard.ts` 与单测，把 radar axes、heatmap bucket、heatmap rows、SVG polygon points 从页面中抽为纯函数，便于后续 A2UI/视觉验收复用。
+- ExamResult 视觉验收收口：揭晓层补 token 化粒子爆破并尊重 `prefers-reduced-motion: reduce`，reduced motion 下分数和 CTA 立即静态可见；打印态新增页眉页脚，Hero 标记 `data-print-surface`，操作区和 ceremony overlay 标记 `data-no-print`。
+- Playwright 视觉验收落地：新增 `server/__tests__/e2e/ui-visual-audit.spec.ts`，使用本地字体文件和 API mock 覆盖 Dashboard 桌面/移动无水平溢出、ExamResult reduced-motion/A4 print markers、`/dev/ui-gallery#plate-11` A2UI BYOC surface；测试 badCount 保留 console warning/error、pageerror 和真实 request failure，过滤导航 reload 导致的正常 `net::ERR_ABORTED`。
+
 ## 文档同步
 
 - `standard/05-frontend-engineering.md` 已补 A2UI 使用边界：只能作为 agent-facing renderer / 设计辅助 surface，必须继承 Round1 token bridge。
@@ -58,18 +66,22 @@
 - `plan/reference-api.md` 已补 `/account/class` 前端路由表项。
 - `plan/step-05-coach-and-admin.md` 与 `docs/plans/2026-04-26-remaining-unfinished-work.md` 已记录 CoachReport payload/frontend 落地现状，并关闭本轮规模化浏览器性能验收缺口；真实生产 p95 继续按性能标准观测。
 - `docs/plans/2026-04-26-remaining-unfinished-work.md` 已记录 A2UI 本轮安装与视觉验收边界，UI/UX 截图、移动端、键盘、reduced motion 与打印视觉验收仍未整体关闭。
+- `docs/plans/2026-04-26-remaining-unfinished-work.md` 已关闭 ExamResult/Dashboard/打印 A4 的本轮 Playwright 视觉验收缺口，并保留全路由截图、键盘与真实打印预览等整体 UI/UX 债务。
+- `plan/step-06-deployment.md` 与 `docs/plans/2026-04-28-single-vps-deployment-recommendation.md` 已记录单 VPS 部署方式推荐：首发 Caddy + PM2/systemd + native Postgres/Redis，Podman Quadlet 二期可选，Kubernetes/k3s 在单 VPS 阶段 deferred。
 
 ## 验证记录
 
 - `npm run lint`：通过，0 errors / 0 warnings。
-- `npm run verify:ui-tokens`：通过，`verifyUiTokenUsage: ok (81 files checked)`，现已实际扫描 CSS 并阻断 `min-height:auto` / `min-width:auto` 兼容告警回归。
+- `npm run verify:ui-tokens`：通过，`verifyUiTokenUsage: ok (83 files checked)`，现已实际扫描 CSS 并阻断 `min-height:auto` / `min-width:auto` 兼容告警回归。
 - `npm run client:test -- client/src/lib/a2ui-design-surface.test.ts`：通过，1 file / 8 tests。
 - `npm run client:test -- src/lib/coach.test.ts src/lib/a2ui-design-surface.test.ts`：通过，2 files / 15 tests，覆盖 CoachReport 分页/CSV 防公式和 A2UI BYOC / 函数绑定 guard。
 - `npm run verify:offline-artifacts`：通过，`verifyOfflineArtifactNames: ok (137 files checked)`。
 - `npm run test -- server/__tests__/safeReturnTo.test.ts`：通过，18 tests。
 - `npm run test -- server/__tests__/coach-classes.integration.test.ts`：通过，7 tests，覆盖班级报告热力图、题型统计、学生详情与趋势 payload。
 - `npm run test`：通过，29 files / 218 tests。
-- `npm run client:test`：通过，8 files / 49 tests。
+- `npm run client:test`：通过，9 files / 52 tests。
+- `npm run client:test -- src/lib/dashboard.test.ts src/lib/a2ui-design-surface.test.ts`：通过，2 files / 13 tests，覆盖 Dashboard radar/heatmap helper 与 A2UI guard。
+- `npm run test:e2e -- ui-visual-audit.spec.ts`：通过，3 tests，覆盖 Dashboard 桌面/移动、ExamResult reduced-motion/print markers 与 A2UI BYOC gallery。
 - `npm run build:server`：通过。
 - `npm run build:client`：通过；`/font/*.woff2` 仍按运行时同源代理解析，Vite build-time unresolved 提示符合当前字体托管设计。
 - Browser check：`https://127.0.0.1:5175/dev/ui-gallery#plate-11` headless Chromium 桌面视口中 A2UI surface 真实渲染，console badCount=0（0 errors / 0 warnings / 0 pageerror）。2026-04-28 维护追加后，`https://127.0.0.1:5177/login` 首次复查发现 `HYShangWeiShouShuW.woff2` 404，已补 `CPPLEARN_FONT_PUBLIC_BASE_URL` 同源代理并复查为 0 warnings / 0 errors；`/coach/report` 首次复查发现未登录 401 resource error，已补 `/api/v1/auth/session` 前置守卫并复查桌面/移动均为 0 warnings / 0 errors；`/dev/ui-gallery#plate-11` 维护追加后复查仍为 0 warnings / 0 errors。维护追加（二）在 `https://127.0.0.1:5178/coach/report` 使用 Playwright 拦截 API 注入 180 名学生 × 24 个知识点规模化数据：桌面首屏热力图 643ms、移动 2418ms，均无水平溢出；学生详情 Sheet 可打开并渲染题型下钻；打印态页眉为 `block`、`data-no-print` 为 `none`、打印区 `break-inside: avoid`；`https://127.0.0.1:5178/dev/ui-gallery#plate-11` 的 Round1 BYOC 可见；最终 badCount=0（0 console warning/error、0 pageerror、0 requestfailed）。
@@ -78,4 +90,5 @@
 
 - A2UI 当前只接入 `/dev/ui-gallery` 示例 surface，尚未连接真实 agent/MCP payload；后续若接入外部 agent 消息，必须先补 payload 校验、权限边界、复杂度限制与 XSS/DoS 防护。Markdown 已接入 sanitizer renderer，但外部 payload 的字段级校验与执行限制仍不能省略。
 - 字体代理当前按本机 `.env` 的公开 `R2_PUBLIC_BASE_URL=https://r2.round1.cc` 与 `CPPLEARN_FONT_PUBLIC_BASE_URL=https://r2.betaoi.cc` 收口；若部署环境变更公开域名，必须同步 Vite/Caddy `/font/*` 代理、CSP 和本文件记录，避免字体源再次漂移。
-- UI/UX 仍保留全路由截图、移动端、键盘、reduced motion 与打印视觉验收债务，本轮只收口 A2UI bridge、R2 字体源、浏览器告警 guard 与发现的导航/回跳漂移。
+- UI/UX 仍保留全路由截图、键盘、真实 Chrome 打印预览 PDF、登录/考试/Admin 全流程截图等整体视觉验收债务；本轮已收口 A2UI bridge、R2 字体源、浏览器告警 guard、导航/回跳漂移、Dashboard 雷达/热力图、ExamResult reduced-motion 与打印 marker 验收。
+- 单 VPS 部署推荐已形成，但真实域名、Caddy/TLS、PM2 reload、备份恢复、Sentry、邮件 DNS、安全加固与回滚仍未实机演练，不能视为生产上线完成。

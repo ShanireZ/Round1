@@ -14,7 +14,7 @@ export function TopBar() {
   const ThemeIcon = theme === "dark" ? Moon : theme === "light" ? Sun : Monitor;
 
   return (
-    <header className="flex h-[--layout-topbar-h] shrink-0 items-center justify-between border-b border-border bg-surface px-[--layout-gutter]">
+    <header className="flex h-[--topbar-height] shrink-0 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur-md md:px-8">
       <Logo size="sm" />
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={cycleTheme} aria-label="切换主题">

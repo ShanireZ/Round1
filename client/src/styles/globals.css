@@ -313,6 +313,106 @@
       radial-gradient(circle at bottom right, var(--color-warning-aura-alpha), transparent 32%);
   }
 
+  .exam-result-ceremony-particles {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .exam-result-ceremony-particles span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: var(--radius-full);
+    background: var(--color-primary);
+    opacity: 0;
+    animation: result-particle-pop var(--duration-ceremony) var(--ease-ceremony) forwards;
+    transform: translate3d(0, 0, 0) scale(0.4);
+  }
+
+  .exam-result-ceremony-particles span:nth-child(3n) {
+    background: var(--color-warning);
+  }
+
+  .exam-result-ceremony-particles span:nth-child(4n) {
+    background: var(--color-success);
+  }
+
+  .exam-result-ceremony-particles span:nth-child(1) {
+    --particle-x: -12rem;
+    --particle-y: -5rem;
+    animation-delay: var(--duration-fast);
+  }
+
+  .exam-result-ceremony-particles span:nth-child(2) {
+    --particle-x: 11rem;
+    --particle-y: -6rem;
+    animation-delay: var(--duration-normal);
+  }
+
+  .exam-result-ceremony-particles span:nth-child(3) {
+    --particle-x: -8rem;
+    --particle-y: 8rem;
+    animation-delay: var(--duration-slow);
+  }
+
+  .exam-result-ceremony-particles span:nth-child(4) {
+    --particle-x: 13rem;
+    --particle-y: 7rem;
+    animation-delay: var(--duration-fast);
+  }
+
+  .exam-result-ceremony-particles span:nth-child(5) {
+    --particle-x: -16rem;
+    --particle-y: 2rem;
+    animation-delay: var(--duration-normal);
+  }
+
+  .exam-result-ceremony-particles span:nth-child(6) {
+    --particle-x: 16rem;
+    --particle-y: -1rem;
+    animation-delay: var(--duration-slow);
+  }
+
+  .exam-result-ceremony-particles span:nth-child(7) {
+    --particle-x: -4rem;
+    --particle-y: -10rem;
+    animation-delay: var(--duration-fast);
+  }
+
+  .exam-result-ceremony-particles span:nth-child(8) {
+    --particle-x: 5rem;
+    --particle-y: 10rem;
+    animation-delay: var(--duration-normal);
+  }
+
+  .exam-result-ceremony-particles span:nth-child(9) {
+    --particle-x: -18rem;
+    --particle-y: -8rem;
+    animation-delay: var(--duration-slow);
+  }
+
+  .exam-result-ceremony-particles span:nth-child(10) {
+    --particle-x: 19rem;
+    --particle-y: 5rem;
+    animation-delay: var(--duration-fast);
+  }
+
+  .exam-result-ceremony-particles span:nth-child(11) {
+    --particle-x: -2rem;
+    --particle-y: 13rem;
+    animation-delay: var(--duration-normal);
+  }
+
+  .exam-result-ceremony-particles span:nth-child(12) {
+    --particle-x: 3rem;
+    --particle-y: -13rem;
+    animation-delay: var(--duration-slow);
+  }
+
   .ui-gallery-grid-backdrop {
     background-image:
       linear-gradient(to right, var(--color-grid-line-alpha) 1px, transparent 1px),
@@ -391,6 +491,26 @@
   }
   ::-webkit-scrollbar-thumb:hover {
     background: var(--color-foreground-secondary);
+  }
+}
+
+@keyframes result-particle-pop {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.4);
+  }
+  20% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--particle-x), var(--particle-y), 0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exam-result-ceremony-particles {
+    display: none;
   }
 }
 

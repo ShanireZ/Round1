@@ -86,6 +86,7 @@
 - [ ] 独立域名可访问并完成 Cloudflare Full Strict + Caddy TLS 验证。
 - [ ] `GET /api/v1/health`、邮件通道、Turnstile、离线内容环境 `cpp-runner` 与 `contentWorker` 分别完成部署验收。
 - [ ] PM2 cluster 模式 2 实例启动与优雅停机演练；生产默认不启动运行时 worker。
+- [ ] 按 2026-04-28 单 VPS 部署推荐完成实机取舍验收：首发使用 Caddy + PM2/systemd + native Postgres/Redis；rootless Podman + Quadlet 仅作为二期镜像化/隔离选项；Kubernetes/k3s 在单 VPS 阶段 deferred，除非进入多节点或托管集群迁移。
 - [ ] 静态资源长期缓存头验证。
 - [ ] `pg_dump` 备份与 `pg_restore` 临时库恢复校验。
 - [ ] Sentry 生产环境 release、采样、敏感信息过滤与事件上报验证。
@@ -99,13 +100,13 @@
 
 ### 7. UI/UX 与前端体验收口
 
-- [ ] UI 设计系统中的 tokens、字体托管、组件库、布局、品牌资产、打印样式与 `/dev/ui-gallery` 仍需按当前代码状态逐项验收。（2026-04-27：已新增 `npm run verify:ui-tokens`，阻断 `client/src` TS/TSX 中重新引入原始 hex/rgb/hsl magic color；截图、键盘、移动端、reduced motion 与打印视觉验收仍需继续收口。2026-04-28：已安装 Google A2UI，并在 `/dev/ui-gallery` 增加 A2UI token bridge 示例，用于后续 agent UI/UX 设计辅助验收；现有 Radix/shadcn 生产组件作为受控辅助实现。同日已扩展 `verify:ui-tokens` 阻断 JSX inline style、`color-mix()` 与 `min-height:auto` / `min-width:auto` 兼容告警回归，并将字体运行时源收口到公开 R2 `/font/`。维护追加已把 A2UI 扩展到 Round1 BYOC custom catalog，并用本地 Card/Badge/Progress 渲染 CoachReport snapshot；`/dev/ui-gallery#plate-11` 浏览器复查 A2UI BYOC 可见且 warning/error 为 0。）
+- [ ] UI 设计系统中的 tokens、字体托管、组件库、布局、品牌资产、打印样式与 `/dev/ui-gallery` 仍需按当前代码状态逐项验收。（2026-04-27：已新增 `npm run verify:ui-tokens`，阻断 `client/src` TS/TSX 中重新引入原始 hex/rgb/hsl magic color；截图、键盘、移动端、reduced motion 与打印视觉验收仍需继续收口。2026-04-28：已安装 Google A2UI，并在 `/dev/ui-gallery` 增加 A2UI token bridge 示例，用于后续 agent UI/UX 设计辅助验收；现有 Radix/shadcn 生产组件作为受控辅助实现。同日已扩展 `verify:ui-tokens` 阻断 JSX inline style、`color-mix()` 与 `min-height:auto` / `min-width:auto` 兼容告警回归，并将字体运行时源收口到公开 R2 `/font/`。维护追加已把 A2UI 扩展到 Round1 BYOC custom catalog，并用本地 Card/Badge/Progress 渲染 CoachReport snapshot；`/dev/ui-gallery#plate-11` 浏览器复查 A2UI BYOC 可见且 warning/error 为 0。维护追加（三）已补 AppShell 布局 token 命名漂移、Dashboard 能力雷达/弱项热力图、ExamResult reduced-motion 揭晓和打印页眉页脚，并新增 `server/__tests__/e2e/ui-visual-audit.spec.ts` 覆盖 Dashboard 桌面/移动、ExamResult print/reduced motion 与 A2UI BYOC gallery。）
 - [ ] AI 智能建议文案模板为 v2 事项；MVP 可保持静态规则或占位。
 - [ ] QQ 互联登录视觉需随 feature flag 流程一起补齐。
 - [x] CppLearn 登录视觉需补齐：`贝塔问天录` 字标使用 HYShangWeiShouShuW 字体，字体通过 `/font/HYShangWeiShouShuW.woff2` 同源代理加载。（2026-04-28：`/login` 已接入真实 AuthLayout 分栏与 CppLearn OIDC provider 入口，`client/public/fonts/README.md` 记录该字体对象来源。）
 - [ ] i18n 多语言为未来扩展项。
-- [ ] 字体当前设计为 Cloudflare R2 自托管，后续可迁国内 CDN。
-- [ ] ExamResult 揭晓动画、Dashboard 雷达/热力图、打印 A4 样式仍需 Playwright/视觉验收覆盖；CoachReport 下钻与打印标记已在 2026-04-28 维护追加中覆盖。
+- [ ] 字体当前设计为 Cloudflare R2 自托管。
+- [x] ExamResult 揭晓动画、Dashboard 雷达/热力图、打印 A4 样式需 Playwright/视觉验收覆盖。（2026-04-28：新增 `ui-visual-audit.spec.ts`，Dashboard 桌面/移动无水平溢出，ExamResult reduced-motion 下 CTA 立即可见且打印态 `.print-header` / `data-no-print` / `data-print-surface` 生效，`/dev/ui-gallery#plate-11` A2UI BYOC 可见且 browser problems 为 0；CoachReport 下钻与打印标记已在早前维护追加中覆盖。）
 
 ### 8. 外部对接与 feature flag
 

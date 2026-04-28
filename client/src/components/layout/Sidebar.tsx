@@ -28,10 +28,10 @@ function SidebarNavItem({ item }: { item: NavItem }) {
       end={item.to === "/"}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-3 rounded-[--radius-md] px-3 py-2 text-sm font-medium transition-colors duration-[--duration-fast]",
+          "flex items-center gap-3 rounded-[--radius-md] border-l-2 px-3 py-2 text-sm font-medium transition-colors duration-[--duration-fast]",
           isActive
-            ? "bg-accent-wash text-primary"
-            : "text-muted-foreground hover:bg-subtle hover:text-foreground",
+            ? "border-primary bg-accent-wash text-primary"
+            : "border-transparent text-muted-foreground hover:bg-subtle hover:text-foreground",
         )
       }
     >
@@ -43,7 +43,7 @@ function SidebarNavItem({ item }: { item: NavItem }) {
 
 export function Sidebar() {
   return (
-    <aside className="hidden w-[--layout-sidebar-w] shrink-0 border-r border-border bg-surface md:block">
+    <aside className="hidden w-[--sidebar-width] shrink-0 border-r border-border bg-surface md:block">
       <ScrollArea className="h-full py-4">
         <div className="space-y-6">
           <SidebarSection title="主导航" items={primaryNavItems} />

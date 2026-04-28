@@ -5,6 +5,8 @@
 > **可验证 demo**：独立域名可访问，健康检查全绿
 > **配置参考**：数据库 Schema、.env 模板、目录结构等详见 [01-reference.md](01-reference.md)
 > **当前对齐说明（2026-04-27）**：本文件描述的是目标部署形态，不是“当前仓库已完成生产上线”的现状快照。当前仓库已经完成“两层架构 + production no-runner”方向的代码收口，并补齐版本化 `ecosystem.config.cjs` 与统一 `scripts/healthcheck.ts`；但真实域名、Caddy/TLS、PM2 reload、外部服务 smoke 与回滚仍需要部署环境演练，不能把生产验收描述成已完成。
+>
+> **部署方式推荐（2026-04-28）**：4H16G、14M 带宽单 VPS 首发不建议引入 Kubernetes/k3s；先使用 Caddy + PM2/systemd + native Postgres/Redis，rootless Podman + Quadlet 仅作为需要镜像化或依赖隔离时的二期选项。详细取舍见 `docs/plans/2026-04-28-single-vps-deployment-recommendation.md`。
 
 ---
 

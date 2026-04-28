@@ -124,6 +124,7 @@ function ResultHero({ data }: { data: ExamResultPayload }) {
     <Card
       variant="hero"
       className="exam-result-hero-surface relative overflow-hidden border border-border"
+      data-print-surface
     >
       <div className="exam-result-hero-sheen pointer-events-none absolute inset-0" />
       <CardContent className="relative grid gap-8 lg:grid-cols-[1.4fr_0.9fr]">
@@ -150,7 +151,7 @@ function ResultHero({ data }: { data: ExamResultPayload }) {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3" data-no-print>
             <Button type="button" variant="primary" onClick={() => window.print()}>
               <Printer />
               打印结果
@@ -452,8 +453,17 @@ function CeremonyReveal({
   const wrongCount = data.attempt.report?.wrongs.length ?? Math.max(totalQuestions - correctAnswers, 0);
 
   return (
-    <div className="exam-result-ceremony-surface fixed inset-0 z-[--z-ceremony] px-6 py-8 text-white" data-testid="exam-result-ceremony">
+    <div
+      className="exam-result-ceremony-surface fixed inset-0 z-[--z-ceremony] px-6 py-8 text-white"
+      data-no-print
+      data-testid="exam-result-ceremony"
+    >
       <div className="exam-result-ceremony-aura absolute inset-0" />
+      <div className="exam-result-ceremony-particles" aria-hidden="true">
+        {Array.from({ length: 12 }, (_, index) => (
+          <span key={index} />
+        ))}
+      </div>
       <div className="relative flex h-full items-center justify-center">
         <div className="w-full max-w-4xl text-center">
           <div className="mx-auto inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-2 text-xs uppercase tracking-[0.32em] text-white/70">
@@ -555,15 +565,28 @@ export default function ExamResultPage() {
       setCtaVisible(false);
     };
 
-    const scoreTimer = window.setTimeout(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timers: number[] = [];
+
+    if (prefersReducedMotion) {
       setScoreVisible(true);
-    }, 120);
-    const ctaTimer = window.setTimeout(() => {
       setCtaVisible(true);
-    }, 1200);
-    const autoCloseTimer = window.setTimeout(() => {
+    } else {
+      timers.push(
+        window.setTimeout(() => {
+          setScoreVisible(true);
+        }, 120),
+      );
+      timers.push(
+        window.setTimeout(() => {
+          setCtaVisible(true);
+        }, 1200),
+      );
+    }
+
+    timers.push(window.setTimeout(() => {
       closeCeremony();
-    }, 2800);
+    }, prefersReducedMotion ? 1600 : 2800));
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         closeCeremony();
@@ -573,9 +596,7 @@ export default function ExamResultPage() {
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
-      window.clearTimeout(scoreTimer);
-      window.clearTimeout(ctaTimer);
-      window.clearTimeout(autoCloseTimer);
+      timers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [resultData, location.state, paperId]);
@@ -635,6 +656,9 @@ export default function ExamResultPage() {
 
   return (
     <div className="space-y-6 pb-12" data-testid="exam-result-page">
+      <div className="print-header hidden">
+        R1 / {data.paper.examType} / {formatDifficultyLabel(data.paper.difficulty)} / 结果报告
+      </div>
       {showCeremony ? (
         <CeremonyReveal
           data={data}
@@ -674,6 +698,7 @@ export default function ExamResultPage() {
           ))}
         </div>
       </section>
+      <div className="print-footer hidden">生成时间：{formatTimestamp(data.attempt.submittedAt)}</div>
     </div>
   );
 }
