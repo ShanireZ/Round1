@@ -287,8 +287,7 @@ curl -fsS https://round1.example.com/api/v1/health
 
 - [ ] Cloudflare WAF 规则已启用
 - [ ] Caddy 覆盖 `X-Forwarded-*` 头（防伪造）
-- [ ] VPS-2/VPS-3 默认不开放公网入站；公网出站按白名单/时间窗控制（允许包更新、时间同步等运维动作）
-- [ ] 各 VPS 间通信走内网
+- [ ] VPS 内通信走内网
 
 ---
 
