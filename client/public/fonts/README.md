@@ -3,20 +3,10 @@
 These `.woff2` files are kept as a local cache, but the active Round1 frontend
 loads fonts through the same-origin `/font/` path. In dev and production that
 path must proxy to the public R2 origin configured by `R2_PUBLIC_BASE_URL`.
-The CppLearn logo font can temporarily use the separate
-`CPPLEARN_FONT_PUBLIC_BASE_URL` origin while the object is not yet copied into
-the main Round1 R2 bucket.
 With the current local `.env`, the upstream font objects live at:
 
 ```
 https://r2.round1.cc/font/<font-file>.woff2
-```
-
-The CppLearn visual mark uses the same path contract. The current public object
-is:
-
-```
-https://r2.betaoi.cc/font/HYShangWeiShouShuW.woff2
 ```
 
 ## Required Font Files
@@ -30,7 +20,6 @@ https://r2.betaoi.cc/font/HYShangWeiShouShuW.woff2
 | `HarmonyOS_Sans_SC_Medium.woff2`  | HarmonyOS Sans SC 500     | https://developer.huawei.com/consumer/cn/design/resource/ |
 | `HarmonyOS_Sans_SC_Bold.woff2`    | HarmonyOS Sans SC 700     | https://developer.huawei.com/consumer/cn/design/resource/ |
 | `SourceHanSerifSC-Heavy.woff2`    | Source Han Serif SC Heavy | https://github.com/adobe-fonts/source-han-serif/releases  |
-| `HYShangWeiShouShuW.woff2`        | CppLearn 标志字           | https://r2.betaoi.cc/font/HYShangWeiShouShuW.woff2        |
 
 ## Cloudflare R2 Hosting
 
@@ -44,3 +33,7 @@ Example R2 URL format:
 ```
 https://<your-r2-domain>/font/GeistVF.woff2
 ```
+
+CppLearn OIDC no longer uses a custom text logo font. CppLearn provides a
+banner image instead; upload it to `${R2_PUBLIC_BASE_URL}/logo/cpplearn.jpg`
+and keep the same-origin `/logo/*` proxy aligned with the same R2 origin.

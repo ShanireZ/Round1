@@ -143,6 +143,13 @@ TRUST_PROXY_HOPS=1
 DEV_HTTPS_CERT=./certs/dev-cert.pem
 DEV_HTTPS_KEY=./certs/dev-key.pem
 
+# Caddy 部署模板变量（见 Caddyfile.example）
+ROUND1_SITE_HOST=round1.example.com
+ROUND1_STATIC_ROOT=/opt/round1/client/dist
+ROUND1_API_UPSTREAM=127.0.0.1:7654
+ROUND1_ACCESS_LOG=/var/log/caddy/round1-access.json
+ROUND1_SYSTEM_LOG=/var/log/caddy/round1-system.json
+
 # 邮件
 MAIL_PROVIDER=resend
 MAIL_FROM=
@@ -242,13 +249,12 @@ R2_ACCOUNT_ID=
 R2_ACCESS_KEY_ID=
 R2_SECRET_ACCESS_KEY=
 R2_API_TOKEN=
-R2_PUBLIC_BASE_URL=                    # 公开资源 origin；前端同源 /font/* 代理到 ${R2_PUBLIC_BASE_URL}/font/*
-CPPLEARN_FONT_PUBLIC_BASE_URL=          # 可选；CppLearn 字标源，前端同源 /font/HYShangWeiShouShuW.woff2 代理到该 origin
+R2_PUBLIC_BASE_URL=                    # 公开资源 origin；前端同源 /font/* 与 /logo/* 代理到该 origin
 
 ```
 
-字体当前需要在 `${R2_PUBLIC_BASE_URL}/font/` 下提供 Geist、HarmonyOS、Fraunces 与 Source Han Serif SC。CppLearn `HYShangWeiShouShuW.woff2` 可上传到同一 R2 `/font/`；若暂未迁入，可设置 `CPPLEARN_FONT_PUBLIC_BASE_URL=https://r2.betaoi.cc`，由同源 `/font/HYShangWeiShouShuW.woff2` 代理到该公开源。运行时页面仍只能引用同源 `/font/HYShangWeiShouShuW.woff2`。
+字体当前需要在 `${R2_PUBLIC_BASE_URL}/font/` 下提供 Geist、HarmonyOS、Fraunces 与 Source Han Serif SC。CppLearn OIDC 横幅图片由 CppLearn 提供并上传到 `${R2_PUBLIC_BASE_URL}/logo/cpplearn.jpg`；运行时页面只引用同源 `/logo/cpplearn.jpg`。
 
-端口设计与暴露面见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。单机部署时 `PORT=7654` 必须配合 `ROUND1_BIND_HOST=127.0.0.1`，`DATABASE_URL` 使用 `127.0.0.1:4397`，`REDIS_URL` 使用 `127.0.0.1:4395`，`SANDBOX_RUNNER_URL` 使用 `127.0.0.1:4401` 且仅用于本地开发/离线内容环境；生产公网入口只开放 Caddy `80/443` 与 SSH `9179`。若重新设计端口，必须同步 `.env.example`、`docker-compose.dev.yml`、Caddy、Vite proxy、healthcheck 与部署 runbook。
+端口设计与暴露面见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。单机部署时 `PORT=7654` 必须配合 `ROUND1_BIND_HOST=127.0.0.1`，`DATABASE_URL` 使用 `127.0.0.1:4397`，`REDIS_URL` 使用 `127.0.0.1:4395`，`SANDBOX_RUNNER_URL` 使用 `127.0.0.1:4401` 且仅用于本地开发/离线内容环境；生产公网入口只开放 Caddy `80/443` 与 SSH `9179`。Caddy 默认协议集为 `h1/h2/h3`；不要只配置 `h2/h3`，因为当前 `h2` 仍需要 `h1`。若保留 Caddy HTTP/3，同一 `443` 还需允许 UDP；若使用 `MAIL_PROVIDER=tencent-ses`，需要允许 SMTP 465 出站。若重新设计端口，必须同步 `.env.example`、`docker-compose.dev.yml`、`Caddyfile.example`、Vite proxy、healthcheck 与部署 runbook。
 
 > 邮件 provider、LLM provider lane、worker 开关与默认值以 `config/env.ts` 为准；本节示例仅保留最常用部署骨架，避免与代码真源重复漂移。

@@ -57,7 +57,6 @@
   --font-mono: "Geist Mono", ui-monospace, "HarmonyOS Sans SC", monospace;
   --font-serif: "Fraunces", "Source Han Serif SC", Georgia, serif;
   --font-display: var(--font-serif);
-  --font-cpplearn-logo: "HYShangWeiShouShuW", "Source Han Serif SC", var(--font-serif);
 
   /* ── 圆角 ── */
   --radius-none: 0px;

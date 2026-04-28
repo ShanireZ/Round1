@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { fetchClientRuntimeConfig } from "@/lib/client-config";
 import { AuthClientError, passwordLogin } from "@/lib/auth";
+import { CPPLEARN_BANNER_SRC } from "@/lib/brand-assets";
 
 function resolveReturnTo(value: string | null): string {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
@@ -153,13 +154,16 @@ export default function LoginPage() {
           {cppLearnEnabled ? (
             <div className="border-border bg-subtle/40 rounded-[--radius-lg] border p-4">
               <div className="flex items-center gap-3">
-                <div className="border-border bg-surface grid h-11 w-11 shrink-0 place-items-center rounded-[--radius-md] border">
-                  <span className="font-cpplearn-logo text-foreground text-lg">贝</span>
+                <div className="border-border bg-surface flex h-11 w-28 shrink-0 items-center justify-center overflow-hidden rounded-[--radius-md] border p-1">
+                  <img
+                    src={CPPLEARN_BANNER_SRC}
+                    alt="CppLearn"
+                    className="max-h-full max-w-full object-contain"
+                    decoding="async"
+                  />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="font-cpplearn-logo text-foreground truncate text-xl">
-                    贝塔问天录
-                  </div>
+                  <div className="text-foreground truncate text-sm font-semibold">CppLearn</div>
                   <div className="text-muted-foreground mt-1 flex items-center gap-1.5 text-xs">
                     <ShieldCheck className="h-3.5 w-3.5" />
                     CppLearn OIDC

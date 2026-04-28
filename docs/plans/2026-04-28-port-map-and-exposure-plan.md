@@ -4,7 +4,7 @@
 >
 > 范围：汇总当前仓库代码、`.env.example`、`docker-compose.dev.yml`、Vite、PM2、healthcheck 与部署计划中出现的端口；供正式部署前重新设计端口与防火墙策略。
 >
-> 状态：端口设计已确认并同步到代码默认值、`.env.example`、本地 compose、Vite、PM2、healthcheck 与部署 runbook；当前代码默认值以 `config/env.ts`、`client/vite.config.ts`、`docker-compose.dev.yml` 为真源。
+> 状态：端口设计已确认并同步到代码默认值、`.env.example`、`Caddyfile.example`、本地 compose、Vite、PM2、healthcheck 与部署 runbook；当前代码默认值以 `config/env.ts`、`client/vite.config.ts`、`docker-compose.dev.yml` 为真源。
 
 ## 结论
 
@@ -12,7 +12,7 @@
 
 本轮已把 `docker-compose.dev.yml` 的 Postgres、Redis、cpp-runner 端口发布收紧为 `127.0.0.1:host:container`，避免本地开发环境把服务暴露到局域网。
 
-Caddy 必须强制 HTTPS，并配置 TLS 1.2+ 与 HTTP/2+；`80` 只用于 HTTP -> HTTPS 跳转、ACME 或 Cloudflare 到源站策略。
+Caddy 必须强制 HTTPS，并配置 TLS 1.2+ 与 HTTP/2+；`80` 只用于 Caddy Automatic HTTPS 的 HTTP -> HTTPS 跳转、ACME 或 Cloudflare 到源站策略，不需要单独维护显式 `http://` 站点块。Caddy 默认协议集为 `h1/h2/h3`；不要只配置 `h2/h3`，因为当前 `h2` 仍需要 `h1`。若保留 Caddy 默认 HTTP/3，则同一端口号 `443` 还需要允许 UDP；若只要求 HTTP/2，可显式配置 `h1/h2`。
 
 ## Current Port Inventory
 
@@ -27,6 +27,7 @@ Caddy 必须强制 HTTPS，并配置 TLS 1.2+ 与 HTTP/2+；`80` 只用于 HTTP 
 | 4395         | Redis                                           | `127.0.0.1:4395`                          | 单机为本机；拆服务时仅私网 | `.env.example`、`docker-compose.dev.yml`                           | 不开放公网；禁止无鉴权公网 Redis。                             |
 | 4401         | cpp-runner                                      | `127.0.0.1:4401`                          | 仅本地开发/离线环境本机    | `config/env.ts`、`docker-compose.dev.yml`、`cpp-runner/Dockerfile` | 生产环境不部署；不进入生产 runtime health。                    |
 | 443 outbound | R2 / LLM / mail API / Turnstile / OIDC / Sentry | 外部服务 HTTPS                            | 出站                       | env 中各 provider URL                                              | 不是入站端口；按 provider 域名做 egress 审计即可。             |
+| 465 outbound | Tencent SES SMTP                                | `MAIL_PROVIDER=tencent-ses`               | 条件出站                   | `server/services/mail/index.ts`                                    | 仅选择腾讯云 SES SMTP 时需要；Resend/Postmark 走 HTTPS 443。   |
 
 ## Proposed Production Exposure
 
@@ -48,7 +49,7 @@ Caddy 必须强制 HTTPS，并配置 TLS 1.2+ 与 HTTP/2+；`80` 只用于 HTTP 
 - `.env.example` 与 `plan/reference-config.md` 的示例值。
 - `client/vite.config.ts` 的 dev proxy：`/api/v1 -> API`。
 - `docker-compose.dev.yml` 的 loopback port mapping。
-- `ecosystem.config.cjs` 与 Caddy reverse proxy。
+- `ecosystem.config.cjs`、`Caddyfile.example` 与实际 Caddy reverse proxy。
 - `scripts/healthcheck.ts` 默认 URL 或部署命令参数。
 - `plan/step-06-deployment.md`、`standard/14-deployment-ops.md`、`scripts/README.md` 中的 runbook。
 
@@ -56,6 +57,7 @@ Caddy 必须强制 HTTPS，并配置 TLS 1.2+ 与 HTTP/2+；`80` 只用于 HTTP 
 
 - SSH 使用 `9179`，允许公网访问，不做 IP allowlist；仍必须禁用密码登录并启用 fail2ban 或等价防护。
 - HTTP/HTTPS 使用 `80/443`，允许公网访问；Caddy 强制 HTTPS，TLS 1.2+，HTTP/2+。
+- Caddy 模板使用 `Caddyfile.example`，模板为 Caddyfile 原生语法，不使用 Caddy JSON config；`format json` 仅表示日志输出编码：静态文件由 Caddy 托管，API 动态请求反代到 Node；hashed assets 缓存 30 天，普通静态资源缓存 1 天，SPA 入口不缓存；静态 HTML 安全头由 Caddy 补齐。
 - Express API 使用 `7654`，仅监听 `127.0.0.1`，由 Caddy 反代。
 - Postgres 使用 `4397`，Redis 使用 `4395`，均不开放公网。
 - Vite dev server 使用 `4399`，只用于本地开发，生产环境不部署。

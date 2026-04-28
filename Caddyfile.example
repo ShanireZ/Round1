@@ -1,0 +1,106 @@
+# Round1 production Caddy template.
+#
+# This file uses native Caddyfile syntax, not Caddy's JSON config format.
+# The `format json` directives below only control log output encoding.
+#
+# Required deployment variables:
+#   ROUND1_SITE_HOST=round1.example.com
+#   ROUND1_STATIC_ROOT=/opt/round1/client/dist
+#   ROUND1_API_UPSTREAM=127.0.0.1:7654
+#   ROUND1_ACCESS_LOG=/var/log/caddy/round1-access.json
+#   ROUND1_SYSTEM_LOG=/var/log/caddy/round1-system.json
+#   R2_PUBLIC_BASE_URL=https://r2.example.com
+#
+# Notes:
+# - Public firewall: TCP 80/443 for Caddy, TCP 9179 for SSH.
+# - The domain site address lets Caddy Automatic HTTPS handle HTTP -> HTTPS.
+# - Caddy defaults to h1/h2/h3. Keep h1; h2 currently implies h1 support.
+# - If default HTTP/3 is kept enabled, also allow UDP 443.
+# - Express must keep ROUND1_BIND_HOST=127.0.0.1 and PORT=7654.
+# - Postgres 4397 and Redis 4395 must not be exposed publicly.
+{
+	log {
+		output file {$ROUND1_SYSTEM_LOG:/var/log/caddy/round1-system.json} {
+			roll_size 100MiB
+			roll_keep 10
+			roll_keep_for 720h
+		}
+		format json
+	}
+}
+
+https://{$ROUND1_SITE_HOST:round1.example.com} {
+	root * {$ROUND1_STATIC_ROOT:/opt/round1/client/dist}
+	encode zstd gzip
+
+	tls {
+		protocols tls1.2 tls1.3
+	}
+
+	log {
+		output file {$ROUND1_ACCESS_LOG:/var/log/caddy/round1-access.json} {
+			roll_size 100MiB
+			roll_keep 10
+			roll_keep_for 720h
+		}
+		format json
+	}
+
+	header {
+		-Server
+		Strict-Transport-Security "max-age=31536000"
+		Content-Security-Policy "default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; connect-src 'self'; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+	}
+
+	# Dynamic API traffic stays in Node. Cache semantics for API responses should
+	# be decided by Express, not by Caddy.
+	@api path /api/*
+	handle @api {
+		reverse_proxy {$ROUND1_API_UPSTREAM:127.0.0.1:7654} {
+			header_up X-Real-IP {remote_host}
+		}
+	}
+
+	# Runtime asset proxies. Upstreams should expose /font/* and /logo/* paths
+	# so the browser only loads same-origin asset URLs and avoids CORS drift.
+	@fonts path /font/*
+	handle @fonts {
+		header Cache-Control "public, max-age=86400"
+		reverse_proxy {$R2_PUBLIC_BASE_URL:https://r2.example.com} {
+			header_up Host {upstream_hostport}
+		}
+	}
+
+	@logos path /logo/*
+	handle @logos {
+		header Cache-Control "public, max-age=86400"
+		reverse_proxy {$R2_PUBLIC_BASE_URL:https://r2.example.com} {
+			header_up Host {upstream_hostport}
+		}
+	}
+
+	# Vite emits hashed assets under /assets/. One month is a conservative long
+	# cache while the app is still moving quickly; raise to one year when release
+	# discipline is mature.
+	@hashedAssets path_regexp hashedAssets ^/assets/.+-[A-Za-z0-9_-]+\.(?:css|js|mjs|map|woff2?|ttf|otf|png|jpe?g|webp|avif|svg|ico)$
+	header @hashedAssets Cache-Control "public, max-age=2592000, immutable"
+
+	# Non-hashed static files can change without a filename bump, so keep them
+	# fresh daily.
+	@staticAssets path /favicon.svg /robots.txt /site.webmanifest /manifest.webmanifest /logos/* /fonts/* /logo/*
+	header @staticAssets Cache-Control "public, max-age=86400"
+
+	route {
+		try_files {path} /index.html
+
+		# The SPA shell, route fallbacks, and other frequently updated entry
+		# content must revalidate on every navigation.
+		header /index.html Cache-Control "no-cache, no-store, max-age=0, must-revalidate"
+
+		file_server
+	}
+}
