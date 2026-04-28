@@ -150,6 +150,33 @@ describe("coach class api", () => {
     expect(mockDb.transaction).toHaveBeenCalledOnce();
   });
 
+  it("lists published prebuilt papers for coach assignment creation", async () => {
+    queuedResults.push([
+      {
+        id: paperId,
+        title: "CSP-J Week 1",
+        examType: "CSP-J",
+        difficulty: "medium",
+        blueprintVersion: 1,
+        publishedAt: new Date("2026-04-28T00:00:00.000Z"),
+      },
+    ]);
+
+    const app = createTestApp("coach");
+    const res = await supertest(app).get("/api/v1/coach/prebuilt-papers");
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.items).toMatchObject([
+      {
+        id: paperId,
+        title: "CSP-J Week 1",
+        examType: "CSP-J",
+        difficulty: "medium",
+        blueprintVersion: 1,
+      },
+    ]);
+  });
+
   it("returns an existing membership when joining the same class again by code", async () => {
     queuedResults.push(
       [{ id: classId, archivedAt: new Date("2026-04-01T00:00:00.000Z") }],

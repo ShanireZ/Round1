@@ -1,3 +1,5 @@
+import { getCachedAuthCsrfToken } from "./auth";
+
 export type CoachClassSummary = {
   id: string;
   name: string;
@@ -9,6 +11,39 @@ export type CoachClassSummary = {
   coachRole?: "owner" | "collaborator";
   memberCount?: number;
   coachCount?: number;
+};
+
+export type CoachClassAssignment = {
+  id: string;
+  classId: string;
+  createdBy: string;
+  title: string;
+  mode: string;
+  prebuiltPaperId: string | null;
+  examType: string;
+  difficulty?: "easy" | "medium" | "hard";
+  blueprintVersion: number;
+  dueAt: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  assignedStudents?: number;
+};
+
+export type CoachPrebuiltPaperSummary = {
+  id: string;
+  title: string;
+  examType: string;
+  difficulty: "easy" | "medium" | "hard";
+  blueprintVersion: number;
+  publishedAt: string | null;
+};
+
+export type CoachAssignmentCreatePayload = {
+  classId: string;
+  title: string;
+  prebuiltPaperId: string;
+  dueAt: string;
 };
 
 export type CoachAssignmentSummary = {
@@ -135,13 +170,22 @@ async function readApiPayload<T>(response: Response): Promise<T> {
 }
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const method = init?.method?.toUpperCase() ?? "GET";
+  const headers = new Headers(init?.headers);
+
+  if (init?.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  if (!["GET", "HEAD", "OPTIONS"].includes(method) && !headers.has("X-CSRF-Token")) {
+    headers.set("X-CSRF-Token", await getCachedAuthCsrfToken());
+  }
+
   const response = await fetch(path, {
     credentials: "include",
     ...init,
-    headers: {
-      ...(init?.body ? { "Content-Type": "application/json" } : {}),
-      ...init?.headers,
-    },
+    method,
+    headers,
   });
 
   return readApiPayload<T>(response);
@@ -149,6 +193,48 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
 
 export function fetchCoachClasses() {
   return requestJson<{ items: CoachClassSummary[] }>("/api/v1/coach/classes");
+}
+
+export function fetchCoachPrebuiltPapers() {
+  return requestJson<{ items: CoachPrebuiltPaperSummary[] }>("/api/v1/coach/prebuilt-papers");
+}
+
+export function createCoachClass(payload: { name: string }) {
+  return requestJson<CoachClassSummary>("/api/v1/coach/classes", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function rotateCoachClassJoinCode(classId: string) {
+  return requestJson<CoachClassSummary>(`/api/v1/coach/classes/${classId}/rotate-code`, {
+    method: "POST",
+  });
+}
+
+export function archiveCoachClass(classId: string) {
+  return requestJson<CoachClassSummary>(`/api/v1/coach/classes/${classId}/archive`, {
+    method: "POST",
+  });
+}
+
+export function fetchCoachClassAssignments(classId: string) {
+  return requestJson<{ items: CoachClassAssignment[] }>(
+    `/api/v1/coach/classes/${classId}/assignments`,
+  );
+}
+
+export function createCoachAssignment(payload: CoachAssignmentCreatePayload) {
+  return requestJson<CoachClassAssignment>("/api/v1/coach/assignments", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function closeCoachAssignment(assignmentId: string) {
+  return requestJson<CoachClassAssignment>(`/api/v1/coach/assignments/${assignmentId}/close`, {
+    method: "POST",
+  });
 }
 
 export function fetchCoachClassReport(classId: string) {
@@ -169,6 +255,34 @@ export function scoreOrDash(value: number | null | undefined): string {
   }
 
   return String(Math.round(value));
+}
+
+export function formatCoachClassRoleLabel(role: CoachClassSummary["coachRole"]): string {
+  if (role === "owner") {
+    return "owner";
+  }
+  if (role === "collaborator") {
+    return "collaborator";
+  }
+  return "coach";
+}
+
+export function formatCoachAssignmentStatusLabel(status: string): string {
+  if (status === "assigned") {
+    return "assigned";
+  }
+  if (status === "closed") {
+    return "closed";
+  }
+  return status;
+}
+
+export function countActiveCoachClasses(classes: readonly CoachClassSummary[]): number {
+  return classes.filter((klass) => !klass.archivedAt).length;
+}
+
+export function countOpenCoachAssignments(assignments: readonly CoachClassAssignment[]): number {
+  return assignments.filter((assignment) => assignment.status === "assigned").length;
 }
 
 export function heatmapBucket(value: CoachKpReportSummary): 0 | 1 | 2 | 3 | 4 {

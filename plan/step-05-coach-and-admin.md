@@ -7,6 +7,8 @@
 
 ---
 
+> **维护追加（2026-04-28）**：`/coach/classes` 与 `/coach/assignments` 已从占位路由切换为真实 Coach 工作台页面。当前已支持班级列表、创建班级、复制/轮换班级码、归档班级、按班级查看/创建/关闭固定预制卷 assignment，并新增 `GET /api/v1/coach/prebuilt-papers` 作为 coach/admin 可用的已发布预制卷选择器。`CoachClassDetail` 的成员、邀请链、教练组深层管理与更完整浏览器视觉验收仍按 12.6 后续推进。
+
 ## Phase 12 — 教练后台
 
 ### 12.1 班级管理

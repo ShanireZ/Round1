@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import {
   BarChart3,
   Download,
@@ -544,6 +544,7 @@ function CoachAccessPrompt({
 }
 
 export default function CoachReport() {
+  const [searchParams] = useSearchParams();
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<CoachStudentReport | null>(null);
 
@@ -564,7 +565,14 @@ export default function CoachReport() {
     enabled: canReadCoachReport,
   });
   const classes = useMemo(() => classesQuery.data?.items ?? [], [classesQuery.data]);
-  const activeClassId = selectedClassId ?? classes[0]?.id ?? null;
+  const classIdFromUrl = searchParams.get("classId");
+  const activeClassId =
+    selectedClassId ??
+    (classIdFromUrl && classes.some((item) => item.id === classIdFromUrl)
+      ? classIdFromUrl
+      : null) ??
+    classes[0]?.id ??
+    null;
   const reportQuery = useQuery({
     queryKey: ["coach-report", activeClassId],
     queryFn: () => fetchCoachClassReport(activeClassId!),

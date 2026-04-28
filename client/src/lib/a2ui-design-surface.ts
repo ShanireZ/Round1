@@ -32,6 +32,10 @@ const ROUND1_A2UI_DRAFT = {
   averageScore: 86,
   completionRate: 0.74,
   printReady: true,
+  classCount: 6,
+  activeClasses: 5,
+  openAssignments: 4,
+  inviteReady: true,
   note: "Validate agent-authored surfaces against Round1 tokens before production use.",
   checks: ["theme", "keyboard"],
   target: "utility-first, token-bound, keyboard-safe",
@@ -246,7 +250,9 @@ function createRound1A2uiComponents(
         "summary",
         "section-divider",
         "design-tabs",
-        ...(options.includeRound1Snapshot ? ["round1-report-snapshot"] : []),
+        ...(options.includeRound1Snapshot
+          ? ["round1-class-snapshot", "round1-report-snapshot"]
+          : []),
         "media-card",
         "checkpoint-list",
         "notes",
@@ -359,6 +365,17 @@ function createRound1A2uiComponents(
     },
     ...(options.includeRound1Snapshot
       ? [
+          {
+            id: "round1-class-snapshot",
+            component: "Round1CoachClassSnapshot",
+            title: "CoachClasses",
+            classCount: bindDraftField("classCount"),
+            activeClasses: bindDraftField("activeClasses"),
+            students: bindDraftField("students"),
+            openAssignments: bindDraftField("openAssignments"),
+            inviteReady: bindDraftField("inviteReady"),
+            tone: "stable",
+          },
           {
             id: "round1-report-snapshot",
             component: "Round1CoachReportSnapshot",

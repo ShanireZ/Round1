@@ -88,8 +88,12 @@ describe("Round1 A2UI design surface", () => {
     expect(surface?.componentsModel.get("round1-report-snapshot")?.type).toBe(
       "Round1CoachReportSnapshot",
     );
+    expect(surface?.componentsModel.get("round1-class-snapshot")?.type).toBe(
+      "Round1CoachClassSnapshot",
+    );
     expect(surface?.dataModel.get("/draft/students")).toBe(128);
     expect(surface?.dataModel.get("/draft/printReady")).toBe(true);
+    expect(surface?.dataModel.get("/draft/openAssignments")).toBe(4);
   });
 
   it("rejects A2UI payloads that drift from installed component schemas", () => {

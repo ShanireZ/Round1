@@ -13,21 +13,21 @@ const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
+const CoachAssignments = lazy(() => import("./pages/coach/CoachAssignments"));
+const CoachClasses = lazy(() => import("./pages/coach/CoachClasses"));
 const CoachReport = lazy(() => import("./pages/coach/CoachReport"));
 const ExamNewPage = lazy(() => import("./pages/exams/ExamNew"));
 const ExamSessionPage = lazy(() => import("./pages/exams/ExamSession"));
 const ExamResultPage = lazy(() => import("./pages/exams/ExamResult"));
 
-// Dev-only pages
 const UIGallery = lazy(() => import("./pages/dev/UIGallery"));
 
-// Placeholder pages
 function PlaceholderPage({ title }: { title: string }) {
   return (
     <div className="flex min-h-[50vh] items-center justify-center">
       <div className="text-center">
         <h1 className="text-foreground text-3xl font-bold">{title}</h1>
-        <p className="text-muted-foreground mt-2">页面开发中…</p>
+        <p className="text-muted-foreground mt-2">页面开发中...</p>
       </div>
     </div>
   );
@@ -45,7 +45,6 @@ export function AppRouter() {
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <Routes>
-        {/* Auth pages — AuthLayout */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<PlaceholderPage title="注册" />} />
@@ -53,12 +52,10 @@ export function AppRouter() {
           <Route path="/auth/callback" element={<PlaceholderPage title="认证回调" />} />
         </Route>
 
-        {/* Exam taking — FocusLayout (minimal chrome) */}
         <Route element={<FocusLayout />}>
           <Route path="/exams/:id" element={<ExamSessionPage />} />
         </Route>
 
-        {/* Main app — AppShell (sidebar + topbar) */}
         <Route element={<AppShell />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/exams/new" element={<ExamNewPage />} />
@@ -67,13 +64,11 @@ export function AppRouter() {
           <Route path="/account/security" element={<PlaceholderPage title="账号安全" />} />
           <Route path="/join" element={<PlaceholderPage title="加入班级" />} />
 
-          {/* Coach */}
-          <Route path="/coach/classes" element={<PlaceholderPage title="我的班级" />} />
-          <Route path="/coach/classes/:id" element={<PlaceholderPage title="班级详情" />} />
-          <Route path="/coach/assignments" element={<PlaceholderPage title="任务管理" />} />
+          <Route path="/coach/classes" element={<CoachClasses />} />
+          <Route path="/coach/classes/:id" element={<CoachClasses />} />
+          <Route path="/coach/assignments" element={<CoachAssignments />} />
           <Route path="/coach/report" element={<CoachReport />} />
 
-          {/* Admin */}
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/questions" element={<AdminQuestionLibrary />} />
           <Route path="/admin/papers" element={<AdminPaperLibrary />} />
@@ -82,13 +77,11 @@ export function AppRouter() {
           <Route path="/admin/review" element={<AdminReviewQueue />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
 
-          {/* Dev-only: UI Gallery */}
           <Route path="/dev/ui-gallery" element={<UIGallery />} />
         </Route>
 
-        {/* Fallback */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<PlaceholderPage title="404 — 页面不存在" />} />
+        <Route path="*" element={<PlaceholderPage title="404 - 页面不存在" />} />
       </Routes>
     </Suspense>
   );

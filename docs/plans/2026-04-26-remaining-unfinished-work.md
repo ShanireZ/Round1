@@ -73,6 +73,7 @@
 - [x] coach/admin 以学生身份体验答题的数据需在班级统计中排除。（2026-04-28：基础报表聚合显式过滤 `users.role = 'student'`。）
 - [x] 群体热力图、题型统计、学生详情、学生趋势与下钻 Sheet 需要落地和性能验收。（2026-04-28：后端 `GET /api/v1/coach/report/:classId` 已追加 heatmap、questionTypeStats、students、student trend；前端 `/coach/report` 已从占位页切到真实页面，支持班级选择、群体热力图、题型统计、学生详情 Sheet、CSV 导出和打印入口。维护追加已用 Playwright 拦截 API 注入 180 名学生 × 24 个知识点规模化数据，桌面 643ms、移动 2418ms 渲染到第一页热力图，学生详情 Sheet 与题型下钻可用，browser warning/error/pageerror/requestfailed 均为 0；真实生产 p95 继续按性能标准观测。）
 - [x] Coach 权限边界验收：只能看到自己参与班级的数据。（2026-04-28：后端 Coach API 均通过 `class_coaches` 关系授权；Coach 前端页面接入与视觉验收仍随下一条 UI 项推进。）
+- [x] Coach 班级/任务列表前端入口落地。（2026-04-28 维护追加：`/coach/classes` 已接入真实班级工作台，支持班级列表、创建班级、复制/轮换班级码、归档和进入报告/任务；`/coach/assignments` 已接入班级选择、assignment 列表、已发布预制卷选择器、创建任务和关闭任务。新增 `GET /api/v1/coach/prebuilt-papers` 避免 Coach UI 依赖 Admin 预制卷库权限。`CoachClassDetail` 的成员/邀请/教练组深层管理，以及桌面/移动/键盘浏览器视觉验收仍保留在 UI/UX backlog。）
 
 ### 5. API 与配置契约补齐
 

@@ -43,6 +43,13 @@
 - CSV 导出安全收口：`buildCoachReportCsv()` 对以 `= + - @` 开头、前置空白后变成公式、或以 tab / carriage return 开头的单元格加前缀，避免学生姓名等字段在表格软件中被当作公式执行。
 - 浏览器验收过程记录：针对 App 级启动请求，Playwright mock 不能只覆盖当前页面 API，还必须覆盖 `/api/v1/config/client`、`/api/v1/auth/session` 与 `/api/v1/attempts/active`；关闭页面前等待 `document.fonts.ready`，避免把字体加载中的正常 abort 误判成页面缺陷。
 
+## 2026-04-28 维护追加（Coach 班级/任务）
+
+- Coach 班级入口推进：`/coach/classes` 从 router placeholder 切换为真实页面，接入受保护的 coach session、班级列表、创建班级、复制/轮换班级码、归档班级、进入 assignment-only 报告与任务管理入口；班级码复制失败时给出手动选择反馈。
+- Coach 任务入口推进：`/coach/assignments` 从只读/占位状态推进为可创建和关闭任务的页面，按班级读取 assignment，新增 inline 创建表单，绑定已发布预制卷、截止时间与当前班级学生 progress，继续保持 utility 工作台密度而不是营销式页面。
+- Coach assignment 选择器补齐：新增 `GET /api/v1/coach/prebuilt-papers`，仅向 coach/admin 暴露已发布预制卷的 assignable 摘要，避免任务创建 UI 依赖 Admin 预制卷库权限或手填 UUID。
+- A2UI BYOC 扩展：Round1 custom catalog 新增 `Round1CoachClassSnapshot`，与既有 `Round1CoachReportSnapshot` 一起复用本地 `Card` / `Badge` / `Progress` primitive；`/dev/ui-gallery` 的 A2UI design surface 增加班级/任务数据绑定，覆盖 CoachClasses 设计片段。
+
 ## 2026-04-28 维护追加（三）
 
 - 布局 token 漂移收口：`AppShell`、`TopBar`、`Sidebar` 不再引用未定义的 `--layout-*` 变量，改回 `tokens.css` 中已存在的 `--content-max-width`、`--topbar-height`、`--sidebar-width` 与响应式 gutter class；Sidebar 选中态补回 2px 品牌红左边界。
@@ -120,6 +127,12 @@
 - `npm run build:client`：通过，确认 `/exams/new` lazy route、A2UI guard 与 UI gallery token guard 源码可通过 TypeScript/Vite 构建；`/font/*.woff2` 仍按运行时同源代理解析。
 - `npm run test:e2e -- server/__tests__/e2e/ui-visual-audit.spec.ts --grep ExamNew`：通过，1 test，覆盖 `/exams/new` 桌面/移动无水平溢出、运行时 catalog 渲染与开考确认 Dialog。
 - Browser check：`https://127.0.0.1:5175/dev/ui-gallery#plate-11` headless Chromium 桌面视口中 A2UI surface 真实渲染，console badCount=0（0 errors / 0 warnings / 0 pageerror）。2026-04-28 维护追加后，`/login` 的 CppLearn OIDC 入口已从纯文字字标切换为 `/logo/cpplearn.jpg` 同源横幅图片；`/coach/report` 首次复查发现未登录 401 resource error，已补 `/api/v1/auth/session` 前置守卫并复查桌面/移动均为 0 warnings / 0 errors；`/dev/ui-gallery#plate-11` 维护追加后复查仍为 0 warnings / 0 errors。维护追加（二）在 `https://127.0.0.1:5178/coach/report` 使用 Playwright 拦截 API 注入 180 名学生 × 24 个知识点规模化数据：桌面首屏热力图 643ms、移动 2418ms，均无水平溢出；学生详情 Sheet 可打开并渲染题型下钻；打印态页眉为 `block`、`data-no-print` 为 `none`、打印区 `break-inside: avoid`；`https://127.0.0.1:5178/dev/ui-gallery#plate-11` 的 Round1 BYOC 可见；最终 badCount=0（0 console warning/error、0 pageerror、0 requestfailed）。
+- `npm run client:test -- src/lib/coach.test.ts src/lib/a2ui-design-surface.test.ts`：通过，2 files / 18 tests，覆盖 Coach helper、assignment 状态汇总与 A2UI Coach BYOC/data binding guard；首次运行因本地 `node_modules` 缺少已声明的 A2UI 包失败，执行 `npm install` 后恢复，`package-lock.json` 内容 hash 与 HEAD 一致。
+- `npm run test -- server/__tests__/coach-classes.integration.test.ts`：通过，1 file / 8 tests，新增覆盖 coach/admin 读取已发布预制卷 assignable 摘要。
+- `npx eslint <本轮 Coach/A2UI/server touched files>`、`npx prettier --check <本轮 touched files>` 与 `git diff --check`：通过，确认新增 Coach 页面、A2UI BYOC、coach route/schema/service 与计划文档均保持当前 lint/format/whitespace gate 干净。
+- `npm run verify:ui-tokens`：通过，`verifyUiTokenUsage: ok (89 files checked)`，确认新增 Coach 页面和 A2UI BYOC 未引入 raw color / inline style / CSS compat 回归。
+- `npm run build:client`：通过，确认 `/coach/classes`、`/coach/assignments` lazy route、A2UI catalog 与 UI gallery payload 可通过 TypeScript/Vite 构建；`/font/*.woff2` 仍按运行时同源代理解析。
+- `npm run build:server`：通过，确认 `GET /api/v1/coach/prebuilt-papers` route/schema/service 可通过 TypeScript 构建。
 
 ## 剩余风险
 

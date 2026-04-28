@@ -157,6 +157,18 @@ export const AssignmentSummarySchema = registry.register(
   }),
 );
 
+export const CoachPrebuiltPaperSummarySchema = registry.register(
+  "CoachPrebuiltPaperSummary",
+  z.object({
+    id: UuidSchema,
+    title: z.string(),
+    examType: z.string(),
+    difficulty: DifficultySchema,
+    blueprintVersion: z.number(),
+    publishedAt: z.date().nullable().or(z.string().nullable()),
+  }),
+);
+
 const KpReportSummarySchema = z.object({
   kpId: z.string(),
   total: z.number(),
@@ -317,6 +329,13 @@ registerJsonPath({
   path: "/api/v1/coach/classes",
   summary: "coach+ lists classes they coach",
   response: listEnvelope(ClassSummarySchema),
+});
+
+registerJsonPath({
+  method: "get",
+  path: "/api/v1/coach/prebuilt-papers",
+  summary: "coach+ lists published prebuilt papers assignable to classes",
+  response: listEnvelope(CoachPrebuiltPaperSummarySchema),
 });
 
 registerJsonPath({

@@ -18,6 +18,7 @@ import {
   listClassInvites,
   listClassMembers,
   listCoachClasses,
+  listCoachPrebuiltPapers,
   removeClassCoach,
   removeClassMember,
   revokeClassInvite,
@@ -84,6 +85,19 @@ coachRouter.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       res.ok({ items: await listCoachClasses(actorFromRequest(req)) });
+    } catch (err) {
+      sendServiceError(err, res, next);
+    }
+  },
+);
+
+coachRouter.get(
+  "/coach/prebuilt-papers",
+  requireAuth,
+  requireRole("coach", "admin"),
+  async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.ok({ items: await listCoachPrebuiltPapers() });
     } catch (err) {
       sendServiceError(err, res, next);
     }

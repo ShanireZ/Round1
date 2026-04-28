@@ -3,6 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   buildCoachReportCsv,
   clampCoachReportPage,
+  countActiveCoachClasses,
+  countOpenCoachAssignments,
+  formatCoachAssignmentStatusLabel,
+  formatCoachClassRoleLabel,
   formatCoachPercent,
   getCoachReportPageCount,
   getCoachReportPageItems,
@@ -24,6 +28,73 @@ describe("coach report helpers", () => {
     expect(formatCoachPercent(Number.NaN)).toBe("0%");
     expect(scoreOrDash(89.4)).toBe("89");
     expect(scoreOrDash(null)).toBe("--");
+  });
+
+  it("summarizes coach class and assignment UI states", () => {
+    expect(formatCoachClassRoleLabel("owner")).toBe("owner");
+    expect(formatCoachClassRoleLabel("collaborator")).toBe("collaborator");
+    expect(formatCoachClassRoleLabel(undefined)).toBe("coach");
+    expect(formatCoachAssignmentStatusLabel("assigned")).toBe("assigned");
+    expect(formatCoachAssignmentStatusLabel("closed")).toBe("closed");
+    expect(formatCoachAssignmentStatusLabel("paused")).toBe("paused");
+
+    expect(
+      countActiveCoachClasses([
+        {
+          id: "11111111-1111-4111-8111-111111111111",
+          name: "A",
+          joinCode: "ABC123",
+          archivedAt: null,
+          createdBy: "00000000-0000-4000-8000-000000000001",
+          createdAt: "2026-04-28T00:00:00.000Z",
+          updatedAt: "2026-04-28T00:00:00.000Z",
+        },
+        {
+          id: "22222222-2222-4222-8222-222222222222",
+          name: "B",
+          joinCode: "DEF456",
+          archivedAt: "2026-04-28T00:00:00.000Z",
+          createdBy: "00000000-0000-4000-8000-000000000001",
+          createdAt: "2026-04-28T00:00:00.000Z",
+          updatedAt: "2026-04-28T00:00:00.000Z",
+        },
+      ]),
+    ).toBe(1);
+
+    expect(
+      countOpenCoachAssignments([
+        {
+          id: "33333333-3333-4333-8333-333333333333",
+          classId: "11111111-1111-4111-8111-111111111111",
+          createdBy: "00000000-0000-4000-8000-000000000001",
+          title: "Week 1",
+          mode: "timed",
+          prebuiltPaperId: "44444444-4444-4444-8444-444444444444",
+          examType: "CSP-J",
+          difficulty: "medium",
+          blueprintVersion: 1,
+          dueAt: "2026-04-30T00:00:00.000Z",
+          status: "assigned",
+          createdAt: "2026-04-28T00:00:00.000Z",
+          updatedAt: "2026-04-28T00:00:00.000Z",
+        },
+        {
+          id: "55555555-5555-4555-8555-555555555555",
+          classId: "11111111-1111-4111-8111-111111111111",
+          createdBy: "00000000-0000-4000-8000-000000000001",
+          title: "Week 2",
+          mode: "timed",
+          prebuiltPaperId: "66666666-6666-4666-8666-666666666666",
+          examType: "CSP-J",
+          difficulty: "medium",
+          blueprintVersion: 1,
+          dueAt: "2026-05-07T00:00:00.000Z",
+          status: "closed",
+          createdAt: "2026-04-28T00:00:00.000Z",
+          updatedAt: "2026-04-28T00:00:00.000Z",
+        },
+      ]),
+    ).toBe(1);
   });
 
   it("windows report rows with stable clamped pagination", () => {

@@ -359,6 +359,21 @@ export async function listCoachClasses(actor: ActorContext) {
   return rows.map(toClassSummary);
 }
 
+export async function listCoachPrebuiltPapers() {
+  return db
+    .select({
+      id: prebuiltPapers.id,
+      title: prebuiltPapers.title,
+      examType: prebuiltPapers.examType,
+      difficulty: prebuiltPapers.difficulty,
+      blueprintVersion: prebuiltPapers.blueprintVersion,
+      publishedAt: prebuiltPapers.publishedAt,
+    })
+    .from(prebuiltPapers)
+    .where(eq(prebuiltPapers.status, "published"))
+    .orderBy(desc(prebuiltPapers.publishedAt), desc(prebuiltPapers.createdAt));
+}
+
 export async function getCoachClass(actor: ActorContext, classId: string) {
   await getCoachAccess(actor, classId);
   const row = await getClassById(classId);
@@ -1390,7 +1405,8 @@ export async function getClassReport(actor: ActorContext, classId: string) {
     }
     if (
       row.submittedAt &&
-      (!student.latestSubmittedAt || row.submittedAt.getTime() > student.latestSubmittedAt.getTime())
+      (!student.latestSubmittedAt ||
+        row.submittedAt.getTime() > student.latestSubmittedAt.getTime())
     ) {
       student.latestSubmittedAt = row.submittedAt;
     }
