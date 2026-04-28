@@ -15,7 +15,7 @@
 - A2UI basic catalog 覆盖扩展：`/dev/ui-gallery` 示例 surface 现覆盖 Text/Card/Row/Column/List/Tabs/Divider/Icon、TextField、CheckBox、Slider、DateTimeInput、ChoicePicker、data model binding 与 Button action context；目录由已安装 `basicCatalog` 动态生成，便于以后 agent UI/UX 设计先在 Round1 token bridge 中验收。
 - A2UI payload 防硬编码：本地示例 surface 从页面长 JSON 收口到 `createRound1A2uiMessages()` factory；渲染前校验 installed `basicCatalog` schema、组件 id 唯一性、引用完整性、action allowlist 和复杂度上限。该校验已捕获并修正 `Slider minValue/maxValue`、`ChoicePicker selections`、`TextField textFieldType`、非法 Icon 名称与动态目录 id 冲突等 drift。
 - Edge Tools 告警收口：`Dashboard.tsx` 的成绩柱状图不再使用 JSX inline `style`，改为受控高度 class；`globals.css`、`a2ui.css` 与 Admin Dashboard 不再使用 `color-mix()`，改为 `tokens.css` 中的静态兼容 token；`a2ui.css` 的 checkbox 不再使用 `min-height: auto`，改为明确 `width`/`height`。
-- 字体源收口：`globals.css` 的全部 `@font-face` 与 `index.html` preload 已改为同源 `/font/*.woff2`；Vite dev server 通过 `R2_PUBLIC_BASE_URL` 代理通用字体到 R2 `/font/`，生产 Caddy 也必须保留同源 `/font/*` 代理，避免浏览器直接跨域请求字体触发 CORS error。CppLearn OIDC 视觉改用同源 `/logo/cpplearn.jpg` 横幅图片，代理到 `R2_PUBLIC_BASE_URL/logo/cpplearn.jpg`。`client/public/fonts` 保留为本地缓存说明，不再作为运行时默认源。
+- 字体源收口：`globals.css` 的全部 `@font-face` 与 `index.html` preload 已改为同源 `/font/*.woff2`；Vite dev server 通过 `R2_PUBLIC_BASE_URL` 代理通用字体到 R2 `/font/`，生产 Caddy 通过 `Caddyfile.example` 中的 R2 源站字面量保留同源 `/font/*` 代理，避免浏览器直接跨域请求字体触发 CORS error。CppLearn OIDC 视觉改用同源 `/logo/cpplearn.jpg` 横幅图片，按开发/生产代理到 R2 `/logo/cpplearn.jpg`。`client/public/fonts` 保留为本地缓存说明，不再作为运行时默认源。
 - CSP 收口：`server/app.ts` 的 Helmet CSP 已把 `R2_PUBLIC_BASE_URL` 同步加入 `font-src`，避免后续 API/同源静态部署时远端字体被策略拦截。
 - 学生导航漂移：`client/src/lib/navigation.ts` 的主导航从早期 `/questions`、`/exams`、`/analytics`、`/settings` 占位入口收口为当前 UI/UX 契约：`/dashboard`、`/exams/new`、`/account/class`、`/account/security`。
 - 认证回跳路径漂移：CppLearn OIDC bind flow 从旧 `/settings/security` 改为当前 `/account/security`，避免成功绑定后跳到未登记前端入口。
@@ -31,7 +31,7 @@
 - A2UI 浏览器错误防护：`A2uiDesignSurface` 不再假设 action context 一定存在；surface 初始化异常会渲染 inline error，不让 React effect 异常升级成 console error / pageerror。
 - CoachReport 落地推进：`GET /api/v1/coach/report/:classId` 从基础 assignment 汇总扩展为 `heatmap`、`questionTypeStats`、`students` 与每个学生的趋势/知识点/题型详情；`/coach/report` 前端从占位页切换为真实页面，支持班级选择、群体热力图、题型统计、学生行键盘下钻 Sheet、CSV 导出与打印入口。
 - 登录视觉漂移收口：`/login` 从占位页切换为 AuthLayout 分栏登录页，接入密码登录、运行时 provider feature flag、CppLearn OIDC 入口与 QQ 互联入口显示条件。
-- CppLearn 登录视觉收口：早期纯文字字标已移除；`/login` 和 AuthLayout 改用 CppLearn 提供的 `/logo/cpplearn.jpg` 横幅图片，路径集中在 `client/src/lib/brand-assets.ts`，由 Vite/Caddy 代理到 `R2_PUBLIC_BASE_URL/logo/cpplearn.jpg`。
+- CppLearn 登录视觉收口：早期纯文字字标已移除；`/login` 和 AuthLayout 改用 CppLearn 提供的 `/logo/cpplearn.jpg` 横幅图片，路径集中在 `client/src/lib/brand-assets.ts`；Vite 开发代理读取 `R2_PUBLIC_BASE_URL`，生产 Caddy 通过 `Caddyfile.example` 中的 R2 源站字面量代理到 R2 `/logo/cpplearn.jpg`。
 
 ## 2026-04-28 维护追加（二）
 
@@ -75,7 +75,7 @@
 - `standard/04-ui-ux.md`、`standard/05-frontend-engineering.md` 与 `plan/uiux_plan.md` 已补 A2UI Round1 BYOC custom catalog、动态 `{ call, args }` 函数绑定禁止和本地 primitive 复用要求。
 - `standard/04-ui-ux.md`、`standard/15-performance-accessibility-print.md`、`plan/uiux_plan.md` 与 `plan/step-05-coach-and-admin.md` 已补 CoachReport 规模化分页/窗口化、打印分区标记和 180×24 浏览器性能验收结果。
 - `standard/04-ui-ux.md` 与 `plan/uiux_plan.md` 已补 CppLearn OIDC 横幅图片的使用边界：只用于身份入口，不替代 Round1 主品牌。
-- `plan/reference-config.md` 已补 R2 环境变量示例，说明前端字体依赖 `R2_PUBLIC_BASE_URL/font/*.woff2`，CppLearn 横幅图片依赖 `R2_PUBLIC_BASE_URL/logo/cpplearn.jpg`。
+- `plan/reference-config.md` 已补 R2 环境变量示例，说明 Vite 开发代理使用 `R2_PUBLIC_BASE_URL`，生产 Caddy 直接使用 `Caddyfile.example` 中的 R2 源站字面量，前端页面始终只引用同源 `/font/*` 与 `/logo/*`。
 - `plan/reference-api.md` 已补 `/account/class` 前端路由表项。
 - `plan/reference-api.md`、`plan/step-02-auth-system.md`、`standard/04-ui-ux.md`、`standard/08-security-auth-permissions.md`、`standard/13-config-env.md` 与 `standard/06-backend-api.md` 已补 QQ placeholder 与 enabled provider 的区别，避免未实现 OAuth 被误写为现状可用能力。
 - `standard/14-deployment-ops.md`、`plan/step-06-deployment.md` 与 `scripts/README.md` 已补 `contentWorker` 独立 healthcheck 口径。
@@ -109,6 +109,6 @@
 ## 剩余风险
 
 - A2UI 当前只接入 `/dev/ui-gallery` 示例 surface，尚未连接真实 agent/MCP payload；后续若接入外部 agent 消息，必须先补 payload 校验、权限边界、复杂度限制与 XSS/DoS 防护。Markdown 已接入 sanitizer renderer，但外部 payload 的字段级校验与执行限制仍不能省略。
-- 字体和品牌图片代理当前按本机 `.env` 的公开 `R2_PUBLIC_BASE_URL=https://r2.round1.cc` 收口；若部署环境变更公开域名，必须同步 Vite/Caddy `/font/*`、`/logo/*` 代理、CSP 和本文件记录，避免资源源再次漂移。
+- 字体和品牌图片代理当前按本机 `.env` 的公开 `R2_PUBLIC_BASE_URL=https://r2.round1.cc` 以及 `Caddyfile.example` 的 R2 源站字面量收口；若部署环境变更公开域名，必须同步 Vite `/font/*`、`/logo/*` 开发代理、Caddyfile 生产代理、CSP 和本文件记录，避免资源源再次漂移。
 - UI/UX 仍保留全路由截图、键盘、真实 Chrome 打印预览 PDF、登录/考试/Admin 全流程截图等整体视觉验收债务；本轮已收口 A2UI bridge、R2 字体源、浏览器告警 guard、导航/回跳漂移、Dashboard 雷达/热力图、ExamResult reduced-motion 与打印 marker 验收。
 - 单 VPS 部署推荐已形成，但真实域名、Caddy/TLS、PM2 reload、备份恢复、Sentry、邮件 DNS、安全加固与回滚仍未实机演练，不能视为生产上线完成。

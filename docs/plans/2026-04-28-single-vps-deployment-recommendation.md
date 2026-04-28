@@ -10,11 +10,11 @@
 
 当前推荐：**不要为单 VPS 首发引入 Kubernetes/k3s**。生产运行时先采用：
 
-- Caddy 继续作为唯一公网入口，负责 TLS、静态资源、SPA fallback、`/api/*` 反代、`/font/*` 同源字体代理与 `/logo/*` 同源品牌图片代理；实际配置以 `Caddyfile.example` 为模板。
+- Caddy 继续作为唯一公网入口，负责 TLS、静态资源、SPA 回退、`/api/*` 反代、`/font/*` 同源字体代理与 `/logo/*` 同源品牌图片代理；实际配置以 `Caddyfile.example` 为模板，生产字面量直接写入 Caddyfile。
 - Node API 使用当前仓库已有 `ecosystem.config.cjs` + PM2 cluster 2 实例，或等价 systemd service；短期以 PM2 为准，因为代码、healthcheck 与 plan 已经对齐。
 - Postgres、Redis 使用系统包或受控 systemd service；Postgres 数据目录、备份、恢复演练优先级高于容器化。
 - Postgres、Redis 在单 VPS 上只绑定 `127.0.0.1` 或 Unix socket，不对公网暴露；当前端口设计见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。
-- `client/dist` 由 Caddy 直接托管，hashed assets 长缓存，`index.html` 不长缓存。
+- `client/dist` 由 Caddy 直接托管，带哈希资源长缓存，`index.html` 不长缓存。
 - 离线内容环境继续与生产运行时分离，不在生产机运行 `cpp-runner`、generation 或 sandbox verify。
 
 可选增强：当需要依赖隔离、镜像化发布或降低 Node/npm 漂移时，再引入 **rootless Podman + Quadlet/systemd** 管理 API 或 Redis；Postgres 是否容器化单独评估，不能因为容器化而降低备份与恢复演练要求。
@@ -62,8 +62,8 @@ Cloudflare DNS / WAF
         v
 Caddy :443
   |-- /api/*       -> 127.0.0.1:7654 Round1 API (PM2 cluster)
-  |-- /font/*      -> R2 public font origin
-  |-- /logo/*      -> R2 public brand image origin
+  |-- /font/*      -> R2 公开字体源站
+  |-- /logo/*      -> R2 公开品牌图片源站
   |-- /*           -> /opt/round1/current/client/dist
 
 systemd/PM2

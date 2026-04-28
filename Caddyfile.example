@@ -1,36 +1,25 @@
-# Round1 production Caddy template.
+# Round1 生产 Caddy 模板。
 #
-# This file uses native Caddyfile syntax, not Caddy's JSON config format.
-# The `format json` directives below only control log output encoding.
+# 本文件使用 Caddyfile 原生语法，不使用 Caddy JSON 配置格式。
+# `format json` 只表示访问日志以 JSON 格式输出。
 #
-# Required deployment variables:
-#   ROUND1_SITE_HOST=round1.example.com
-#   ROUND1_STATIC_ROOT=/opt/round1/client/dist
-#   ROUND1_API_UPSTREAM=127.0.0.1:7654
-#   ROUND1_ACCESS_LOG=/var/log/caddy/round1-access.json
-#   ROUND1_SYSTEM_LOG=/var/log/caddy/round1-system.json
-#   R2_PUBLIC_BASE_URL=https://r2.example.com
+# 部署前请按实际环境修改下列字面量：
+# - 站点域名：round1.example.com
+# - 前端构建目录：/opt/round1/client/dist
+# - Express API：127.0.0.1:7654
+# - 访问日志：/var/log/caddy/round1-access.json
+# - R2 公开资源源站：https://r2.example.com
 #
-# Notes:
-# - Public firewall: TCP 80/443 for Caddy, TCP 9179 for SSH.
-# - The domain site address lets Caddy Automatic HTTPS handle HTTP -> HTTPS.
-# - Caddy defaults to h1/h2/h3. Keep h1; h2 currently implies h1 support.
-# - If default HTTP/3 is kept enabled, also allow UDP 443.
-# - Express must keep ROUND1_BIND_HOST=127.0.0.1 and PORT=7654.
-# - Postgres 4397 and Redis 4395 must not be exposed publicly.
-{
-	log {
-		output file {$ROUND1_SYSTEM_LOG:/var/log/caddy/round1-system.json} {
-			roll_size 100MiB
-			roll_keep 10
-			roll_keep_for 720h
-		}
-		format json
-	}
-}
+# 说明：
+# - 公网防火墙只开放 Caddy TCP 80/443 与 SSH TCP 9179。
+# - 域名站点会让 Caddy 自动 HTTPS 机制处理 HTTP 到 HTTPS 跳转。
+# - Caddy 默认协议为 h1/h2/h3；保留 h1，因为当前 h2 仍需要 h1 支持。
+# - 如果保留默认 HTTP/3，还需要允许 UDP 443。
+# - Express 必须保持 ROUND1_BIND_HOST=127.0.0.1 且 PORT=7654。
+# - Postgres 4397 与 Redis 4395 不得暴露公网。
 
-https://{$ROUND1_SITE_HOST:round1.example.com} {
-	root * {$ROUND1_STATIC_ROOT:/opt/round1/client/dist}
+https://round1.example.com {
+	root * /opt/round1/client/dist
 	encode zstd gzip
 
 	tls {
@@ -38,7 +27,7 @@ https://{$ROUND1_SITE_HOST:round1.example.com} {
 	}
 
 	log {
-		output file {$ROUND1_ACCESS_LOG:/var/log/caddy/round1-access.json} {
+		output file /var/log/caddy/round1-access.json {
 			roll_size 100MiB
 			roll_keep 10
 			roll_keep_for 720h
@@ -56,21 +45,20 @@ https://{$ROUND1_SITE_HOST:round1.example.com} {
 		Permissions-Policy "camera=(), microphone=(), geolocation=()"
 	}
 
-	# Dynamic API traffic stays in Node. Cache semantics for API responses should
-	# be decided by Express, not by Caddy.
+	# 动态 API 交给 Node；API 响应缓存语义由 Express 决定，不在 Caddy 层统一缓存。
 	@api path /api/*
 	handle @api {
-		reverse_proxy {$ROUND1_API_UPSTREAM:127.0.0.1:7654} {
+		reverse_proxy 127.0.0.1:7654 {
 			header_up X-Real-IP {remote_host}
 		}
 	}
 
-	# Runtime asset proxies. Upstreams should expose /font/* and /logo/* paths
-	# so the browser only loads same-origin asset URLs and avoids CORS drift.
+	# 运行时资源代理。R2 源站应提供 /font/* 与 /logo/* 路径；
+	# 浏览器只加载同源资源 URL，避免 CORS 漂移。
 	@fonts path /font/*
 	handle @fonts {
 		header Cache-Control "public, max-age=86400"
-		reverse_proxy {$R2_PUBLIC_BASE_URL:https://r2.example.com} {
+		reverse_proxy https://r2.example.com {
 			header_up Host {upstream_hostport}
 		}
 	}
@@ -78,27 +66,24 @@ https://{$ROUND1_SITE_HOST:round1.example.com} {
 	@logos path /logo/*
 	handle @logos {
 		header Cache-Control "public, max-age=86400"
-		reverse_proxy {$R2_PUBLIC_BASE_URL:https://r2.example.com} {
+		reverse_proxy https://r2.example.com {
 			header_up Host {upstream_hostport}
 		}
 	}
 
-	# Vite emits hashed assets under /assets/. One month is a conservative long
-	# cache while the app is still moving quickly; raise to one year when release
-	# discipline is mature.
+	# Vite 会把带哈希的构建产物输出到 /assets/。当前先使用一个月保守长缓存；
+	# 发布纪律稳定后可提升到一年。
 	@hashedAssets path_regexp hashedAssets ^/assets/.+-[A-Za-z0-9_-]+\.(?:css|js|mjs|map|woff2?|ttf|otf|png|jpe?g|webp|avif|svg|ico)$
 	header @hashedAssets Cache-Control "public, max-age=2592000, immutable"
 
-	# Non-hashed static files can change without a filename bump, so keep them
-	# fresh daily.
+	# 未带哈希的静态资源可能原名更新，因此只缓存一天。
 	@staticAssets path /favicon.svg /robots.txt /site.webmanifest /manifest.webmanifest /logos/* /fonts/* /logo/*
 	header @staticAssets Cache-Control "public, max-age=86400"
 
 	route {
 		try_files {path} /index.html
 
-		# The SPA shell, route fallbacks, and other frequently updated entry
-		# content must revalidate on every navigation.
+		# SPA 入口、路由回退和关键易更新内容每次导航都必须重新验证。
 		header /index.html Cache-Control "no-cache, no-store, max-age=0, must-revalidate"
 
 		file_server

@@ -45,7 +45,7 @@
 
 条件出站端口：默认外部 API（R2、LLM、Resend/Postmark、Turnstile、OIDC、Sentry）走 HTTPS `443`；若启用 `MAIL_PROVIDER=tencent-ses`，腾讯云 SES SMTP 需要出站 `465`。
 
-重新设计端口时，先改 `.env` / Caddy / healthcheck / compose，再同步 `plan/reference-config.md` 与端口盘点文档，避免部署 runbook 和代码默认值漂移。若生产 API 与 Caddy 同机，`ROUND1_BIND_HOST` 必须保持 `127.0.0.1`。
+重新设计端口时，先改 `.env`、`Caddyfile.example`、healthcheck 与 compose，再同步 `plan/reference-config.md` 与端口盘点文档，避免部署 runbook 和代码默认值漂移。若生产 API 与 Caddy 同机，`ROUND1_BIND_HOST` 必须保持 `127.0.0.1`。
 
 ---
 
@@ -82,13 +82,13 @@
 
 ### 14.2 Caddy 配置
 
-- 模板文件：`Caddyfile.example`。该文件使用 Caddyfile 原生语法，不使用 Caddy JSON config；其中 `format json` 仅表示日志输出为 JSON。实际部署时复制为系统 Caddyfile，并通过 systemd/Caddy 环境变量填入域名、静态目录、API upstream、日志路径与字体源。
+- 模板文件：`Caddyfile.example`。该文件使用 Caddyfile 原生语法，不使用 Caddy JSON config；其中 `format json` 仅表示日志输出为 JSON。实际部署时复制为系统 Caddyfile，并直接修改文件中的站点域名、静态目录、API upstream、访问日志路径与 R2 公开资源源站字面量；这些值不从 `.env` 读取。
 - Cloudflare Origin CA 15 年源证书，Full (Strict) 加密模式
-- 覆盖 `X-Forwarded-*` 头，防止客户端伪造：使用 `CF-Connecting-IP` 作为 `X-Forwarded-For`
+- 依赖 Caddy `reverse_proxy` 默认处理 `X-Forwarded-For`、`X-Forwarded-Host` 与 `X-Forwarded-Proto`，并忽略客户端伪造的同名请求头；模板额外上送 `X-Real-IP {remote_host}`。若未来要恢复 Cloudflare 访客真实 IP，必须先配置 `trusted_proxies` / `client_ip_headers` 或源站保护，不能在允许公网直连时盲信 `CF-Connecting-IP`。
 - `reverse_proxy 127.0.0.1:7654`
 - `app.set('trust proxy', 1)`（一跳 = Caddy），严禁 `true`
-- Caddy 必须强制 HTTPS，TLS 最低 `tls1.2`，启用 HTTP/2 或更新协议；域名站点依赖 Caddy Automatic HTTPS 自动处理 HTTP -> HTTPS，不额外维护显式 `http://` 站点块。协议配置保持 Caddy 默认 `h1/h2/h3`；不要只配置 `h2/h3`，因为当前 `h2` 仍需要 `h1`。若保留默认 HTTP/3，防火墙需放行 UDP 443；若只要 HTTP/2，可显式配置 `h1/h2`。
-- Caddy access/system log 使用 JSON，滚动策略为 `roll_size 100MiB`、`roll_keep 10`、`roll_keep_for 720h`。
+- Caddy 必须强制 HTTPS，TLS 最低 `tls1.2`，启用 HTTP/2 或更新协议；域名站点依赖 Caddy 自动 HTTPS 机制处理 HTTP -> HTTPS，不额外维护显式 `http://` 站点块。协议配置保持 Caddy 默认 `h1/h2/h3`；不要只配置 `h2/h3`，因为当前 `h2` 仍需要 `h1`。若保留默认 HTTP/3，防火墙需放行 UDP 443；若只要 HTTP/2，可显式配置 `h1/h2`。
+- Caddy 站点访问日志写在站点配置块内，使用 JSON 格式，滚动策略为 `roll_size 100MiB`、`roll_keep 10`、`roll_keep_for 720h`。
 - 因 `client/dist` 由 Caddy 直接托管，Caddy 模板必须补齐静态 HTML 的 HSTS、CSP、`X-Content-Type-Options`、`X-Frame-Options`、`Referrer-Policy` 与 `Permissions-Policy`，避免只依赖 Express Helmet。
 
 ### 14.3 PM2 配置
@@ -106,16 +106,16 @@
 - Caddy 配置：
   - `root * /opt/round1/client/dist`
   - `file_server`
-  - `try_files {path} /index.html`（SPA fallback）
+  - `try_files {path} /index.html`（SPA 回退）
   - `@fonts path /font/*`
-  - `reverse_proxy @fonts <R2_PUBLIC_BASE_URL>`（保留 `/font/*` path；避免浏览器直接跨域加载字体）
+  - `reverse_proxy @fonts <R2 公开资源源站>`（保留 `/font/*` path；避免浏览器直接跨域加载字体）
   - `@logos path /logo/*`
-  - `reverse_proxy @logos <R2_PUBLIC_BASE_URL>`（CppLearn 横幅为 `/logo/cpplearn.jpg`）
+  - `reverse_proxy @logos <R2 公开资源源站>`（CppLearn 横幅为 `/logo/cpplearn.jpg`）
   - `@api path /api/*`
   - `reverse_proxy @api 127.0.0.1:7654`
 - 散列文件名 → `Cache-Control: public, max-age=2592000, immutable`
 - 普通静态资源 → `Cache-Control: public, max-age=86400`
-- `index.html` 与 SPA fallback → `Cache-Control: no-cache, no-store, max-age=0, must-revalidate`
+- `index.html` 与 SPA 回退 → `Cache-Control: no-cache, no-store, max-age=0, must-revalidate`
 - 动态 API 响应由 Express 决定缓存语义，不在 Caddy 层统一缓存。
 
 ### 14.5 优雅停机

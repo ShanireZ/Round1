@@ -12,7 +12,7 @@
 ## 前端性能
 
 - 字体使用 `font-display: swap`。
-- 字体默认通过同源 `/font/` 代理从公开 `R2_PUBLIC_BASE_URL/font/` 加载；Geist/HarmonyOS 关键字重可 preload；Fraunces/思源宋体 Heavy 只在 Hero/ExamResult/AuthLayout 场景加载。CppLearn OIDC 横幅图片通过同源 `/logo/cpplearn.jpg` 代理到 `R2_PUBLIC_BASE_URL/logo/cpplearn.jpg`，按普通静态资源缓存。
+- 字体默认通过同源 `/font/` 加载；开发环境由 Vite 读取 `R2_PUBLIC_BASE_URL` 代理到 R2 `/font/`，生产环境由 `Caddyfile.example` 中的 R2 源站字面量代理到同一路径。Geist/HarmonyOS 关键字重可 preload；Fraunces/思源宋体 Heavy 只在 Hero/ExamResult/AuthLayout 场景加载。CppLearn OIDC 横幅图片通过同源 `/logo/cpplearn.jpg` 按开发/生产代理到 R2 `/logo/cpplearn.jpg`，按普通静态资源缓存。
 - 图表库按需 lazy load。
 - 大型 JSON、报告、题库详情不得一次性渲染全量；列表分页或虚拟化。
 - CoachReport 热力图和学生表在规模化班级中必须分页、窗口化或虚拟化，禁止一次性渲染全量 student × knowledge point 矩阵；分页大小等渲染上限应集中在领域 helper 常量中，不能散落硬编码。

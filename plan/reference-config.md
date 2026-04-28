@@ -143,13 +143,6 @@ TRUST_PROXY_HOPS=1
 DEV_HTTPS_CERT=./certs/dev-cert.pem
 DEV_HTTPS_KEY=./certs/dev-key.pem
 
-# Caddy 部署模板变量（见 Caddyfile.example）
-ROUND1_SITE_HOST=round1.example.com
-ROUND1_STATIC_ROOT=/opt/round1/client/dist
-ROUND1_API_UPSTREAM=127.0.0.1:7654
-ROUND1_ACCESS_LOG=/var/log/caddy/round1-access.json
-ROUND1_SYSTEM_LOG=/var/log/caddy/round1-system.json
-
 # 邮件
 MAIL_PROVIDER=resend
 MAIL_FROM=
@@ -169,19 +162,19 @@ CPPLEARN_OIDC_CLIENT_ID=
 CPPLEARN_OIDC_CLIENT_SECRET=
 CPPLEARN_OIDC_REDIRECT_URI=
 
-# LLM
-# 推荐直接配置 provider lane；离线 scripts 与审核脚本共用同一组 provider-direct 路由解析逻辑
-# scene:
+# 大模型
+# 推荐直接配置提供商通道；离线脚本与审核脚本共用同一组提供商直连路由解析逻辑
+# 场景：
 #   generate     -> 离线题目生成脚本
 #   judge        -> 离线判官/审核脚本
 #   rewrite      -> scripts/rewritePaperExplanations.ts
 #   paper_audit  -> scripts/reviewRealPapers.ts
 #   answer_fill  -> 答案回填/补全脚本
-# 当前 provider-direct 方案只保留 2 条 lane：
-#   LLM_PROVIDER_DEFAULT -> 主 lane provider slug
-#   LLM_PROVIDER_BACKUP  -> 备用 lane provider slug
-# 日常脚本入口不写 provider 覆盖参数；显式 route override 仅用于内部诊断，
-# 并限制在 deepseek / xiaomi / alibaba / minimax 四个 provider 内。
+# 当前提供商直连方案只保留 2 条通道：
+#   LLM_PROVIDER_DEFAULT -> 主通道的提供商标识
+#   LLM_PROVIDER_BACKUP  -> 备用通道的提供商标识
+# 日常脚本入口不写提供商覆盖参数；显式路由覆盖仅用于内部诊断，
+# 并限制在 deepseek / xiaomi / alibaba / minimax 四个提供商内。
 # 示例：
 # LLM_PROVIDER_DEFAULT=xiaomi
 # LLM_PROVIDER_BACKUP=deepseek
@@ -225,7 +218,7 @@ XAI_API_KEY=
 XAI_BASE_URL=https://api.x.ai/v1
 XAI_MODEL=grok-3-beta
 
-# Sandbox
+# 沙箱
 SANDBOX_RUNNER_URL=http://127.0.0.1:4401
 SANDBOX_RUNNER_IMAGE=cpp-runner:latest
 SANDBOX_RUNNER_RUNTIME=runsc
@@ -234,7 +227,7 @@ SANDBOX_TIMEOUT_MS=1000
 SANDBOX_MEM_MB=256
 SANDBOX_PIDS_LIMIT=64
 
-# Redis / Worker
+# Redis 与工作器
 REDIS_URL=redis://127.0.0.1:4395
 ROUND1_WORKER_ENABLED=0              # 生产默认关闭运行时 worker；离线内容环境单独启 content worker
 ROUND1_WORKER_CONCURRENCY=3
@@ -244,17 +237,17 @@ ROUND1_WORKER_CONCURRENCY=3
 MIN_ASSIGNMENT_START_MINUTES=1
 AUTOSAVE_INTERVAL_SECONDS=180          # 前端周期性 autosave flush 间隔（通过 GET /api/v1/config/client 下发）；后端 per-user 限频默认由 exam.autosaveRateLimitSeconds=30 管理
 
-# R2 / public assets
+# R2 公开资源
 R2_ACCOUNT_ID=
 R2_ACCESS_KEY_ID=
 R2_SECRET_ACCESS_KEY=
 R2_API_TOKEN=
-R2_PUBLIC_BASE_URL=                    # 公开资源 origin；前端同源 /font/* 与 /logo/* 代理到该 origin
+R2_PUBLIC_BASE_URL=                    # 公开资源源站；Vite 开发代理把同源 /font/* 与 /logo/* 代理到该源站
 
 ```
 
 字体当前需要在 `${R2_PUBLIC_BASE_URL}/font/` 下提供 Geist、HarmonyOS、Fraunces 与 Source Han Serif SC。CppLearn OIDC 横幅图片由 CppLearn 提供并上传到 `${R2_PUBLIC_BASE_URL}/logo/cpplearn.jpg`；运行时页面只引用同源 `/logo/cpplearn.jpg`。
 
-端口设计与暴露面见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。单机部署时 `PORT=7654` 必须配合 `ROUND1_BIND_HOST=127.0.0.1`，`DATABASE_URL` 使用 `127.0.0.1:4397`，`REDIS_URL` 使用 `127.0.0.1:4395`，`SANDBOX_RUNNER_URL` 使用 `127.0.0.1:4401` 且仅用于本地开发/离线内容环境；生产公网入口只开放 Caddy `80/443` 与 SSH `9179`。Caddy 默认协议集为 `h1/h2/h3`；不要只配置 `h2/h3`，因为当前 `h2` 仍需要 `h1`。若保留 Caddy HTTP/3，同一 `443` 还需允许 UDP；若使用 `MAIL_PROVIDER=tencent-ses`，需要允许 SMTP 465 出站。若重新设计端口，必须同步 `.env.example`、`docker-compose.dev.yml`、`Caddyfile.example`、Vite proxy、healthcheck 与部署 runbook。
+端口设计与暴露面见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。单机部署时 `PORT=7654` 必须配合 `ROUND1_BIND_HOST=127.0.0.1`，`DATABASE_URL` 使用 `127.0.0.1:4397`，`REDIS_URL` 使用 `127.0.0.1:4395`，`SANDBOX_RUNNER_URL` 使用 `127.0.0.1:4401` 且仅用于本地开发/离线内容环境；生产公网入口只开放 Caddy `80/443` 与 SSH `9179`。`Caddyfile.example` 为独立配置文件，不从 `.env` 读取域名、静态目录、API upstream、日志路径或 R2 源站；部署时直接修改 Caddyfile 中的字面量。Caddy 默认协议集为 `h1/h2/h3`；不要只配置 `h2/h3`，因为当前 `h2` 仍需要 `h1`。若保留 Caddy HTTP/3，同一 `443` 还需允许 UDP；若使用 `MAIL_PROVIDER=tencent-ses`，需要允许 SMTP 465 出站。若重新设计端口，必须同步 `.env.example`、`docker-compose.dev.yml`、`Caddyfile.example`、Vite proxy、healthcheck 与部署 runbook。
 
-> 邮件 provider、LLM provider lane、worker 开关与默认值以 `config/env.ts` 为准；本节示例仅保留最常用部署骨架，避免与代码真源重复漂移。
+> 邮件提供商、大模型提供商通道、工作器开关与默认值以 `config/env.ts` 为准；本节示例仅保留最常用部署骨架，避免与代码真源重复漂移。
