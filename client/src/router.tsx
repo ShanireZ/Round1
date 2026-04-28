@@ -13,6 +13,8 @@ const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
+const AccountClassPage = lazy(() => import("./pages/account/AccountClassPage"));
+const AccountSecurityPage = lazy(() => import("./pages/account/AccountSecurityPage"));
 const CoachAssignments = lazy(() => import("./pages/coach/CoachAssignments"));
 const CoachClasses = lazy(() => import("./pages/coach/CoachClasses"));
 const CoachReport = lazy(() => import("./pages/coach/CoachReport"));
@@ -60,9 +62,9 @@ export function AppRouter() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/exams/new" element={<ExamNewPage />} />
           <Route path="/exams/:id/result" element={<ExamResultPage />} />
-          <Route path="/account/class" element={<PlaceholderPage title="我的班级" />} />
-          <Route path="/account/security" element={<PlaceholderPage title="账号安全" />} />
-          <Route path="/join" element={<PlaceholderPage title="加入班级" />} />
+          <Route path="/account/class" element={<AccountClassPage />} />
+          <Route path="/account/security" element={<AccountSecurityPage />} />
+          <Route path="/join" element={<AccountClassPage focusJoin />} />
 
           <Route path="/coach/classes" element={<CoachClasses />} />
           <Route path="/coach/classes/:id" element={<CoachClasses />} />

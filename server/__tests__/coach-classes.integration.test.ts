@@ -177,6 +177,36 @@ describe("coach class api", () => {
     ]);
   });
 
+  it("lists classes joined by the current student with assignment counters", async () => {
+    queuedResults.push([
+      {
+        classId,
+        name: "CSP-J Spring",
+        archivedAt: null,
+        joinedVia: "code",
+        joinedAt: new Date("2026-04-28T00:00:00.000Z"),
+        openAssignments: 2,
+        completedAssignments: 3,
+        missedAssignments: 1,
+      },
+    ]);
+
+    const app = createTestApp("student");
+    const res = await supertest(app).get("/api/v1/classes/mine");
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.items).toMatchObject([
+      {
+        classId,
+        name: "CSP-J Spring",
+        joinedVia: "code",
+        openAssignments: 2,
+        completedAssignments: 3,
+        missedAssignments: 1,
+      },
+    ]);
+  });
+
   it("returns an existing membership when joining the same class again by code", async () => {
     queuedResults.push(
       [{ id: classId, archivedAt: new Date("2026-04-01T00:00:00.000Z") }],

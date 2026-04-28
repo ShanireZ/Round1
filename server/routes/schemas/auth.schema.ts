@@ -151,6 +151,46 @@ export const AuthSessionResponse = registry.register(
   }),
 );
 
+export const AuthSecuritySummaryResponse = registry.register(
+  "AuthSecuritySummaryResponse",
+  z.object({
+    profile: z.object({
+      id: z.string().uuid(),
+      username: z.string(),
+      displayName: z.string(),
+      role: z.enum(["student", "coach", "admin"]),
+      status: z.string(),
+      passwordChangeRequired: z.boolean(),
+      lastStrongAuthAt: z.date().nullable().or(z.string().nullable()),
+    }),
+    email: z
+      .object({
+        email: z.string().email(),
+        verifiedAt: z.date().nullable().or(z.string().nullable()),
+        source: z.string(),
+      })
+      .nullable(),
+    passwordEnabled: z.boolean(),
+    totpEnabledAt: z.date().nullable().or(z.string().nullable()),
+    passkeys: z.array(
+      z.object({
+        credentialIdSuffix: z.string(),
+        backupEligible: z.boolean(),
+        backupState: z.boolean(),
+        createdAt: z.date().or(z.string()),
+      }),
+    ),
+    externalIdentities: z.array(
+      z.object({
+        provider: z.string(),
+        providerType: z.string(),
+        providerEmail: z.string().nullable(),
+        createdAt: z.date().or(z.string()),
+      }),
+    ),
+  }),
+);
+
 // Passkey login options body
 export const PasskeyLoginOptionsBody = registry.register(
   "PasskeyLoginOptionsBody",

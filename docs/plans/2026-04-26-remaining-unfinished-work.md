@@ -1,5 +1,12 @@
 # Remaining Unfinished Work Summary
 
+## 2026-04-28 Maintenance Addendum: Account/Class UI
+
+- Closed from the UI/UX placeholder backlog in this slice: `/account/class`, `/join`, and `/account/security` now route to real pages instead of generic placeholders.
+- New current-state APIs for those pages: `GET /api/v1/classes/mine` returns the signed-in user's joined classes with assignment counters, and `GET /api/v1/auth/security/summary` returns the account security snapshot consumed by the account page.
+- Remaining UI/UX debt after this slice: `/register`, `/forgot-password`, `/auth/callback`, and the not-found surface still need full real-page treatment; passkey registration/delete UX still needs a browser client dependency and recent-auth flow polish; full-route screenshot, keyboard, mobile, reduced-motion, and print acceptance remains open.
+- Verification recorded for this slice: focused client tests, focused coach class API tests, `verify:ui-tokens`, `build:client`, and `build:server` passed. Browser screenshot acceptance was not rerun for these account pages in this maintenance slice, so the global visual-audit backlog remains open.
+
 > 生成日期：2026-04-26
 >
 > 范围：本文件汇总 `plan/` 与现有 `docs/plans/` 中仍未完成或仍需验证的内容。仓库中不存在 `docs/plan/` 单数目录，现有计划目录为 `docs/plans/`，因此本汇总放在该目录下。

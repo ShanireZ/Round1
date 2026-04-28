@@ -295,3 +295,9 @@
 - [x] 各频控规则生效
 - [x] FingerprintJS 设备指纹写入 audit log
 - [x] TOTP 信封加密存储正确（DEK+KEK）
+
+## 2026-04-28 Account Security Addendum
+
+- `/account/security` is no longer a router placeholder. `client/src/pages/account/AccountSecurityPage.tsx` now consumes `GET /api/v1/auth/security/summary` and exposes password change, email change challenge/confirm, TOTP enrollment/verification/delete, and CppLearn bind entry points.
+- The new summary endpoint returns the active profile, primary email state, password/TOTP state, passkey metadata, and external identity bindings. It does not expose passkey credential material.
+- Passkey browser registration/deletion UI remains a later slice because the client package does not currently include `@simplewebauthn/browser`; the page surfaces passkey status rather than pretending the full WebAuthn browser flow is complete.

@@ -303,30 +303,38 @@ export default function ExamNew() {
           </Card>
         ) : null}
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <fieldset className="m-0 grid min-w-0 gap-4 border-0 p-0 sm:grid-cols-2 xl:grid-cols-5">
+          <legend className="sr-only">考试类型</legend>
           {visibleExamTypes.map((examType) => {
             const typeOptions = options.filter((option) => option.examType === examType);
             const totalCount = typeOptions.reduce((sum, option) => sum + option.availableCount, 0);
             const isSelected = currentExamType === examType;
             return (
-              <button
+              <label
                 key={examType}
-                type="button"
-                disabled={totalCount === 0}
-                onClick={() => {
-                  const nextDifficulty = resolveDifficultyForExamType(
-                    options,
-                    examType,
-                    currentDifficulty,
-                  );
-                  setSelectedExamType(examType);
-                  setSelectedDifficulty(nextDifficulty);
-                }}
-                className={`group border-border bg-card hover:border-primary/60 hover:bg-accent-wash/40 rounded-[--radius-lg] border p-5 text-left transition-all focus-visible:shadow-[--shadow-glow] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-55 ${
-                  isSelected ? "border-primary bg-accent-wash/50" : ""
-                }`}
-                aria-pressed={isSelected}
+                className={`group border-border bg-card rounded-[--radius-lg] border p-5 text-left transition-all focus-within:shadow-[--shadow-glow] ${
+                  totalCount === 0
+                    ? "cursor-not-allowed opacity-55"
+                    : "hover:border-primary/60 hover:bg-accent-wash/40 cursor-pointer"
+                } ${isSelected ? "border-primary bg-accent-wash/50" : ""}`}
               >
+                <input
+                  type="radio"
+                  name="exam-type"
+                  value={examType}
+                  checked={isSelected}
+                  disabled={totalCount === 0}
+                  onChange={() => {
+                    const nextDifficulty = resolveDifficultyForExamType(
+                      options,
+                      examType,
+                      currentDifficulty,
+                    );
+                    setSelectedExamType(examType);
+                    setSelectedDifficulty(nextDifficulty);
+                  }}
+                  className="sr-only"
+                />
                 <div className="flex items-start justify-between gap-3">
                   <Badge variant={formatExamTypeBadgeVariant(examType)}>{examType}</Badge>
                   {isSelected ? <CheckCircle2 className="text-primary h-4 w-4" /> : null}
@@ -341,10 +349,10 @@ export default function ExamNew() {
                   <FileText className="h-3.5 w-3.5" />
                   <span className="tabular-nums">{totalCount} 套可用</span>
                 </div>
-              </button>
+              </label>
             );
           })}
-        </div>
+        </fieldset>
 
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <Card variant="flat" className="border-border bg-card">
@@ -355,39 +363,49 @@ export default function ExamNew() {
               </CardTitle>
               <CardDescription>同一考试类型下按已发布预制卷目录启用。</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-3">
-              {(difficultyValues ?? []).map((difficulty) => {
-                const count =
-                  currentExamType === null
-                    ? 0
-                    : getAvailableExamCount(options, {
-                        examType: currentExamType,
-                        difficulty,
-                      });
-                const isSelected = currentDifficulty === difficulty;
-                return (
-                  <button
-                    key={difficulty}
-                    type="button"
-                    disabled={count === 0}
-                    onClick={() => setSelectedDifficulty(difficulty)}
-                    aria-pressed={isSelected}
-                    className={`border-border bg-card hover:border-primary/60 rounded-[--radius-md] border p-4 text-left transition-colors focus-visible:shadow-[--shadow-glow] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-55 ${
-                      isSelected ? "border-primary bg-accent-wash/50" : ""
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="font-medium">{formatDifficultyLabel(difficulty)}</div>
-                      <Badge variant="outline">
-                        <span className="tabular-nums">{count}</span> 套
-                      </Badge>
-                    </div>
-                    <div className="text-muted-foreground mt-2 text-sm">
-                      {difficultyDescriptions[difficulty]}
-                    </div>
-                  </button>
-                );
-              })}
+            <CardContent>
+              <fieldset className="m-0 grid min-w-0 gap-3 border-0 p-0">
+                <legend className="sr-only">难度</legend>
+                {(difficultyValues ?? []).map((difficulty) => {
+                  const count =
+                    currentExamType === null
+                      ? 0
+                      : getAvailableExamCount(options, {
+                          examType: currentExamType,
+                          difficulty,
+                        });
+                  const isSelected = currentDifficulty === difficulty;
+                  return (
+                    <label
+                      key={difficulty}
+                      className={`border-border bg-card rounded-[--radius-md] border p-4 text-left transition-colors focus-within:shadow-[--shadow-glow] ${
+                        count === 0
+                          ? "cursor-not-allowed opacity-55"
+                          : "hover:border-primary/60 cursor-pointer"
+                      } ${isSelected ? "border-primary bg-accent-wash/50" : ""}`}
+                    >
+                      <input
+                        type="radio"
+                        name="exam-difficulty"
+                        value={difficulty}
+                        checked={isSelected}
+                        disabled={count === 0}
+                        onChange={() => setSelectedDifficulty(difficulty)}
+                        className="sr-only"
+                      />
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="font-medium">{formatDifficultyLabel(difficulty)}</div>
+                        <Badge variant="outline">
+                          <span className="tabular-nums">{count}</span> 套
+                        </Badge>
+                      </div>
+                      <div className="text-muted-foreground mt-2 text-sm">
+                        {difficultyDescriptions[difficulty]}
+                      </div>
+                    </label>
+                  );
+                })}
+              </fieldset>
             </CardContent>
           </Card>
 

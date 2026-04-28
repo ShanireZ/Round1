@@ -37,6 +37,25 @@ const Round1CoachClassSnapshotSchema = z.object({
   tone: z.enum(["stable", "risk", "improving"]).default("stable"),
 });
 
+const Round1StudentClassSnapshotSchema = z.object({
+  title: DynamicStringSchema,
+  joinedClasses: DynamicNumberSchema,
+  openAssignments: DynamicNumberSchema,
+  completedAssignments: DynamicNumberSchema,
+  inviteReady: DynamicBooleanSchema,
+  tone: z.enum(["stable", "risk", "improving"]).default("stable"),
+});
+
+const Round1AccountSecuritySnapshotSchema = z.object({
+  title: DynamicStringSchema,
+  emailVerified: DynamicBooleanSchema,
+  passwordEnabled: DynamicBooleanSchema,
+  totpEnabled: DynamicBooleanSchema,
+  passkeys: DynamicNumberSchema,
+  externalBindings: DynamicNumberSchema,
+  tone: z.enum(["stable", "risk", "improving"]).default("stable"),
+});
+
 const Round1CoachReportSnapshotApi = {
   name: "Round1CoachReportSnapshot",
   schema: Round1CoachReportSnapshotSchema as unknown as ReactComponentImplementation["schema"],
@@ -45,6 +64,16 @@ const Round1CoachReportSnapshotApi = {
 const Round1CoachClassSnapshotApi = {
   name: "Round1CoachClassSnapshot",
   schema: Round1CoachClassSnapshotSchema as unknown as ReactComponentImplementation["schema"],
+};
+
+const Round1StudentClassSnapshotApi = {
+  name: "Round1StudentClassSnapshot",
+  schema: Round1StudentClassSnapshotSchema as unknown as ReactComponentImplementation["schema"],
+};
+
+const Round1AccountSecuritySnapshotApi = {
+  name: "Round1AccountSecuritySnapshot",
+  schema: Round1AccountSecuritySnapshotSchema as unknown as ReactComponentImplementation["schema"],
 };
 
 const toneBadgeVariant = {
@@ -65,6 +94,10 @@ function isRound1SnapshotTone(value: unknown): value is Round1SnapshotTone {
   return typeof value === "string" && value in toneLabel;
 }
 
+function clampPercent(value: number): number {
+  return Math.min(Math.max(Math.round(value), 0), 100);
+}
+
 const Round1CoachReportSnapshot = createComponentImplementation(
   Round1CoachReportSnapshotApi,
   ({ props }) => {
@@ -75,7 +108,7 @@ const Round1CoachReportSnapshot = createComponentImplementation(
     const printReady = props.printReady ?? false;
     const tone = props.tone ?? "stable";
     const safeTone = isRound1SnapshotTone(tone) ? tone : "stable";
-    const completionPercent = Math.min(Math.max(Math.round(completionRate * 100), 0), 100);
+    const completionPercent = clampPercent(completionRate * 100);
 
     return (
       <Card variant="flat" className="a2ui-round1-snapshot border-border bg-card">
@@ -133,10 +166,7 @@ const Round1CoachClassSnapshot = createComponentImplementation(
     const inviteReady = props.inviteReady ?? false;
     const tone = props.tone ?? "stable";
     const safeTone = isRound1SnapshotTone(tone) ? tone : "stable";
-    const activePercent =
-      classCount > 0
-        ? Math.min(Math.max(Math.round((activeClasses / classCount) * 100), 0), 100)
-        : 0;
+    const activePercent = classCount > 0 ? clampPercent((activeClasses / classCount) * 100) : 0;
 
     return (
       <Card variant="flat" className="a2ui-round1-snapshot border-border bg-card">
@@ -185,8 +215,139 @@ const Round1CoachClassSnapshot = createComponentImplementation(
   },
 );
 
+const Round1StudentClassSnapshot = createComponentImplementation(
+  Round1StudentClassSnapshotApi,
+  ({ props }) => {
+    const title = props.title ?? "MyClasses";
+    const joinedClasses = props.joinedClasses ?? 0;
+    const openAssignments = props.openAssignments ?? 0;
+    const completedAssignments = props.completedAssignments ?? 0;
+    const inviteReady = props.inviteReady ?? false;
+    const tone = props.tone ?? "stable";
+    const safeTone = isRound1SnapshotTone(tone) ? tone : "stable";
+    const completionPercent =
+      completedAssignments + openAssignments > 0
+        ? clampPercent((completedAssignments / (completedAssignments + openAssignments)) * 100)
+        : 0;
+
+    return (
+      <Card variant="flat" className="a2ui-round1-snapshot border-border bg-card">
+        <CardContent className="space-y-4 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="text-muted-foreground text-xs">Round1 BYOC</div>
+              <div className="text-foreground mt-1 text-lg font-semibold">{title}</div>
+            </div>
+            <Badge variant={toneBadgeVariant[safeTone]}>{toneLabel[safeTone]}</Badge>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <div className="text-muted-foreground text-xs">班级</div>
+              <div className="text-foreground mt-1 text-xl font-semibold tabular-nums">
+                {joinedClasses}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground text-xs">待完成</div>
+              <div className="text-foreground mt-1 text-xl font-semibold tabular-nums">
+                {openAssignments}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground text-xs">已完成</div>
+              <div className="text-foreground mt-1 text-xl font-semibold tabular-nums">
+                {completedAssignments}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">
+                {inviteReady ? "邀请入口可用" : "等待班级码"}
+              </span>
+              <span className="text-foreground tabular-nums">{completionPercent}% done</span>
+            </div>
+            <Progress value={completionPercent} variant="exam" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  },
+);
+
+const Round1AccountSecuritySnapshot = createComponentImplementation(
+  Round1AccountSecuritySnapshotApi,
+  ({ props }) => {
+    const title = props.title ?? "AccountSecurity";
+    const emailVerified = props.emailVerified ?? false;
+    const passwordEnabled = props.passwordEnabled ?? false;
+    const totpEnabled = props.totpEnabled ?? false;
+    const passkeys = props.passkeys ?? 0;
+    const externalBindings = props.externalBindings ?? 0;
+    const tone = props.tone ?? "stable";
+    const safeTone = isRound1SnapshotTone(tone) ? tone : "stable";
+    const securitySignals = [
+      emailVerified,
+      passwordEnabled,
+      totpEnabled,
+      passkeys > 0,
+      externalBindings > 0,
+    ].filter(Boolean).length;
+    const securityPercent = clampPercent((securitySignals / 5) * 100);
+
+    return (
+      <Card variant="flat" className="a2ui-round1-snapshot border-border bg-card">
+        <CardContent className="space-y-4 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="text-muted-foreground text-xs">Round1 BYOC</div>
+              <div className="text-foreground mt-1 text-lg font-semibold">{title}</div>
+            </div>
+            <Badge variant={toneBadgeVariant[safeTone]}>{toneLabel[safeTone]}</Badge>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <div className="text-muted-foreground text-xs">邮箱</div>
+              <div className="text-foreground mt-1 text-sm font-medium">
+                {emailVerified ? "verified" : "pending"}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground text-xs">TOTP</div>
+              <div className="text-foreground mt-1 text-sm font-medium">
+                {totpEnabled ? "enabled" : "off"}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground text-xs">Passkey</div>
+              <div className="text-foreground mt-1 text-xl font-semibold tabular-nums">
+                {passkeys}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">
+                {passwordEnabled ? `${externalBindings} external binding` : "password pending"}
+              </span>
+              <span className="text-foreground tabular-nums">{securityPercent}% covered</span>
+            </div>
+            <Progress value={securityPercent} variant="exam" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  },
+);
+
 export const round1A2uiCatalog = new Catalog<ReactComponentImplementation>(ROUND1_A2UI_CATALOG_ID, [
   ...basicCatalog.components.values(),
   Round1CoachReportSnapshot,
   Round1CoachClassSnapshot,
+  Round1StudentClassSnapshot,
+  Round1AccountSecuritySnapshot,
 ]);

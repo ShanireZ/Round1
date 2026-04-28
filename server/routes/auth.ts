@@ -47,6 +47,7 @@ import {
   TotpEnrollVerifyBody,
   TotpReauthBody,
   AuthSessionResponse,
+  AuthSecuritySummaryResponse,
 } from "./schemas/auth.schema.js";
 import { safeReturnTo } from "../../config/auth.js";
 import {
@@ -169,6 +170,25 @@ registry.registerPath({
   },
 });
 
+registry.registerPath({
+  method: "get",
+  path: "/api/v1/auth/security/summary",
+  summary: "Read current user's account security summary",
+  responses: {
+    200: {
+      description: "Current account security state",
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.literal(true),
+            data: AuthSecuritySummaryResponse,
+          }),
+        },
+      },
+    },
+  },
+});
+
 // 2a. GET /auth/session — frontend auth gate without noisy 401s
 authRouter.get("/auth/session", async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -201,7 +221,94 @@ authRouter.get("/auth/session", async (req: Request, res: Response, next: NextFu
   }
 });
 
-// 2b. GET /auth/pow-challenge — issue a PoW challenge
+// 2b. GET /auth/security/summary — account security page snapshot
+authRouter.get(
+  "/auth/security/summary",
+  requireAuth,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.session.userId!;
+      const [user] = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          displayName: users.displayName,
+          role: users.role,
+          status: users.status,
+          passwordHash: users.passwordHash,
+          passwordChangeRequired: users.passwordChangeRequired,
+          lastStrongAuthAt: users.lastStrongAuthAt,
+          totpEnabledAt: users.totpEnabledAt,
+        })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      if (!user || user.status !== "active") {
+        res.fail("ROUND1_AUTH_REQUIRED", "请重新登录", 401);
+        return;
+      }
+
+      const [email] = await db
+        .select({
+          email: userEmails.email,
+          verifiedAt: userEmails.verifiedAt,
+          source: userEmails.source,
+        })
+        .from(userEmails)
+        .where(eq(userEmails.userId, userId))
+        .limit(1);
+
+      const passkeys = await db
+        .select({
+          credentialId: passkeyCredentials.credentialId,
+          backupEligible: passkeyCredentials.backupEligible,
+          backupState: passkeyCredentials.backupState,
+          createdAt: passkeyCredentials.createdAt,
+        })
+        .from(passkeyCredentials)
+        .where(eq(passkeyCredentials.userId, userId))
+        .orderBy(passkeyCredentials.createdAt);
+
+      const identities = await db
+        .select({
+          provider: externalIdentities.provider,
+          providerType: externalIdentities.providerType,
+          providerEmail: externalIdentities.providerEmail,
+          createdAt: externalIdentities.createdAt,
+        })
+        .from(externalIdentities)
+        .where(eq(externalIdentities.userId, userId))
+        .orderBy(externalIdentities.createdAt);
+
+      res.ok({
+        profile: {
+          id: user.id,
+          username: user.username,
+          displayName: user.displayName,
+          role: user.role,
+          status: user.status,
+          passwordChangeRequired: user.passwordChangeRequired,
+          lastStrongAuthAt: user.lastStrongAuthAt,
+        },
+        email: email ?? null,
+        passwordEnabled: Boolean(user.passwordHash),
+        totpEnabledAt: user.totpEnabledAt,
+        passkeys: passkeys.map((passkey) => ({
+          credentialIdSuffix: passkey.credentialId.slice(-8),
+          backupEligible: passkey.backupEligible,
+          backupState: passkey.backupState,
+          createdAt: passkey.createdAt,
+        })),
+        externalIdentities: identities,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+// 2c. GET /auth/pow-challenge — issue a PoW challenge
 authRouter.get("/auth/pow-challenge", async (_req: Request, res: Response, next: NextFunction) => {
   try {
     if (!env.AUTH_POW_ENABLED) {

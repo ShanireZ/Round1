@@ -99,6 +99,8 @@ interface ClientConfig {
 
 | 方法     | 路径                                                       | 说明                                                                                                                        | 鉴权                     |
 | -------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `GET`    | `/api/v1/auth/security/summary`                            | Current account security snapshot for `/account/security`                                                                   | logged-in                |
+| `GET`    | `/api/v1/classes/mine`                                     | Current signed-in user's joined classes and assignment counters for `/account/class` and `/join`                            | student+                 |
 | `GET`    | `/api/v1/health`                                           | 健康检查                                                                                                                    | 无                       |
 | `GET`    | `/api/v1/openapi.json`                                     | OpenAPI 文档                                                                                                                | 开发无鉴权；非开发 admin |
 | `GET`    | `/api/v1/docs`                                             | Swagger UI                                                                                                                  | 仅开发                   |
@@ -208,3 +210,9 @@ interface ClientConfig {
 | `POST`   | `/api/v1/admin/classes/:id/coaches/:userId/transfer-owner` | Admin 转让任意班级 owner                                                                                                    | admin(s-u)               |
 
 > `student+` 表示 student/coach/admin 均可访问；`coach+` 表示 coach/admin；`admin(s-u)` 表示需 step-up 复核。
+
+## 2026-04-28 Account/Class Addendum
+
+- `/account/class` and `/join` are now backed by `GET /api/v1/classes/mine` plus `POST /api/v1/classes/join`; `/join` accepts both `code` and `invite` query parameters and then submits through the same join API.
+- `/account/security` is now backed by `GET /api/v1/auth/security/summary` plus the existing password, email change, TOTP, external identity, and passkey endpoints.
+- `GET /api/v1/auth/security/summary` intentionally returns passkey metadata only. Full passkey registration/deletion browser UX remains a later frontend slice.

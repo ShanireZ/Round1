@@ -374,6 +374,56 @@ export async function listCoachPrebuiltPapers() {
     .orderBy(desc(prebuiltPapers.publishedAt), desc(prebuiltPapers.createdAt));
 }
 
+export async function listStudentClasses(actor: ActorContext) {
+  const rows = await db
+    .select({
+      classId: classes.id,
+      name: classes.name,
+      archivedAt: classes.archivedAt,
+      joinedVia: classMembers.joinedVia,
+      joinedAt: classMembers.joinedAt,
+      openAssignments: sql<number>`(
+        select count(*)::int
+        from ${assignments} a
+        left join ${assignmentProgress} ap
+          on ap.assignment_id = a.id
+          and ap.user_id = ${actor.userId}
+        where a.class_id = ${classes.id}
+          and a.status = 'assigned'
+          and coalesce(ap.status, 'pending') in ('pending', 'in_progress')
+      )`,
+      completedAssignments: sql<number>`(
+        select count(*)::int
+        from ${assignments} a
+        inner join ${assignmentProgress} ap
+          on ap.assignment_id = a.id
+          and ap.user_id = ${actor.userId}
+        where a.class_id = ${classes.id}
+          and ap.status = 'completed'
+      )`,
+      missedAssignments: sql<number>`(
+        select count(*)::int
+        from ${assignments} a
+        inner join ${assignmentProgress} ap
+          on ap.assignment_id = a.id
+          and ap.user_id = ${actor.userId}
+        where a.class_id = ${classes.id}
+          and ap.status = 'missed'
+      )`,
+    })
+    .from(classMembers)
+    .innerJoin(classes, eq(classes.id, classMembers.classId))
+    .where(eq(classMembers.userId, actor.userId))
+    .orderBy(desc(classMembers.joinedAt));
+
+  return rows.map((row) => ({
+    ...row,
+    openAssignments: Number(row.openAssignments),
+    completedAssignments: Number(row.completedAssignments),
+    missedAssignments: Number(row.missedAssignments),
+  }));
+}
+
 export async function getCoachClass(actor: ActorContext, classId: string) {
   await getCoachAccess(actor, classId);
   const row = await getClassById(classId);

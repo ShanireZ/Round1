@@ -19,6 +19,7 @@ import {
   listClassMembers,
   listCoachClasses,
   listCoachPrebuiltPapers,
+  listStudentClasses,
   removeClassCoach,
   removeClassMember,
   revokeClassInvite,
@@ -72,6 +73,18 @@ coachRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       res.ok(await joinClass(actorFromRequest(req), req.body));
+    } catch (err) {
+      sendServiceError(err, res, next);
+    }
+  },
+);
+
+coachRouter.get(
+  "/classes/mine",
+  requireAuth,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.ok({ items: await listStudentClasses(actorFromRequest(req)) });
     } catch (err) {
       sendServiceError(err, res, next);
     }

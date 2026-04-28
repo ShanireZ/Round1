@@ -230,3 +230,9 @@
 - [x] Admin 导入中心 dry-run/apply 流程完整
 - [x] Admin step-up 在设置变更时生效
 - [x] `config:change` 热更新通知所有进程刷新配置
+
+## 2026-04-28 Student Class UI Addendum
+
+- `/account/class` and `/join` are no longer router placeholders. `client/src/pages/account/AccountClassPage.tsx` now reads `GET /api/v1/classes/mine`, submits class code or invite token joins through `POST /api/v1/classes/join`, and supports `/join?code=xxx`, `/join?invite=token`, and `/join?inviteToken=token`.
+- `server/services/classService.ts` now exposes `listStudentClasses()` to return joined class summaries with open/completed/missed assignment counters for the current student account.
+- Coach deep management backlog is unchanged: `CoachClassDetail` member/invite/coach-group management and full browser visual acceptance remain separate follow-up work.

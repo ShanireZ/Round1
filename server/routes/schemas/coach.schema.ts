@@ -109,6 +109,20 @@ export const ClassMemberSchema = registry.register(
   }),
 );
 
+export const StudentClassSummarySchema = registry.register(
+  "StudentClassSummary",
+  z.object({
+    classId: UuidSchema,
+    name: z.string(),
+    archivedAt: z.date().nullable().or(z.string().nullable()),
+    joinedVia: z.string(),
+    joinedAt: z.date().or(z.string()),
+    openAssignments: z.number(),
+    completedAssignments: z.number(),
+    missedAssignments: z.number(),
+  }),
+);
+
 export const ClassInviteSchema = registry.register(
   "ClassInvite",
   z.object({
@@ -322,6 +336,13 @@ registerJsonPath({
   summary: "student+ joins a class by join code or invite token",
   request: JoinClassBodySchema,
   response: okEnvelope(ClassMemberSchema),
+});
+
+registerJsonPath({
+  method: "get",
+  path: "/api/v1/classes/mine",
+  summary: "student+ lists classes they have joined",
+  response: listEnvelope(StudentClassSummarySchema),
 });
 
 registerJsonPath({

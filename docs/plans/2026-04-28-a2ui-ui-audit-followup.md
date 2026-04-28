@@ -1,5 +1,12 @@
 # A2UI and UI Drift Audit Follow-up
 
+## 2026-04-28 Maintenance Addendum: Account/Class Surfaces
+
+- Account/class UX landed: `/account/class` and `/join` now render a real `AccountClassPage` instead of a placeholder. The page reads `GET /api/v1/classes/mine`, joins through the existing `POST /api/v1/classes/join`, and supports both `/join?code=...` and `/join?invite=...` entry points.
+- Account security UX landed: `/account/security` now renders a real `AccountSecurityPage` backed by `GET /api/v1/auth/security/summary`, password change, email change challenge/confirm, TOTP enroll/verify/delete, and CppLearn bind entry points. Passkey browser registration UI remains a future slice because the client workspace does not currently include `@simplewebauthn/browser`.
+- A2UI BYOC coverage expanded: the Round1 custom catalog now includes `Round1StudentClassSnapshot` and `Round1AccountSecuritySnapshot`, and the `/dev/ui-gallery` design surface includes both components in the local A2UI payload factory.
+- Verification for this addendum: `npm run client:test -- src/lib/account.test.ts src/lib/a2ui-design-surface.test.ts` passed, `npm run test -- server/__tests__/coach-classes.integration.test.ts --reporter verbose` passed, `npm run verify:ui-tokens` passed, `npm run build:server` passed, and `npm run build:client` passed after fixing a missing TOTP import. The first Vitest attempts inside the default sandbox failed with `spawn EPERM`, then passed outside the sandbox.
+
 > 日期：2026-04-28
 >
 > 范围：对照 `standard/04-ui-ux.md`、`standard/05-frontend-engineering.md`、`standard/11-testing-quality.md`、`standard/17-docs-plan-maintenance.md` 与 `standard/22-standard-adoption-and-audit.md`，安装 Google A2UI，复核当前前端已完成骨架中的 UI/UX、导航、认证回跳与浏览器可见问题。
