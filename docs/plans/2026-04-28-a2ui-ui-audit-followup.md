@@ -64,6 +64,13 @@
 - 端口规划文档落地：新增 `docs/plans/2026-04-28-port-map-and-exposure-plan.md` 并维护为确认后的端口设计：SSH `9179` 公网、Caddy `80/443` 公网且强制 HTTPS / TLS 1.2+ / HTTP/2+、Express API `7654` 仅本机反代、Postgres `4397` 与 Redis `4395` 不开放公网、Vite dev `4399` 与 cpp-runner `4401` 仅本地开发/离线环境；Express 保持 `ROUND1_BIND_HOST=127.0.0.1` 默认值，避免仅配置 `PORT` 时 API 监听所有网卡。
 - 本地开发 runbook 收口：`plan/other-detail.md` 从旧 `D:\round1`、`certss` 与全网卡默认端口映射修正为当前工作区路径、`certs` 与 loopback-only port publishing；宿主机端口使用 `4397` / `4395`，容器内部仍保留官方默认端口。
 
+## 2026-04-28 维护追加（六）
+
+- ExamNew 占位漂移收口：`/exams/new` 从 `PlaceholderPage` 切换为真实 `ExamNew.tsx`，读取 `/api/v1/config/client`、`/api/v1/exams/catalog` 与 `/api/v1/exams/active-draft`，按运行时 `availableExamTypes` / `availableDifficulties` 生成 2×5 试卷类型矩阵，展示 100 分制、试卷时长口径、草稿回收 TTL、可用预制卷数量、难度选择和二次确认 Dialog；创建草稿走 CSRF 保护的 `POST /api/v1/exams`，成功后进入 `/exams/:id`，由现有 FocusLayout/ExamSession 接管开考。
+- ExamNew UI 计划漂移收口：`standard/04-ui-ux.md` 与 `plan/uiux_plan.md` 不再要求旧在线组卷 cooldown 倒计时，改为展示 prebuilt-only 目录可用性、缺卷禁用、活动草稿提示；只有后端返回稳定 rate-limit / retry-after 语义时才展示倒计时。
+- A2UI payload guard 再收紧：`assertRound1A2uiMessages()` 现在拒绝 `/draft` 之外的组件 data binding path，并对 Image / AudioPlayer / Video 的本地设计 surface URL 做同源或受限 data URL allowlist，防止后续 agent payload 在接入真实消息前绕过数据根和资源边界。
+- UI token guard 例外收口：`scripts/verifyUiTokenUsage.ts` 不再整文件跳过 `/dev/ui-gallery`；图库里残留的品牌红 raw hex 文案改为 token 名称，保证设计样本册本身也接受 raw color / inline style / CSS compat guard。
+
 ## 文档同步
 
 - `standard/05-frontend-engineering.md` 已补 A2UI 使用边界：只能作为 agent-facing renderer / 设计辅助 surface，必须继承 Round1 token bridge。
@@ -84,6 +91,8 @@
 - `docs/plans/2026-04-26-remaining-unfinished-work.md` 已关闭 ExamResult/Dashboard/打印 A4 的本轮 Playwright 视觉验收缺口，并保留全路由截图、键盘与真实打印预览等整体 UI/UX 债务。
 - `plan/step-06-deployment.md` 与 `docs/plans/2026-04-28-single-vps-deployment-recommendation.md` 已记录单 VPS 部署方式推荐：首发 Caddy + PM2/systemd + native Postgres/Redis，Podman Quadlet 二期可选，Kubernetes/k3s 在单 VPS 阶段 deferred。
 - `standard/05-frontend-engineering.md`、`standard/14-deployment-ops.md`、`plan/reference-config.md`、`plan/step-06-deployment.md` 与 `docs/plans/2026-04-28-port-map-and-exposure-plan.md` 已补端口暴露与 token guard 收口口径：单机 Postgres/Redis 默认本机访问，生产公网入口为 SSH 9179 与 Caddy 80/443，API/DB/Redis/runner 不公网监听。
+- `plan/step-04-exam-and-grading.md` 与 `docs/plans/2026-04-26-remaining-unfinished-work.md` 已补 `/exams/new` 真实页面落地和本轮视觉验收口径，避免 Step 04 已完成运行时接口与前端入口仍是占位之间的漂移。
+- `standard/04-ui-ux.md` 与 `plan/uiux_plan.md` 已把 ExamNew 从旧 cooldown 文案更新为 prebuilt-only 可用性文案，避免 UI 标准重新要求已删除的在线组卷冷却语义。
 
 ## 验证记录
 
@@ -104,6 +113,12 @@
 - `npm run build:server`：通过。
 - `npm run build:client`：通过；`/font/*.woff2` 仍按运行时同源代理解析，Vite build-time unresolved 提示符合当前字体托管设计。
 - `npm run healthcheck -- --help`：通过，确认 `--expect-content-worker` 离线内容环境验收参数已出现在脚本 usage。
+- `npm run client:test -- src/lib/exam-new.test.ts src/lib/exam-runtime.test.ts src/lib/a2ui-design-surface.test.ts`：通过，3 files / 26 tests，覆盖 ExamNew 配置矩阵/API client、A2UI data binding/media URL guard 与既有 payload schema。
+- `npm run verify:ui-tokens`：通过，`verifyUiTokenUsage: ok (87 files checked)`；确认 `/dev/ui-gallery` 不再依赖整文件豁免且本轮新增页面未引入裸色值、inline style 或 flex/browser-warning 回归。
+- `npx eslint <本轮前端/测试 touched files>`：通过，覆盖 ExamNew、exam runtime helper、A2UI guard、UI token guard 与新增视觉 E2E。
+- `npx prettier --check <本轮 touched files>` 与 `git diff --check`：通过，确认本轮代码/文档排版与空白检查无异常。
+- `npm run build:client`：通过，确认 `/exams/new` lazy route、A2UI guard 与 UI gallery token guard 源码可通过 TypeScript/Vite 构建；`/font/*.woff2` 仍按运行时同源代理解析。
+- `npm run test:e2e -- server/__tests__/e2e/ui-visual-audit.spec.ts --grep ExamNew`：通过，1 test，覆盖 `/exams/new` 桌面/移动无水平溢出、运行时 catalog 渲染与开考确认 Dialog。
 - Browser check：`https://127.0.0.1:5175/dev/ui-gallery#plate-11` headless Chromium 桌面视口中 A2UI surface 真实渲染，console badCount=0（0 errors / 0 warnings / 0 pageerror）。2026-04-28 维护追加后，`/login` 的 CppLearn OIDC 入口已从纯文字字标切换为 `/logo/cpplearn.jpg` 同源横幅图片；`/coach/report` 首次复查发现未登录 401 resource error，已补 `/api/v1/auth/session` 前置守卫并复查桌面/移动均为 0 warnings / 0 errors；`/dev/ui-gallery#plate-11` 维护追加后复查仍为 0 warnings / 0 errors。维护追加（二）在 `https://127.0.0.1:5178/coach/report` 使用 Playwright 拦截 API 注入 180 名学生 × 24 个知识点规模化数据：桌面首屏热力图 643ms、移动 2418ms，均无水平溢出；学生详情 Sheet 可打开并渲染题型下钻；打印态页眉为 `block`、`data-no-print` 为 `none`、打印区 `break-inside: avoid`；`https://127.0.0.1:5178/dev/ui-gallery#plate-11` 的 Round1 BYOC 可见；最终 badCount=0（0 console warning/error、0 pageerror、0 requestfailed）。
 
 ## 剩余风险

@@ -29,6 +29,26 @@ export type ActiveRuntimeAttempt = RuntimeAttempt & {
   resumePath: string;
 };
 
+export type ExamCatalogItem = {
+  examType: string;
+  difficulty: string;
+  count: number;
+};
+
+export type DraftExamPaper = {
+  id: string;
+  prebuiltPaperId: string | null;
+  examType: string;
+  difficulty: string | null;
+  status: string;
+};
+
+export type CreateExamDraftPayload = {
+  examType: string;
+  difficulty: "easy" | "medium" | "hard";
+  assignmentId?: string;
+};
+
 export type ExamSessionPaper = {
   id: string;
   examType: string;
@@ -203,6 +223,41 @@ export async function startExamAttempt(paperId: string): Promise<RuntimeAttempt>
   return readApiPayload<RuntimeAttempt>(response);
 }
 
+export async function fetchExamCatalog(): Promise<{ items: ExamCatalogItem[] }> {
+  const response = await fetch("/api/v1/exams/catalog", {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return readApiPayload<{ items: ExamCatalogItem[] }>(response);
+}
+
+export async function fetchActiveDraftExam(): Promise<DraftExamPaper | null> {
+  const response = await fetch("/api/v1/exams/active-draft", {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return readApiPayload<DraftExamPaper | null>(response);
+}
+
+export async function createExamDraft(payload: CreateExamDraftPayload): Promise<DraftExamPaper> {
+  const response = await fetch("/api/v1/exams", {
+    method: "POST",
+    credentials: "include",
+    headers: await buildMutationHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  return readApiPayload<DraftExamPaper>(response);
+}
+
 export async function autosaveExamAttempt({
   attemptId,
   tabNonce,
@@ -290,10 +345,12 @@ export async function fetchActiveAttempt(): Promise<ActiveRuntimeAttempt | null>
   return readApiPayload<ActiveRuntimeAttempt | null>(response);
 }
 
-export async function fetchUserAttemptHistory(params: {
-  page?: number;
-  pageSize?: number;
-} = {}): Promise<UserAttemptHistoryPayload> {
+export async function fetchUserAttemptHistory(
+  params: {
+    page?: number;
+    pageSize?: number;
+  } = {},
+): Promise<UserAttemptHistoryPayload> {
   const searchParams = new URLSearchParams({
     page: String(params.page ?? 1),
     pageSize: String(params.pageSize ?? 20),

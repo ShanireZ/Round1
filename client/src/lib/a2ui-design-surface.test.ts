@@ -206,6 +206,46 @@ describe("Round1 A2UI design surface", () => {
     ).toThrow(/escapes \/draft/);
   });
 
+  it("rejects component data bindings outside the draft root", () => {
+    expect(() =>
+      assertRound1A2uiMessages([
+        {
+          version: "v0.9",
+          updateComponents: {
+            surfaceId: ROUND1_A2UI_SURFACE_ID,
+            components: [
+              {
+                id: "root",
+                component: "Text",
+                text: { path: "/profile/displayName" },
+              },
+            ],
+          },
+        },
+      ]),
+    ).toThrow(/data binding escapes \/draft/);
+  });
+
+  it("rejects remote media URLs in local design surfaces", () => {
+    expect(() =>
+      assertRound1A2uiMessages([
+        {
+          version: "v0.9",
+          updateComponents: {
+            surfaceId: ROUND1_A2UI_SURFACE_ID,
+            components: [
+              {
+                id: "root",
+                component: "Image",
+                url: "https://example.invalid/agent-image.png",
+              },
+            ],
+          },
+        },
+      ]),
+    ).toThrow(/media URL is not allowed/);
+  });
+
   it("validates dynamic list component references", () => {
     expect(() =>
       assertRound1A2uiMessages([

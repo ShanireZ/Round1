@@ -78,7 +78,9 @@ async function waitForFonts(page: Page) {
 }
 
 async function hasHorizontalOverflow(page: Page) {
-  return page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth > 1);
+  return page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth > 1,
+  );
 }
 
 async function installDashboardRoutes(page: Page) {
@@ -151,6 +153,57 @@ async function installDashboardRoutes(page: Page) {
         },
       },
     });
+  });
+}
+
+async function installExamNewRoutes(page: Page) {
+  await page.route("**/api/v1/config/client", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          turnstileSiteKey: "",
+          powEnabled: false,
+          powBaseDifficulty: 0,
+          autosaveIntervalSeconds: 180,
+          examDraftTtlMinutes: 1440,
+          availableExamTypes: [
+            "CSP-J",
+            "CSP-S",
+            "GESP-1",
+            "GESP-2",
+            "GESP-3",
+            "GESP-4",
+            "GESP-5",
+            "GESP-6",
+            "GESP-7",
+            "GESP-8",
+          ],
+          availableDifficulties: ["easy", "medium", "hard"],
+          enabledAuthProviders: [],
+          authProviderPlaceholders: [],
+        },
+      },
+    });
+  });
+
+  await page.route("**/api/v1/exams/catalog", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          items: [
+            { examType: "CSP-J", difficulty: "medium", count: 2 },
+            { examType: "CSP-S", difficulty: "hard", count: 1 },
+            { examType: "GESP-1", difficulty: "easy", count: 1 },
+          ],
+        },
+      },
+    });
+  });
+
+  await page.route("**/api/v1/exams/active-draft", async (route) => {
+    await route.fulfill({ json: { success: true, data: null } });
   });
 }
 
@@ -253,6 +306,34 @@ test("Dashboard renders radar and heatmap without desktop or mobile overflow", a
   await expect(page.getByTestId("dashboard-hero")).toBeVisible();
   await expect(page.getByTestId("dashboard-ability-radar")).toBeVisible();
   await expect(page.getByTestId("dashboard-weakness-heatmap")).toBeVisible();
+  expect(await hasHorizontalOverflow(page)).toBe(false);
+  expect(problems).toEqual([]);
+});
+
+test("ExamNew renders the config-driven catalog without desktop or mobile overflow", async ({
+  page,
+}) => {
+  const problems = collectBrowserProblems(page);
+  await installCommonRoutes(page);
+  await installExamNewRoutes(page);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/exams/new");
+  await expect(page.getByTestId("exam-new-page")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "出卷考试" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /CSP-J/ })).toBeVisible();
+  await page
+    .getByRole("button", { name: /创建并进入/ })
+    .first()
+    .click();
+  await expect(page.getByRole("heading", { name: "确认开始这场模拟？" })).toBeVisible();
+  await waitForFonts(page);
+  expect(await hasHorizontalOverflow(page)).toBe(false);
+
+  await page.keyboard.press("Escape");
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.reload();
+  await expect(page.getByTestId("exam-new-page")).toBeVisible();
   expect(await hasHorizontalOverflow(page)).toBe(false);
   expect(problems).toEqual([]);
 });

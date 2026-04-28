@@ -281,7 +281,7 @@ export default function UIGallery() {
                 </div>
                 <div className="border-border/60 flex justify-between gap-4 border-b pb-2">
                   <dt>Accent</dt>
-                  <dd className="text-foreground">#E63946</dd>
+                  <dd className="text-foreground">--color-primary</dd>
                 </div>
                 <div className="border-border/60 flex justify-between gap-4 border-b pb-2">
                   <dt>Serif</dt>
@@ -1054,7 +1054,7 @@ if (x > 0) ac();`}
               </div>
               <div className="text-muted-foreground font-mono text-[11px] tracking-[0.18em] uppercase md:text-right">
                 <div>Crafted with care</div>
-                <div className="text-primary mt-1">#E63946</div>
+                <div className="text-primary mt-1">--color-primary</div>
               </div>
             </div>
           </footer>

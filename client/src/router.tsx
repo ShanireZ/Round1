@@ -14,6 +14,7 @@ const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
 const CoachReport = lazy(() => import("./pages/coach/CoachReport"));
+const ExamNewPage = lazy(() => import("./pages/exams/ExamNew"));
 const ExamSessionPage = lazy(() => import("./pages/exams/ExamSession"));
 const ExamResultPage = lazy(() => import("./pages/exams/ExamResult"));
 
@@ -60,7 +61,7 @@ export function AppRouter() {
         {/* Main app — AppShell (sidebar + topbar) */}
         <Route element={<AppShell />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/exams/new" element={<PlaceholderPage title="出卷考试" />} />
+          <Route path="/exams/new" element={<ExamNewPage />} />
           <Route path="/exams/:id/result" element={<ExamResultPage />} />
           <Route path="/account/class" element={<PlaceholderPage title="我的班级" />} />
           <Route path="/account/security" element={<PlaceholderPage title="账号安全" />} />

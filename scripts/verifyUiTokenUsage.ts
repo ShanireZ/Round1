@@ -6,9 +6,7 @@ const CLIENT_SRC = path.join(ROOT, "client", "src");
 
 const COLOR_LITERAL_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".css"]);
 const BROWSER_HINT_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".css"]);
-const IGNORED_RELATIVE_PATHS = new Set([
-  path.join("client", "src", "pages", "dev", "UIGallery.tsx"),
-]);
+const IGNORED_RELATIVE_PATHS = new Set<string>();
 const TOKEN_SOURCE_RELATIVE_PATHS = new Set([path.join("client", "src", "styles", "tokens.css")]);
 
 const COLOR_LITERAL_PATTERNS = [/#[0-9A-Fa-f]{3,8}\b/g, /\brgba?\s*\(/g, /\bhsla?\s*\(/g];

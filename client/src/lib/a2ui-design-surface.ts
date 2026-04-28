@@ -12,6 +12,7 @@ const ROUND1_A2UI_ACTION_NAME = "round1_a2ui_review";
 const ROUND1_A2UI_LIMITS = {
   maxMessages: 4,
   maxComponents: 80,
+  maxDataUrlLength: 50_000,
 } as const;
 
 export const ROUND1_A2UI_SURFACE_ID = "round1-design-assistant";
@@ -480,8 +481,72 @@ function assertNoFunctionBindings(value: unknown, componentId: string, path: str
   }
 }
 
+function isIconSvgPath(component: A2uiComponentPayload, path: string): boolean {
+  return component.component === "Icon" && path === "props.name";
+}
+
+function assertDataBindingsStayInDraft(
+  value: unknown,
+  componentId: string,
+  component: A2uiComponentPayload,
+  path: string,
+): void {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => {
+      assertDataBindingsStayInDraft(item, componentId, component, `${path}.${index}`);
+    });
+    return;
+  }
+
+  if (!isRecord(value)) {
+    return;
+  }
+
+  if (
+    typeof value["path"] === "string" &&
+    !isIconSvgPath(component, path) &&
+    !isAllowedDataModelPath(value["path"])
+  ) {
+    throw new Error(
+      `A2UI data binding escapes ${ROUND1_A2UI_DRAFT_ROOT}: ${componentId}.${path}.path=${value["path"]}`,
+    );
+  }
+
+  for (const [key, child] of Object.entries(value)) {
+    assertDataBindingsStayInDraft(child, componentId, component, path ? `${path}.${key}` : key);
+  }
+}
+
 function isAllowedDataModelPath(path: string): boolean {
   return path === ROUND1_A2UI_DRAFT_ROOT || path.startsWith(`${ROUND1_A2UI_DRAFT_ROOT}/`);
+}
+
+function isSafeRound1A2uiMediaUrl(url: string): boolean {
+  if (url.startsWith("/") && !url.startsWith("//")) {
+    return true;
+  }
+
+  if (url.startsWith("data:")) {
+    const isAllowedMedia = /^data:(?:image|audio|video)\/[a-z0-9.+-]+;base64,/i.test(url);
+    return isAllowedMedia && url.length <= ROUND1_A2UI_LIMITS.maxDataUrlLength;
+  }
+
+  return false;
+}
+
+function assertSafeMediaUrl(component: A2uiComponentPayload, props: Record<string, unknown>): void {
+  if (
+    component.component !== "Image" &&
+    component.component !== "AudioPlayer" &&
+    component.component !== "Video"
+  ) {
+    return;
+  }
+
+  const url = props["url"];
+  if (typeof url === "string" && !isSafeRound1A2uiMediaUrl(url)) {
+    throw new Error(`A2UI media URL is not allowed: ${component.id}`);
+  }
 }
 
 export function formatRound1A2uiActionSummary(action: A2uiClientAction): string {
@@ -555,6 +620,8 @@ export function assertRound1A2uiMessages(
       );
       const actionName = getComponentActionEventName(component);
       assertNoFunctionBindings(props, component.id, "props");
+      assertDataBindingsStayInDraft(props, component.id, component, "props");
+      assertSafeMediaUrl(component, props);
       const validation = catalogEntry.schema.safeParse(props);
       if (!validation.success) {
         const issue = validation.error.issues[0];

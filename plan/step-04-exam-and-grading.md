@@ -4,6 +4,7 @@
 > **交付物**：完整的选卷→预览→答题→自动保存→提交→批改→解析→打印流程
 > **可验证 demo**：学生按考试类型和难度创建试卷、开始答题、提交后看到分数与每题解析、浏览器打印输出与真题对比
 > **当前对齐说明（2026-04-26，2026-04-27 复核更新）**：本文件描述的是 Phase 11 目标状态机与完整目标路由契约。当前 worktree 已挂载的运行时 slice 已扩展为：`GET /api/v1/exams/catalog`、`GET /api/v1/exams/active-draft`、`POST /api/v1/exams`、`POST /api/v1/exams/:id/attempts`、`GET /api/v1/exams/:id/session`、`GET /api/v1/exams/:id/result`、`PATCH /api/v1/attempts/:id`、`POST /api/v1/attempts/:id/submit`、`GET /api/v1/attempts/active`、`GET /api/v1/users/me/attempts`、`GET /api/v1/users/me/stats`。当前实现已经锁定“只能从已发布预制卷克隆实例，禁止在线组卷/换题”的约束；`server/__tests__/exams-runtime.integration.test.ts` 已覆盖 catalog、active draft 查询、重复建 draft 复用、拒绝在线拼题/换题 payload、按已发布预制卷克隆 draft、最近 finalized attempts 的模板级软排除、无模板时返回 `ROUND1_PREBUILT_PAPER_UNAVAILABLE`、startAttempt CAS 与 delayed auto-submit 调度、任务模式 `assignment_progress.pending → in_progress`、session payload 返回题面与当前答案、autosave `patches[] + jsonb_set()` 增量保存与 nonce 冲突、submit finalized 幂等返回、阅读/完善程序子题级聚合、wrongs 报告、独立 result payload、超时落 `auto_submitted`、`attempts/active` 剩余时间恢复 payload、以及 users/me 历史与统计。前端已接入 App 启动恢复、`/api/v1/config/client.autosaveIntervalSeconds` 周期性 pending patch flush、30s autosave debounce、beforeunload keepalive 保存、Dashboard 与打印样式。
+> **2026-04-28 前端入口复核**：`/exams/new` 已从占位页切换为 `client/src/pages/exams/ExamNew.tsx`，读取 `GET /api/v1/config/client`、`GET /api/v1/exams/catalog` 与 `GET /api/v1/exams/active-draft`，按运行时 `availableExamTypes` / `availableDifficulties` 渲染 2×5 试卷类型矩阵、难度选择、可用预制卷数量、草稿 TTL 与开考二次确认；创建草稿走 CSRF 保护的 `POST /api/v1/exams`，成功后进入 `/exams/:id` 由 `ExamSession` 开始或复用 attempt。
 
 ---
 
@@ -116,7 +117,7 @@
 
 - `GET /api/v1/exams/catalog` — 查询可用 exam_type / difficulty 目录
 - `GET /api/v1/exams/active-draft` — 查询当前活动 draft
-- `ExamNew.tsx` — 选择考试类型 + 难度 + 可用预制卷状态展示
+- `ExamNew.tsx` — 选择考试类型 + 难度 + 可用预制卷状态展示；当前路径为 `client/src/pages/exams/ExamNew.tsx`
 - `Exam.tsx` — 试卷预览 / 答题 / 计时器 / autosave
 - `ExamResult.tsx` — 报告 + 每题解析 + 打印按钮
 - `GET /api/v1/exams/:id/result` — 结果页读取接口（当前已挂载，返回稳定结果 payload）
@@ -172,6 +173,7 @@
 
 - [x] `GET /api/v1/exams/catalog` 返回正确的 exam_type / difficulty 目录
 - [x] `GET /api/v1/exams/active-draft` 返回当前活动 draft
+- [x] `/exams/new` 前端入口读取运行时目录并能创建/复用 draft（2026-04-28：新增 `ExamNew.tsx`、`client/src/lib/exam-new.ts` 与相关 client 测试；视觉验收覆盖桌面/移动无溢出和确认 Dialog）
 - [x] `POST /api/v1/exams` 拒绝在线拼题 / 换题 payload
 - [x] 自练按指定难度成功从已发布预制卷克隆 draft
 - [x] 重复创建自练试卷返回同一 draft

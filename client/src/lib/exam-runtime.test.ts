@@ -4,7 +4,10 @@ import {
   ExamRuntimeClientError,
   autosaveExamAttempt,
   clearCachedCsrfTokenForTests,
+  createExamDraft,
   fetchActiveAttempt,
+  fetchActiveDraftExam,
+  fetchExamCatalog,
   fetchExamSession,
   sendKeepaliveAutosave,
   startExamAttempt,
@@ -103,6 +106,85 @@ describe("exam runtime client", () => {
       body: JSON.stringify({}),
     });
     expect(result.status).toBe("started");
+  });
+
+  it("fetches the published prebuilt paper catalog", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: {
+          items: [{ examType: "CSP-J", difficulty: "medium", count: 2 }],
+        },
+      }),
+    });
+
+    const result = await fetchExamCatalog();
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/v1/exams/catalog", {
+      method: "GET",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
+    expect(result.items[0]?.count).toBe(2);
+  });
+
+  it("fetches an active draft before creating a new one", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: {
+          id: "paper-draft",
+          prebuiltPaperId: "pp-1",
+          examType: "CSP-J",
+          difficulty: "medium",
+          status: "draft",
+        },
+      }),
+    });
+
+    const result = await fetchActiveDraftExam();
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/v1/exams/active-draft", {
+      method: "GET",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
+    expect(result?.id).toBe("paper-draft");
+  });
+
+  it("creates a draft exam using the CSRF-protected runtime endpoint", async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: { csrfToken: "csrf-1" },
+      }),
+    });
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: {
+          id: "paper-1",
+          prebuiltPaperId: "pp-1",
+          examType: "CSP-J",
+          difficulty: "medium",
+          status: "draft",
+        },
+      }),
+    });
+
+    const result = await createExamDraft({ examType: "CSP-J", difficulty: "medium" });
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/v1/exams", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": "csrf-1" },
+      body: JSON.stringify({ examType: "CSP-J", difficulty: "medium" }),
+    });
+    expect(result.id).toBe("paper-1");
   });
 
   it("autosaves attempt answers with the current tab nonce", async () => {
