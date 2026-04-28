@@ -4,6 +4,7 @@
 
 @import "tailwindcss";
 @import "./tokens.css";
+@import "./a2ui.css";
 @import "./print.css";
 
 /* ── @font-face 声明 ── */

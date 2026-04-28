@@ -31,9 +31,14 @@ describe("admin information architecture", () => {
     expect(routerSource).not.toContain('path="/admin/manual-gen"');
   });
 
-  it("keeps the admin hub reachable from the primary navigation", () => {
+  it("keeps the student primary navigation aligned with the UI/UX contract", () => {
     const primaryRoutes = primaryNavItems.map((item) => item.to);
 
-    expect(primaryRoutes).toContain("/admin");
+    expect(primaryRoutes).toEqual([
+      "/dashboard",
+      "/exams/new",
+      "/account/class",
+      "/account/security",
+    ]);
   });
 });

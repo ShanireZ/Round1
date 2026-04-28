@@ -1,5 +1,13 @@
 import type { ComponentType } from "react";
-import { BarChart3, BookOpen, ClipboardList, Home, Settings, Users } from "lucide-react";
+import {
+  BarChart3,
+  BookOpen,
+  ClipboardList,
+  Home,
+  Settings,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 
 export interface NavItem {
   to: string;
@@ -9,12 +17,15 @@ export interface NavItem {
 }
 
 export const primaryNavItems: NavItem[] = [
-  { to: "/", label: "首页", description: "返回主入口与管理总览", icon: Home },
-  { to: "/questions", label: "题库", description: "学生侧题目浏览", icon: BookOpen },
-  { to: "/exams", label: "考试", description: "考试与结果历史", icon: ClipboardList },
-  { to: "/analytics", label: "数据", description: "学习统计与趋势", icon: BarChart3 },
-  { to: "/admin", label: "管理", description: "内容库与导入中枢", icon: Users },
-  { to: "/settings", label: "设置", description: "个人与系统设置入口", icon: Settings },
+  { to: "/dashboard", label: "首页", description: "最近考试与能力摘要", icon: Home },
+  { to: "/exams/new", label: "出卷考试", description: "选择预制卷并开始模拟", icon: ClipboardList },
+  { to: "/account/class", label: "我的班级", description: "班级邀请与任务入口", icon: Users },
+  {
+    to: "/account/security",
+    label: "账号安全",
+    description: "密码、Passkey 与 OIDC 绑定",
+    icon: ShieldCheck,
+  },
 ];
 
 export const coachNavItems: NavItem[] = [

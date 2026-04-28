@@ -162,9 +162,9 @@ function ResultHero({ data }: { data: ExamResultPayload }) {
               </Link>
             </Button>
             <Button asChild variant="ghost">
-              <Link to="/exams">
+              <Link to="/dashboard">
                 <ArrowLeft />
-                返回考试列表
+                返回首页
               </Link>
             </Button>
           </div>
@@ -619,11 +619,11 @@ export default function ExamResultPage() {
             type="button"
             variant="secondary"
             onClick={() => {
-              startTransition(() => navigate("/exams"));
+              startTransition(() => navigate("/dashboard"));
             }}
           >
             <ArrowLeft />
-            返回考试列表
+            返回首页
           </Button>
         </CardContent>
       </Card>

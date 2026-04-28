@@ -945,11 +945,11 @@ authRouter.get(
         if (existingBinding) {
           if (existingBinding.userId === req.session.userId) {
             // Idempotent — already bound to self
-            res.redirect(302, safeReturnTo("/settings/security"));
+            res.redirect(302, safeReturnTo("/account/security"));
             return;
           }
           // Bound to another user
-          res.redirect(302, safeReturnTo("/settings/security?error=already_bound"));
+          res.redirect(302, safeReturnTo("/account/security?error=already_bound"));
           return;
         }
         // Create binding to current user
@@ -967,7 +967,7 @@ authRouter.get(
           ip: req.ip!,
           result: "success",
         });
-        res.redirect(302, safeReturnTo("/settings/security"));
+        res.redirect(302, safeReturnTo("/account/security"));
         return;
       }
 

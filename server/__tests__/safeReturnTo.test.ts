@@ -19,9 +19,7 @@ describe("safeReturnTo — Open Redirect Protection", () => {
   });
 
   it("accepts nested relative path with query", () => {
-    expect(safeReturnTo("/settings/security?tab=passkey")).toBe(
-      "/settings/security?tab=passkey",
-    );
+    expect(safeReturnTo("/account/security?tab=passkey")).toBe("/account/security?tab=passkey");
   });
 
   it("accepts path with hash fragment", () => {

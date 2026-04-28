@@ -106,6 +106,8 @@
 
 新增依赖前必须说明为什么现有 React、Radix、TanStack Query、Zod、Tailwind 或少量本地 helper 无法解决。纯 UI 便利库、日期库、图表库、表格库尤其要评估包体、可达性和样式一致性。
 
+A2UI 只能作为 agent-facing UI renderer 或设计辅助 surface 使用，用于接收声明式 agent payload 并在本地验收。A2UI surface 必须通过 Round1 token bridge 继承 `tokens.css`，不得替换 Radix/shadcn primitive、页面 IA、品牌色、字体系统或生产核心流程组件。A2UI markdown 内容必须使用官方 sanitizer renderer 或等价的 HTML sanitizer，不得直接渲染未净化的 agent markdown/HTML。
+
 ## 前端验证
 
 常规前端变更至少运行：

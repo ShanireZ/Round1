@@ -1,0 +1,105 @@
+/* Round1 bridge for Google A2UI surfaces.
+   A2UI is scoped as an agent-facing renderer and inherits the existing design tokens. */
+.round1-a2ui-surface {
+  --a2ui-color-background: var(--color-background);
+  --a2ui-color-on-background: var(--color-foreground);
+  --a2ui-color-surface: var(--color-surface);
+  --a2ui-color-on-surface: var(--color-foreground);
+  --a2ui-color-primary: var(--color-primary);
+  --a2ui-color-primary-hover: var(--color-primary-hover);
+  --a2ui-color-on-primary: var(--color-primary-foreground);
+  --a2ui-color-secondary: var(--color-secondary);
+  --a2ui-color-secondary-hover: var(--color-subtle);
+  --a2ui-color-on-secondary: var(--color-foreground);
+  --a2ui-color-border: var(--color-border);
+  --a2ui-color-border-hover: var(--color-divider);
+  --a2ui-color-input: var(--color-surface);
+  --a2ui-color-on-input: var(--color-foreground);
+  --a2ui-text-caption-color: var(--color-muted-foreground);
+  --a2ui-text-a-color: var(--color-primary);
+  --a2ui-border-width: var(--border-hair);
+  --a2ui-border-radius: var(--radius-md);
+  --a2ui-border: var(--border-hair) solid var(--color-border);
+  --a2ui-grid-base: var(--space-2);
+  --a2ui-spacing-xs: var(--space-1);
+  --a2ui-spacing-s: var(--space-2);
+  --a2ui-spacing-m: var(--space-3);
+  --a2ui-spacing-l: var(--space-4);
+  --a2ui-spacing-xl: var(--space-6);
+  --a2ui-font-family-title: var(--font-serif);
+  --a2ui-font-family-monospace: var(--font-mono);
+  --a2ui-font-size-xs: 0.75rem;
+  --a2ui-font-size-s: 0.875rem;
+  --a2ui-font-size-m: 1rem;
+  --a2ui-font-size-l: 1.125rem;
+  --a2ui-font-size-xl: 1.375rem;
+  --a2ui-font-size-2xl: 1.75rem;
+  --a2ui-line-height-headings: 1.2;
+  --a2ui-line-height-body: 1.6;
+  --a2ui-card-border: var(--border-hair) solid var(--color-border);
+  --a2ui-card-border-radius: var(--radius-lg);
+  --a2ui-card-background: color-mix(in oklab, var(--color-surface) 96%, var(--color-background));
+  --a2ui-card-box-shadow: none;
+  --a2ui-card-margin: 0;
+  --a2ui-card-padding: var(--space-6);
+  --a2ui-button-margin: 0;
+  --a2ui-button-padding: var(--space-2) var(--space-4);
+  --a2ui-button-font-weight: 500;
+  --a2ui-button-border-radius: var(--radius-md);
+  --a2ui-button-border: var(--border-hair) solid var(--color-border);
+  --a2ui-textfield-border-radius: var(--radius-md);
+  --a2ui-textfield-padding: var(--space-2) var(--space-3);
+  --a2ui-textfield-color-border-hover: var(--color-divider);
+  --a2ui-textfield-color-border-focus: var(--color-primary);
+  --a2ui-textfield-color-error: var(--color-destructive);
+  --a2ui-label-font-size: 0.875rem;
+  --a2ui-label-font-weight: 500;
+  --a2ui-choicepicker-gap: var(--space-2);
+  --a2ui-choicepicker-chip-padding: var(--space-1) var(--space-3);
+  --a2ui-choicepicker-chip-border-radius: var(--radius-full);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+.round1-a2ui-surface button {
+  min-height: 2.5rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+.round1-a2ui-surface button:hover {
+  transform: translateY(-1px);
+}
+
+.round1-a2ui-surface input:not([type="range"]),
+.round1-a2ui-surface textarea {
+  min-height: 2.5rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+}
+
+.round1-a2ui-surface input[type="range"] {
+  accent-color: var(--color-primary);
+}
+
+.round1-a2ui-surface label,
+.round1-a2ui-surface strong {
+  color: var(--color-foreground);
+  font-weight: 500;
+}
+
+.round1-a2ui-surface .h3 {
+  font-family: var(--font-serif);
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.round1-a2ui-surface .caption {
+  color: var(--color-muted-foreground);
+  font-size: 0.75rem;
+}

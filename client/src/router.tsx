@@ -23,8 +23,8 @@ function PlaceholderPage({ title }: { title: string }) {
   return (
     <div className="flex min-h-[50vh] items-center justify-center">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-foreground">{title}</h1>
-        <p className="mt-2 text-muted-foreground">页面开发中…</p>
+        <h1 className="text-foreground text-3xl font-bold">{title}</h1>
+        <p className="text-muted-foreground mt-2">页面开发中…</p>
       </div>
     </div>
   );
@@ -33,7 +33,7 @@ function PlaceholderPage({ title }: { title: string }) {
 function LoadingSpinner() {
   return (
     <div className="flex min-h-[50vh] items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
     </div>
   );
 }
@@ -58,13 +58,10 @@ export function AppRouter() {
         {/* Main app — AppShell (sidebar + topbar) */}
         <Route element={<AppShell />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/questions" element={<PlaceholderPage title="题库" />} />
-          <Route path="/exams" element={<PlaceholderPage title="考试列表" />} />
           <Route path="/exams/new" element={<PlaceholderPage title="出卷考试" />} />
           <Route path="/exams/:id/result" element={<ExamResultPage />} />
-          <Route path="/analytics" element={<PlaceholderPage title="数据分析" />} />
+          <Route path="/account/class" element={<PlaceholderPage title="我的班级" />} />
           <Route path="/account/security" element={<PlaceholderPage title="账号安全" />} />
-          <Route path="/settings" element={<PlaceholderPage title="设置" />} />
           <Route path="/join" element={<PlaceholderPage title="加入班级" />} />
 
           {/* Coach */}

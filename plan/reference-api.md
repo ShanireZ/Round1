@@ -69,6 +69,7 @@ interface ClientConfig {
 | `/exams/new`         | `ExamNew`             | student+       |
 | `/exams/:id`         | `Exam`                | student+       |
 | `/exams/:id/result`  | `ExamResult`          | student+       |
+| `/account/class`     | `AccountClassPage`    | 已登录         |
 | `/account/security`  | `AccountSecurityPage` | 已登录         |
 | `/coach/classes`     | `CoachClasses`        | coach+         |
 | `/coach/classes/:id` | `CoachClassDetail`    | coach+         |

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { A2uiDesignSurface } from "@/components/a2ui/A2uiDesignSurface";
 import { useTheme } from "@/lib/theme";
 
 /* ── UI Components ──────────────────────────────────────────── */
@@ -331,6 +332,7 @@ export default function UIGallery() {
                   ["08", "Overlay"],
                   ["09", "Data"],
                   ["10", "Rhythm"],
+                  ["11", "A2UI"],
                 ].map(([no, name]) => (
                   <a
                     key={no}
@@ -995,6 +997,18 @@ if (x > 0) ac();`}
                 </div>
               </Exhibit>
             </div>
+          </Plate>
+
+          {/* ── 11 A2UI ──────────────────────────────────────── */}
+          <Plate
+            no="11"
+            eyebrow="Agent Surface · 声明式 UI"
+            title="A2UI Surface"
+            lede="A2UI payload 在 Round1 token bridge 内渲染，用于设计辅助与 agent 交互验收。"
+          >
+            <Exhibit idx="A" label="Google A2UI v0.9" className="md:col-span-12" tone="dim">
+              <A2uiDesignSurface />
+            </Exhibit>
           </Plate>
 
           {/* ═══ Colophon · 版权尾页 ═══════════════════════════ */}
