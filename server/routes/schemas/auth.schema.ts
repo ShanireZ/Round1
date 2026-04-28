@@ -130,6 +130,7 @@ export const AuthProvidersResponse = registry.register(
   "AuthProvidersResponse",
   z.object({
     providers: z.array(z.string()),
+    placeholders: z.array(z.string()),
   }),
 );
 

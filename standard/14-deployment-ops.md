@@ -160,7 +160,7 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 - API readiness，并从 `/api/v1/health` 汇总 DB / Redis 状态。
 - 前端静态文件可访问，需通过 `ROUND1_HEALTHCHECK_FRONTEND_URL` 或 `--frontend-url` 显式开启。
 - 邮件 provider 与 Turnstile 配置 smoke，默认跳过，需通过 `ROUND1_HEALTHCHECK_INCLUDE_EXTERNAL=1` 或 `--include-external` 开启。
-- 离线内容环境 runner/content worker smoke，默认跳过，需通过 `ROUND1_HEALTHCHECK_INCLUDE_OFFLINE=1` 或 `--include-offline` 开启。
+- 离线内容环境 runner/content worker smoke，默认跳过；runner 需通过 `ROUND1_HEALTHCHECK_INCLUDE_OFFLINE=1` 或 `--include-offline` 开启，content worker 需额外显式传入 `--expect-content-worker` 或设置 `ROUND1_PM2_ENABLE_CONTENT_WORKER=1`，避免混入生产 runtime health。
 - PM2 进程状态，默认跳过，需通过 `ROUND1_HEALTHCHECK_PM2=1` 或 `--pm2` 开启。
 
 健康检查分层：

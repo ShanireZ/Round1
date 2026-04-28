@@ -188,6 +188,8 @@
 - `AUTH_PROVIDER_QQ_ENABLED=0` 默认关闭
 - `GET /api/v1/auth/providers` — 返回当前启用的登录方式，前端据此动态渲染按钮
 
+> **当前实现对齐（2026-04-28）**：QQ OAuth adapter 仍未实现，`AUTH_PROVIDER_QQ_ENABLED=1` 仅把 `qq` 放入 `authProviderPlaceholders` / `placeholders` 用于登录页视觉占位；`enabledAuthProviders` / `providers` 不包含 `qq`，避免前端把 501 占位接口展示成可用登录流程。完整登录 / 注册 / 绑定跑通后，才可把 `qq` 移入可用 provider。
+
 ---
 
 ## Phase 5 — Passkey (WebAuthn)
@@ -283,7 +285,7 @@
 - [x] 已登录修改密码 → 其他设备会话失效
 - [x] zxcvbn 弱密码拦截生效（score < 3 被拒绝）
 - [x] CppLearn OIDC 登录/注册/绑定三类流程跑通
-- [ ] QQ互联（feature flag=1 时）登录/注册/绑定跑通
+- [ ] QQ互联（feature flag=1 时）登录/注册/绑定跑通（当前仅视觉占位，未进入可用 provider）
 - [x] Passkey 绑定 → 登出 → Passkey 登录 → 解绑
 - [x] Admin step-up：改角色 → 401 REAUTH_REQUIRED → Passkey/TOTP 复核 → 重放成功
 - [x] Admin 审计日志可追溯

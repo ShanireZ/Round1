@@ -51,8 +51,9 @@ export default function LoginPage() {
     staleTime: 60_000,
   });
   const providers = configQuery.data?.enabledAuthProviders ?? ["password"];
+  const providerPlaceholders = configQuery.data?.authProviderPlaceholders ?? [];
   const cppLearnEnabled = providers.includes("cpplearn");
-  const qqEnabled = providers.includes("qq");
+  const qqPlaceholderEnabled = providerPlaceholders.includes("qq");
 
   const loginMutation = useMutation({
     mutationFn: () => passwordLogin({ identifier: identifier.trim(), password }),
@@ -62,8 +63,7 @@ export default function LoginPage() {
       navigate(returnTo, { replace: true });
     },
     onError: (error) => {
-      const message =
-        error instanceof AuthClientError ? error.message : "登录失败，请稍后重试。";
+      const message = error instanceof AuthClientError ? error.message : "登录失败，请稍后重试。";
       setFormError(message);
       toast.error(message);
     },
@@ -101,7 +101,7 @@ export default function LoginPage() {
         <div className="space-y-2">
           <Label htmlFor="identifier">邮箱或用户名</Label>
           <div className="relative">
-            <Mail className="text-muted-foreground pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+            <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               id="identifier"
               value={identifier}
@@ -116,12 +116,15 @@ export default function LoginPage() {
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-3">
             <Label htmlFor="password">密码</Label>
-            <Link to="/forgot-password" className="text-primary text-xs font-medium hover:underline">
+            <Link
+              to="/forgot-password"
+              className="text-primary text-xs font-medium hover:underline"
+            >
               找回密码
             </Link>
           </div>
           <div className="relative">
-            <LockKeyhole className="text-muted-foreground pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+            <LockKeyhole className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               id="password"
               type="password"
@@ -145,8 +148,8 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      {cppLearnEnabled || qqEnabled ? (
-        <div className="space-y-3 border-t border-border pt-5">
+      {cppLearnEnabled || qqPlaceholderEnabled ? (
+        <div className="border-border space-y-3 border-t pt-5">
           {cppLearnEnabled ? (
             <div className="border-border bg-subtle/40 rounded-[--radius-lg] border p-4">
               <div className="flex items-center gap-3">
@@ -174,21 +177,29 @@ export default function LoginPage() {
             </div>
           ) : null}
 
-          {qqEnabled ? (
-            <Button
-              type="button"
-              variant="secondary"
-              className="w-full"
-              onClick={() => startExternalAuth("qq")}
-            >
-              <KeyRound />
-              QQ 互联登录
-            </Button>
+          {qqPlaceholderEnabled ? (
+            <div className="border-border bg-subtle/40 rounded-[--radius-lg] border p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="border-border bg-surface grid h-10 w-10 shrink-0 place-items-center rounded-[--radius-md] border">
+                    <KeyRound className="text-muted-foreground h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-foreground text-sm font-semibold">QQ 互联登录</div>
+                    <div className="text-muted-foreground mt-1 text-xs">feature flag 视觉占位</div>
+                  </div>
+                </div>
+                <Badge variant="outline">待联调</Badge>
+              </div>
+              <Button type="button" variant="secondary" className="mt-4 w-full" disabled>
+                QQ 互联登录
+              </Button>
+            </div>
           ) : null}
         </div>
       ) : null}
 
-      <div className="text-muted-foreground flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5 text-sm">
+      <div className="text-muted-foreground border-border flex flex-wrap items-center justify-between gap-3 border-t pt-5 text-sm">
         <span>还没有账号？</span>
         <Button asChild variant="link" className="px-0">
           <Link to="/register">创建账号</Link>

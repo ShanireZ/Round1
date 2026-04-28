@@ -25,6 +25,7 @@ describe("client runtime config", () => {
           availableExamTypes: ["CSP-J"],
           availableDifficulties: ["easy", "medium", "hard"],
           enabledAuthProviders: ["password", "passkey"],
+          authProviderPlaceholders: ["qq"],
         },
       }),
     });
@@ -38,6 +39,7 @@ describe("client runtime config", () => {
     });
     expect(config.autosaveIntervalSeconds).toBe(120);
     expect(config.enabledAuthProviders).toContain("passkey");
+    expect(config.authProviderPlaceholders).toEqual(["qq"]);
   });
 
   it("derives autosave interval milliseconds with a safe fallback", () => {

@@ -39,7 +39,7 @@ Session 相关错误不应泄露 session 是否存在、具体过期原因或 Re
 - `provider_email` 存在但可能为空或不可验证时，不得作为可绑定邮箱事实源。
 - OIDC 回调中 provider email 与本地邮箱一致时，不自动合并账号；用户需登录本地账号后走 bind 流程。
 - `safeReturnTo` 必须防开放跳转。
-- QQ 互联仍为 feature flag，未启用时前端不展示入口、后端拒绝流程。
+- QQ 互联仍为 feature flag，未启用时前端不展示入口、后端拒绝流程；OAuth adapter 未实现前只能进入 placeholder 列表用于禁用视觉占位，不能作为 enabled provider 发起登录。
 
 账号绑定与登录必须区分：
 

@@ -136,6 +136,7 @@ describe("PoW integration — challenge / verify flow", () => {
     expect(res.body.data.enabledAuthProviders).toEqual(
       expect.arrayContaining(["password", "passkey"]),
     );
+    expect(Array.isArray(res.body.data.authProviderPlaceholders)).toBe(true);
     expect(JSON.stringify(res.body.data)).not.toContain("API_KEY");
   });
 

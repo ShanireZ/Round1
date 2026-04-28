@@ -46,7 +46,7 @@ Secret 使用应遵循最小范围：服务端读取后只传给需要的 provid
 
 - 字段名包含单位，例如 `autosaveIntervalSeconds`。
 - 只返回最终生效值，不返回 secret 来源、内部 base URL 或 provider key。
-- feature flag 默认关闭；前端只按 enabled 字段展示入口。
+- feature flag 默认关闭；前端只按 enabled 字段展示可用入口。尚未实现的 provider 只能进入 placeholder 字段并渲染为禁用视觉占位，不得混入 enabled provider。
 - 新增字段先让前端容错，再把它作为必需依赖。
 - 可枚举配置（考试类型、难度、登录方式）由后端返回当前可用集合。
 

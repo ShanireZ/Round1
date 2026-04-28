@@ -48,7 +48,11 @@ function findNearestEnvFile(startDir: string): string | undefined {
 }
 
 function parseBooleanFlag(value: string | undefined): boolean {
-  return ["1", "true", "yes"].includes(String(value ?? "").trim().toLowerCase());
+  return ["1", "true", "yes"].includes(
+    String(value ?? "")
+      .trim()
+      .toLowerCase(),
+  );
 }
 
 function takeValue(args: string[], name: string): string | undefined {
@@ -71,7 +75,7 @@ Options:
   --include-external       Check mail and Turnstile configuration presence.
   --pm2                    Check PM2 process status with "pm2 jlist".
   --expect-runtime-worker  Require round1-runtime-worker to be online in PM2.
-  --expect-content-worker  Require round1-content-worker to be online in PM2.
+  --expect-content-worker  Require round1-content-worker to be online in PM2 for offline-content.
   --timeout-ms <ms>        Per-request timeout. Defaults to 5000.
   --json                   Print JSON.
   --help                   Show this help.`);
@@ -91,7 +95,8 @@ function parseOptions(): HealthcheckOptions {
 
   const port = process.env.PORT || "5100";
   const configuredRunner = process.env.SANDBOX_RUNNER_URL || "http://127.0.0.1:6100";
-  const runnerUrl = takeValue(args, "--runner-url") ?? `${configuredRunner.replace(/\/$/, "")}/health`;
+  const runnerUrl =
+    takeValue(args, "--runner-url") ?? `${configuredRunner.replace(/\/$/, "")}/health`;
   const timeoutRaw =
     takeValue(args, "--timeout-ms") ?? process.env.ROUND1_HEALTHCHECK_TIMEOUT_MS ?? "5000";
   const timeoutMs = Number.parseInt(timeoutRaw, 10);
@@ -101,7 +106,8 @@ function parseOptions(): HealthcheckOptions {
       takeValue(args, "--api-url") ??
       process.env.ROUND1_HEALTHCHECK_API_URL ??
       `http://127.0.0.1:${port}/api/v1/health`,
-    frontendUrl: takeValue(args, "--frontend-url") ?? process.env.ROUND1_HEALTHCHECK_FRONTEND_URL ?? "",
+    frontendUrl:
+      takeValue(args, "--frontend-url") ?? process.env.ROUND1_HEALTHCHECK_FRONTEND_URL ?? "",
     runnerUrl,
     timeoutMs: Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 5000,
     includeOffline:
@@ -265,20 +271,41 @@ async function checkOfflineRunner(options: HealthcheckOptions): Promise<CheckRes
 
 async function checkPm2(options: HealthcheckOptions): Promise<CheckResult> {
   if (!options.checkPm2) {
-    return { name: "pm2-processes", status: "skip", detail: "use --pm2 to check PM2 process status" };
+    return {
+      name: "pm2-processes",
+      status: "skip",
+      detail: "use --pm2 to check PM2 process status",
+    };
   }
 
-  const command = process.platform === "win32" ? "pm2.cmd" : "pm2";
   const requiredApps = ["round1-api"];
   if (options.expectRuntimeWorker) {
     requiredApps.push("round1-runtime-worker");
   }
-  if (options.expectContentWorker) {
-    requiredApps.push("round1-content-worker");
+
+  return checkPm2Apps("pm2-processes", requiredApps, options.timeoutMs);
+}
+
+async function checkOfflineContentWorker(options: HealthcheckOptions): Promise<CheckResult> {
+  if (!options.expectContentWorker) {
+    return {
+      name: "offline-content-worker",
+      status: "skip",
+      detail: "use --expect-content-worker in offline-content deployments",
+    };
   }
 
+  return checkPm2Apps("offline-content-worker", ["round1-content-worker"], options.timeoutMs);
+}
+
+async function checkPm2Apps(
+  checkName: string,
+  requiredApps: string[],
+  timeoutMs: number,
+): Promise<CheckResult> {
+  const command = process.platform === "win32" ? "pm2.cmd" : "pm2";
   try {
-    const { stdout } = await execFileAsync(command, ["jlist"], { timeout: options.timeoutMs });
+    const { stdout } = await execFileAsync(command, ["jlist"], { timeout: timeoutMs });
     const output = typeof stdout === "string" ? stdout : stdout.toString("utf8");
     const apps = JSON.parse(output) as Array<{ name?: string; pm2_env?: { status?: string } }>;
     const missingOrDown = requiredApps.filter((name) => {
@@ -288,20 +315,20 @@ async function checkPm2(options: HealthcheckOptions): Promise<CheckResult> {
 
     if (missingOrDown.length === 0) {
       return {
-        name: "pm2-processes",
+        name: checkName,
         status: "pass",
         detail: `online=${requiredApps.join(",")}`,
       };
     }
 
     return {
-      name: "pm2-processes",
+      name: checkName,
       status: "fail",
       detail: `missing-or-down=${missingOrDown.join(",")}`,
     };
   } catch (error) {
     return {
-      name: "pm2-processes",
+      name: checkName,
       status: "fail",
       detail: error instanceof Error ? error.message : String(error),
     };
@@ -323,11 +350,18 @@ async function main(): Promise<void> {
     checkMailConfig(options),
     checkTurnstileConfig(options),
     await checkOfflineRunner(options),
+    await checkOfflineContentWorker(options),
     await checkPm2(options),
   ];
 
   if (options.json) {
-    console.log(JSON.stringify({ success: results.every((result) => result.status !== "fail"), results }, null, 2));
+    console.log(
+      JSON.stringify(
+        { success: results.every((result) => result.status !== "fail"), results },
+        null,
+        2,
+      ),
+    );
   } else {
     printResults(results);
   }

@@ -122,6 +122,7 @@ API 应优先表达资源和状态，不把内部实现暴露成接口形状：
 - `availableExamTypes`
 - `availableDifficulties`
 - `enabledAuthProviders`
+- `authProviderPlaceholders`
 
 不得暴露 secret、provider API key、内部 base URL。
 

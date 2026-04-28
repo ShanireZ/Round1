@@ -51,10 +51,11 @@ interface ClientConfig {
   availableExamTypes: string[]; // ['CSP-J', 'CSP-S', 'GESP-1', ...]
   availableDifficulties: string[]; // ['easy', 'medium', 'hard']
   enabledAuthProviders: string[]; // ['password', 'passkey', ...]（动态）
+  authProviderPlaceholders: string[]; // ['qq'] 等视觉占位，不代表登录流程可用
 }
 ```
 
-> **当前对齐说明（2026-04-27）**：`/api/v1/config/client` 已从 auth router 拆出到 `server/routes/config.ts`，当前返回 `turnstileSiteKey`、PoW 字段、`autosaveIntervalSeconds`、`examDraftTtlMinutes`、`availableExamTypes`、`availableDifficulties` 与 `enabledAuthProviders`。autosave 与 draft TTL 读取运行时配置最终生效值；前端不需要也不应知道该值来自 `app_settings`、`.env` 还是代码默认值。`ExamSession` 现在使用 `autosaveIntervalSeconds` 做周期性 pending patch flush；答题变更仍有 30s debounce，以便和后端 per-user autosave rate limit 默认值对齐。
+> **当前对齐说明（2026-04-28）**：`/api/v1/config/client` 已从 auth router 拆出到 `server/routes/config.ts`，当前返回 `turnstileSiteKey`、PoW 字段、`autosaveIntervalSeconds`、`examDraftTtlMinutes`、`availableExamTypes`、`availableDifficulties`、`enabledAuthProviders` 与 `authProviderPlaceholders`。`enabledAuthProviders` 只描述当前可发起的登录方式；QQ 互联在 OAuth adapter 尚未实现前只进入 `authProviderPlaceholders`，供登录页做 feature-flag 视觉占位，不触发 501 流程。autosave 与 draft TTL 读取运行时配置最终生效值；前端不需要也不应知道该值来自 `app_settings`、`.env` 还是代码默认值。`ExamSession` 现在使用 `autosaveIntervalSeconds` 做周期性 pending patch flush；答题变更仍有 30s debounce，以便和后端 per-user autosave rate limit 默认值对齐。
 
 ### 前端路由表
 
@@ -93,7 +94,7 @@ interface ClientConfig {
 | `/api/v1/config/client`                                                                                                                                                                                                                                                      | 现状契约 | 当前已挂载，返回前端非敏感运行时配置完整字段；由 `server/routes/config.ts` 注册 OpenAPI                                                                        |
 | `/api/v1/exams/catalog`、`/api/v1/exams/active-draft`、`POST /api/v1/exams`、`POST /api/v1/exams/:id/attempts`、`GET /api/v1/exams/:id/session`、`GET /api/v1/exams/:id/result`、`PATCH /api/v1/attempts/:id`、`POST /api/v1/attempts/:id/submit`、`/api/v1/attempts/active` | 现状契约 | 当前已挂载的 Phase 11 运行时接口，严格 prebuilt-only；session 返回题面与当前答案；autosave 增量保存；submit/result 已含 grouped grader 与稳定结果 payload 语义 |
 | `/api/v1/users/me/**`                                                                                                                                                                                                                                                        | 现状契约 | 学生历史与统计已挂载，并被当前 Dashboard 消费                                                                                                                  |
-| `/api/v1/classes/join`、`/api/v1/coach/**`                                                                                                                                                                                                                                   | 现状契约 | 当前已挂载教练后端 slice：班级、成员、邀请、多教练、assignment、群体热力图、题型统计和学生下钻报表；`/coach/report` 前端已接入，班级/任务页面仍需继续收口       |
+| `/api/v1/classes/join`、`/api/v1/coach/**`                                                                                                                                                                                                                                   | 现状契约 | 当前已挂载教练后端 slice：班级、成员、邀请、多教练、assignment、群体热力图、题型统计和学生下钻报表；`/coach/report` 前端已接入，班级/任务页面仍需继续收口      |
 | `/api/v1/docs`                                                                                                                                                                                                                                                               | 现状契约 | Swagger UI 仅在 `NODE_ENV=development` 挂载，生产不暴露                                                                                                        |
 
 | 方法     | 路径                                                       | 说明                                                                                                                        | 鉴权                     |
@@ -102,7 +103,7 @@ interface ClientConfig {
 | `GET`    | `/api/v1/openapi.json`                                     | OpenAPI 文档                                                                                                                | 开发无鉴权；非开发 admin |
 | `GET`    | `/api/v1/docs`                                             | Swagger UI                                                                                                                  | 仅开发                   |
 | `GET`    | `/api/v1/config/client`                                    | 前端运行时配置                                                                                                              | 无                       |
-| `GET`    | `/api/v1/auth/providers`                                   | 可用登录方式                                                                                                                | 无                       |
+| `GET`    | `/api/v1/auth/providers`                                   | 可用登录方式与 feature flag 视觉占位；`providers` 不包含未实现的 QQ 流程                                                    | 无                       |
 | `GET`    | `/api/v1/auth/session`                                     | 当前浏览器会话状态；匿名返回 `authenticated=false`，供前端避免未登录时请求受保护 Dashboard / CoachReport 数据               | 无                       |
 | `POST`   | `/api/v1/auth/register/email/request-challenge`            | 注册发起 challenge                                                                                                          | 无                       |
 | `POST`   | `/api/v1/auth/register/email/verify-code`                  | 注册验证码校验                                                                                                              | 无                       |

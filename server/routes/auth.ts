@@ -58,6 +58,10 @@ import {
   registerPerIpLimiter,
 } from "../middleware/authRateLimit.js";
 import { buildAuthorizationUrl, handleCallback } from "../services/auth/oidcService.js";
+import {
+  getAuthProviderPlaceholders,
+  getEnabledAuthProviders,
+} from "../services/auth/providerAvailability.js";
 import { isTempEmail } from "../services/auth/blocklistService.js";
 import { passkeyCredentials } from "../db/schema/passkeyCredentials.js";
 import {
@@ -140,14 +144,10 @@ authRouter.get("/auth/csrf-token", (req: Request, res: Response, next: NextFunct
 
 // 2. GET /auth/providers
 authRouter.get("/auth/providers", (_req: Request, res: Response) => {
-  const providers: string[] = ["password", "passkey"];
-  if (env.CPPLEARN_OIDC_ISSUER) {
-    providers.push("cpplearn");
-  }
-  if (env.AUTH_PROVIDER_QQ_ENABLED) {
-    providers.push("qq");
-  }
-  res.ok({ providers });
+  res.ok({
+    providers: getEnabledAuthProviders(),
+    placeholders: getAuthProviderPlaceholders(),
+  });
 });
 
 registry.registerPath({

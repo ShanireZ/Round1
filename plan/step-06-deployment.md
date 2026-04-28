@@ -168,6 +168,7 @@ Redis 不可用时：
 离线内容环境单独执行：
 
 - `npm run healthcheck -- --include-offline --runner-url http://127.0.0.1:6100/health`：检查 cpp-runner 可达。
+- `npm run healthcheck -- --include-offline --expect-content-worker`：独立检查离线内容环境的 `round1-content-worker` PM2 进程在线；不把 contentWorker 混进生产 runtime health。
 - `scripts/workers/contentWorker.ts` 启动日志：确认只消费 `generation` / `sandbox-verify`。
 
 > 应用专属运行时变量使用 `ROUND1_*` 前缀，其余按功能模块分组（如 `DATABASE_*`、`SESSION_*`、`AUTH_*`、`LLM_*` 等），详见 [01-reference.md — 环境变量配置](reference-config.md#环境变量配置env)。

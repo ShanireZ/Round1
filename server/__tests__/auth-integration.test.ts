@@ -33,6 +33,10 @@ import { users } from "../db/schema/users.js";
 import { env } from "../../config/env.js";
 import { eq } from "drizzle-orm";
 
+const mutableEnv = env as typeof env & {
+  AUTH_PROVIDER_QQ_ENABLED: boolean;
+};
+
 // ── Test harness ─────────────────────────────────────────────────────
 
 let app: Express;
@@ -146,6 +150,21 @@ describe("Phase 2 — Email Registration", () => {
     expect(res.status).toBe(200);
     expect(res.body.data.providers).toContain("password");
     expect(res.body.data.providers).toContain("passkey");
+    expect(Array.isArray(res.body.data.placeholders)).toBe(true);
+  });
+
+  it("GET /auth/providers — keeps QQ as a placeholder until OAuth is implemented", async () => {
+    const originalQqFlag = env.AUTH_PROVIDER_QQ_ENABLED;
+    mutableEnv.AUTH_PROVIDER_QQ_ENABLED = true;
+
+    try {
+      const res = await agent.get("/api/v1/auth/providers");
+      expect(res.status).toBe(200);
+      expect(res.body.data.providers).not.toContain("qq");
+      expect(res.body.data.placeholders).toContain("qq");
+    } finally {
+      mutableEnv.AUTH_PROVIDER_QQ_ENABLED = originalQqFlag;
+    }
   });
 
   it("GET /auth/session — returns an anonymous session state without 401", async () => {

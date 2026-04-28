@@ -7,6 +7,7 @@ export type ClientRuntimeConfig = {
   availableExamTypes: string[];
   availableDifficulties: string[];
   enabledAuthProviders: string[];
+  authProviderPlaceholders: string[];
 };
 
 type ApiPayload<T> =

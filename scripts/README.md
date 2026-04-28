@@ -54,7 +54,7 @@
 - bootstrapKnowledgePoints.ts：初始化知识点树。
 - seedBlueprint.ts：初始化蓝图配置。
 - initAdmin.ts：首个管理员引导脚本，固定用户名 `elder`，读取 `ROUND1_INITIAL_ADMIN_PASSWORD`，写入 admin 角色与 `password_change_required=true`；支持 `--dry-run` 与 `--rotate`。
-- healthcheck.ts：统一健康检查脚本，默认检查 API readiness，可选检查前端静态资源、外部配置、离线 runner 与 PM2 进程。
+- healthcheck.ts：统一健康检查脚本，默认检查 API readiness，可选检查前端静态资源、外部配置、离线 runner、离线 contentWorker 与 PM2 进程；contentWorker 需用 `--expect-content-worker` 单独声明，避免混入生产 runtime health。
 - db-stats.cjs：查看题库与数据表统计。
 
 ## 共享库
@@ -88,6 +88,7 @@
 - 离线产物命名守卫：`npm run verify:offline-artifacts`
 - 首个管理员 dry-run：`ROUND1_INITIAL_ADMIN_PASSWORD='<临时强密码>' npm run init:admin -- --dry-run`
 - 生产健康检查：`npm run healthcheck -- --api-url https://round1.example.com/api/v1/health --frontend-url https://round1.example.com --pm2`
+- 离线内容环境健康检查：`npm run healthcheck -- --include-offline --runner-url http://127.0.0.1:6100/health --expect-content-worker`
 
 ## Question bundle 来源口径
 

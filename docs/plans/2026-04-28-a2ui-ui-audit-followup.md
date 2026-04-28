@@ -51,6 +51,11 @@
 - ExamResult 视觉验收收口：揭晓层补 token 化粒子爆破并尊重 `prefers-reduced-motion: reduce`，reduced motion 下分数和 CTA 立即静态可见；打印态新增页眉页脚，Hero 标记 `data-print-surface`，操作区和 ceremony overlay 标记 `data-no-print`。
 - Playwright 视觉验收落地：新增 `server/__tests__/e2e/ui-visual-audit.spec.ts`，使用本地字体文件和 API mock 覆盖 Dashboard 桌面/移动无水平溢出、ExamResult reduced-motion/A4 print markers、`/dev/ui-gallery#plate-11` A2UI BYOC surface；测试 badCount 保留 console warning/error、pageerror 和真实 request failure，过滤导航 reload 导致的正常 `net::ERR_ABORTED`。
 
+## 2026-04-28 维护追加（四）
+
+- QQ 互联视觉占位收口：后端把 auth provider 响应拆分为 `enabledAuthProviders/providers` 与 `authProviderPlaceholders/placeholders`；QQ OAuth adapter 未实现前不再作为可用 provider 暴露，登录页仅在 feature flag 开启时渲染禁用占位卡，不触发 `/api/v1/auth/external/qq/start` 的 501 占位流程。
+- 部署验收口径收口：`scripts/healthcheck.ts` 将离线 `round1-content-worker` 从生产 PM2 runtime 检查中拆出，使用 `--expect-content-worker` 独立验收；`cpp-runner` 继续由 `--include-offline --runner-url` 单独检查，符合生产 runtime 不依赖离线内容环境的两层架构。
+
 ## 文档同步
 
 - `standard/05-frontend-engineering.md` 已补 A2UI 使用边界：只能作为 agent-facing renderer / 设计辅助 surface，必须继承 Round1 token bridge。
@@ -64,6 +69,8 @@
 - `standard/04-ui-ux.md` 与 `plan/uiux_plan.md` 已补 CppLearn OIDC `贝塔问天录` 字标的使用边界：只用于身份入口，不替代 Round1 主品牌。
 - `plan/reference-config.md` 已补 R2 环境变量示例，说明前端字体依赖 `R2_PUBLIC_BASE_URL/font/*.woff2`，CppLearn 字标可临时依赖 `CPPLEARN_FONT_PUBLIC_BASE_URL/font/HYShangWeiShouShuW.woff2` 作为同源代理后端。
 - `plan/reference-api.md` 已补 `/account/class` 前端路由表项。
+- `plan/reference-api.md`、`plan/step-02-auth-system.md`、`standard/04-ui-ux.md`、`standard/08-security-auth-permissions.md`、`standard/13-config-env.md` 与 `standard/06-backend-api.md` 已补 QQ placeholder 与 enabled provider 的区别，避免未实现 OAuth 被误写为现状可用能力。
+- `standard/14-deployment-ops.md`、`plan/step-06-deployment.md` 与 `scripts/README.md` 已补 `contentWorker` 独立 healthcheck 口径。
 - `plan/step-05-coach-and-admin.md` 与 `docs/plans/2026-04-26-remaining-unfinished-work.md` 已记录 CoachReport payload/frontend 落地现状，并关闭本轮规模化浏览器性能验收缺口；真实生产 p95 继续按性能标准观测。
 - `docs/plans/2026-04-26-remaining-unfinished-work.md` 已记录 A2UI 本轮安装与视觉验收边界，UI/UX 截图、移动端、键盘、reduced motion 与打印视觉验收仍未整体关闭。
 - `docs/plans/2026-04-26-remaining-unfinished-work.md` 已关闭 ExamResult/Dashboard/打印 A4 的本轮 Playwright 视觉验收缺口，并保留全路由截图、键盘与真实打印预览等整体 UI/UX 债务。
@@ -81,9 +88,13 @@
 - `npm run test`：通过，29 files / 218 tests。
 - `npm run client:test`：通过，9 files / 52 tests。
 - `npm run client:test -- src/lib/dashboard.test.ts src/lib/a2ui-design-surface.test.ts`：通过，2 files / 13 tests，覆盖 Dashboard radar/heatmap helper 与 A2UI guard。
+- `npm run client:test -- src/lib/client-config.test.ts`：通过，1 file / 2 tests，覆盖 `authProviderPlaceholders` 前端配置读取。
+- `npm run test -- server/__tests__/auth-integration.test.ts -t "auth/providers"`：通过，2 tests，覆盖 QQ 仅作为 placeholder 暴露且不混入 enabled provider。
+- `npm run test -- server/__tests__/pow.test.ts -t "GET /config/client"`：通过，1 test，确认 `/api/v1/config/client` 返回 `authProviderPlaceholders` 且不泄露 secret。
 - `npm run test:e2e -- ui-visual-audit.spec.ts`：通过，3 tests，覆盖 Dashboard 桌面/移动、ExamResult reduced-motion/print markers 与 A2UI BYOC gallery。
 - `npm run build:server`：通过。
 - `npm run build:client`：通过；`/font/*.woff2` 仍按运行时同源代理解析，Vite build-time unresolved 提示符合当前字体托管设计。
+- `npm run healthcheck -- --help`：通过，确认 `--expect-content-worker` 离线内容环境验收参数已出现在脚本 usage。
 - Browser check：`https://127.0.0.1:5175/dev/ui-gallery#plate-11` headless Chromium 桌面视口中 A2UI surface 真实渲染，console badCount=0（0 errors / 0 warnings / 0 pageerror）。2026-04-28 维护追加后，`https://127.0.0.1:5177/login` 首次复查发现 `HYShangWeiShouShuW.woff2` 404，已补 `CPPLEARN_FONT_PUBLIC_BASE_URL` 同源代理并复查为 0 warnings / 0 errors；`/coach/report` 首次复查发现未登录 401 resource error，已补 `/api/v1/auth/session` 前置守卫并复查桌面/移动均为 0 warnings / 0 errors；`/dev/ui-gallery#plate-11` 维护追加后复查仍为 0 warnings / 0 errors。维护追加（二）在 `https://127.0.0.1:5178/coach/report` 使用 Playwright 拦截 API 注入 180 名学生 × 24 个知识点规模化数据：桌面首屏热力图 643ms、移动 2418ms，均无水平溢出；学生详情 Sheet 可打开并渲染题型下钻；打印态页眉为 `block`、`data-no-print` 为 `none`、打印区 `break-inside: avoid`；`https://127.0.0.1:5178/dev/ui-gallery#plate-11` 的 Round1 BYOC 可见；最终 badCount=0（0 console warning/error、0 pageerror、0 requestfailed）。
 
 ## 剩余风险
