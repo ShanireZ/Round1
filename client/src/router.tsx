@@ -22,6 +22,7 @@ const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const AccountClassPage = lazy(() => import("./pages/account/AccountClassPage"));
 const AccountSecurityPage = lazy(() => import("./pages/account/AccountSecurityPage"));
 const CoachAssignments = lazy(() => import("./pages/coach/CoachAssignments"));
+const CoachClassDetail = lazy(() => import("./pages/coach/CoachClassDetail"));
 const CoachClasses = lazy(() => import("./pages/coach/CoachClasses"));
 const CoachReport = lazy(() => import("./pages/coach/CoachReport"));
 const ExamNewPage = lazy(() => import("./pages/exams/ExamNew"));
@@ -62,7 +63,7 @@ export function AppRouter() {
           <Route path="/join" element={<AccountClassPage focusJoin />} />
 
           <Route path="/coach/classes" element={<CoachClasses />} />
-          <Route path="/coach/classes/:id" element={<CoachClasses />} />
+          <Route path="/coach/classes/:id" element={<CoachClassDetail />} />
           <Route path="/coach/assignments" element={<CoachAssignments />} />
           <Route path="/coach/report" element={<CoachReport />} />
 

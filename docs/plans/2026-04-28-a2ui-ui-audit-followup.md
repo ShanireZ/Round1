@@ -1,5 +1,12 @@
 # A2UI and UI Drift Audit Follow-up
 
+## 2026-04-28 Maintenance Addendum: Coach Class Detail
+
+- Coach deep management UX landed: `/coach/classes/:id` now renders a real `CoachClassDetail` page instead of falling back to the class list route. The page consumes the existing coach class, members, invites, and coaches APIs, supports owner-only class rename, member removal, invite creation/revocation, collaborator add/remove, and owner transfer.
+- A2UI BYOC coverage expanded: the Round1 custom catalog now includes `Round1CoachClassDetailSnapshot`, and the `/dev/ui-gallery` design surface binds the detail-management slice through the guarded local A2UI payload factory.
+- Token/primitive boundary: the page reuses Round1 `Card`, `Button`, `Badge`, `Input`, `Tabs`, and token classes; no new raw colors or page-scoped inline styles are required for this slice.
+- Verification for this addendum should cover `npm run client:test -- src/lib/coach.test.ts src/lib/a2ui-design-surface.test.ts`, `npm run verify:ui-tokens`, and `npm run build:client`. Full browser visual acceptance for the entire coach route family remains open.
+
 ## 2026-04-28 Maintenance Addendum: Auth Entry Surfaces
 
 - Auth entry UX landed: `/register`, `/forgot-password`, `/auth/callback`, `/auth/complete-profile`, and wildcard not-found now render real AuthLayout-compatible pages instead of placeholders.

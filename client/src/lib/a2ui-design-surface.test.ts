@@ -91,6 +91,9 @@ describe("Round1 A2UI design surface", () => {
     expect(surface?.componentsModel.get("round1-class-snapshot")?.type).toBe(
       "Round1CoachClassSnapshot",
     );
+    expect(surface?.componentsModel.get("round1-class-detail-snapshot")?.type).toBe(
+      "Round1CoachClassDetailSnapshot",
+    );
     expect(surface?.componentsModel.get("round1-student-class-snapshot")?.type).toBe(
       "Round1StudentClassSnapshot",
     );
@@ -103,6 +106,7 @@ describe("Round1 A2UI design surface", () => {
     expect(surface?.dataModel.get("/draft/students")).toBe(128);
     expect(surface?.dataModel.get("/draft/printReady")).toBe(true);
     expect(surface?.dataModel.get("/draft/openAssignments")).toBe(4);
+    expect(surface?.dataModel.get("/draft/detailMembers")).toBe(32);
     expect(surface?.dataModel.get("/draft/joinedClasses")).toBe(2);
     expect(surface?.dataModel.get("/draft/emailVerified")).toBe(true);
     expect(surface?.dataModel.get("/draft/authPages")).toBe(5);

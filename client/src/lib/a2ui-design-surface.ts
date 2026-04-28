@@ -35,6 +35,10 @@ const ROUND1_A2UI_DRAFT = {
   classCount: 6,
   activeClasses: 5,
   openAssignments: 4,
+  detailMembers: 32,
+  detailCoaches: 3,
+  activeInvites: 2,
+  ownerReady: true,
   joinedClasses: 2,
   completedAssignments: 9,
   inviteReady: true,
@@ -264,6 +268,7 @@ function createRound1A2uiComponents(
         ...(options.includeRound1Snapshot
           ? [
               "round1-class-snapshot",
+              "round1-class-detail-snapshot",
               "round1-student-class-snapshot",
               "round1-security-snapshot",
               "round1-auth-snapshot",
@@ -392,6 +397,17 @@ function createRound1A2uiComponents(
             openAssignments: bindDraftField("openAssignments"),
             inviteReady: bindDraftField("inviteReady"),
             tone: "stable",
+          },
+          {
+            id: "round1-class-detail-snapshot",
+            component: "Round1CoachClassDetailSnapshot",
+            title: "CoachClassDetail",
+            members: bindDraftField("detailMembers"),
+            coaches: bindDraftField("detailCoaches"),
+            activeInvites: bindDraftField("activeInvites"),
+            ownerReady: bindDraftField("ownerReady"),
+            inviteReady: bindDraftField("inviteReady"),
+            tone: "improving",
           },
           {
             id: "round1-report-snapshot",

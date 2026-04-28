@@ -4,10 +4,13 @@ import {
   buildCoachReportCsv,
   clampCoachReportPage,
   countActiveCoachClasses,
+  countActiveCoachClassInvites,
   countOpenCoachAssignments,
   formatCoachAssignmentStatusLabel,
   formatCoachClassRoleLabel,
+  formatCoachClassInviteStatusLabel,
   formatCoachPercent,
+  getCoachClassInviteStatus,
   getCoachReportPageCount,
   getCoachReportPageItems,
   heatmapBucket,
@@ -94,6 +97,32 @@ describe("coach report helpers", () => {
           updatedAt: "2026-04-28T00:00:00.000Z",
         },
       ]),
+    ).toBe(1);
+  });
+
+  it("classifies invite link lifecycle states for detail management", () => {
+    const now = new Date("2026-04-28T00:00:00.000Z");
+    const active = {
+      expiresAt: "2026-04-29T00:00:00.000Z",
+      maxUses: 3,
+      useCount: 1,
+      revokedAt: null,
+    };
+
+    expect(getCoachClassInviteStatus(active, now)).toBe("active");
+    expect(formatCoachClassInviteStatusLabel("active")).toBe("active");
+    expect(
+      getCoachClassInviteStatus({ ...active, revokedAt: "2026-04-27T00:00:00.000Z" }, now),
+    ).toBe("revoked");
+    expect(getCoachClassInviteStatus({ ...active, expiresAt: now.toISOString() }, now)).toBe(
+      "expired",
+    );
+    expect(getCoachClassInviteStatus({ ...active, useCount: 3 }, now)).toBe("full");
+    expect(
+      countActiveCoachClassInvites(
+        [active, { ...active, revokedAt: "2026-04-27T00:00:00.000Z" }, { ...active, useCount: 3 }],
+        now,
+      ),
     ).toBe(1);
   });
 

@@ -10,6 +10,7 @@ import {
   LogIn,
   Plus,
   RotateCcw,
+  Settings2,
   ShieldCheck,
   Users,
 } from "lucide-react";
@@ -175,6 +176,12 @@ function ClassCard({
 
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="primary" size="sm">
+            <Link to={`/coach/classes/${encodeURIComponent(klass.id)}`}>
+              <Settings2 />
+              管理
+            </Link>
+          </Button>
+          <Button asChild variant="secondary" size="sm">
             <Link to={`/coach/report?classId=${encodeURIComponent(klass.id)}`}>
               报告
               <ArrowRight />

@@ -1,5 +1,12 @@
 # Remaining Unfinished Work Summary
 
+## 2026-04-28 Maintenance Addendum: Coach Class Detail UI
+
+- Closed from the Coach deep-management backlog in this slice: `/coach/classes/:id` now routes to a real `CoachClassDetail` page that reads the class summary, members, invites, and coach group surfaces through existing APIs.
+- The detail page supports owner-only class rename, member removal, invite link creation/revocation, collaborator coach add/remove, and owner transfer. Collaborators keep read access to members/coaches while invite mutation stays owner-only.
+- A2UI BYOC coverage expanded with `Round1CoachClassDetailSnapshot`; the `/dev/ui-gallery` design surface includes the detail-management slice through the guarded local payload factory.
+- Remaining UI/UX debt after this slice: full coach route visual acceptance across desktop/mobile/keyboard/reduced-motion remains open; invite token search/user picker polish is still limited by the current backend surface accepting explicit user IDs for coach add.
+
 ## 2026-04-28 Maintenance Addendum: Auth Entry UI
 
 - Closed from the UI/UX placeholder backlog in this slice: `/register`, `/forgot-password`, `/auth/callback`, `/auth/complete-profile`, and the wildcard not-found surface now route to real AuthLayout-compatible pages instead of generic placeholders.

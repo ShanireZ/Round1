@@ -37,6 +37,16 @@ const Round1CoachClassSnapshotSchema = z.object({
   tone: z.enum(["stable", "risk", "improving"]).default("stable"),
 });
 
+const Round1CoachClassDetailSnapshotSchema = z.object({
+  title: DynamicStringSchema,
+  members: DynamicNumberSchema,
+  coaches: DynamicNumberSchema,
+  activeInvites: DynamicNumberSchema,
+  ownerReady: DynamicBooleanSchema,
+  inviteReady: DynamicBooleanSchema,
+  tone: z.enum(["stable", "risk", "improving"]).default("stable"),
+});
+
 const Round1StudentClassSnapshotSchema = z.object({
   title: DynamicStringSchema,
   joinedClasses: DynamicNumberSchema,
@@ -73,6 +83,11 @@ const Round1CoachReportSnapshotApi = {
 const Round1CoachClassSnapshotApi = {
   name: "Round1CoachClassSnapshot",
   schema: Round1CoachClassSnapshotSchema as unknown as ReactComponentImplementation["schema"],
+};
+
+const Round1CoachClassDetailSnapshotApi = {
+  name: "Round1CoachClassDetailSnapshot",
+  schema: Round1CoachClassDetailSnapshotSchema as unknown as ReactComponentImplementation["schema"],
 };
 
 const Round1StudentClassSnapshotApi = {
@@ -291,6 +306,68 @@ const Round1StudentClassSnapshot = createComponentImplementation(
   },
 );
 
+const Round1CoachClassDetailSnapshot = createComponentImplementation(
+  Round1CoachClassDetailSnapshotApi,
+  ({ props }) => {
+    const title = props.title ?? "CoachClassDetail";
+    const members = props.members ?? 0;
+    const coaches = props.coaches ?? 0;
+    const activeInvites = props.activeInvites ?? 0;
+    const ownerReady = props.ownerReady ?? false;
+    const inviteReady = props.inviteReady ?? false;
+    const tone = props.tone ?? "stable";
+    const safeTone = isRound1SnapshotTone(tone) ? tone : "stable";
+    const governancePercent = clampPercent(
+      ((ownerReady ? 1 : 0) + (inviteReady ? 1 : 0) + Math.min(coaches, 2) / 2) * (100 / 3),
+    );
+
+    return (
+      <Card variant="flat" className="a2ui-round1-snapshot border-border bg-card">
+        <CardContent className="space-y-4 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="text-muted-foreground text-xs">Round1 BYOC</div>
+              <div className="text-foreground mt-1 text-lg font-semibold">{title}</div>
+            </div>
+            <Badge variant={toneBadgeVariant[safeTone]}>{toneLabel[safeTone]}</Badge>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <div className="text-muted-foreground text-xs">成员</div>
+              <div className="text-foreground mt-1 text-xl font-semibold tabular-nums">
+                {members}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground text-xs">教练</div>
+              <div className="text-foreground mt-1 text-xl font-semibold tabular-nums">
+                {coaches}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground text-xs">邀请</div>
+              <div className="text-foreground mt-1 text-xl font-semibold tabular-nums">
+                {activeInvites}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">
+                {ownerReady ? "owner 边界已就绪" : "等待 owner 审核"}
+              </span>
+              <span className="text-foreground tabular-nums">{governancePercent}% managed</span>
+            </div>
+            <Progress value={governancePercent} variant="exam" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  },
+);
+
 const Round1AccountSecuritySnapshot = createComponentImplementation(
   Round1AccountSecuritySnapshotApi,
   ({ props }) => {
@@ -419,6 +496,7 @@ export const round1A2uiCatalog = new Catalog<ReactComponentImplementation>(ROUND
   ...basicCatalog.components.values(),
   Round1CoachReportSnapshot,
   Round1CoachClassSnapshot,
+  Round1CoachClassDetailSnapshot,
   Round1StudentClassSnapshot,
   Round1AccountSecuritySnapshot,
   Round1AuthEntrySnapshot,

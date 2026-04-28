@@ -13,6 +13,38 @@ export type CoachClassSummary = {
   coachCount?: number;
 };
 
+export type CoachClassMember = {
+  classId: string;
+  userId: string;
+  username: string;
+  displayName: string;
+  role: string;
+  joinedVia: string;
+  joinedAt: string;
+};
+
+export type CoachClassInvite = {
+  id: string;
+  classId: string;
+  token?: string;
+  joinUrl?: string;
+  expiresAt: string;
+  maxUses: number;
+  useCount: number;
+  revokedAt: string | null;
+  createdAt: string;
+};
+
+export type CoachClassCoach = {
+  classId: string;
+  userId: string;
+  username: string;
+  displayName: string;
+  userRole: string;
+  coachRole: "owner" | "collaborator";
+  addedAt: string;
+};
+
 export type CoachClassAssignment = {
   id: string;
   classId: string;
@@ -195,6 +227,10 @@ export function fetchCoachClasses() {
   return requestJson<{ items: CoachClassSummary[] }>("/api/v1/coach/classes");
 }
 
+export function fetchCoachClass(classId: string) {
+  return requestJson<CoachClassSummary>(`/api/v1/coach/classes/${classId}`);
+}
+
 export function fetchCoachPrebuiltPapers() {
   return requestJson<{ items: CoachPrebuiltPaperSummary[] }>("/api/v1/coach/prebuilt-papers");
 }
@@ -202,6 +238,13 @@ export function fetchCoachPrebuiltPapers() {
 export function createCoachClass(payload: { name: string }) {
   return requestJson<CoachClassSummary>("/api/v1/coach/classes", {
     method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateCoachClass(classId: string, payload: { name: string }) {
+  return requestJson<CoachClassSummary>(`/api/v1/coach/classes/${classId}`, {
+    method: "PATCH",
     body: JSON.stringify(payload),
   });
 }
@@ -216,6 +259,62 @@ export function archiveCoachClass(classId: string) {
   return requestJson<CoachClassSummary>(`/api/v1/coach/classes/${classId}/archive`, {
     method: "POST",
   });
+}
+
+export function fetchCoachClassMembers(classId: string) {
+  return requestJson<{ items: CoachClassMember[] }>(`/api/v1/coach/classes/${classId}/members`);
+}
+
+export function removeCoachClassMember(classId: string, userId: string) {
+  return requestJson<Pick<CoachClassMember, "classId" | "userId" | "joinedVia" | "joinedAt">>(
+    `/api/v1/coach/classes/${classId}/members/${userId}`,
+    { method: "DELETE" },
+  );
+}
+
+export function fetchCoachClassInvites(classId: string) {
+  return requestJson<{ items: CoachClassInvite[] }>(`/api/v1/coach/classes/${classId}/invites`);
+}
+
+export function createCoachClassInvite(payload: {
+  classId: string;
+  expiresAt: string;
+  maxUses: number;
+}) {
+  return requestJson<CoachClassInvite>(`/api/v1/coach/classes/${payload.classId}/invites`, {
+    method: "POST",
+    body: JSON.stringify({ expiresAt: payload.expiresAt, maxUses: payload.maxUses }),
+  });
+}
+
+export function revokeCoachClassInvite(classId: string, inviteId: string) {
+  return requestJson<CoachClassInvite>(`/api/v1/coach/classes/${classId}/invites/${inviteId}`, {
+    method: "DELETE",
+  });
+}
+
+export function fetchCoachClassCoaches(classId: string) {
+  return requestJson<{ items: CoachClassCoach[] }>(`/api/v1/coach/classes/${classId}/coaches`);
+}
+
+export function addCoachClassCoach(payload: { classId: string; userId: string }) {
+  return requestJson<CoachClassCoach>(`/api/v1/coach/classes/${payload.classId}/coaches`, {
+    method: "POST",
+    body: JSON.stringify({ userId: payload.userId }),
+  });
+}
+
+export function removeCoachClassCoach(classId: string, userId: string) {
+  return requestJson<CoachClassCoach>(`/api/v1/coach/classes/${classId}/coaches/${userId}`, {
+    method: "DELETE",
+  });
+}
+
+export function transferCoachClassOwner(classId: string, userId: string) {
+  return requestJson<CoachClassCoach>(
+    `/api/v1/coach/classes/${classId}/coaches/${userId}/transfer-owner`,
+    { method: "POST" },
+  );
 }
 
 export function fetchCoachClassAssignments(classId: string) {
@@ -283,6 +382,48 @@ export function countActiveCoachClasses(classes: readonly CoachClassSummary[]): 
 
 export function countOpenCoachAssignments(assignments: readonly CoachClassAssignment[]): number {
   return assignments.filter((assignment) => assignment.status === "assigned").length;
+}
+
+export type CoachClassInviteStatus = "active" | "revoked" | "expired" | "full";
+
+export function getCoachClassInviteStatus(
+  invite: Pick<CoachClassInvite, "expiresAt" | "maxUses" | "useCount" | "revokedAt">,
+  now = new Date(),
+): CoachClassInviteStatus {
+  if (invite.revokedAt) {
+    return "revoked";
+  }
+
+  const expiresAt = new Date(invite.expiresAt);
+  if (!Number.isNaN(expiresAt.getTime()) && expiresAt.getTime() <= now.getTime()) {
+    return "expired";
+  }
+
+  if (invite.useCount >= invite.maxUses) {
+    return "full";
+  }
+
+  return "active";
+}
+
+export function formatCoachClassInviteStatusLabel(status: CoachClassInviteStatus): string {
+  if (status === "active") {
+    return "active";
+  }
+  if (status === "revoked") {
+    return "revoked";
+  }
+  if (status === "expired") {
+    return "expired";
+  }
+  return "full";
+}
+
+export function countActiveCoachClassInvites(
+  invites: readonly Pick<CoachClassInvite, "expiresAt" | "maxUses" | "useCount" | "revokedAt">[],
+  now = new Date(),
+): number {
+  return invites.filter((invite) => getCoachClassInviteStatus(invite, now) === "active").length;
 }
 
 export function heatmapBucket(value: CoachKpReportSummary): 0 | 1 | 2 | 3 | 4 {
