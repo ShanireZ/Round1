@@ -77,8 +77,8 @@ function main(): void {
   );
 
   console.log("✅ Dev environment setup complete!\n");
-  console.log("   npm run dev:server   — Start backend on :5100");
-  console.log("   npm run dev:client   — Start frontend on :5173");
+  console.log("   npm run dev:server   — Start backend on :7654");
+  console.log("   npm run dev:client   — Start frontend on :4399");
 }
 
 main();

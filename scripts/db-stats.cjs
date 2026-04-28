@@ -1,5 +1,5 @@
 const { Pool } = require("pg");
-const p = new Pool({ connectionString: "postgres://round1:round1_dev@127.0.0.1:5432/round1" });
+const p = new Pool({ connectionString: "postgres://round1:round1_dev@127.0.0.1:4397/round1" });
 
 async function main() {
   const r1 = await p.query(

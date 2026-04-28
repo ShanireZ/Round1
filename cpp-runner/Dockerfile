@@ -36,14 +36,14 @@ USER runner
 # 创建临时工作目录
 RUN mkdir -p /tmp/cpp-runner
 
-ENV PORT=6100
+ENV PORT=4401
 ENV WORK_DIR=/tmp/cpp-runner
 ENV COMPILE_TIMEOUT_MS=10000
 ENV RUN_TIMEOUT_MS=1000
 
-EXPOSE 6100
+EXPOSE 4401
 
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 \
-  CMD node -e "fetch('http://localhost:6100/health').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"
+  CMD node -e "fetch('http://localhost:4401/health').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"
 
 ENTRYPOINT ["/entrypoint.sh"]

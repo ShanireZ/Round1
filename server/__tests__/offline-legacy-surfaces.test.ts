@@ -11,7 +11,7 @@ vi.mock("ioredis", () => ({
 
 vi.mock("../../config/env.js", () => ({
   env: {
-    REDIS_URL: "redis://127.0.0.1:6379",
+    REDIS_URL: "redis://127.0.0.1:4395",
   },
 }));
 

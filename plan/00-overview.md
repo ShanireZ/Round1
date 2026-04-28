@@ -7,6 +7,7 @@
 **用户痛点**：初赛真题有限、模拟题质量参差、错题缺乏个性化诊断、教练难掌握全班薄弱面。
 
 **核心价值**：
+
 1. **AI 辅助离线内容生产** — 在开发环境离线生成、审查和发布题目与预制卷，确保内容质量与可回滚性
 2. **自动批改与预生成解析** — 提交后同步返回客观得分与每题正误原因分析；AI 学习建议延后至未来版本
 3. **数据沉淀** — 学生看进步曲线；教练看班级群体热力图及单个学生详情、布置任务
@@ -21,13 +22,13 @@
 
 | 层级      | 选型                                                                                         |
 | --------- | -------------------------------------------------------------------------------------------- |
-| 后端      | Node.js `>=24.15.0` + npm `>=11.12.1` + Express 5 + TypeScript，端口 `:5100`                 |
+| 后端      | Node.js `>=24.15.0` + npm `>=11.12.1` + Express 5 + TypeScript，端口 `:7654`                 |
 | 前端      | React 19 + TypeScript + Vite + React Router 7 + TanStack Query v5 + shadcn/ui + Tailwind CSS |
 | 数据库    | postgreSQL 18（独立数据库 `round1`），pg + drizzle-orm                                       |
 | 缓存/队列 | Redis — Session Store / 频控 / 延迟作业                                                      |
 | LLM       | 开发环境离线脚本使用 Vercel AI SDK（`ai`）多供应商路由                                       |
 | 沙箱      | 独立 `cpp-runner` 服务（Docker + gVisor），用于离线题目生产与导入校验                        |
-| 部署      | Caddy 反向代理 + PM2，三 VPS 分离（应用/沙箱/数据库）                                        |
+| 部署      | 单 VPS 首发：Caddy 反向代理 + PM2/systemd + 本机 Postgres/Redis；离线内容环境独立            |
 
 ---
 
@@ -44,9 +45,9 @@ Browser (React 19 + Vite)
   │  /api/v1/*  session cookie
   ▼
 Caddy 反向代理
-  └─ round1.example.com → :5100
+  └─ round1.example.com → 127.0.0.1:7654
 
-Express 5 + TypeScript (:5100)
+Express 5 + TypeScript (:7654)
   ├─ 中间件、路由、服务层（详见 01-reference.md）
   ├─ postgreSQL 18 → round1
   ├─ Redis → session / rate limit / delayed jobs
@@ -60,20 +61,20 @@ External: CppLearn OIDC Provider
 
 ## 关键决策摘要
 
-| #   | 决策项       | 选择摘要                                                                       |
-| --- | ------------ | ------------------------------------------------------------------------------ |
-| 1   | 项目形态     | 独立 Git 仓库 `Round1/`，与 CppLearn 仅 OIDC 对接                              |
-| 2   | 题型范围     | 单选(15)+阅读程序(3×5)+完善程序(2×5)=100 分                                    |
-| 3   | 内容生产策略 | 开发环境离线生成题目与预制卷，生产环境仅导入与发布                             |
-| 4   | 去重策略     | MVP 仅规则去重（content_hash + Jaccard），不使用向量嵌入                       |
-| 5   | 选卷策略     | 从已发布预制卷库按 exam_type + difficulty 选择，paper 级软排除 recent attempts |
-| 6   | 题库生命周期 | 无自动退役；管理员可 publish / archive，未引用 draft 才允许硬删除              |
-| 7   | 认证方案     | 本地账号为主，CppLearn OIDC 首发，QQ 为 feature flag                           |
-| 8   | 会话模型     | express-session + Redis，idle/absolute TTL                                     |
-| 9   | 频控分层防线 | L1 Cloudflare WAF + L2 Redis + L3 进程内 Map 兜底                              |
-| 10  | API 规范     | OpenAPI 3.1，Zod schema 自动生成                                               |
+| #   | 决策项       | 选择摘要                                                                                                                         |
+| --- | ------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | 项目形态     | 独立 Git 仓库 `Round1/`，与 CppLearn 仅 OIDC 对接                                                                                |
+| 2   | 题型范围     | 单选(15)+阅读程序(3×5)+完善程序(2×5)=100 分                                                                                      |
+| 3   | 内容生产策略 | 开发环境离线生成题目与预制卷，生产环境仅导入与发布                                                                               |
+| 4   | 去重策略     | MVP 仅规则去重（content_hash + Jaccard），不使用向量嵌入                                                                         |
+| 5   | 选卷策略     | 从已发布预制卷库按 exam_type + difficulty 选择，paper 级软排除 recent attempts                                                   |
+| 6   | 题库生命周期 | 无自动退役；管理员可 publish / archive，未引用 draft 才允许硬删除                                                                |
+| 7   | 认证方案     | 本地账号为主，CppLearn OIDC 首发，QQ 为 feature flag                                                                             |
+| 8   | 会话模型     | express-session + Redis，idle/absolute TTL                                                                                       |
+| 9   | 频控分层防线 | L1 Cloudflare WAF + L2 Redis + L3 进程内 Map 兜底                                                                                |
+| 10  | API 规范     | OpenAPI 3.1，Zod schema 自动生成                                                                                                 |
 | 11  | 视觉风格     | Modern Editorial × Contest Ceremony，Light/Dark 双主题，品牌红 + 中性灰阶；以 `plan/uiux_plan.md` 和 `standard/04-ui-ux.md` 为准 |
-| 12  | 多教练模型   | V1 即支持多教练（class_coaches M2M），班级至少一位 owner                       |
+| 12  | 多教练模型   | V1 即支持多教练（class_coaches M2M），班级至少一位 owner                                                                         |
 
 > 完整决策表与全量技术细节见 [01-reference.md](01-reference.md)。
 

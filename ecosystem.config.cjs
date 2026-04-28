@@ -37,12 +37,12 @@ const apps = [
     time: true,
     env: {
       NODE_ENV: "production",
-      PORT: process.env.PORT ?? "5100",
+      PORT: process.env.PORT ?? "7654",
       ROUND1_BIND_HOST: process.env.ROUND1_BIND_HOST ?? "127.0.0.1",
     },
     env_production: {
       NODE_ENV: "production",
-      PORT: process.env.PORT ?? "5100",
+      PORT: process.env.PORT ?? "7654",
       ROUND1_BIND_HOST: process.env.ROUND1_BIND_HOST ?? "127.0.0.1",
     },
   },

@@ -95,7 +95,7 @@
 - [ ] 系统层安全加固：UFW/iptables、SSH 禁用密码、fail2ban、自动安全更新、非 root 运行服务。
 - [ ] 应用层安全加固：`.env` 权限 600、`NODE_ENV=production`、Helmet CSP、CSRF、`__Host-` cookie、`trust proxy = 1`、argon2id。
 - [ ] 数据库层安全加固：Postgres 内网监听、应用用户最小权限、`statement_timeout=30s`、备份权限 600。
-- [ ] 生产端口最终设计与防火墙规则需确认。（2026-04-28：已新增 `docs/plans/2026-04-28-port-map-and-exposure-plan.md` 盘点 80/443/SSH/5100/5173/5432/6379/6100；Express 新增 `ROUND1_BIND_HOST=127.0.0.1` 默认值，本地 compose 已收紧 Postgres/Redis/cpp-runner 到 `127.0.0.1`，单机生产默认不对公网暴露 API/Postgres/Redis。）
+- [x] 生产端口最终设计与防火墙规则需确认。（2026-04-28：`docs/plans/2026-04-28-port-map-and-exposure-plan.md` 已从盘点更新为确认后的端口设计：SSH `9179` 公网且不做 IP allowlist，Caddy `80/443` 公网并强制 HTTPS / TLS 1.2+ / HTTP/2+，Express API `7654` 仅 `127.0.0.1` 给 Caddy 反代，Postgres `4397` 与 Redis `4395` 不开放公网，Vite dev `4399` 仅本地开发，cpp-runner `4401` 仅本地开发/离线内容环境且生产不部署；代码默认值、`.env.example`、compose、Vite、PM2 与 healthcheck 已同步。）
 - [ ] 手动部署 SOP 与回滚流程演练。
 - [x] 已纳入 `scripts/healthcheck.ts` 和版本化 `ecosystem.config.cjs`；真实域名、Caddy/TLS、PM2 reload、外部服务 smoke 与回滚仍需实机演练。
 

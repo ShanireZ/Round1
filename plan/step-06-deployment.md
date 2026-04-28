@@ -8,7 +8,7 @@
 >
 > **部署方式推荐（2026-04-28）**：4H16G、14M 带宽单 VPS 首发不建议引入 Kubernetes/k3s；先使用 Caddy + PM2/systemd + native Postgres/Redis，rootless Podman + Quadlet 仅作为需要镜像化或依赖隔离时的二期选项。详细取舍见 `docs/plans/2026-04-28-single-vps-deployment-recommendation.md`。
 >
-> **端口规划说明（2026-04-28）**：当前端口盘点与待设计项见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。单机部署时 Postgres / Redis 默认只绑定本机，不对公网暴露；生产公网业务入口仅应是 Caddy 的 80/443。
+> **端口规划说明（2026-04-28）**：当前端口设计见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。单机部署时 Postgres / Redis 默认只绑定本机，不对公网暴露；生产公网入口为 SSH `9179` 与 Caddy `80/443`。Caddy 必须强制 HTTPS、TLS 1.2+ 与 HTTP/2+。
 
 ---
 
@@ -33,14 +33,15 @@
 
 ### 14.1.1 端口暴露原则
 
-| 服务        | 当前默认 | 生产暴露范围                               | 配置真源                                             |
-| ----------- | -------- | ------------------------------------------ | ---------------------------------------------------- |
-| Caddy       | 80 / 443 | 公网                                       | 系统部署配置                                         |
-| Express API | 5100     | `127.0.0.1`，仅 Caddy 反代                 | `PORT` / `ROUND1_BIND_HOST` / `ecosystem.config.cjs` |
-| Postgres    | 5432     | 单机仅本机；拆库时仅私网                   | `DATABASE_URL`                                       |
-| Redis       | 6379     | 单机仅本机；拆服务时仅私网                 | `REDIS_URL`                                          |
-| cpp-runner  | 6100     | 离线内容环境本机/内网，生产 runtime 不开放 | `SANDBOX_RUNNER_URL`                                 |
-| Vite dev    | 5173     | 本地开发机                                 | `client/vite.config.ts`                              |
+| 服务        | 当前默认 | 生产暴露范围                                   | 配置真源                                             |
+| ----------- | -------- | ---------------------------------------------- | ---------------------------------------------------- |
+| Caddy       | 80 / 443 | 公网；强制 HTTPS、TLS 1.2+、HTTP/2+            | 系统部署配置                                         |
+| SSH         | 9179     | 公网；不做 IP allowlist                        | VPS 系统层                                           |
+| Express API | 7654     | `127.0.0.1`，仅 Caddy 反代                     | `PORT` / `ROUND1_BIND_HOST` / `ecosystem.config.cjs` |
+| Postgres    | 4397     | 单机仅本机；拆库时仅私网                       | `DATABASE_URL`                                       |
+| Redis       | 4395     | 单机仅本机；拆服务时仅私网                     | `REDIS_URL`                                          |
+| cpp-runner  | 4401     | 本地开发/离线内容环境本机，生产 runtime 不部署 | `SANDBOX_RUNNER_URL`                                 |
+| Vite dev    | 4399     | 本地开发机，生产不部署                         | `client/vite.config.ts`                              |
 
 重新设计端口时，先改 `.env` / Caddy / healthcheck / compose，再同步 `plan/reference-config.md` 与端口盘点文档，避免部署 runbook 和代码默认值漂移。若生产 API 与 Caddy 同机，`ROUND1_BIND_HOST` 必须保持 `127.0.0.1`。
 
@@ -81,12 +82,13 @@
 
 - Cloudflare Origin CA 15 年源证书，Full (Strict) 加密模式
 - 覆盖 `X-Forwarded-*` 头，防止客户端伪造：使用 `CF-Connecting-IP` 作为 `X-Forwarded-For`
-- `reverse_proxy 127.0.0.1:5100`
+- `reverse_proxy 127.0.0.1:7654`
 - `app.set('trust proxy', 1)`（一跳 = Caddy），严禁 `true`
+- Caddy 必须强制 HTTPS，TLS 最低 `tls1.2`，启用 HTTP/2 或更新协议。
 
 ### 14.3 PM2 配置
 
-- `round1-api`：由 `ecosystem.config.cjs` 管理，cluster 模式默认 2 实例，端口默认 5100
+- `round1-api`：由 `ecosystem.config.cjs` 管理，cluster 模式默认 2 实例，端口默认 7654
 - 生产默认**不启动 Worker**；当前目标运行时仅保留 Caddy + API + Redis + Postgres
 - 若未来恢复运行时延迟任务，`round1-runtime-worker` 仅在 `ROUND1_PM2_ENABLE_RUNTIME_WORKER=1` 时启用，且只允许承载运行时队列，禁止消费 `generation` / `sandbox-verify`
 - `round1-content-worker` 仅存在于离线内容环境，通过 `ROUND1_PM2_ENABLE_CONTENT_WORKER=1` 显式启用，不部署到生产运行时
@@ -103,7 +105,7 @@
   - `@fonts path /font/*`
   - `reverse_proxy @fonts <R2_PUBLIC_BASE_URL>`（保留 `/font/*` path；避免浏览器直接跨域加载字体）
   - `@api path /api/*`
-  - `reverse_proxy @api 127.0.0.1:5100`
+  - `reverse_proxy @api 127.0.0.1:7654`
 - 散列文件名 → `Cache-Control: public, max-age=31536000, immutable`
 - `index.html` → `Cache-Control: no-cache`
 
@@ -182,7 +184,7 @@ Redis 不可用时：
 
 离线内容环境单独执行：
 
-- `npm run healthcheck -- --include-offline --runner-url http://127.0.0.1:6100/health`：检查 cpp-runner 可达。
+- `npm run healthcheck -- --include-offline --runner-url http://127.0.0.1:4401/health`：检查 cpp-runner 可达。
 - `npm run healthcheck -- --include-offline --expect-content-worker`：独立检查离线内容环境的 `round1-content-worker` PM2 进程在线；不把 contentWorker 混进生产 runtime health。
 - `scripts/workers/contentWorker.ts` 启动日志：确认只消费 `generation` / `sandbox-verify`。
 
@@ -273,10 +275,10 @@ curl -fsS https://round1.example.com/api/v1/health
 ### 系统层
 
 - [ ] 所有 VPS 启用 UFW/iptables，仅开放必要端口
-  - 生产运行时：80, 443（公网）+ SSH
-  - 独立数据库主机：5432（仅内网）+ SSH
-  - 离线内容环境：6100（仅本机/内网）+ SSH
-- [ ] SSH 禁用密码登录，仅允许密钥认证
+  - 生产运行时：80、443、9179（公网）
+  - 独立数据库主机：4397（仅内网）+ SSH 9179
+  - 本地开发/离线内容环境：4401（仅本机/内网）+ SSH 9179
+- [ ] SSH 监听 9179，允许公网访问，不做 IP allowlist；禁用密码登录，仅允许密钥认证
 - [ ] 启用 `fail2ban` 防暴力破解
 - [ ] 定期自动安全更新（`unattended-upgrades`）
 - [ ] 应用用户/root 用户运行所有服务
@@ -308,7 +310,7 @@ curl -fsS https://round1.example.com/api/v1/health
 
 ## CORS 与 Vite 代理
 
-- 开发模式：Vite `server.proxy` 代理 `/api/v1/*` → Express `:5100`，同域无 CORS
+- 开发模式：Vite `server.proxy` 代理 `/api/v1/*` → Express `:7654`，同域无 CORS
 - 生产环境：同源部署（Caddy 直接托管 `client/dist`，Express 仅处理 API），无需 CORS
 - 后续拆分域名时在 Express 配置 `cors()` 白名单
 
@@ -317,8 +319,8 @@ curl -fsS https://round1.example.com/api/v1/health
 ## 开发模式（本地强制 HTTPS）
 
 - `npm run dev:setup` 封装：`mkcert -install` + 证书生成 + hosts 提示
-- `npm run dev:server` → Express `https://round1.local:5100`
-- `npm run dev:client` → Vite `https://round1.local:5173`，proxy `/api/v1/*` → `:5100`
+- `npm run dev:server` → Express `https://round1.local:7654`
+- `npm run dev:client` → Vite `https://round1.local:4399`，proxy `/api/v1/*` → `:7654`
 - 全环境统一 `__Host-Round1.sid`，不做 dev 降级
 - `certs/` 进 `.gitignore`
 

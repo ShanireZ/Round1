@@ -16,14 +16,14 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter,
   use: {
-    baseURL: "https://127.0.0.1:5173",
+    baseURL: "https://127.0.0.1:4399",
     trace: "on-first-retry",
     ignoreHTTPSErrors: true,
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: "npm run dev --workspace=client -- --host 127.0.0.1 --port 5173",
-    url: "https://127.0.0.1:5173",
+    command: "npm run dev --workspace=client -- --host 127.0.0.1 --port 4399",
+    url: "https://127.0.0.1:4399",
     reuseExistingServer: !process.env.CI,
     ignoreHTTPSErrors: true,
     timeout: 120_000,

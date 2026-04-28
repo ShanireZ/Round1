@@ -13,7 +13,7 @@
 - Caddy 继续作为唯一公网入口，负责 TLS、静态资源、SPA fallback、`/api/*` 反代与 `/font/*` 同源字体代理。
 - Node API 使用当前仓库已有 `ecosystem.config.cjs` + PM2 cluster 2 实例，或等价 systemd service；短期以 PM2 为准，因为代码、healthcheck 与 plan 已经对齐。
 - Postgres、Redis 使用系统包或受控 systemd service；Postgres 数据目录、备份、恢复演练优先级高于容器化。
-- Postgres、Redis 在单 VPS 上只绑定 `127.0.0.1` 或 Unix socket，不对公网暴露；完整端口盘点与待设计项见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。
+- Postgres、Redis 在单 VPS 上只绑定 `127.0.0.1` 或 Unix socket，不对公网暴露；当前端口设计见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。
 - `client/dist` 由 Caddy 直接托管，hashed assets 长缓存，`index.html` 不长缓存。
 - 离线内容环境继续与生产运行时分离，不在生产机运行 `cpp-runner`、generation 或 sandbox verify。
 
@@ -37,7 +37,7 @@ Context7 Podman 文档显示，Podman 是 daemonless 容器引擎，支持 rootl
 
 适合 Round1 的 Podman 使用边界：
 
-- API 容器：可 rootless 运行，挂载只读 release 与 `.env`，暴露到 `127.0.0.1:5100` 给 Caddy。
+- API 容器：可 rootless 运行，挂载只读 release 与 `.env`，暴露到 `127.0.0.1:7654` 给 Caddy。
 - Redis 容器：可接受，数据 volume 与持久化策略要写清。
 - Postgres 容器：可以做，但首发不优先；数据库故障恢复、升级、备份、权限更关键，系统包部署更直观。
 - Caddy：建议继续系统包安装，不放进同一个容器栈，保持公网入口和证书生命周期简单。
@@ -61,14 +61,14 @@ Cloudflare DNS / WAF
         |
         v
 Caddy :443
-  |-- /api/*       -> 127.0.0.1:5100 Round1 API (PM2 cluster)
+  |-- /api/*       -> 127.0.0.1:7654 Round1 API (PM2 cluster)
   |-- /font/*      -> R2 public font origin
   |-- /*           -> /opt/round1/current/client/dist
 
 systemd/PM2
   |-- round1-api x2
-  |-- redis       -> 127.0.0.1:6379 or unix socket
-  |-- postgres    -> 127.0.0.1:5432 or unix socket
+  |-- redis       -> 127.0.0.1:4395 or unix socket
+  |-- postgres    -> 127.0.0.1:4397 or unix socket
 
 offline-content environment
   |-- generation / judge / cpp-runner / content worker
@@ -110,4 +110,4 @@ offline-content environment
 - Sentry release 与敏感信息过滤。
 - 邮件 SPF/DKIM/DMARC 与真实投递。
 - 静态资源和字体 cache headers。
-- UFW/iptables 仅开放公网 80/443 与受控 SSH；确认 5100/5432/6379/6100 不在公网监听。
+- UFW/iptables 仅开放公网 80/443 与 SSH 9179；确认 7654/4397/4395/4401 不在公网监听。

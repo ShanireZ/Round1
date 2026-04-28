@@ -31,7 +31,7 @@ cd D:\WorkSpace\Round1
 docker compose -f docker-compose.dev.yml up -d
 ```
 
-当前 compose 只把 Postgres、Redis 与 cpp-runner 发布到 `127.0.0.1`。如果本地旧 `pgdata` volume 曾使用 `/var/lib/postgresql` 作为挂载点，切到官方 `/var/lib/postgresql/data` 后需要执行一次 `docker compose -f docker-compose.dev.yml down -v` 重建本地开发数据。
+当前 compose 只把 Postgres、Redis 与 cpp-runner 发布到 `127.0.0.1`，宿主机端口分别为 `4397`、`4395`、`4401`。Postgres/Redis 容器内仍保留官方默认端口 `5432` / `6379`。如果本地旧 `pgdata` volume 曾使用 `/var/lib/postgresql` 作为挂载点，切到官方 `/var/lib/postgresql/data` 后需要执行一次 `docker compose -f docker-compose.dev.yml down -v` 重建本地开发数据。
 
 停止 / 销毁：
 
@@ -52,7 +52,7 @@ docker compose -f docker-compose.dev.yml logs -f redis   # 仅 Redis
 ```powershell
 # PostgreSQL 18
 docker run -d --name r1-pg `
-  -p 127.0.0.1:5432:5432 `
+  -p 127.0.0.1:4397:5432 `
   -e POSTGRES_DB=round1 `
   -e POSTGRES_USER=round1 `
   -e POSTGRES_PASSWORD=round1_dev `
@@ -61,7 +61,7 @@ docker run -d --name r1-pg `
 
 # Redis 8 (Alpine)
 docker run -d --name r1-redis `
-  -p 127.0.0.1:6379:6379 `
+  -p 127.0.0.1:4395:6379 `
   -v r1-redisdata:/data `
   redis:8-alpine redis-server --save 60 1 --loglevel warning
 ```
@@ -79,11 +79,11 @@ docker exec r1-redis redis-cli ping
 ### .env 对应配置
 
 ```env
-DATABASE_URL=postgres://round1:round1_dev@127.0.0.1:5432/round1
-REDIS_URL=redis://127.0.0.1:6379
+DATABASE_URL=postgres://round1:round1_dev@127.0.0.1:4397/round1
+REDIS_URL=redis://127.0.0.1:4395
 ```
 
 ## 启动开发
 
 cd D:\WorkSpace\Round1
-npm run dev:client # → https://round1.local:5173/dev/ui-gallery（证书缺失时为 HTTP）
+npm run dev:client # → https://round1.local:4399/dev/ui-gallery（证书缺失时为 HTTP）

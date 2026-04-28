@@ -35,7 +35,7 @@ if (envFile) {
 }
 
 process.env.NODE_ENV = "test";
-process.env.DATABASE_URL ??= "postgres://round1:round1@127.0.0.1:5432/round1_test";
+process.env.DATABASE_URL ??= "postgres://round1:round1_dev@127.0.0.1:4397/round1_test";
 process.env.SESSION_SECRET ??= "test-session-secret-at-least-16";
 process.env.TOTP_ENCRYPTION_KEK ??= "test-totp-kek-at-least-16";
 

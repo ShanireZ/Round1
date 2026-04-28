@@ -126,12 +126,12 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 
 ## 安全加固
 
-- SSH 禁用密码登录，启用 fail2ban 或等价防护。
-- UFW/iptables 只开放 80/443/SSH；Postgres 仅内网。
-- 单 VPS 部署时 Postgres、Redis、Express API 与 cpp-runner 不得公网监听；端口设计和例外必须同步 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`、`plan/step-06-deployment.md` 与 `.env.example`。
+- SSH 监听 `9179`，允许公网访问且不做 IP allowlist；必须禁用密码登录，启用 fail2ban 或等价防护。
+- UFW/iptables 只开放公网 `80`、`443`、`9179`；Postgres、Redis、Express API 与 cpp-runner 不得公网监听。
+- 单 VPS 部署时 Express API 仅监听 `127.0.0.1:7654` 并由 Caddy 反代；Postgres 使用 `127.0.0.1:4397`，Redis 使用 `127.0.0.1:4395`；cpp-runner `127.0.0.1:4401` 只用于本地开发/离线内容环境，生产不部署；Vite dev server `127.0.0.1:4399` 只用于本地开发。端口设计和例外必须同步 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`、`plan/step-06-deployment.md` 与 `.env.example`。
 - 服务使用非 root 用户。
 - 自动安全更新按服务器策略开启。
-- Cloudflare Full Strict + Caddy TLS 上线前验证。
+- Cloudflare Full Strict + Caddy TLS 上线前验证；Caddy 必须强制 HTTPS，TLS 1.2+，HTTP/2+。
 - PostgreSQL 应用用户最小权限，不使用 superuser。
 
 ## 离线内容环境
@@ -207,7 +207,7 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 
 ## Caddy 与静态资源
 
-- Caddy 负责 TLS 和反代。
+- Caddy 负责 TLS 和反代；生产必须强制 HTTPS，TLS 1.2+，HTTP/2+。
 - API 与静态资源同源部署时无需 CORS。
 - 前端字体使用同源 `/font/*`，Caddy/Vite 必须把通用字体代理到 `R2_PUBLIC_BASE_URL/font/*`；CppLearn `HYShangWeiShouShuW.woff2` 可通过 `CPPLEARN_FONT_PUBLIC_BASE_URL` 单独代理到公开源。不要让浏览器直接跨域请求字体，除非资源源站已配置正确 CORS。
 - `client/dist` 静态资源应有长期缓存；HTML 不应长期缓存。

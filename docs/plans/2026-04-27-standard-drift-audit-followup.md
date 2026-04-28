@@ -75,7 +75,7 @@ node -v
 npm -v
 ```
 
-2026-04-27 dependency-upgrade verification note: root/workspace and `cpp-runner` `npm outdated --json --long` both returned `{}` and both audit trees returned 0 vulnerabilities. The full server Vitest run with default forks passed 160 tests and left only Redis-dependent suites blocked by local `127.0.0.1:6379` being unavailable (`bullmq-dead-letter`, `auth-integration`, `pow`). `npm run migrate:status` is likewise blocked by local Postgres `127.0.0.1:5432` being unavailable.
+2026-04-27 dependency-upgrade verification note: root/workspace and `cpp-runner` `npm outdated --json --long` both returned `{}` and both audit trees returned 0 vulnerabilities. The full server Vitest run with default forks passed 160 tests and left only Redis-dependent suites blocked by local Redis being unavailable (`bullmq-dead-letter`, `auth-integration`, `pow`). `npm run migrate:status` was likewise blocked by local Postgres being unavailable. Current local ports now follow `docs/plans/2026-04-28-port-map-and-exposure-plan.md`.
 
 当前 Codex 沙箱追加复核时，`npm run client:test -- src/lib/exam-session.test.ts src/lib/client-config.test.ts src/lib/exam-runtime.test.ts` 的默认 bundle loader 在加载 Vite/Vitest 配置阶段触发 Windows `spawn EPERM`；改为 `--configLoader native` 后配置可加载，但 Vitest worker / Vite realpath 仍被同一类 `spawn EPERM` 阻断，未进入测试断言。本轮使用 `node --experimental-strip-types` 对新增 autosave helper 行为做等价断言，并运行 `npx tsc -p client/tsconfig.json --noEmit`、`npm run build:client` 作为补充验证。
 

@@ -58,11 +58,11 @@ export default defineConfig({
   },
   server: {
     host: "127.0.0.1",
-    port: 5173,
+    port: 4399,
     https: httpsConfig,
     proxy: {
       "/api/v1": {
-        target: "https://127.0.0.1:5100",
+        target: "https://127.0.0.1:7654",
         changeOrigin: true,
         secure: false,
       },

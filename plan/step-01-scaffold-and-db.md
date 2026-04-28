@@ -11,8 +11,8 @@
 ### 0.1 项目初始化
 
 - 创建 `package.json`（npm workspaces: `["server", "client"]`）+ `engines: { "node": ">=24.15.0", "npm": ">=11.12.1" }`
-- 创建 `server/package.json`（依赖：express, pg, drizzle-orm, ioredis, redis, connect-redis, bullmq, ai@^6.0, @ai-sdk/*, nodemailer, helmet, pino, pino-http, csrf-sync, express-rate-limit, rate-limit-redis, @sentry/node, @asteasolutions/zod-to-openapi, swagger-ui-express, @simplewebauthn/server, zod, argon2, zxcvbn 等；迁移执行由 `scripts/migrate.ts` 负责）
-- 创建 `client/package.json`（依赖：react, vite, tailwindcss, @radix-ui/*, react-hook-form, @hookform/resolvers, @simplewebauthn/browser, @sentry/react, @tanstack/react-query, @fingerprintjs/fingerprintjs 等）
+- 创建 `server/package.json`（依赖：express, pg, drizzle-orm, ioredis, redis, connect-redis, bullmq, ai@^6.0, @ai-sdk/\*, nodemailer, helmet, pino, pino-http, csrf-sync, express-rate-limit, rate-limit-redis, @sentry/node, @asteasolutions/zod-to-openapi, swagger-ui-express, @simplewebauthn/server, zod, argon2, zxcvbn 等；迁移执行由 `scripts/migrate.ts` 负责）
+- 创建 `client/package.json`（依赖：react, vite, tailwindcss, @radix-ui/\*, react-hook-form, @hookform/resolvers, @simplewebauthn/browser, @sentry/react, @tanstack/react-query, @fingerprintjs/fingerprintjs 等）
 - 根 `tsconfig.json` + `server/tsconfig.json`（extends 根配置）
 - `eslint.config.js` + `prettier.config.js`
 - `.gitignore`（含 `certs/`、`node_modules/`、`dist/`、`data/backups/`）
@@ -32,6 +32,7 @@
   8. 路由挂载
 
 > 中间件顺序的完整定义见 [01-reference.md](01-reference.md)，此处仅为摘要。
+
 - `server/middleware/responseWrapper.ts` — 统一 JSON 信封 `{ success, data, error }`
 - `app.set('trust proxy', 1)` — 严禁 `true`
 
@@ -41,12 +42,12 @@ Phase 0 必须逐一实测以下中间件在 Express 5 下的兼容性：
 
 | 包                                  | 预期状态 | 说明                                                                |
 | ----------------------------------- | -------- | ------------------------------------------------------------------- |
-| `helmet` v8+                        | ✅        | 已确认兼容                                                          |
-| `express-rate-limit` v7+            | ✅        | 已确认兼容                                                          |
-| `pino-http`                         | ✅        | 已确认兼容                                                          |
-| `csrf-sync`                         | ✅        | 已确认兼容（Express 5.1 + csrf-sync 4.x，POST 无 token → 403 JSON） |
-| `swagger-ui-express`                | ✅        | 已确认兼容（`/api/v1/docs` 返回 200 HTML）                          |
-| `express-session` + `connect-redis` | ✅        | 已确认兼容；OIDC 302 回调需在 step-02 完成 OIDC 集成后验证          |
+| `helmet` v8+                        | ✅       | 已确认兼容                                                          |
+| `express-rate-limit` v7+            | ✅       | 已确认兼容                                                          |
+| `pino-http`                         | ✅       | 已确认兼容                                                          |
+| `csrf-sync`                         | ✅       | 已确认兼容（Express 5.1 + csrf-sync 4.x，POST 无 token → 403 JSON） |
+| `swagger-ui-express`                | ✅       | 已确认兼容（`/api/v1/docs` 返回 200 HTML）                          |
+| `express-session` + `connect-redis` | ✅       | 已确认兼容；OIDC 302 回调需在 step-02 完成 OIDC 集成后验证          |
 
 > **Phase 0 实测要求**：除上表外，还需验证 `csrf-sync` 同步器 token 与 `express-session` 在 Express 5 下正常协作。
 
@@ -54,7 +55,7 @@ Phase 0 必须逐一实测以下中间件在 Express 5 下的兼容性：
 
 ### 0.4 Vite + 前端骨架
 
-- `client/vite.config.ts` — HTTPS 开发（读取 `certs/dev-*.pem`）+ `server.proxy` 将 `/api/v1/*` 代理到 `:5100`
+- `client/vite.config.ts` — HTTPS 开发（读取 `certs/dev-*.pem`）+ `server.proxy` 将 `/api/v1/*` 代理到 `:7654`
 - `client/index.html` + `client/src/main.tsx` + `client/src/App.tsx`
 - `client/src/router.tsx` — React Router 7 路由骨架（占位页面）
 - `client/src/queryClient.ts` — TanStack Query 初始化
@@ -111,6 +112,7 @@ Phase 0 必须逐一实测以下中间件在 Express 5 下的兼容性：
 按模块拆分为 5 个迁移文件，顺序执行：
 
 **迁移 1 — 用户与认证** (`001_users_and_auth.ts`)
+
 - `users`（含 `session_version`、`last_strong_auth_at`、`totp_secret_enc`、`totp_enabled_at`、`status`(active/locked/deleted)、`deleted_at`）
 - `user_emails`
 - `external_identities`
@@ -120,22 +122,26 @@ Phase 0 必须逐一实测以下中间件在 Express 5 下的兼容性：
 - `auth_audit_logs`
 
 **迁移 2 — 题库与蓝图** (`002_question_bank.ts`)
+
 - `knowledge_points`
 - `questions` + `question_reviews` + `question_exam_types` + `question_kp_tags`
 - `blueprints`
 
 **迁移 3 — 预制卷、考试与成绩** (`003_exam_and_grading.ts`)
+
 - `prebuilt_papers` + `prebuilt_paper_slots`
 - `papers` + `paper_question_slots`
 - `attempts`
 
 **迁移 4 — 班级与任务** (`004_classes_and_assignments.ts`)
+
 - `classes`
 - `class_coaches`（多教练 M2M：`(class_id, user_id)` 联合 PK + `role` + `added_at`）
 - `class_members` + `class_invites`
 - `assignments` + `assignment_progress`
 
 **迁移 5 — 系统与日志** (`005_system_and_logs.ts`)
+
 - `admin_audit_logs`
 - `import_batches`
 - `llm_provider_logs`

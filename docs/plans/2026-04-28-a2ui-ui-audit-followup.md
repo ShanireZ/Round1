@@ -61,8 +61,8 @@
 - A2UI 版本口径复核：Context7 与当前安装的 `@a2ui/react@0.9.1` README 均建议新项目使用 `@a2ui/react/v0_9` + `@a2ui/web_core/v0_9`，本仓库继续以 installed package schema 作为运行时真源；若 a2ui.org 文档页与包内 README 对稳定性标注不一致，禁止直接复制外部示例字段，必须先过本地 schema/test/browser guard。
 - UI token guard 收紧：`scripts/verifyUiTokenUsage.ts` 现在扫描 TS/TSX 与非 token CSS 的 raw color literal；`tokens.css` 作为令牌真源保留 raw color，`print.css` 与 `globals.css` 的印刷色、mesh fallback、mask color 已收敛到 token。
 - 本地基础设施暴露面收口：`docker-compose.dev.yml` 的 Postgres、Redis、cpp-runner 改为只绑定 `127.0.0.1`，并修正 Postgres volume 到官方数据目录 `/var/lib/postgresql/data`。
-- 端口规划文档落地：新增 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`，列出 80/443/SSH/5100/5173/5432/6379/6100 与 external HTTPS outbound 的当前默认、建议暴露范围和需要同步的配置位置；Express 新增 `ROUND1_BIND_HOST=127.0.0.1` 默认值，避免仅配置 `PORT` 时 API 监听所有网卡。
-- 本地开发 runbook 收口：`plan/other-detail.md` 从旧 `D:\round1`、`certss` 与全网卡 `-p 5432:5432` / `-p 6379:6379` 修正为当前工作区路径、`certs` 与 loopback-only port publishing。
+- 端口规划文档落地：新增 `docs/plans/2026-04-28-port-map-and-exposure-plan.md` 并维护为确认后的端口设计：SSH `9179` 公网、Caddy `80/443` 公网且强制 HTTPS / TLS 1.2+ / HTTP/2+、Express API `7654` 仅本机反代、Postgres `4397` 与 Redis `4395` 不开放公网、Vite dev `4399` 与 cpp-runner `4401` 仅本地开发/离线环境；Express 保持 `ROUND1_BIND_HOST=127.0.0.1` 默认值，避免仅配置 `PORT` 时 API 监听所有网卡。
+- 本地开发 runbook 收口：`plan/other-detail.md` 从旧 `D:\round1`、`certss` 与全网卡默认端口映射修正为当前工作区路径、`certs` 与 loopback-only port publishing；宿主机端口使用 `4397` / `4395`，容器内部仍保留官方默认端口。
 
 ## 文档同步
 
@@ -83,7 +83,7 @@
 - `docs/plans/2026-04-26-remaining-unfinished-work.md` 已记录 A2UI 本轮安装与视觉验收边界，UI/UX 截图、移动端、键盘、reduced motion 与打印视觉验收仍未整体关闭。
 - `docs/plans/2026-04-26-remaining-unfinished-work.md` 已关闭 ExamResult/Dashboard/打印 A4 的本轮 Playwright 视觉验收缺口，并保留全路由截图、键盘与真实打印预览等整体 UI/UX 债务。
 - `plan/step-06-deployment.md` 与 `docs/plans/2026-04-28-single-vps-deployment-recommendation.md` 已记录单 VPS 部署方式推荐：首发 Caddy + PM2/systemd + native Postgres/Redis，Podman Quadlet 二期可选，Kubernetes/k3s 在单 VPS 阶段 deferred。
-- `standard/05-frontend-engineering.md`、`plan/reference-config.md`、`plan/step-06-deployment.md` 与 `docs/plans/2026-04-28-port-map-and-exposure-plan.md` 已补端口暴露与 token guard 收口口径：单机 Postgres/Redis 默认本机访问，生产公网业务入口只保留 Caddy 80/443。
+- `standard/05-frontend-engineering.md`、`standard/14-deployment-ops.md`、`plan/reference-config.md`、`plan/step-06-deployment.md` 与 `docs/plans/2026-04-28-port-map-and-exposure-plan.md` 已补端口暴露与 token guard 收口口径：单机 Postgres/Redis 默认本机访问，生产公网入口为 SSH 9179 与 Caddy 80/443，API/DB/Redis/runner 不公网监听。
 
 ## 验证记录
 

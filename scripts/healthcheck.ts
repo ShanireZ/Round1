@@ -93,8 +93,8 @@ function parseOptions(): HealthcheckOptions {
     dotenv.config({ path: envFile });
   }
 
-  const port = process.env.PORT || "5100";
-  const configuredRunner = process.env.SANDBOX_RUNNER_URL || "http://127.0.0.1:6100";
+  const port = process.env.PORT || "7654";
+  const configuredRunner = process.env.SANDBOX_RUNNER_URL || "http://127.0.0.1:4401";
   const runnerUrl =
     takeValue(args, "--runner-url") ?? `${configuredRunner.replace(/\/$/, "")}/health`;
   const timeoutRaw =

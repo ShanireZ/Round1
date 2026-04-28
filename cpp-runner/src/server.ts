@@ -1,25 +1,25 @@
 /**
  * cpp-runner — C++ 编译执行沙箱 HTTP 服务
  *
- * 端口：6100
+ * 端口：4401
  * 端点：
  *   POST /run    — 编译并运行 C++ 代码
  *   GET  /health — 健康检查
  */
-import express from 'express';
-import { execFile } from 'node:child_process';
-import { writeFile, mkdir, rm } from 'node:fs/promises';
-import { randomUUID } from 'node:crypto';
-import path from 'node:path';
-import os from 'node:os';
+import express from "express";
+import { execFile } from "node:child_process";
+import { writeFile, mkdir, rm } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import path from "node:path";
+import os from "node:os";
 
 const app = express();
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: "1mb" }));
 
-const PORT = parseInt(process.env.PORT ?? '6100', 10);
-const COMPILE_TIMEOUT = parseInt(process.env.COMPILE_TIMEOUT_MS ?? '10000', 10);
-const RUN_TIMEOUT = parseInt(process.env.RUN_TIMEOUT_MS ?? '1000', 10);
-const WORK_DIR = process.env.WORK_DIR ?? path.join(os.tmpdir(), 'cpp-runner');
+const PORT = parseInt(process.env.PORT ?? "4401", 10);
+const COMPILE_TIMEOUT = parseInt(process.env.COMPILE_TIMEOUT_MS ?? "10000", 10);
+const RUN_TIMEOUT = parseInt(process.env.RUN_TIMEOUT_MS ?? "1000", 10);
+const WORK_DIR = process.env.WORK_DIR ?? path.join(os.tmpdir(), "cpp-runner");
 
 interface RunRequest {
   source: string;
@@ -39,29 +39,29 @@ interface RunResponse {
   wallMs: number;
 }
 
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', uptime: process.uptime() });
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok", uptime: process.uptime() });
 });
 
-app.post('/run', async (req, res) => {
+app.post("/run", async (req, res) => {
   const body = req.body as RunRequest;
   const start = performance.now();
 
-  if (!body.source || typeof body.source !== 'string') {
-    res.status(400).json({ error: 'source is required' });
+  if (!body.source || typeof body.source !== "string") {
+    res.status(400).json({ error: "source is required" });
     return;
   }
 
   // 安全检查 — 禁止危险系统调用
-  const forbidden = ['system(', 'exec(', 'popen(', 'fork(', '__asm__', 'asm('];
+  const forbidden = ["system(", "exec(", "popen(", "fork(", "__asm__", "asm("];
   for (const f of forbidden) {
     if (body.source.includes(f)) {
       res.json({
         compileOk: false,
         compileStderr: `Forbidden: source contains '${f}'`,
         runOk: null,
-        stdout: '',
-        stderr: '',
+        stdout: "",
+        stderr: "",
         exitCode: null,
         timedOut: false,
         peakMemoryKb: null,
@@ -76,15 +76,15 @@ app.post('/run', async (req, res) => {
 
   try {
     await mkdir(jobDir, { recursive: true });
-    const srcFile = path.join(jobDir, 'main.cpp');
-    const binFile = path.join(jobDir, 'main');
+    const srcFile = path.join(jobDir, "main.cpp");
+    const binFile = path.join(jobDir, "main");
 
-    await writeFile(srcFile, body.source, 'utf-8');
+    await writeFile(srcFile, body.source, "utf-8");
 
     // ── 编译阶段 ──────────────────────────────────────────
     const compileResult = await runProcess(
-      'g++',
-      ['-std=c++17', '-O2', '-Wall', '-o', binFile, srcFile],
+      "g++",
+      ["-std=c++17", "-O2", "-Wall", "-o", binFile, srcFile],
       { timeout: COMPILE_TIMEOUT, cwd: jobDir },
     );
 
@@ -93,8 +93,8 @@ app.post('/run', async (req, res) => {
         compileOk: false,
         compileStderr: compileResult.stderr,
         runOk: null,
-        stdout: '',
-        stderr: '',
+        stdout: "",
+        stderr: "",
         exitCode: null,
         timedOut: compileResult.timedOut,
         peakMemoryKb: null,
@@ -125,10 +125,10 @@ app.post('/run', async (req, res) => {
   } catch (err) {
     res.status(500).json({
       compileOk: false,
-      compileStderr: err instanceof Error ? err.message : 'internal error',
+      compileStderr: err instanceof Error ? err.message : "internal error",
       runOk: null,
-      stdout: '',
-      stderr: '',
+      stdout: "",
+      stderr: "",
       exitCode: null,
       timedOut: false,
       peakMemoryKb: null,
@@ -162,16 +162,20 @@ function runProcess(
         cwd: opts.cwd,
         timeout: opts.timeout,
         maxBuffer: 1024 * 1024, // 1MB
-        killSignal: 'SIGKILL',
+        killSignal: "SIGKILL",
       },
       (err, stdout, stderr) => {
         const timedOut = err?.killed === true;
-        const exitCode = timedOut ? -1 : (err ? (err as NodeJS.ErrnoException & { code?: number }).code ?? 1 : 0);
+        const exitCode = timedOut
+          ? -1
+          : err
+            ? ((err as NodeJS.ErrnoException & { code?: number }).code ?? 1)
+            : 0;
 
         resolve({
           stdout: stdout.slice(0, 64 * 1024), // 限制 64KB
           stderr: stderr.slice(0, 64 * 1024),
-          exitCode: typeof exitCode === 'number' ? exitCode : 1,
+          exitCode: typeof exitCode === "number" ? exitCode : 1,
           timedOut,
         });
       },

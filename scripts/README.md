@@ -43,7 +43,7 @@
 - verifyLlmTasks.ts：用合成 prompt 实跑 `generate` / `judge` 两类 LLM 任务，并回查 `llm_provider_logs` 是否记录 tokens、cost estimate、latency 与受控失败信息。
 - verifyQuestionBundleGuards.ts：构造临时候选题，验证规则去重可用 `DUPLICATE_JACCARD` 拦截近似题，并验证 LLM 判官可用 `JUDGE_REJECTED` 拦截答案不一致题。
 - verifyOfflineArtifactNames.ts：检查正式离线产物是否使用 runId 持久化命名，并校验 bundle JSON meta 与文件名一致；拒绝 `paper-packs.json`、`artifacts/llm-step3/probe*.json` 以及所有 `papers/<year>/*.json` 旧布局。
-- verifyUiTokenUsage.ts：检查 `client/src` 的 TS/TSX 是否重新引入原始 hex/rgb/hsl 颜色字面量；颜色应落到 design token、语义 Tailwind class 或共享 CSS utility。
+- verifyUiTokenUsage.ts：检查 `client/src` 的 TS/TSX 与非 token CSS 是否重新引入原始 hex/rgb/hsl 颜色字面量；颜色应落到 design token、语义 Tailwind class 或共享 CSS utility。
 - tests/verifyExamMappings.ts：校验共享考试映射是否包含关键批次。
 
 ## 初始化与维护类
@@ -88,7 +88,7 @@
 - 离线产物命名守卫：`npm run verify:offline-artifacts`
 - 首个管理员 dry-run：`ROUND1_INITIAL_ADMIN_PASSWORD='<临时强密码>' npm run init:admin -- --dry-run`
 - 生产健康检查：`npm run healthcheck -- --api-url https://round1.example.com/api/v1/health --frontend-url https://round1.example.com --pm2`
-- 离线内容环境健康检查：`npm run healthcheck -- --include-offline --runner-url http://127.0.0.1:6100/health --expect-content-worker`
+- 离线内容环境健康检查：`npm run healthcheck -- --include-offline --runner-url http://127.0.0.1:4401/health --expect-content-worker`
 
 ## Question bundle 来源口径
 

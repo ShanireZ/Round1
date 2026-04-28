@@ -199,7 +199,7 @@ dotenv.config({ path: findNearestEnvFile(path.resolve(import.meta.dirname, "..")
 
 const envSchema = z.object({
   // Service
-  PORT: z.coerce.number().default(5100),
+  PORT: z.coerce.number().default(7654),
   ROUND1_BIND_HOST: z.string().min(1).default("127.0.0.1"),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   ROUND1_PM2_API_INSTANCES: z.coerce.number().default(2),
@@ -315,7 +315,7 @@ const envSchema = z.object({
   ZAI_MODEL: llmProviderModelSchema.default(""),
 
   // Sandbox
-  SANDBOX_RUNNER_URL: z.string().default("http://127.0.0.1:6100"),
+  SANDBOX_RUNNER_URL: z.string().default("http://127.0.0.1:4401"),
   SANDBOX_RUNNER_IMAGE: z.string().default("cpp-runner:latest"),
   SANDBOX_RUNNER_RUNTIME: z.string().default("runsc"),
   SANDBOX_COMPILE_TIMEOUT_MS: z.coerce.number().default(10000),
@@ -324,7 +324,7 @@ const envSchema = z.object({
   SANDBOX_PIDS_LIMIT: z.coerce.number().default(64),
 
   // Redis / Worker
-  REDIS_URL: z.string().default("redis://127.0.0.1:6379"),
+  REDIS_URL: z.string().default("redis://127.0.0.1:4395"),
   ROUND1_WORKER_ENABLED: z.coerce.boolean().default(true),
   ROUND1_WORKER_CONCURRENCY: z.coerce.number().default(3),
 

@@ -172,7 +172,7 @@ docker run --rm --runtime=runsc --read-only --network=none \
 
 **开发（Win11 + WSL2 + Docker Desktop）**：
 
-- `SANDBOX_RUNNER_URL=http://127.0.0.1:6100`
+- `SANDBOX_RUNNER_URL=http://127.0.0.1:4401`
 - 健康检查失败 → stub 返回 `{ runOk: null, reason: 'runner_unavailable' }`，`sandbox_verified=false`，该题不得导入为 published
 
 ### 9.2 主进程 RPC 客户端
