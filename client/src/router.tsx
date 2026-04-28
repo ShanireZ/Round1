@@ -1,5 +1,6 @@
-import { Routes, Route, Navigate } from "react-router";
 import { lazy, Suspense } from "react";
+import { Navigate, Route, Routes } from "react-router";
+
 import { AppShell } from "./components/layout/AppShell";
 import { AuthLayout } from "./components/layout/AuthLayout";
 import { FocusLayout } from "./components/layout/FocusLayout";
@@ -13,6 +14,11 @@ const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
+const RegisterPage = lazy(() => import("./pages/auth/RegisterPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage"));
+const AuthCallbackPage = lazy(() => import("./pages/auth/AuthCallbackPage"));
+const CompleteProfilePage = lazy(() => import("./pages/auth/CompleteProfilePage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const AccountClassPage = lazy(() => import("./pages/account/AccountClassPage"));
 const AccountSecurityPage = lazy(() => import("./pages/account/AccountSecurityPage"));
 const CoachAssignments = lazy(() => import("./pages/coach/CoachAssignments"));
@@ -21,19 +27,7 @@ const CoachReport = lazy(() => import("./pages/coach/CoachReport"));
 const ExamNewPage = lazy(() => import("./pages/exams/ExamNew"));
 const ExamSessionPage = lazy(() => import("./pages/exams/ExamSession"));
 const ExamResultPage = lazy(() => import("./pages/exams/ExamResult"));
-
 const UIGallery = lazy(() => import("./pages/dev/UIGallery"));
-
-function PlaceholderPage({ title }: { title: string }) {
-  return (
-    <div className="flex min-h-[50vh] items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-foreground text-3xl font-bold">{title}</h1>
-        <p className="text-muted-foreground mt-2">页面开发中...</p>
-      </div>
-    </div>
-  );
-}
 
 function LoadingSpinner() {
   return (
@@ -49,9 +43,10 @@ export function AppRouter() {
       <Routes>
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<PlaceholderPage title="注册" />} />
-          <Route path="/forgot-password" element={<PlaceholderPage title="找回密码" />} />
-          <Route path="/auth/callback" element={<PlaceholderPage title="认证回调" />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/auth/complete-profile" element={<CompleteProfilePage />} />
         </Route>
 
         <Route element={<FocusLayout />}>
@@ -83,7 +78,14 @@ export function AppRouter() {
         </Route>
 
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<PlaceholderPage title="404 - 页面不存在" />} />
+        <Route
+          path="*"
+          element={
+            <AuthLayout>
+              <NotFoundPage />
+            </AuthLayout>
+          }
+        />
       </Routes>
     </Suspense>
   );

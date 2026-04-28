@@ -1,10 +1,18 @@
 # Remaining Unfinished Work Summary
 
+## 2026-04-28 Maintenance Addendum: Auth Entry UI
+
+- Closed from the UI/UX placeholder backlog in this slice: `/register`, `/forgot-password`, `/auth/callback`, `/auth/complete-profile`, and the wildcard not-found surface now route to real AuthLayout-compatible pages instead of generic placeholders.
+- Frontend auth helpers now consume the existing email registration, password reset, email-change callback, and OIDC complete-profile endpoints through CSRF-aware JSON requests. Password reset request copy keeps the anti-enumeration contract and completes from an email-link ticket.
+- A2UI BYOC coverage expanded with `Round1AuthEntrySnapshot`; the `/dev/ui-gallery` design surface includes auth-entry coverage through the guarded local payload factory rather than page-scoped long JSON.
+- Remaining UI/UX debt after this slice: passkey registration/delete browser UX still needs `@simplewebauthn/browser` and recent-auth flow polish; full-route screenshot, keyboard, mobile, reduced-motion, and print acceptance remains open.
+- Verification recorded for this slice: `npm run client:test -- src/lib/auth.test.ts src/lib/a2ui-design-surface.test.ts` passed outside the default sandbox after `spawn EPERM`, `npm run verify:ui-tokens` passed, `npm run build:client` passed, and the targeted Playwright auth-entry visual smoke passed with `ROUND1_PLAYWRIGHT_BROWSER_CHANNEL=chrome` after the bundled Chromium executable was missing. Full-route screenshot, keyboard, reduced-motion, and print acceptance remains open.
+
 ## 2026-04-28 Maintenance Addendum: Account/Class UI
 
 - Closed from the UI/UX placeholder backlog in this slice: `/account/class`, `/join`, and `/account/security` now route to real pages instead of generic placeholders.
 - New current-state APIs for those pages: `GET /api/v1/classes/mine` returns the signed-in user's joined classes with assignment counters, and `GET /api/v1/auth/security/summary` returns the account security snapshot consumed by the account page.
-- Remaining UI/UX debt after this slice: `/register`, `/forgot-password`, `/auth/callback`, and the not-found surface still need full real-page treatment; passkey registration/delete UX still needs a browser client dependency and recent-auth flow polish; full-route screenshot, keyboard, mobile, reduced-motion, and print acceptance remains open.
+- Subsequent Auth Entry UI work closed the `/register`, `/forgot-password`, `/auth/callback`, and not-found placeholder debt. Remaining UI/UX debt: passkey registration/delete UX still needs a browser client dependency and recent-auth flow polish; full-route screenshot, keyboard, mobile, reduced-motion, and print acceptance remains open.
 - Verification recorded for this slice: focused client tests, focused coach class API tests, `verify:ui-tokens`, `build:client`, and `build:server` passed. Browser screenshot acceptance was not rerun for these account pages in this maintenance slice, so the global visual-audit backlog remains open.
 
 > 生成日期：2026-04-26

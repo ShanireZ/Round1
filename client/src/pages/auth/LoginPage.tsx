@@ -9,24 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { fetchClientRuntimeConfig } from "@/lib/client-config";
-import { AuthClientError, passwordLogin } from "@/lib/auth";
+import { AuthClientError, passwordLogin, resolveAuthReturnTo } from "@/lib/auth";
 import { CPPLEARN_BANNER_SRC } from "@/lib/brand-assets";
-
-function resolveReturnTo(value: string | null): string {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/dashboard";
-  }
-
-  if (
-    value.startsWith("/login") ||
-    value.startsWith("/register") ||
-    value.startsWith("/forgot-password")
-  ) {
-    return "/dashboard";
-  }
-
-  return value;
-}
 
 function startExternalAuth(provider: "cpplearn" | "qq") {
   const target =
@@ -43,7 +27,7 @@ export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
-  const returnTo = resolveReturnTo(searchParams.get("returnTo"));
+  const returnTo = resolveAuthReturnTo(searchParams.get("returnTo"));
 
   const configQuery = useQuery({
     queryKey: ["client-runtime-config"],

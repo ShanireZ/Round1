@@ -416,6 +416,7 @@ export default function AccountSecurityPage() {
   );
   const securityPercent = Math.round((signalCount / 5) * 100);
   const oidcError = searchParams.get("error");
+  const emailChanged = searchParams.get("email") === "changed";
 
   if (sessionQuery.isPending || (session?.authenticated === true && securityQuery.isPending)) {
     return <LoadingAccountSecurity />;
@@ -479,6 +480,13 @@ export default function AccountSecurityPage() {
       {oidcError ? (
         <div className="border-destructive/50 bg-subtle/20 text-destructive rounded-[--radius-md] border p-3 text-sm">
           外部身份绑定未完成：{oidcError}
+        </div>
+      ) : null}
+
+      {emailChanged ? (
+        <div className="border-success/40 bg-subtle/20 text-success flex items-center gap-2 rounded-[--radius-md] border p-3 text-sm">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
+          邮箱更换已完成。
         </div>
       ) : null}
 

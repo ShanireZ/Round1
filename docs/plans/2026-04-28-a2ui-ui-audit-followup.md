@@ -1,5 +1,12 @@
 # A2UI and UI Drift Audit Follow-up
 
+## 2026-04-28 Maintenance Addendum: Auth Entry Surfaces
+
+- Auth entry UX landed: `/register`, `/forgot-password`, `/auth/callback`, `/auth/complete-profile`, and wildcard not-found now render real AuthLayout-compatible pages instead of placeholders.
+- Auth flow helpers landed: `client/src/lib/auth.ts` now includes CSRF-aware helpers for email registration challenges, registration tickets, password-reset tickets, email-change callbacks, and OIDC complete-profile tickets. Login, register, forgot-password, and callback pages share the same return-to guard instead of duplicating redirect policy.
+- A2UI BYOC coverage expanded: the Round1 custom catalog now includes `Round1AuthEntrySnapshot`, and the `/dev/ui-gallery` design surface binds the auth-entry slice through the guarded local A2UI payload factory.
+- Verification for this addendum: `npm run client:test -- src/lib/auth.test.ts src/lib/a2ui-design-surface.test.ts` passed outside the default sandbox after `spawn EPERM`, `npm run verify:ui-tokens` passed, `npm run build:client` passed, and the targeted Playwright auth-entry visual smoke passed with `ROUND1_PLAYWRIGHT_BROWSER_CHANNEL=chrome` after the bundled Chromium executable was missing. Full-route visual acceptance remains open.
+
 ## 2026-04-28 Maintenance Addendum: Account/Class Surfaces
 
 - Account/class UX landed: `/account/class` and `/join` now render a real `AccountClassPage` instead of a placeholder. The page reads `GET /api/v1/classes/mine`, joins through the existing `POST /api/v1/classes/join`, and supports both `/join?code=...` and `/join?invite=...` entry points.

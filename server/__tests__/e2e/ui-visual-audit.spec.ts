@@ -73,6 +73,37 @@ async function installCommonRoutes(page: Page, authenticated = true) {
   });
 }
 
+async function installAuthEntryRoutes(page: Page) {
+  await page.route("**/logo/cpplearn.jpg", async (route) => {
+    await route.fulfill({
+      path: path.join(process.cwd(), "client", "public", "logos", "C1.png"),
+      contentType: "image/png",
+      headers: {
+        "Cache-Control": "public, max-age=31536000, immutable",
+      },
+    });
+  });
+
+  await page.route("**/api/v1/config/client", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          turnstileSiteKey: "",
+          powEnabled: false,
+          powBaseDifficulty: 0,
+          autosaveIntervalSeconds: 180,
+          examDraftTtlMinutes: 1440,
+          availableExamTypes: ["CSP-J", "CSP-S"],
+          availableDifficulties: ["easy", "medium", "hard"],
+          enabledAuthProviders: ["password"],
+          authProviderPlaceholders: [],
+        },
+      },
+    });
+  });
+}
+
 async function waitForFonts(page: Page) {
   await page.evaluate(() => document.fonts.ready.then(() => true));
 }
@@ -335,6 +366,35 @@ test("ExamNew renders the config-driven catalog without desktop or mobile overfl
   await page.reload();
   await expect(page.getByTestId("exam-new-page")).toBeVisible();
   expect(await hasHorizontalOverflow(page)).toBe(false);
+  expect(problems).toEqual([]);
+});
+
+test("Auth entry surfaces render without desktop or mobile overflow", async ({ page }) => {
+  const problems = collectBrowserProblems(page);
+  await installCommonRoutes(page, false);
+  await installAuthEntryRoutes(page);
+
+  const routes = [
+    { path: "/register", testId: "register-page" },
+    { path: "/forgot-password", testId: "forgot-password-page" },
+    { path: "/auth/callback?error=access_denied", testId: "auth-callback-page" },
+    { path: "/auth/complete-profile", testId: "complete-profile-page" },
+    { path: "/visual-audit-missing-route", testId: "not-found-page" },
+  ];
+
+  for (const route of routes) {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto(route.path);
+    await expect(page.getByTestId(route.testId)).toBeVisible();
+    await waitForFonts(page);
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.reload();
+    await expect(page.getByTestId(route.testId)).toBeVisible();
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+  }
+
   expect(problems).toEqual([]);
 });
 

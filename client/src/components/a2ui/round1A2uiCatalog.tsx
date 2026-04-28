@@ -56,6 +56,15 @@ const Round1AccountSecuritySnapshotSchema = z.object({
   tone: z.enum(["stable", "risk", "improving"]).default("stable"),
 });
 
+const Round1AuthEntrySnapshotSchema = z.object({
+  title: DynamicStringSchema,
+  authPages: DynamicNumberSchema,
+  callbackReady: DynamicBooleanSchema,
+  notFoundReady: DynamicBooleanSchema,
+  completionRate: DynamicNumberSchema,
+  tone: z.enum(["stable", "risk", "improving"]).default("stable"),
+});
+
 const Round1CoachReportSnapshotApi = {
   name: "Round1CoachReportSnapshot",
   schema: Round1CoachReportSnapshotSchema as unknown as ReactComponentImplementation["schema"],
@@ -74,6 +83,11 @@ const Round1StudentClassSnapshotApi = {
 const Round1AccountSecuritySnapshotApi = {
   name: "Round1AccountSecuritySnapshot",
   schema: Round1AccountSecuritySnapshotSchema as unknown as ReactComponentImplementation["schema"],
+};
+
+const Round1AuthEntrySnapshotApi = {
+  name: "Round1AuthEntrySnapshot",
+  schema: Round1AuthEntrySnapshotSchema as unknown as ReactComponentImplementation["schema"],
 };
 
 const toneBadgeVariant = {
@@ -344,10 +358,68 @@ const Round1AccountSecuritySnapshot = createComponentImplementation(
   },
 );
 
+const Round1AuthEntrySnapshot = createComponentImplementation(
+  Round1AuthEntrySnapshotApi,
+  ({ props }) => {
+    const title = props.title ?? "AuthEntrypoints";
+    const authPages = props.authPages ?? 0;
+    const callbackReady = props.callbackReady ?? false;
+    const notFoundReady = props.notFoundReady ?? false;
+    const completionRate = props.completionRate ?? 0;
+    const tone = props.tone ?? "stable";
+    const safeTone = isRound1SnapshotTone(tone) ? tone : "stable";
+    const completionPercent = clampPercent(completionRate * 100);
+
+    return (
+      <Card variant="flat" className="a2ui-round1-snapshot border-border bg-card">
+        <CardContent className="space-y-4 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="text-muted-foreground text-xs">Round1 BYOC</div>
+              <div className="text-foreground mt-1 text-lg font-semibold">{title}</div>
+            </div>
+            <Badge variant={toneBadgeVariant[safeTone]}>{toneLabel[safeTone]}</Badge>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <div className="text-muted-foreground text-xs">入口页</div>
+              <div className="text-foreground mt-1 text-xl font-semibold tabular-nums">
+                {authPages}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground text-xs">Callback</div>
+              <div className="text-foreground mt-1 text-sm font-medium">
+                {callbackReady ? "ready" : "pending"}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground text-xs">404</div>
+              <div className="text-foreground mt-1 text-sm font-medium">
+                {notFoundReady ? "ready" : "pending"}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">AuthLayout coverage</span>
+              <span className="text-foreground tabular-nums">{completionPercent}%</span>
+            </div>
+            <Progress value={completionPercent} variant="exam" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  },
+);
+
 export const round1A2uiCatalog = new Catalog<ReactComponentImplementation>(ROUND1_A2UI_CATALOG_ID, [
   ...basicCatalog.components.values(),
   Round1CoachReportSnapshot,
   Round1CoachClassSnapshot,
   Round1StudentClassSnapshot,
   Round1AccountSecuritySnapshot,
+  Round1AuthEntrySnapshot,
 ]);

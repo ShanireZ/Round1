@@ -59,30 +59,31 @@ interface ClientConfig {
 
 ### 前端路由表
 
-| 路径                 | 页面组件              | 鉴权要求       |
-| -------------------- | --------------------- | -------------- |
-| `/login`             | `LoginPage`           | 仅未登录       |
-| `/register`          | `RegisterPage`        | 仅未登录       |
-| `/auth/callback`     | `AuthCallbackPage`    | —              |
-| `/forgot-password`   | `ForgotPasswordPage`  | 仅未登录       |
-| `/join`              | `JoinClassPage`       | 已登录         |
-| `/dashboard`         | `Dashboard`           | student+       |
-| `/exams/new`         | `ExamNew`             | student+       |
-| `/exams/:id`         | `Exam`                | student+       |
-| `/exams/:id/result`  | `ExamResult`          | student+       |
-| `/account/class`     | `AccountClassPage`    | 已登录         |
-| `/account/security`  | `AccountSecurityPage` | 已登录         |
-| `/coach/classes`     | `CoachClasses`        | coach+         |
-| `/coach/classes/:id` | `CoachClassDetail`    | coach+         |
-| `/coach/assignments` | `CoachAssignments`    | coach+         |
-| `/coach/report`      | `CoachReport`         | coach+         |
-| `/admin`             | `AdminDashboard`      | admin          |
-| `/admin/questions`   | `AdminQuestionPool`   | admin          |
-| `/admin/papers`      | `AdminPaperLibrary`   | admin          |
-| `/admin/imports`     | `AdminImports`        | admin          |
-| `/admin/settings`    | `AdminSettings`       | admin(step-up) |
-| `/admin/users`       | `AdminUsers`          | admin(step-up) |
-| `/admin/review`      | `AdminReview`         | admin          |
+| 路径                     | 页面组件              | 鉴权要求       |
+| ------------------------ | --------------------- | -------------- |
+| `/login`                 | `LoginPage`           | 仅未登录       |
+| `/register`              | `RegisterPage`        | 仅未登录       |
+| `/auth/callback`         | `AuthCallbackPage`    | —              |
+| `/auth/complete-profile` | `CompleteProfilePage` | —              |
+| `/forgot-password`       | `ForgotPasswordPage`  | 仅未登录       |
+| `/join`                  | `JoinClassPage`       | 已登录         |
+| `/dashboard`             | `Dashboard`           | student+       |
+| `/exams/new`             | `ExamNew`             | student+       |
+| `/exams/:id`             | `Exam`                | student+       |
+| `/exams/:id/result`      | `ExamResult`          | student+       |
+| `/account/class`         | `AccountClassPage`    | 已登录         |
+| `/account/security`      | `AccountSecurityPage` | 已登录         |
+| `/coach/classes`         | `CoachClasses`        | coach+         |
+| `/coach/classes/:id`     | `CoachClassDetail`    | coach+         |
+| `/coach/assignments`     | `CoachAssignments`    | coach+         |
+| `/coach/report`          | `CoachReport`         | coach+         |
+| `/admin`                 | `AdminDashboard`      | admin          |
+| `/admin/questions`       | `AdminQuestionPool`   | admin          |
+| `/admin/papers`          | `AdminPaperLibrary`   | admin          |
+| `/admin/imports`         | `AdminImports`        | admin          |
+| `/admin/settings`        | `AdminSettings`       | admin(step-up) |
+| `/admin/users`           | `AdminUsers`          | admin(step-up) |
+| `/admin/review`          | `AdminReview`         | admin          |
 
 ### API 路由总表
 

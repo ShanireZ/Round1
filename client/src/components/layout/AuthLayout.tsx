@@ -1,10 +1,15 @@
+import type { ReactNode } from "react";
 import { Outlet } from "react-router";
 import { Logo } from "@/components/brand/Logo";
 import { MeshGradient } from "@/components/brand/MeshGradient";
 import { NoiseTexture } from "@/components/brand/NoiseTexture";
 import { CPPLEARN_BANNER_SRC } from "@/lib/brand-assets";
 
-export function AuthLayout() {
+type AuthLayoutProps = {
+  children?: ReactNode;
+};
+
+export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="bg-background relative isolate min-h-dvh overflow-hidden">
       <MeshGradient variant="hero" />
@@ -47,7 +52,7 @@ export function AuthLayout() {
 
         <div className="flex items-center justify-center md:justify-end">
           <div className="border-border bg-surface w-full max-w-md rounded-[--radius-xl] border p-6 shadow-[--shadow-md] sm:p-8">
-            <Outlet />
+            {children ?? <Outlet />}
           </div>
         </div>
       </div>
