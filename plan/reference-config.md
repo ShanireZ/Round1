@@ -242,7 +242,10 @@ R2_ACCESS_KEY_ID=
 R2_SECRET_ACCESS_KEY=
 R2_API_TOKEN=
 R2_PUBLIC_BASE_URL=                    # 公开资源 origin；前端同源 /font/* 代理到 ${R2_PUBLIC_BASE_URL}/font/*
+CPPLEARN_FONT_PUBLIC_BASE_URL=          # 可选；CppLearn 字标源，前端同源 /font/HYShangWeiShouShuW.woff2 代理到该 origin
 
 ```
+
+字体当前需要在 `${R2_PUBLIC_BASE_URL}/font/` 下提供 Geist、HarmonyOS、Fraunces 与 Source Han Serif SC。CppLearn `HYShangWeiShouShuW.woff2` 可上传到同一 R2 `/font/`；若暂未迁入，可设置 `CPPLEARN_FONT_PUBLIC_BASE_URL=https://r2.betaoi.cc`，由同源 `/font/HYShangWeiShouShuW.woff2` 代理到该公开源。运行时页面仍只能引用同源 `/font/HYShangWeiShouShuW.woff2`。
 
 > 邮件 provider、LLM provider lane、worker 开关与默认值以 `config/env.ts` 为准；本节示例仅保留最常用部署骨架，避免与代码真源重复漂移。

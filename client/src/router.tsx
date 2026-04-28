@@ -12,6 +12,8 @@ const AdminReviewQueue = lazy(() => import("./pages/admin/AdminReviewQueue"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
+const CoachReport = lazy(() => import("./pages/coach/CoachReport"));
 const ExamSessionPage = lazy(() => import("./pages/exams/ExamSession"));
 const ExamResultPage = lazy(() => import("./pages/exams/ExamResult"));
 
@@ -44,7 +46,7 @@ export function AppRouter() {
       <Routes>
         {/* Auth pages — AuthLayout */}
         <Route element={<AuthLayout />}>
-          <Route path="/login" element={<PlaceholderPage title="登录" />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<PlaceholderPage title="注册" />} />
           <Route path="/forgot-password" element={<PlaceholderPage title="找回密码" />} />
           <Route path="/auth/callback" element={<PlaceholderPage title="认证回调" />} />
@@ -68,7 +70,7 @@ export function AppRouter() {
           <Route path="/coach/classes" element={<PlaceholderPage title="我的班级" />} />
           <Route path="/coach/classes/:id" element={<PlaceholderPage title="班级详情" />} />
           <Route path="/coach/assignments" element={<PlaceholderPage title="任务管理" />} />
-          <Route path="/coach/report" element={<PlaceholderPage title="班级报告" />} />
+          <Route path="/coach/report" element={<CoachReport />} />
 
           {/* Admin */}
           <Route path="/admin" element={<AdminDashboard />} />

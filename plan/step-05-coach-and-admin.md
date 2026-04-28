@@ -3,7 +3,7 @@
 > **前置依赖**：Step 01–04（DB、认证、题库、预制卷考试流程均已就绪）
 > **交付物**：教练完整班级管理流程、管理员题库/预制卷库/导入中心、真题审核与系统设置
 > **可验证 demo**：教练创建班级→生成班级码/邀请链接→学生入班→布置固定预制卷任务→查看热力图；管理员导入并发布题目与预制卷
-> **当前对齐说明（2026-04-28）**：当前运行时已经落地 Admin 内容库闭环的主要页面与接口。后端已挂载 `/api/v1/admin/questions`、`/api/v1/admin/questions/:id/references`、`/api/v1/admin/prebuilt-papers`、`/api/v1/admin/prebuilt-papers/:id/references`、`/api/v1/admin/import-batches`、`/api/v1/admin/question-reviews`、`/api/v1/admin/users`、`/api/v1/admin/settings` 及 publish/archive/copy-version/dry-run/apply 路由；前端 router 已接入 `/admin`、`/admin/questions`、`/admin/papers`、`/admin/imports`、`/admin/review`、`/admin/users`、`/admin/settings`，旧 `/admin/jobs`、`/admin/manual-gen` 已删除并进入 404 fallback；Admin 设置已通过 Redis `config:change` 通知 API/runtime worker/content worker 刷新运行时配置。教练后端 slice 已挂载 `/api/v1/classes/join`、`/api/v1/coach/**` 与 Admin 班级教练组管理接口，覆盖班级 CRUD、班级码、邀请链接、成员、owner/collaborator、多教练 owner 转让、固定预制卷 assignment 创建、基础 assignment-only 报表聚合；Coach 前端页面、热力图/题型统计/学生详情下钻仍属于后续目标契约。
+> **当前对齐说明（2026-04-28）**：当前运行时已经落地 Admin 内容库闭环的主要页面与接口。后端已挂载 `/api/v1/admin/questions`、`/api/v1/admin/questions/:id/references`、`/api/v1/admin/prebuilt-papers`、`/api/v1/admin/prebuilt-papers/:id/references`、`/api/v1/admin/import-batches`、`/api/v1/admin/question-reviews`、`/api/v1/admin/users`、`/api/v1/admin/settings` 及 publish/archive/copy-version/dry-run/apply 路由；前端 router 已接入 `/admin`、`/admin/questions`、`/admin/papers`、`/admin/imports`、`/admin/review`、`/admin/users`、`/admin/settings`，旧 `/admin/jobs`、`/admin/manual-gen` 已删除并进入 404 fallback；Admin 设置已通过 Redis `config:change` 通知 API/runtime worker/content worker 刷新运行时配置。教练后端 slice 已挂载 `/api/v1/classes/join`、`/api/v1/coach/**` 与 Admin 班级教练组管理接口，覆盖班级 CRUD、班级码、邀请链接、成员、owner/collaborator、多教练 owner 转让、固定预制卷 assignment 创建、assignment-only 报表聚合、群体热力图、题型统计、学生趋势与详情下钻所需 payload；前端 `/coach/report` 已接入班级报告页面。Coach 班级/任务列表页面与报表规模化性能验收仍属于后续目标契约。
 
 ---
 
@@ -220,8 +220,8 @@
 - [x] 归档班级拒绝加入（2026-04-28：新入班请求在服务端拒绝，已在班成员重复提交仍幂等成功。）
 - [x] 教练布置固定预制卷任务 + 学生单次作答（2026-04-28：`POST /api/v1/coach/assignments` 只接受 published prebuilt paper；`POST /api/v1/exams` 的 assignment 分支使用 assignment 绑定的 `prebuilt_paper_id`，并复用 `assignment_progress` 防止同一学生重复创建任务试卷。）
 - [x] 截止时间自动提交（2026-04-28：沿用 Phase 11 已落地的 `min(started_at + duration, assignment.due_at)` delayed job + 维护循环。）
-- [ ] 热力图展示正确（knowledge_point × student 矩阵，加载时间 < 3s）
-- [ ] 学生详情展示正确
+- [ ] 热力图展示正确（knowledge_point × student 矩阵，加载时间 < 3s）（2026-04-28：后端 payload 与前端热力图已落地；还需真实/规模化数据性能验收。）
+- [ ] 学生详情展示正确（2026-04-28：`/coach/report` 已接入右侧 Sheet 下钻、趋势、知识点和题型统计；还需浏览器视觉与真实数据验收。）
 - [x] Coach 只能看到自己班级的数据（2026-04-28：Coach 路由统一按 `class_coaches` 关系授权；Admin 全局教练组管理走 `/api/v1/admin/classes/:id/coaches/**` 独立入口。）
 - [x] Admin 题库 CRUD 流程完整
 - [x] Admin 预制卷库 CRUD 流程完整

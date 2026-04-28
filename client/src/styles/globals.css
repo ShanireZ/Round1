@@ -71,6 +71,15 @@
   font-display: swap;
 }
 
+/* HYShangWeiShouShuW — CppLearn / 贝塔问天录标志字 */
+@font-face {
+  font-family: "HYShangWeiShouShuW";
+  src: url("/font/HYShangWeiShouShuW.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ── Tailwind 4 @theme — 设计令牌注入 ── */
 @theme {
   /* Colors */
@@ -202,6 +211,10 @@
 
   .font-display {
     font-family: var(--font-display);
+  }
+
+  .font-cpplearn-logo {
+    font-family: var(--font-cpplearn-logo);
   }
 
   .font-ss01 {

@@ -16,6 +16,16 @@ export type AuthSession =
       user: AuthSessionUser;
     };
 
+export type PasswordLoginPayload = {
+  identifier: string;
+  password: string;
+  deviceIdHash?: string;
+};
+
+export type PasswordLoginResult = AuthSessionUser & {
+  passwordChangeRequired: boolean;
+};
+
 type ApiPayload<T> =
   | {
       success: true;
@@ -29,6 +39,8 @@ type ApiPayload<T> =
         details?: unknown;
       };
     };
+
+let csrfTokenPromise: Promise<string> | null = null;
 
 export class AuthClientError extends Error {
   code: string;
@@ -57,6 +69,27 @@ async function readApiPayload<T>(response: Response): Promise<T> {
   return payload.data;
 }
 
+export async function fetchAuthCsrfToken(): Promise<string> {
+  const response = await fetch("/api/v1/auth/csrf-token", {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const data = await readApiPayload<{ csrfToken: string }>(response);
+  return data.csrfToken;
+}
+
+export function getCachedAuthCsrfToken(): Promise<string> {
+  csrfTokenPromise ??= fetchAuthCsrfToken().catch((error) => {
+    csrfTokenPromise = null;
+    throw error;
+  });
+  return csrfTokenPromise;
+}
+
 export async function fetchAuthSession(): Promise<AuthSession> {
   const response = await fetch("/api/v1/auth/session", {
     method: "GET",
@@ -67,4 +100,19 @@ export async function fetchAuthSession(): Promise<AuthSession> {
   });
 
   return readApiPayload<AuthSession>(response);
+}
+
+export async function passwordLogin(payload: PasswordLoginPayload): Promise<PasswordLoginResult> {
+  const csrfToken = await getCachedAuthCsrfToken();
+  const response = await fetch("/api/v1/auth/login/password", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": csrfToken,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return readApiPayload<PasswordLoginResult>(response);
 }

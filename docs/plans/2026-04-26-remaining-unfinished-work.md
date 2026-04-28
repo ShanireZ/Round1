@@ -70,7 +70,7 @@
 - [x] `assignment_progress` 补完整 `pending -> in_progress -> completed / missed` 状态流。（2026-04-28：创建 assignment 时给当前 student 成员写 pending；startAttempt/finalizer/维护循环已推进 in_progress/completed/missed。）
 - [x] 教练报表只包含班级 assignment attempts，不混入学生自练数据。（2026-04-28：`GET /api/v1/coach/report/:classId` 从 `assignments -> assignment_progress -> attempts` 聚合。）
 - [x] coach/admin 以学生身份体验答题的数据需在班级统计中排除。（2026-04-28：基础报表聚合显式过滤 `users.role = 'student'`。）
-- [ ] 群体热力图、题型统计、学生详情、学生趋势与下钻 Sheet 需要落地和性能验收。
+- [ ] 群体热力图、题型统计、学生详情、学生趋势与下钻 Sheet 需要落地和性能验收。（2026-04-28：后端 `GET /api/v1/coach/report/:classId` 已追加 heatmap、questionTypeStats、students、student trend；前端 `/coach/report` 已从占位页切到真实页面，支持班级选择、群体热力图、题型统计、学生详情 Sheet、CSV 导出和打印入口。仍需用真实/规模化数据做浏览器性能验收并确认加载时间 < 3s。）
 - [x] Coach 权限边界验收：只能看到自己参与班级的数据。（2026-04-28：后端 Coach API 均通过 `class_coaches` 关系授权；Coach 前端页面接入与视觉验收仍随下一条 UI 项推进。）
 
 ### 5. API 与配置契约补齐
@@ -102,6 +102,7 @@
 - [ ] UI 设计系统中的 tokens、字体托管、组件库、布局、品牌资产、打印样式与 `/dev/ui-gallery` 仍需按当前代码状态逐项验收。（2026-04-27：已新增 `npm run verify:ui-tokens`，阻断 `client/src` TS/TSX 中重新引入原始 hex/rgb/hsl magic color；截图、键盘、移动端、reduced motion 与打印视觉验收仍需继续收口。2026-04-28：已安装 Google A2UI，并在 `/dev/ui-gallery` 增加 A2UI token bridge 示例，用于后续 agent UI/UX 设计辅助验收；现有 Radix/shadcn 生产组件作为受控辅助实现。同日已扩展 `verify:ui-tokens` 阻断 JSX inline style、`color-mix()` 与 `min-height:auto` / `min-width:auto` 兼容告警回归，并将字体运行时源收口到公开 R2 `/font/`。）
 - [ ] AI 智能建议文案模板为 v2 事项；MVP 可保持静态规则或占位。
 - [ ] QQ 互联登录视觉需随 feature flag 流程一起补齐。
+- [x] CppLearn 登录视觉需补齐：`贝塔问天录` 字标使用 HYShangWeiShouShuW 字体，字体通过 `/font/HYShangWeiShouShuW.woff2` 同源代理加载。（2026-04-28：`/login` 已接入真实 AuthLayout 分栏与 CppLearn OIDC provider 入口，`client/public/fonts/README.md` 记录该字体对象来源。）
 - [ ] i18n 多语言为未来扩展项。
 - [ ] 字体当前设计为 Cloudflare R2 自托管，后续可迁国内 CDN。
 - [ ] ExamResult 揭晓动画、CoachReport 下钻、Dashboard 雷达/热力图、打印 A4 样式仍需 Playwright/视觉验收覆盖。

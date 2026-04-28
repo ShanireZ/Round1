@@ -46,7 +46,12 @@ export function createApp(): Express {
           frameSrc: ["'self'", "https://challenges.cloudflare.com"],
           connectSrc: ["'self'"],
           imgSrc: ["'self'", "data:", ...(env.R2_PUBLIC_BASE_URL ? [env.R2_PUBLIC_BASE_URL] : [])],
-          fontSrc: ["'self'", "data:", ...(env.R2_PUBLIC_BASE_URL ? [env.R2_PUBLIC_BASE_URL] : [])],
+          fontSrc: [
+            "'self'",
+            "data:",
+            ...(env.R2_PUBLIC_BASE_URL ? [env.R2_PUBLIC_BASE_URL] : []),
+            ...(env.CPPLEARN_FONT_PUBLIC_BASE_URL ? [env.CPPLEARN_FONT_PUBLIC_BASE_URL] : []),
+          ],
           styleSrc: ["'self'", "'unsafe-inline'"],
         },
       },

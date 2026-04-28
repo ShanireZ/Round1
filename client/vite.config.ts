@@ -34,6 +34,7 @@ function readRootEnvValue(name: string) {
 }
 
 const r2PublicBaseUrl = readRootEnvValue("R2_PUBLIC_BASE_URL");
+const cpplearnFontPublicBaseUrl = readRootEnvValue("CPPLEARN_FONT_PUBLIC_BASE_URL");
 
 if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
   httpsConfig = {
@@ -65,6 +66,15 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      ...(cpplearnFontPublicBaseUrl
+        ? {
+            "^/font/HYShangWeiShouShuW\\.woff2$": {
+              target: cpplearnFontPublicBaseUrl,
+              changeOrigin: true,
+              secure: true,
+            },
+          }
+        : {}),
       ...(r2PublicBaseUrl
         ? {
             "/font": {

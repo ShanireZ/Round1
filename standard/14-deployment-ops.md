@@ -208,7 +208,7 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 
 - Caddy 负责 TLS 和反代。
 - API 与静态资源同源部署时无需 CORS。
-- 前端字体使用同源 `/font/*`，Caddy/Vite 必须把该路径代理到 `R2_PUBLIC_BASE_URL/font/*`；不要让浏览器直接跨域请求 R2 字体，除非 R2 已配置正确 CORS。
+- 前端字体使用同源 `/font/*`，Caddy/Vite 必须把通用字体代理到 `R2_PUBLIC_BASE_URL/font/*`；CppLearn `HYShangWeiShouShuW.woff2` 可通过 `CPPLEARN_FONT_PUBLIC_BASE_URL` 单独代理到公开源。不要让浏览器直接跨域请求字体，除非资源源站已配置正确 CORS。
 - `client/dist` 静态资源应有长期缓存；HTML 不应长期缓存。
 - Cloudflare Full Strict 上线前验证。
 

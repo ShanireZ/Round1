@@ -157,6 +157,22 @@ export const AssignmentSummarySchema = registry.register(
   }),
 );
 
+const KpReportSummarySchema = z.object({
+  kpId: z.string(),
+  total: z.number(),
+  correct: z.number(),
+  accuracy: z.number(),
+});
+
+const QuestionTypeReportSummarySchema = z.object({
+  questionType: z.string(),
+  total: z.number(),
+  correct: z.number(),
+  score: z.number(),
+  maxScore: z.number(),
+  accuracy: z.number(),
+});
+
 export const ClassReportSchema = registry.register(
   "ClassReport",
   z.object({
@@ -178,6 +194,43 @@ export const ClassReportSchema = registry.register(
         completed: z.number(),
         missed: z.number(),
         averageScore: z.number(),
+      }),
+    ),
+    heatmap: z.object({
+      knowledgePointIds: z.array(z.string()),
+      students: z.array(
+        z.object({
+          userId: UuidSchema,
+          displayName: z.string(),
+          values: z.array(KpReportSummarySchema),
+        }),
+      ),
+    }),
+    questionTypeStats: z.array(QuestionTypeReportSummarySchema),
+    students: z.array(
+      z.object({
+        userId: UuidSchema,
+        username: z.string(),
+        displayName: z.string(),
+        pending: z.number(),
+        inProgress: z.number(),
+        completed: z.number(),
+        missed: z.number(),
+        averageScore: z.number(),
+        latestSubmittedAt: z.date().nullable().or(z.string().nullable()),
+        kpStats: z.array(KpReportSummarySchema),
+        questionTypeStats: z.array(QuestionTypeReportSummarySchema),
+        trend: z.array(
+          z.object({
+            assignmentId: UuidSchema,
+            title: z.string(),
+            status: z.string(),
+            dueAt: z.date().nullable().or(z.string().nullable()),
+            progressStatus: z.string(),
+            score: z.number().nullable(),
+            submittedAt: z.date().nullable().or(z.string().nullable()),
+          }),
+        ),
       }),
     ),
   }),

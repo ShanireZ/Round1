@@ -15,7 +15,7 @@
 - A2UI basic catalog 覆盖扩展：`/dev/ui-gallery` 示例 surface 现覆盖 Text/Card/Row/Column/List/Tabs/Divider/Icon、TextField、CheckBox、Slider、DateTimeInput、ChoicePicker、data model binding 与 Button action context；目录由已安装 `basicCatalog` 动态生成，便于以后 agent UI/UX 设计先在 Round1 token bridge 中验收。
 - A2UI payload 防硬编码：本地示例 surface 从页面长 JSON 收口到 `createRound1A2uiMessages()` factory；渲染前校验 installed `basicCatalog` schema、组件 id 唯一性、引用完整性、action allowlist 和复杂度上限。该校验已捕获并修正 `Slider minValue/maxValue`、`ChoicePicker selections`、`TextField textFieldType`、非法 Icon 名称与动态目录 id 冲突等 drift。
 - Edge Tools 告警收口：`Dashboard.tsx` 的成绩柱状图不再使用 JSX inline `style`，改为受控高度 class；`globals.css`、`a2ui.css` 与 Admin Dashboard 不再使用 `color-mix()`，改为 `tokens.css` 中的静态兼容 token；`a2ui.css` 的 checkbox 不再使用 `min-height: auto`，改为明确 `width`/`height`。
-- 字体源收口：`globals.css` 的全部 `@font-face` 与 `index.html` preload 已改为同源 `/font/*.woff2`；Vite dev server 通过 `R2_PUBLIC_BASE_URL` 代理该路径到 R2 `/font/`，生产 Caddy 也必须保留同源 `/font/*` 代理，避免浏览器直接跨域请求 R2 字体触发 CORS error。`client/public/fonts` 保留为本地缓存说明，不再作为运行时默认源。
+- 字体源收口：`globals.css` 的全部 `@font-face` 与 `index.html` preload 已改为同源 `/font/*.woff2`；Vite dev server 通过 `R2_PUBLIC_BASE_URL` 代理通用字体到 R2 `/font/`，CppLearn 字标可通过 `CPPLEARN_FONT_PUBLIC_BASE_URL` 单独代理，生产 Caddy 也必须保留同源 `/font/*` 代理，避免浏览器直接跨域请求字体触发 CORS error。`client/public/fonts` 保留为本地缓存说明，不再作为运行时默认源。
 - CSP 收口：`server/app.ts` 的 Helmet CSP 已把 `R2_PUBLIC_BASE_URL` 同步加入 `font-src`，避免后续 API/同源静态部署时远端字体被策略拦截。
 - 学生导航漂移：`client/src/lib/navigation.ts` 的主导航从早期 `/questions`、`/exams`、`/analytics`、`/settings` 占位入口收口为当前 UI/UX 契约：`/dashboard`、`/exams/new`、`/account/class`、`/account/security`。
 - 认证回跳路径漂移：CppLearn OIDC bind flow 从旧 `/settings/security` 改为当前 `/account/security`，避免成功绑定后跳到未登记前端入口。
@@ -29,6 +29,9 @@
 - A2UI data model guard 收紧：`updateDataModel.path` 必须是 `/draft` 或 `/draft/*`，不再接受 `/drafty` 这类仅共享字符串前缀的路径。
 - A2UI 引用完整性收口：动态 `List.children.componentId` 模板也纳入引用校验，避免 agent payload 在列表模板缺失时进入渲染阶段才出错。
 - A2UI 浏览器错误防护：`A2uiDesignSurface` 不再假设 action context 一定存在；surface 初始化异常会渲染 inline error，不让 React effect 异常升级成 console error / pageerror。
+- CoachReport 落地推进：`GET /api/v1/coach/report/:classId` 从基础 assignment 汇总扩展为 `heatmap`、`questionTypeStats`、`students` 与每个学生的趋势/知识点/题型详情；`/coach/report` 前端从占位页切换为真实页面，支持班级选择、群体热力图、题型统计、学生行键盘下钻 Sheet、CSV 导出与打印入口。
+- 登录视觉漂移收口：`/login` 从占位页切换为 AuthLayout 分栏登录页，接入密码登录、运行时 provider feature flag、CppLearn OIDC 入口与 QQ 互联入口显示条件。
+- CppLearn 字标收口：新增 `HYShangWeiShouShuW` 字体声明与 `--font-cpplearn-logo` token，`贝塔问天录` 仅用于 CppLearn 身份入口；字体运行时仍走 `/font/HYShangWeiShouShuW.woff2` 同源代理，`client/public/fonts/README.md` 记录公开 R2 来源；浏览器复查发现当前 `R2_PUBLIC_BASE_URL=https://r2.round1.cc` 尚未包含该对象，因此补入 `CPPLEARN_FONT_PUBLIC_BASE_URL` 配置化代理，避免直接在组件写死外部 URL。
 
 ## 文档同步
 
@@ -38,26 +41,29 @@
 - `standard/04-ui-ux.md`、`standard/14-deployment-ops.md`、`standard/15-performance-accessibility-print.md` 与 `plan/uiux_plan.md` 已把同源 `/font/` 到 R2 `/font/` 的字体代理纳入当前契约。
 - `standard/04-ui-ux.md` 与 `plan/uiux_plan.md` 已把 A2UI token bridge 纳入 `/dev/ui-gallery` / 交付物口径。
 - `standard/04-ui-ux.md`、`standard/05-frontend-engineering.md` 与 `plan/uiux_plan.md` 已补 A2UI media/modal 覆盖、`functionCall` 禁止、data model 路径边界和动态 List 模板引用校验口径。
-- `plan/reference-config.md` 已补 R2 环境变量示例，说明前端字体依赖 `R2_PUBLIC_BASE_URL/font/*.woff2`。
+- `standard/04-ui-ux.md` 与 `plan/uiux_plan.md` 已补 CppLearn OIDC `贝塔问天录` 字标的使用边界：只用于身份入口，不替代 Round1 主品牌。
+- `plan/reference-config.md` 已补 R2 环境变量示例，说明前端字体依赖 `R2_PUBLIC_BASE_URL/font/*.woff2`，CppLearn 字标可临时依赖 `CPPLEARN_FONT_PUBLIC_BASE_URL/font/HYShangWeiShouShuW.woff2` 作为同源代理后端。
 - `plan/reference-api.md` 已补 `/account/class` 前端路由表项。
+- `plan/step-05-coach-and-admin.md` 与 `docs/plans/2026-04-26-remaining-unfinished-work.md` 已记录 CoachReport payload/frontend 落地现状，同时保留真实/规模化数据性能验收缺口。
 - `docs/plans/2026-04-26-remaining-unfinished-work.md` 已记录 A2UI 本轮安装与视觉验收边界，UI/UX 截图、移动端、键盘、reduced motion 与打印视觉验收仍未整体关闭。
 
 ## 验证记录
 
 - `npm run lint`：通过。
-- `npm run verify:ui-tokens`：通过，`verifyUiTokenUsage: ok (76 files checked)`，现已实际扫描 CSS 并阻断 `min-height:auto` / `min-width:auto` 兼容告警回归。
+- `npm run verify:ui-tokens`：通过，`verifyUiTokenUsage: ok (80 files checked)`，现已实际扫描 CSS 并阻断 `min-height:auto` / `min-width:auto` 兼容告警回归。
 - `npm run client:test -- client/src/lib/a2ui-design-surface.test.ts`：通过，1 file / 8 tests。
+- `npm run client:test -- src/lib/coach.test.ts src/lib/navigation.test.ts src/lib/client-config.test.ts`：通过，3 files / 9 tests。
 - `npm run verify:offline-artifacts`：通过，`verifyOfflineArtifactNames: ok (137 files checked)`。
 - `npm run test -- server/__tests__/safeReturnTo.test.ts`：通过，18 tests。
-- `npm run test -- server/__tests__/coach-classes.integration.test.ts`：修复 UUID fixture 后通过，6 tests。
+- `npm run test -- server/__tests__/coach-classes.integration.test.ts`：通过，7 tests，覆盖班级报告热力图、题型统计、学生详情与趋势 payload。
 - `npm run test`：通过，29 files / 217 tests。
 - `npm run client:test`：通过，7 files / 42 tests。
 - `npm run build:server`：通过。
 - `npm run build:client`：通过。
-- Browser check：`https://127.0.0.1:5175/dev/ui-gallery#plate-11` headless Chromium 桌面视口中 A2UI surface 真实渲染，console badCount=0（0 errors / 0 warnings / 0 pageerror）。2026-04-28 维护追加后复查仍为 0 warnings / 0 errors，并截图确认 `Surface ready`、media/modal 预览入口和 token bridge 卡片渲染。
+- Browser check：`https://127.0.0.1:5175/dev/ui-gallery#plate-11` headless Chromium 桌面视口中 A2UI surface 真实渲染，console badCount=0（0 errors / 0 warnings / 0 pageerror）。2026-04-28 维护追加后，`https://127.0.0.1:5177/login` 首次复查发现 `HYShangWeiShouShuW.woff2` 404，已补 `CPPLEARN_FONT_PUBLIC_BASE_URL` 同源代理并复查为 0 warnings / 0 errors；`/coach/report` 首次复查发现未登录 401 resource error，已补 `/api/v1/auth/session` 前置守卫并复查桌面/移动均为 0 warnings / 0 errors；`/dev/ui-gallery#plate-11` 维护追加后复查仍为 0 warnings / 0 errors。
 
 ## 剩余风险
 
 - A2UI 当前只接入 `/dev/ui-gallery` 示例 surface，尚未连接真实 agent/MCP payload；后续若接入外部 agent 消息，必须先补 payload 校验、权限边界、复杂度限制与 XSS/DoS 防护。Markdown 已接入 sanitizer renderer，但外部 payload 的字段级校验与执行限制仍不能省略。
-- 字体代理当前按本机 `.env` 的公开 `R2_PUBLIC_BASE_URL=https://r2.round1.cc` 收口；若部署环境变更公开域名，必须同步 Vite/Caddy `/font/*` 代理、CSP 和本文件记录，避免字体源再次漂移。
+- 字体代理当前按本机 `.env` 的公开 `R2_PUBLIC_BASE_URL=https://r2.round1.cc` 与 `CPPLEARN_FONT_PUBLIC_BASE_URL=https://r2.betaoi.cc` 收口；若部署环境变更公开域名，必须同步 Vite/Caddy `/font/*` 代理、CSP 和本文件记录，避免字体源再次漂移。
 - UI/UX 仍保留全路由截图、移动端、键盘、reduced motion 与打印视觉验收债务，本轮只收口 A2UI bridge、R2 字体源、浏览器告警 guard 与发现的导航/回跳漂移。

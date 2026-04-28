@@ -337,6 +337,7 @@ const envSchema = z.object({
   R2_SECRET_ACCESS_KEY: z.string().default(""),
   R2_API_TOKEN: z.string().default(""),
   R2_PUBLIC_BASE_URL: z.string().default(""),
+  CPPLEARN_FONT_PUBLIC_BASE_URL: z.string().default(""),
 
   // Sentry
   SENTRY_DSN: z.string().default(""),

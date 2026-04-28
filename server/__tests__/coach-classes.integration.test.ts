@@ -280,4 +280,72 @@ describe("coach class api", () => {
       assignedStudents: 1,
     });
   });
+
+  it("returns heatmap, question type stats, student detail, and trend data for class reports", async () => {
+    queuedResults.push(
+      [{ id: classId, archivedAt: null, coachRole: "collaborator" }],
+      [
+        {
+          assignmentId,
+          title: "第 1 周模拟",
+          assignmentStatus: "assigned",
+          dueAt: new Date("2026-04-30T00:00:00.000Z"),
+          userId: "55555555-5555-4555-8555-555555555555",
+          username: "student-a",
+          displayName: "学生 A",
+          progressStatus: "completed",
+          score: 80,
+          submittedAt: new Date("2026-04-28T00:00:00.000Z"),
+          perSectionJson: {
+            single_choice: { total: 10, correct: 8, score: 40, maxScore: 50 },
+          },
+          perPrimaryKpJson: {
+            "101": { total: 5, correct: 4, accuracy: 0.8 },
+          },
+        },
+        {
+          assignmentId,
+          title: "第 1 周模拟",
+          assignmentStatus: "assigned",
+          dueAt: new Date("2026-04-30T00:00:00.000Z"),
+          userId: "66666666-6666-4666-8666-666666666666",
+          username: "student-b",
+          displayName: "学生 B",
+          progressStatus: "missed",
+          score: null,
+          submittedAt: null,
+          perSectionJson: null,
+          perPrimaryKpJson: null,
+        },
+      ],
+    );
+
+    const app = createTestApp("coach");
+    const res = await supertest(app).get(`/api/v1/coach/report/${classId}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.totals).toMatchObject({
+      students: 2,
+      completed: 1,
+      missed: 1,
+      averageScore: 80,
+    });
+    expect(res.body.data.heatmap.knowledgePointIds).toEqual(["101"]);
+    expect(res.body.data.questionTypeStats).toMatchObject([
+      {
+        questionType: "single_choice",
+        total: 10,
+        correct: 8,
+        score: 40,
+        maxScore: 50,
+        accuracy: 0.8,
+      },
+    ]);
+    expect(res.body.data.students[0]).toMatchObject({
+      displayName: "学生 A",
+      averageScore: 80,
+      kpStats: [{ kpId: "101", total: 5, correct: 4, accuracy: 0.8 }],
+      trend: [{ assignmentId, score: 80, progressStatus: "completed" }],
+    });
+  });
 });

@@ -12,7 +12,7 @@
 ## 前端性能
 
 - 字体使用 `font-display: swap`。
-- 字体默认通过同源 `/font/` 代理从公开 `R2_PUBLIC_BASE_URL/font/` 加载；Geist/HarmonyOS 关键字重可 preload；Fraunces/思源宋体 Heavy 只在 Hero/ExamResult/AuthLayout 场景加载。
+- 字体默认通过同源 `/font/` 代理从公开 `R2_PUBLIC_BASE_URL/font/` 加载；CppLearn 字标可由 `CPPLEARN_FONT_PUBLIC_BASE_URL` 作为同源代理后端；Geist/HarmonyOS 关键字重可 preload；Fraunces/思源宋体 Heavy 只在 Hero/ExamResult/AuthLayout 场景加载。
 - 图表库按需 lazy load。
 - 大型 JSON、报告、题库详情不得一次性渲染全量；列表分页或虚拟化。
 - 代码块和题目渲染器要避免输入时全页重渲染。

@@ -67,6 +67,40 @@ type AssignmentUpdateBody = {
   dueAt?: string;
 };
 
+type NumericSummary = {
+  total: number;
+  correct: number;
+};
+
+type QuestionTypeSummary = NumericSummary & {
+  score: number;
+  maxScore: number;
+};
+
+type StudentReportSummary = {
+  userId: string;
+  username: string;
+  displayName: string;
+  pending: number;
+  inProgress: number;
+  completed: number;
+  missed: number;
+  scoreSum: number;
+  scored: number;
+  latestSubmittedAt: Date | null;
+  kpStats: Map<string, NumericSummary>;
+  questionTypeStats: Map<string, QuestionTypeSummary>;
+  trend: Array<{
+    assignmentId: string;
+    title: string;
+    status: string;
+    dueAt: Date | null;
+    progressStatus: string;
+    score: number | null;
+    submittedAt: Date | null;
+  }>;
+};
+
 function isUniqueViolation(err: unknown): boolean {
   return (
     typeof err === "object" &&
@@ -130,6 +164,68 @@ function toClassSummary(
     ...(row.memberCount !== undefined ? { memberCount: Number(row.memberCount) } : {}),
     ...(row.coachCount !== undefined ? { coachCount: Number(row.coachCount) } : {}),
   };
+}
+
+function normalizeRecord(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function readNumberField(record: Record<string, unknown>, key: string): number {
+  const value = record[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function mergeKpStats(target: Map<string, NumericSummary>, value: unknown): void {
+  for (const [kpId, rawSummary] of Object.entries(normalizeRecord(value))) {
+    const summary = normalizeRecord(rawSummary);
+    const current = target.get(kpId) ?? { total: 0, correct: 0 };
+    current.total += readNumberField(summary, "total");
+    current.correct += readNumberField(summary, "correct");
+    target.set(kpId, current);
+  }
+}
+
+function mergeQuestionTypeStats(target: Map<string, QuestionTypeSummary>, value: unknown): void {
+  for (const [questionType, rawSummary] of Object.entries(normalizeRecord(value))) {
+    const summary = normalizeRecord(rawSummary);
+    const current = target.get(questionType) ?? {
+      total: 0,
+      correct: 0,
+      score: 0,
+      maxScore: 0,
+    };
+    current.total += readNumberField(summary, "total");
+    current.correct += readNumberField(summary, "correct");
+    current.score += readNumberField(summary, "score");
+    current.maxScore += readNumberField(summary, "maxScore");
+    target.set(questionType, current);
+  }
+}
+
+function toAccuracy(summary: NumericSummary): number {
+  return summary.total === 0 ? 0 : summary.correct / summary.total;
+}
+
+function toQuestionTypeAccuracy(summary: QuestionTypeSummary): number {
+  return summary.maxScore === 0 ? toAccuracy(summary) : summary.score / summary.maxScore;
+}
+
+function sortKpIds(left: string, right: string): number {
+  const leftNumber = Number(left);
+  const rightNumber = Number(right);
+  if (Number.isFinite(leftNumber) && Number.isFinite(rightNumber)) {
+    return leftNumber - rightNumber;
+  }
+
+  return left.localeCompare(right);
+}
+
+function sortNullableDates(left: Date | null, right: Date | null): number {
+  return (left?.getTime() ?? 0) - (right?.getTime() ?? 0);
 }
 
 async function generateUniqueJoinCode(): Promise<string> {
@@ -1197,8 +1293,13 @@ export async function getClassReport(actor: ActorContext, classId: string) {
       assignmentStatus: assignments.status,
       dueAt: assignments.dueAt,
       userId: assignmentProgress.userId,
+      username: users.username,
+      displayName: users.displayName,
       progressStatus: assignmentProgress.status,
       score: attempts.score,
+      submittedAt: attempts.submittedAt,
+      perSectionJson: attempts.perSectionJson,
+      perPrimaryKpJson: attempts.perPrimaryKpJson,
     })
     .from(assignments)
     .innerJoin(assignmentProgress, eq(assignmentProgress.assignmentId, assignments.id))
@@ -1228,6 +1329,9 @@ export async function getClassReport(actor: ActorContext, classId: string) {
     scoreSum: 0,
     scored: 0,
   };
+  const studentMap = new Map<string, StudentReportSummary>();
+  const kpStats = new Map<string, NumericSummary>();
+  const questionTypeStats = new Map<string, QuestionTypeSummary>();
 
   for (const row of rows) {
     totals.students.add(row.userId);
@@ -1259,7 +1363,98 @@ export async function getClassReport(actor: ActorContext, classId: string) {
     }
 
     assignmentMap.set(row.assignmentId, summary);
+
+    const student = studentMap.get(row.userId) ?? {
+      userId: row.userId,
+      username: row.username,
+      displayName: row.displayName,
+      pending: 0,
+      inProgress: 0,
+      completed: 0,
+      missed: 0,
+      scoreSum: 0,
+      scored: 0,
+      latestSubmittedAt: null,
+      kpStats: new Map<string, NumericSummary>(),
+      questionTypeStats: new Map<string, QuestionTypeSummary>(),
+      trend: [],
+    };
+
+    if (row.progressStatus === "pending") student.pending += 1;
+    if (row.progressStatus === "in_progress") student.inProgress += 1;
+    if (row.progressStatus === "completed") student.completed += 1;
+    if (row.progressStatus === "missed") student.missed += 1;
+    if (typeof row.score === "number") {
+      student.scoreSum += row.score;
+      student.scored += 1;
+    }
+    if (
+      row.submittedAt &&
+      (!student.latestSubmittedAt || row.submittedAt.getTime() > student.latestSubmittedAt.getTime())
+    ) {
+      student.latestSubmittedAt = row.submittedAt;
+    }
+
+    mergeKpStats(student.kpStats, row.perPrimaryKpJson);
+    mergeKpStats(kpStats, row.perPrimaryKpJson);
+    mergeQuestionTypeStats(student.questionTypeStats, row.perSectionJson);
+    mergeQuestionTypeStats(questionTypeStats, row.perSectionJson);
+    student.trend.push({
+      assignmentId: row.assignmentId,
+      title: row.title,
+      status: row.assignmentStatus,
+      dueAt: row.dueAt,
+      progressStatus: row.progressStatus,
+      score: typeof row.score === "number" ? row.score : null,
+      submittedAt: row.submittedAt ?? null,
+    });
+
+    studentMap.set(row.userId, student);
   }
+
+  const sortedKpIds = Array.from(kpStats.keys()).sort(sortKpIds);
+  const students = Array.from(studentMap.values())
+    .sort((left, right) => left.displayName.localeCompare(right.displayName, "zh-CN"))
+    .map((student) => ({
+      userId: student.userId,
+      username: student.username,
+      displayName: student.displayName,
+      pending: student.pending,
+      inProgress: student.inProgress,
+      completed: student.completed,
+      missed: student.missed,
+      averageScore: student.scored === 0 ? 0 : student.scoreSum / student.scored,
+      latestSubmittedAt: student.latestSubmittedAt,
+      kpStats: Array.from(student.kpStats.entries())
+        .sort(([left], [right]) => sortKpIds(left, right))
+        .map(([kpId, summary]) => ({
+          kpId,
+          total: summary.total,
+          correct: summary.correct,
+          accuracy: toAccuracy(summary),
+        })),
+      questionTypeStats: Array.from(student.questionTypeStats.entries()).map(
+        ([questionType, summary]) => ({
+          questionType,
+          total: summary.total,
+          correct: summary.correct,
+          score: summary.score,
+          maxScore: summary.maxScore,
+          accuracy: toQuestionTypeAccuracy(summary),
+        }),
+      ),
+      trend: student.trend
+        .sort((left, right) => sortNullableDates(left.dueAt, right.dueAt))
+        .map((entry) => ({
+          assignmentId: entry.assignmentId,
+          title: entry.title,
+          status: entry.status,
+          dueAt: entry.dueAt,
+          progressStatus: entry.progressStatus,
+          score: entry.score,
+          submittedAt: entry.submittedAt,
+        })),
+    }));
 
   return {
     classId,
@@ -1280,6 +1475,31 @@ export async function getClassReport(actor: ActorContext, classId: string) {
       missed: assignment.missed,
       averageScore: assignment.scored === 0 ? 0 : assignment.scoreSum / assignment.scored,
     })),
+    heatmap: {
+      knowledgePointIds: sortedKpIds,
+      students: students.map((student) => ({
+        userId: student.userId,
+        displayName: student.displayName,
+        values: sortedKpIds.map((kpId) => {
+          const summary = student.kpStats.find((item) => item.kpId === kpId) ?? {
+            kpId,
+            total: 0,
+            correct: 0,
+            accuracy: 0,
+          };
+          return summary;
+        }),
+      })),
+    },
+    questionTypeStats: Array.from(questionTypeStats.entries()).map(([questionType, summary]) => ({
+      questionType,
+      total: summary.total,
+      correct: summary.correct,
+      score: summary.score,
+      maxScore: summary.maxScore,
+      accuracy: toQuestionTypeAccuracy(summary),
+    })),
+    students,
   };
 }
 
