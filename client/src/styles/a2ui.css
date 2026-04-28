@@ -38,7 +38,7 @@
   --a2ui-line-height-body: 1.6;
   --a2ui-card-border: var(--border-hair) solid var(--color-border);
   --a2ui-card-border-radius: var(--radius-lg);
-  --a2ui-card-background: color-mix(in oklab, var(--color-surface) 96%, var(--color-background));
+  --a2ui-card-background: var(--color-a2ui-card-background);
   --a2ui-card-box-shadow: none;
   --a2ui-card-margin: 0;
   --a2ui-card-padding: var(--space-6);
@@ -75,11 +75,21 @@
   transform: translateY(-1px);
 }
 
-.round1-a2ui-surface input:not([type="range"]),
+.round1-a2ui-surface input:not([type="range"]):not([type="checkbox"]),
 .round1-a2ui-surface textarea {
+  width: 100%;
   min-height: 2.5rem;
+  border: var(--border-hair) solid var(--color-border);
   border-radius: var(--radius-md);
+  background: var(--color-card);
+  color: var(--color-foreground);
   font-family: var(--font-sans);
+  padding: var(--space-2) var(--space-3);
+}
+
+.round1-a2ui-surface input[type="checkbox"] {
+  min-height: auto;
+  accent-color: var(--color-primary);
 }
 
 .round1-a2ui-surface input[type="range"] {

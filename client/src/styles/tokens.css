@@ -5,41 +5,48 @@
 
 :root {
   /* ── 品牌色 ── */
-  --color-primary: #E63946;
-  --color-primary-hover: #DC2E3B;
-  --color-primary-foreground: #FFFFFF;
+  --color-primary: #e63946;
+  --color-primary-hover: #dc2e3b;
+  --color-primary-foreground: #ffffff;
 
   /* ── 语义色 ── */
-  --color-destructive: #C8102E;
-  --color-destructive-foreground: #FFFFFF;
-  --color-warning: #F59E0B;
-  --color-warning-foreground: #451A03;
+  --color-destructive: #c8102e;
+  --color-destructive-foreground: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #451a03;
   --color-success: #059669;
-  --color-success-foreground: #FFFFFF;
-  --color-info: #0284C7;
-  --color-info-foreground: #FFFFFF;
-  --color-code-background: #0B1120;
-  --color-code-foreground: #F1F5F9;
+  --color-success-foreground: #ffffff;
+  --color-info: #0284c7;
+  --color-info-foreground: #ffffff;
+  --color-code-background: #0b1120;
+  --color-code-foreground: #f1f5f9;
+  --color-primary-soft-alpha: rgba(230, 57, 70, 0.13);
+  --color-primary-sheen-alpha: rgba(230, 57, 70, 0.08);
+  --color-primary-aura-alpha: rgba(230, 57, 70, 0.36);
+  --color-warning-soft-alpha: rgba(245, 158, 11, 0.08);
+  --color-warning-aura-alpha: rgba(245, 158, 11, 0.16);
+  --color-destructive-soft-alpha: rgba(200, 16, 46, 0.08);
 
   /* ── 数据可视化色板（色盲友好） ── */
-  --color-chart-1: #E63946;
-  --color-chart-2: #0EA5E9;
-  --color-chart-3: #10B981;
-  --color-chart-4: #F59E0B;
-  --color-chart-5: #8B5CF6;
-  --color-chart-6: #64748B;
+  --color-chart-1: #e63946;
+  --color-chart-2: #0ea5e9;
+  --color-chart-3: #10b981;
+  --color-chart-4: #f59e0b;
+  --color-chart-5: #8b5cf6;
+  --color-chart-6: #64748b;
 
   /* ── 热力图色阶 ── */
-  --color-heatmap-0: #FEF9F8;
-  --color-heatmap-1: #FDEEEF;
-  --color-heatmap-2: #F8B5BC;
-  --color-heatmap-3: #E63946;
-  --color-heatmap-4: #8B1538;
+  --color-heatmap-0: #fef9f8;
+  --color-heatmap-1: #fdeeef;
+  --color-heatmap-2: #f8b5bc;
+  --color-heatmap-3: #e63946;
+  --color-heatmap-4: #8b1538;
 
   /* ── 字体栈 ── */
-  --font-sans: 'Geist', 'HarmonyOS Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, 'HarmonyOS Sans SC', monospace;
-  --font-serif: 'Fraunces', 'Source Han Serif SC', Georgia, serif;
+  --font-sans:
+    "Geist", "HarmonyOS Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "HarmonyOS Sans SC", monospace;
+  --font-serif: "Fraunces", "Source Han Serif SC", Georgia, serif;
   --font-display: var(--font-serif);
 
   /* ── 圆角 ── */
@@ -117,66 +124,80 @@
 /* ── Light 主题（默认） ── */
 :root,
 html:not(.dark) {
-  --color-background: #FEF9F8;
-  --color-surface: #FFFFFF;
-  --color-subtle: #FAF3F2;
-  --color-border: #F0E4E2;
-  --color-divider: #E4D6D3;
-  --color-muted: #94A3B8;
-  --color-muted-foreground: #64748B;
+  --color-background: #fef9f8;
+  --color-surface: #ffffff;
+  --color-subtle: #faf3f2;
+  --color-border: #f0e4e2;
+  --color-divider: #e4d6d3;
+  --color-muted: #94a3b8;
+  --color-muted-foreground: #64748b;
   --color-foreground-secondary: #475569;
-  --color-foreground: #0F172A;
+  --color-foreground: #0f172a;
   --color-ink: #020617;
-  --color-accent-wash: #FDEEEF;
+  --color-accent-wash: #fdeeef;
 
-  --color-card: #FFFFFF;
-  --color-card-foreground: #0F172A;
-  --color-popover: #FFFFFF;
-  --color-popover-foreground: #0F172A;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0f172a;
 
-  --color-secondary: #FAF3F2;
-  --color-secondary-foreground: #0F172A;
+  --color-secondary: #faf3f2;
+  --color-secondary-foreground: #0f172a;
 
-  --color-input: #F0E4E2;
-  --color-ring: #E63946;
+  --color-input: #f0e4e2;
+  --color-ring: #e63946;
+  --color-grid-line-alpha: rgba(228, 214, 211, 0.6);
+  --color-ceremony-surface: rgba(254, 249, 248, 0.96);
+  --color-a2ui-card-background: #fffcfb;
+  --color-admin-hero-accent: #fdeeef;
 
   /* Light 语义色微调 */
-  --color-destructive: #C8102E;
-  --color-warning: #F59E0B;
+  --color-destructive: #c8102e;
+  --color-warning: #f59e0b;
   --color-success: #059669;
-  --color-info: #0284C7;
+  --color-info: #0284c7;
 }
 
 /* ── Dark 主题 ── */
 html.dark {
-  --color-background: #0A0E1A;
+  --color-background: #0a0e1a;
   --color-surface: #121826;
-  --color-subtle: #1E293B;
-  --color-border: #2D3748;
+  --color-subtle: #1e293b;
+  --color-border: #2d3748;
   --color-divider: #475569;
-  --color-muted: #64748B;
-  --color-muted-foreground: #94A3B8;
-  --color-foreground-secondary: #CBD5E1;
-  --color-foreground: #F1F5F9;
-  --color-ink: #FFFFFF;
+  --color-muted: #64748b;
+  --color-muted-foreground: #94a3b8;
+  --color-foreground-secondary: #cbd5e1;
+  --color-foreground: #f1f5f9;
+  --color-ink: #ffffff;
   --color-accent-wash: rgba(230, 57, 70, 0.1);
 
   --color-card: #121826;
-  --color-card-foreground: #F1F5F9;
+  --color-card-foreground: #f1f5f9;
   --color-popover: #121826;
-  --color-popover-foreground: #F1F5F9;
+  --color-popover-foreground: #f1f5f9;
 
-  --color-secondary: #1E293B;
-  --color-secondary-foreground: #F1F5F9;
+  --color-secondary: #1e293b;
+  --color-secondary-foreground: #f1f5f9;
 
-  --color-input: #2D3748;
-  --color-ring: #E63946;
+  --color-input: #2d3748;
+  --color-ring: #e63946;
+  --color-primary-soft-alpha: rgba(230, 57, 70, 0.18);
+  --color-primary-sheen-alpha: rgba(230, 57, 70, 0.12);
+  --color-primary-aura-alpha: rgba(230, 57, 70, 0.28);
+  --color-warning-soft-alpha: rgba(251, 191, 36, 0.14);
+  --color-warning-aura-alpha: rgba(251, 191, 36, 0.16);
+  --color-destructive-soft-alpha: rgba(225, 29, 72, 0.16);
+  --color-grid-line-alpha: rgba(71, 85, 105, 0.6);
+  --color-ceremony-surface: rgba(2, 6, 23, 0.96);
+  --color-a2ui-card-background: #151d2c;
+  --color-admin-hero-accent: rgba(230, 57, 70, 0.14);
 
   /* Dark 语义色微调 */
-  --color-destructive: #E11D48;
-  --color-warning: #FBBF24;
-  --color-success: #10B981;
-  --color-info: #0EA5E9;
+  --color-destructive: #e11d48;
+  --color-warning: #fbbf24;
+  --color-success: #10b981;
+  --color-info: #0ea5e9;
 
   /* Dark 阴影调整 — 降低不透明度 + outer glow */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -194,8 +215,12 @@ html.dark {
 }
 
 /* ── 代码连字关闭 ── */
-code, pre, .font-mono {
-  font-feature-settings: "liga" 0, "calt" 0;
+code,
+pre,
+.font-mono {
+  font-feature-settings:
+    "liga" 0,
+    "calt" 0;
 }
 
 /* ── Reduced Motion ── */

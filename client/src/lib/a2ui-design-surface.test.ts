@@ -23,6 +23,11 @@ describe("Round1 A2UI design surface", () => {
 
     const surface = processor.model.getSurface(ROUND1_A2UI_SURFACE_ID);
     expect(surface?.componentsModel.get("root")?.type).toBe("Card");
+    expect(surface?.componentsModel.get("note")?.type).toBe("TextField");
+    expect(surface?.componentsModel.get("due-at")?.type).toBe("DateTimeInput");
+    expect(surface?.componentsModel.get("enabled")?.type).toBe("CheckBox");
+    expect(surface?.componentsModel.get("checkpoint-list")?.type).toBe("List");
     expect(surface?.dataModel.get("/draft/page")).toBe("CoachReport");
+    expect(surface?.dataModel.get("/draft/enabled")).toBe(true);
   });
 });

@@ -4,10 +4,10 @@
 
 Round1 采用“两层架构”：
 
-| 层级 | 组件 | 说明 |
-| --- | --- | --- |
-| 生产运行时 | Caddy + Express API + Redis + Postgres | 在线考试、后台 API、静态资源；不部署 cpp-runner |
-| 离线内容环境 | generate / judge / cpp-runner / content worker | 内容生产、校验、bundle 构建；不要求 24x7 |
+| 层级         | 组件                                           | 说明                                            |
+| ------------ | ---------------------------------------------- | ----------------------------------------------- |
+| 生产运行时   | Caddy + Express API + Redis + Postgres         | 在线考试、后台 API、静态资源；不部署 cpp-runner |
+| 离线内容环境 | generate / judge / cpp-runner / content worker | 内容生产、校验、bundle 构建；不要求 24x7        |
 
 生产 runtime worker 只允许承载考试会话支持型任务，例如 auto-submit；不得消费 generation 或 sandbox verify。
 
@@ -46,13 +46,13 @@ readiness review 可以写在 PR、发布记录或 `docs/plans/YYYY-MM-DD-releas
 
 不同变更使用不同上线强度，不把所有发布都做成重流程，也不把高风险发布当普通改动。
 
-| 类型 | 示例 | 必须额外确认 |
-| --- | --- | --- |
-| docs-only | standard/plan/README | 链接、路径、术语 |
-| frontend-only | 页面、组件、样式 | build、视觉/响应式、可达性、打印相关页面 |
-| api-compatible | 新增可选字段、新只读接口 | OpenAPI、integration test、前端兼容 |
-| stateful | migration、状态机、权限、导入 apply | 备份、回滚/恢复、审计、并发测试 |
-| ops/security | Caddy、PM2、cookie、CSP、secret | smoke、回滚、访问控制、监控观察 |
+| 类型           | 示例                                | 必须额外确认                             |
+| -------------- | ----------------------------------- | ---------------------------------------- |
+| docs-only      | standard/plan/README                | 链接、路径、术语                         |
+| frontend-only  | 页面、组件、样式                    | build、视觉/响应式、可达性、打印相关页面 |
+| api-compatible | 新增可选字段、新只读接口            | OpenAPI、integration test、前端兼容      |
+| stateful       | migration、状态机、权限、导入 apply | 备份、回滚/恢复、审计、并发测试          |
+| ops/security   | Caddy、PM2、cookie、CSP、secret     | smoke、回滚、访问控制、监控观察          |
 
 stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值守时段上线。
 
@@ -84,12 +84,12 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 
 发布后的观察窗口按风险决定：
 
-| 风险 | 观察重点 | 建议时长 |
-| --- | --- | --- |
-| frontend-only | 首屏、关键路由、Sentry 前端异常、静态资源 404 | 15-30 分钟 |
-| api-compatible | 5xx、p95、错误码分布、前端调用失败 | 30-60 分钟 |
-| stateful | migration、autosave/submit、import/admin audit、DB locks | 1-2 小时 |
-| ops/security | 登录、cookie/CSRF、TLS/CSP、邮件/OIDC、Sentry release | 1-2 小时 |
+| 风险           | 观察重点                                                 | 建议时长   |
+| -------------- | -------------------------------------------------------- | ---------- |
+| frontend-only  | 首屏、关键路由、Sentry 前端异常、静态资源 404            | 15-30 分钟 |
+| api-compatible | 5xx、p95、错误码分布、前端调用失败                       | 30-60 分钟 |
+| stateful       | migration、autosave/submit、import/admin audit、DB locks | 1-2 小时   |
+| ops/security   | 登录、cookie/CSRF、TLS/CSP、邮件/OIDC、Sentry release    | 1-2 小时   |
 
 观察窗口内发现 Page/SEV1 信号，优先止损和回滚，不继续叠加修复性发布，除非已确认回滚风险更高。
 
@@ -102,14 +102,14 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 
 ## 回滚策略矩阵
 
-| 变更 | 首选回滚 | 注意 |
-| --- | --- | --- |
-| 前端静态资源 | 回滚到上一构建或 tag | HTML 不长期缓存，避免旧 JS 找不到资源 |
-| 后端代码 | 回滚 commit/tag 并重启 | 确认新 DB 字段是否仍被旧代码忽略 |
-| 可逆 migration | 执行 down 或补偿 migration | 先备份，先在临时库演练 |
-| 不可逆 migration | 从备份恢复或写补偿脚本 | 必须先评估数据损失窗口 |
-| 配置变更 | 恢复 env/app_settings | 记录生效时间，验证 Redis config refresh |
-| 内容导入 | archive/copy-version，不硬删历史 | 保留 import batch 和 checksum |
+| 变更             | 首选回滚                         | 注意                                    |
+| ---------------- | -------------------------------- | --------------------------------------- |
+| 前端静态资源     | 回滚到上一构建或 tag             | HTML 不长期缓存，避免旧 JS 找不到资源   |
+| 后端代码         | 回滚 commit/tag 并重启           | 确认新 DB 字段是否仍被旧代码忽略        |
+| 可逆 migration   | 执行 down 或补偿 migration       | 先备份，先在临时库演练                  |
+| 不可逆 migration | 从备份恢复或写补偿脚本           | 必须先评估数据损失窗口                  |
+| 配置变更         | 恢复 env/app_settings            | 记录生效时间，验证 Redis config refresh |
+| 内容导入         | archive/copy-version，不硬删历史 | 保留 import batch 和 checksum           |
 
 ## 数据库备份
 
@@ -197,17 +197,18 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 
 ## 环境矩阵
 
-| 环境 | 组件 | 说明 |
-| --- | --- | --- |
-| local | client/server/Redis/Postgres 可本机 | 本地 HTTPS，便于 cookie/OIDC 测试 |
-| test | 测试 DB/Redis 或 mock | 不依赖真实外部服务 |
-| offline-content | scripts/contentWorker/cpp-runner/LLM | 生成和校验内容 |
-| production-runtime | Caddy/API/Redis/Postgres | 在线服务，不跑内容生成 |
+| 环境               | 组件                                 | 说明                              |
+| ------------------ | ------------------------------------ | --------------------------------- |
+| local              | client/server/Redis/Postgres 可本机  | 本地 HTTPS，便于 cookie/OIDC 测试 |
+| test               | 测试 DB/Redis 或 mock                | 不依赖真实外部服务                |
+| offline-content    | scripts/contentWorker/cpp-runner/LLM | 生成和校验内容                    |
+| production-runtime | Caddy/API/Redis/Postgres             | 在线服务，不跑内容生成            |
 
 ## Caddy 与静态资源
 
 - Caddy 负责 TLS 和反代。
 - API 与静态资源同源部署时无需 CORS。
+- 前端字体使用同源 `/font/*`，Caddy/Vite 必须把该路径代理到 `R2_PUBLIC_BASE_URL/font/*`；不要让浏览器直接跨域请求 R2 字体，除非 R2 已配置正确 CORS。
 - `client/dist` 静态资源应有长期缓存；HTML 不应长期缓存。
 - Cloudflare Full Strict 上线前验证。
 

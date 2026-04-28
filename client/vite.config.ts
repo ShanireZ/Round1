@@ -11,6 +11,30 @@ const keyPath = path.resolve(rootDir, "../certs/dev-key.pem");
 
 let httpsConfig: { cert: Buffer; key: Buffer } | undefined;
 
+function readRootEnvValue(name: string) {
+  const envPath = path.resolve(rootDir, "../.env");
+  if (!fs.existsSync(envPath)) {
+    return "";
+  }
+
+  const line = fs
+    .readFileSync(envPath, "utf8")
+    .split(/\r?\n/)
+    .find((entry) => entry.trimStart().startsWith(`${name}=`));
+
+  if (!line) {
+    return "";
+  }
+
+  return line
+    .slice(line.indexOf("=") + 1)
+    .trim()
+    .replace(/^['"]|['"]$/g, "")
+    .replace(/\/+$/, "");
+}
+
+const r2PublicBaseUrl = readRootEnvValue("R2_PUBLIC_BASE_URL");
+
 if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
   httpsConfig = {
     cert: fs.readFileSync(certPath),
@@ -41,6 +65,15 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      ...(r2PublicBaseUrl
+        ? {
+            "/font": {
+              target: r2PublicBaseUrl,
+              changeOrigin: true,
+              secure: true,
+            },
+          }
+        : {}),
     },
   },
 });

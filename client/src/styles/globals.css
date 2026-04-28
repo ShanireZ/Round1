@@ -13,7 +13,7 @@
 /* Geist Sans (Variable) */
 @font-face {
   font-family: "Geist";
-  src: url("/fonts/GeistVF.woff2") format("woff2");
+  src: url("/font/GeistVF.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -22,7 +22,7 @@
 /* Geist Mono (Variable) */
 @font-face {
   font-family: "Geist Mono";
-  src: url("/fonts/GeistMonoVF.woff2") format("woff2");
+  src: url("/font/GeistMonoVF.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -31,7 +31,7 @@
 /* Fraunces (Variable) — Display 字体，懒加载 */
 @font-face {
   font-family: "Fraunces";
-  src: url("/fonts/Fraunces-Variable.woff2") format("woff2");
+  src: url("/font/Fraunces-Variable.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -40,7 +40,7 @@
 /* HarmonyOS Sans SC — 中文正文 */
 @font-face {
   font-family: "HarmonyOS Sans SC";
-  src: url("/fonts/HarmonyOS_Sans_SC_Regular.woff2") format("woff2");
+  src: url("/font/HarmonyOS_Sans_SC_Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -48,7 +48,7 @@
 
 @font-face {
   font-family: "HarmonyOS Sans SC";
-  src: url("/fonts/HarmonyOS_Sans_SC_Medium.woff2") format("woff2");
+  src: url("/font/HarmonyOS_Sans_SC_Medium.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -56,7 +56,7 @@
 
 @font-face {
   font-family: "HarmonyOS Sans SC";
-  src: url("/fonts/HarmonyOS_Sans_SC_Bold.woff2") format("woff2");
+  src: url("/font/HarmonyOS_Sans_SC_Bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -65,7 +65,7 @@
 /* Source Han Serif SC Heavy — 中文 Display，懒加载 */
 @font-face {
   font-family: "Source Han Serif SC";
-  src: url("/fonts/SourceHanSerifSC-Heavy.woff2") format("woff2");
+  src: url("/font/SourceHanSerifSC-Heavy.woff2") format("woff2");
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -259,87 +259,51 @@
 
   .exam-session-hero-surface {
     background-image:
-      radial-gradient(
-        circle at top left,
-        color-mix(in oklab, var(--color-primary) 13%, transparent),
-        transparent 34%
-      ),
-      linear-gradient(
-        180deg,
-        color-mix(in oklab, var(--color-surface) 98%, var(--color-background)),
-        color-mix(in oklab, var(--color-background) 82%, var(--color-surface))
-      );
+      radial-gradient(circle at top left, var(--color-primary-soft-alpha), transparent 34%),
+      linear-gradient(180deg, var(--color-card), var(--color-background));
   }
 
   .exam-session-warning-surface {
-    background-image: linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--color-warning) 8%, transparent),
-      color-mix(in oklab, var(--color-surface) 98%, var(--color-background))
-    );
+    background-image: linear-gradient(180deg, var(--color-warning-soft-alpha), var(--color-card));
   }
 
   .exam-session-error-surface {
     background-image: linear-gradient(
       180deg,
-      color-mix(in oklab, var(--color-destructive) 8%, transparent),
-      color-mix(in oklab, var(--color-surface) 98%, var(--color-background))
+      var(--color-destructive-soft-alpha),
+      var(--color-card)
     );
   }
 
   .exam-result-hero-surface {
     background-image:
-      radial-gradient(
-        circle at top left,
-        color-mix(in oklab, var(--color-primary) 14%, transparent),
-        transparent 36%
-      ),
-      linear-gradient(
-        135deg,
-        color-mix(in oklab, var(--color-surface) 98%, var(--color-background)),
-        color-mix(in oklab, var(--color-background) 84%, var(--color-surface))
-      );
+      radial-gradient(circle at top left, var(--color-primary-soft-alpha), transparent 36%),
+      linear-gradient(135deg, var(--color-card), var(--color-background));
   }
 
   .exam-result-hero-sheen {
     background-image: linear-gradient(
       120deg,
       transparent 0%,
-      color-mix(in oklab, var(--color-primary) 8%, transparent) 48%,
+      var(--color-primary-sheen-alpha) 48%,
       transparent 100%
     );
   }
 
   .exam-result-ceremony-surface {
-    background-color: color-mix(in oklab, var(--color-background) 96%, black);
+    background-color: var(--color-ceremony-surface);
   }
 
   .exam-result-ceremony-aura {
     background-image:
-      radial-gradient(
-        circle at top,
-        color-mix(in oklab, var(--color-primary) 36%, transparent),
-        transparent 30%
-      ),
-      radial-gradient(
-        circle at bottom right,
-        color-mix(in oklab, var(--color-warning) 16%, transparent),
-        transparent 32%
-      );
+      radial-gradient(circle at top, var(--color-primary-aura-alpha), transparent 30%),
+      radial-gradient(circle at bottom right, var(--color-warning-aura-alpha), transparent 32%);
   }
 
   .ui-gallery-grid-backdrop {
     background-image:
-      linear-gradient(
-        to right,
-        color-mix(in oklab, var(--color-border) 60%, transparent) 1px,
-        transparent 1px
-      ),
-      linear-gradient(
-        to bottom,
-        color-mix(in oklab, var(--color-border) 60%, transparent) 1px,
-        transparent 1px
-      );
+      linear-gradient(to right, var(--color-grid-line-alpha) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--color-grid-line-alpha) 1px, transparent 1px);
     background-size: 64px 64px;
     -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 40%, transparent 80%);
     mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 40%, transparent 80%);
@@ -366,6 +330,15 @@
     background-color: var(--color-primary);
     border-radius: inherit;
     transition: width var(--duration-slow) var(--ease-standard);
+  }
+
+  .admin-dashboard-hero {
+    background-image: linear-gradient(
+      135deg,
+      var(--color-surface),
+      var(--color-card),
+      var(--color-admin-hero-accent)
+    );
   }
 
   /* Focus 可见性 — 品牌红 glow 环 */

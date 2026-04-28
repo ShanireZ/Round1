@@ -73,6 +73,8 @@
 - 所有设计决策进入 `tokens.css` 或 `globals.css` 的 token，不在页面里散落 magic color。
 - Tailwind 类用于布局与状态组合；复杂变体优先用 `class-variance-authority`。
 - 使用 `cn()` 合并类名，避免手写字符串拼接导致冲突。
+- 禁止在 JSX 中使用 `style` prop 写动态样式；动态视觉值必须收敛为 token、预定义 class、CSS utility 或受控组件属性，避免 Microsoft Edge Tools `no-inline-styles` 告警。
+- 禁止在生产 CSS/TSX 中使用 `color-mix()`，直到浏览器支持基线明确放宽；渐变和透明混色应落到 `tokens.css` 的静态 token，避免 Chrome < 111 兼容告警。
 - 不使用 viewport-width 驱动字体大小。
 - 卡片圆角默认遵守 token：按钮/输入 8px，卡片/Dialog 12px。
 - Dark 模式必须通过 token 支持，不得写只适配 light 的硬编码颜色。
@@ -108,6 +110,8 @@
 
 A2UI 只能作为 agent-facing UI renderer 或设计辅助 surface 使用，用于接收声明式 agent payload 并在本地验收。A2UI surface 必须通过 Round1 token bridge 继承 `tokens.css`，不得替换 Radix/shadcn primitive、页面 IA、品牌色、字体系统或生产核心流程组件。A2UI markdown 内容必须使用官方 sanitizer renderer 或等价的 HTML sanitizer，不得直接渲染未净化的 agent markdown/HTML。
 
+当前 `/dev/ui-gallery` A2UI 示例必须覆盖 surface lifecycle、data model binding、Text/Card/Row/Column/List、Button action、TextField、CheckBox、Slider、DateTimeInput、ChoicePicker 和 sanitizer markdown 渲染。若后续接入真实 agent/MCP payload，必须先补字段级 schema 校验、复杂度限制、权限边界和 XSS/DoS 防护。
+
 ## 前端验证
 
 常规前端变更至少运行：
@@ -122,14 +126,14 @@ npm run build --workspace=client
 
 ## 分层结构
 
-| 层 | 职责 | 禁止 |
-| --- | --- | --- |
-| `pages/` | 路由页面、数据编排、页面级布局 | 放可复用业务算法 |
-| `components/ui/` | shadcn/Radix primitive | 调业务 API |
-| `components/layout/` | AppShell/Auth/Focus/Ceremony | 放页面业务状态 |
-| `components/brand/` | Logo、Mesh、Backdrop、Noise | 临时页面文案 |
-| `lib/` | API client、纯函数、领域 helper | React 组件 |
-| `styles/` | tokens/globals/print | 页面私有 magic color |
+| 层                   | 职责                            | 禁止                 |
+| -------------------- | ------------------------------- | -------------------- |
+| `pages/`             | 路由页面、数据编排、页面级布局  | 放可复用业务算法     |
+| `components/ui/`     | shadcn/Radix primitive          | 调业务 API           |
+| `components/layout/` | AppShell/Auth/Focus/Ceremony    | 放页面业务状态       |
+| `components/brand/`  | Logo、Mesh、Backdrop、Noise     | 临时页面文案         |
+| `lib/`               | API client、纯函数、领域 helper | React 组件           |
+| `styles/`            | tokens/globals/print            | 页面私有 magic color |
 
 新增目录前必须证明现有层无法表达。
 

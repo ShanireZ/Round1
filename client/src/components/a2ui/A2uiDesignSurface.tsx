@@ -20,7 +20,8 @@ export function A2uiDesignSurface() {
     createRound1A2uiProcessor((action) => {
       const density =
         typeof action.context.density === "number" ? `${action.context.density}%` : "未设置";
-      setLastAction(`${action.name} · ${density}`);
+      const checks = Array.isArray(action.context.checks) ? action.context.checks.length : 0;
+      setLastAction(`${action.name} · ${density} · ${checks}项`);
     }),
   );
 

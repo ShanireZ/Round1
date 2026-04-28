@@ -9,7 +9,7 @@
 
 | #   | 决策项                  | 选择                                                                                                                                                                                                 |
 | --- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | 后端部署                | Node.js `>=24.15.0` + npm `>=11.12.1` + `Express 5` + `TypeScript` 独立进程（`server/`），监听独立端口（默认 `:5100`），Caddy 按域名反代                                                               |
+| 1   | 后端部署                | Node.js `>=24.15.0` + npm `>=11.12.1` + `Express 5` + `TypeScript` 独立进程（`server/`），监听独立端口（默认 `:5100`），Caddy 按域名反代                                                             |
 | 2   | 前端部署                | `React 19` + `TypeScript` + `Vite` + `React Router 7` + `TanStack Query v5` + `shadcn/ui` + `Tailwind CSS` + `react-hook-form`（`client/`），独立域名、独立构建产物                                  |
 | 3   | 代码存放                | 独立项目 `Round1/`，独立 Git 仓库；除 CppLearn OIDC 对接外，与其无代码依赖                                                                                                                           |
 | 4   | 数据库                  | `postgreSQL 18` 独立数据库 `round1`，通过 `pg` 驱动 + `drizzle-orm` 访问（schema 版本化迁移）；自有 `users` 表；session 不落库，交给 Redis                                                           |
@@ -235,6 +235,13 @@ ROUND1_WORKER_CONCURRENCY=3
 # 其他
 MIN_ASSIGNMENT_START_MINUTES=1
 AUTOSAVE_INTERVAL_SECONDS=180          # 前端周期性 autosave flush 间隔（通过 GET /api/v1/config/client 下发）；后端 per-user 限频默认由 exam.autosaveRateLimitSeconds=30 管理
+
+# R2 / public assets
+R2_ACCOUNT_ID=
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_API_TOKEN=
+R2_PUBLIC_BASE_URL=                    # 公开资源 origin；前端同源 /font/* 代理到 ${R2_PUBLIC_BASE_URL}/font/*
 
 ```
 

@@ -52,6 +52,39 @@ function formatScore(value: number | null) {
   return String(Math.round(value));
 }
 
+const scoreTrendBarHeightClasses = [
+  "h-[4%]",
+  "h-[5%]",
+  "h-[10%]",
+  "h-[15%]",
+  "h-[20%]",
+  "h-[25%]",
+  "h-[30%]",
+  "h-[35%]",
+  "h-[40%]",
+  "h-[45%]",
+  "h-[50%]",
+  "h-[55%]",
+  "h-[60%]",
+  "h-[65%]",
+  "h-[70%]",
+  "h-[75%]",
+  "h-[80%]",
+  "h-[85%]",
+  "h-[90%]",
+  "h-[95%]",
+  "h-full",
+] as const;
+
+function scoreTrendBarHeightClass(score: number) {
+  if (score <= 0) {
+    return scoreTrendBarHeightClasses[0];
+  }
+
+  const bucket = Math.min(20, Math.max(1, Math.ceil(score / 5)));
+  return scoreTrendBarHeightClasses[bucket];
+}
+
 function statusLabel(status: string) {
   if (status === "auto_submitted") {
     return "自动交卷";
@@ -138,8 +171,7 @@ function ScoreTrend({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
             return (
               <div key={attempt.id} className="flex min-w-0 flex-col items-center gap-2">
                 <div
-                  className="bg-primary/85 w-full rounded-t-[--radius-sm] transition-all"
-                  style={{ height: `${Math.max(score, 4)}%` }}
+                  className={`bg-primary/85 w-full rounded-t-[--radius-sm] transition-all ${scoreTrendBarHeightClass(score)}`}
                   title={`${attempt.examType} ${formatScore(attempt.score)} 分`}
                 />
                 <span className="text-muted-foreground w-full truncate text-center text-xs">

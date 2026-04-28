@@ -1,7 +1,13 @@
 # Self-Hosted Fonts
 
-Place the following `.woff2` font files in this directory.
-They are referenced by `src/styles/globals.css` via relative path `/fonts/`.
+These `.woff2` files are kept as a local cache, but the active Round1 frontend
+loads fonts through the same-origin `/font/` path. In dev and production that
+path must proxy to the public R2 origin configured by `R2_PUBLIC_BASE_URL`.
+With the current local `.env`, the upstream font objects live at:
+
+```
+https://r2.round1.cc/font/<font-file>.woff2
+```
 
 ## Required Font Files
 
@@ -17,11 +23,13 @@ They are referenced by `src/styles/globals.css` via relative path `/fonts/`.
 
 ## Cloudflare R2 Hosting
 
-After downloading the fonts, upload them to your R2 bucket and update the
-`@font-face` URLs in `src/styles/globals.css` if you want to serve from CDN
-instead of the local `public/fonts/` directory.
+After downloading the fonts, upload them to your R2 bucket under `/font/` and
+keep the same-origin `/font/` proxy aligned with the public
+`R2_PUBLIC_BASE_URL` value. Direct cross-origin font URLs require R2 CORS
+headers, so Round1 uses the proxy path to avoid browser font CORS errors.
 
 Example R2 URL format:
+
 ```
 https://<your-r2-domain>/font/GeistVF.woff2
 ```
