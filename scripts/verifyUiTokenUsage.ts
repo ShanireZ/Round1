@@ -14,7 +14,16 @@ const COLOR_LITERAL_PATTERNS = [/#[0-9A-Fa-f]{3,8}\b/g, /\brgba?\s*\(/g, /\bhsla
 
 const INLINE_STYLE_PATTERNS = [/\bstyle\s*=\s*\{\s*\{/g, /\bstyle\s*=\s*\{/g];
 
-const CSS_COMPAT_PATTERNS = [/\bcolor-mix\s*\(/g];
+const CSS_COMPAT_CHECKS = [
+  {
+    reason: "Chrome < 111 CSS compat warning",
+    patterns: [/\bcolor-mix\s*\(/g],
+  },
+  {
+    reason: "Firefox 22+ CSS compat warning",
+    patterns: [/\bmin-(?:height|width)\s*:\s*auto\b/g],
+  },
+];
 
 type Violation = {
   file: string;
@@ -36,6 +45,10 @@ function shouldScanBrowserHints(filePath: string): boolean {
   return BROWSER_HINT_EXTENSIONS.has(path.extname(filePath));
 }
 
+function shouldInclude(filePath: string): boolean {
+  return shouldScan(filePath) || shouldScanBrowserHints(filePath);
+}
+
 function walk(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const fullPath = path.join(directory, entry.name);
@@ -43,11 +56,15 @@ function walk(directory: string): string[] {
       return walk(fullPath);
     }
 
-    return shouldScan(fullPath) ? [fullPath] : [];
+    return shouldInclude(fullPath) ? [fullPath] : [];
   });
 }
 
 function findViolations(filePath: string): Violation[] {
+  if (!shouldScan(filePath)) {
+    return [];
+  }
+
   const relative = toRelative(filePath);
   const lines = readFileSync(filePath, "utf8").split(/\r?\n/);
   const violations: Violation[] = [];
@@ -83,10 +100,10 @@ function findBrowserHintViolations(filePath: string): Violation[] {
   lines.forEach((line, index) => {
     const checks =
       extension === ".css"
-        ? [{ reason: "Chrome < 111 CSS compat warning", patterns: CSS_COMPAT_PATTERNS }]
+        ? CSS_COMPAT_CHECKS
         : [
             { reason: "no inline JSX styles", patterns: INLINE_STYLE_PATTERNS },
-            { reason: "Chrome < 111 CSS compat warning", patterns: CSS_COMPAT_PATTERNS },
+            ...CSS_COMPAT_CHECKS,
           ];
 
     for (const check of checks) {

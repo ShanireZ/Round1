@@ -88,7 +88,8 @@
 }
 
 .round1-a2ui-surface input[type="checkbox"] {
-  min-height: auto;
+  width: 0.75rem;
+  height: 0.75rem;
   accent-color: var(--color-primary);
 }
 

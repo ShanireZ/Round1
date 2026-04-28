@@ -709,7 +709,7 @@ ease-ceremony: cubic-bezier(0.16, 1, 0.3, 1)
 - Light/Dark 对比。
 - Skeleton/Empty/Error。
 - Exam 相关题目组件样式。
-- A2UI agent surface 的 Round1 token bridge 示例，确保声明式 agent UI 不脱离当前视觉系统。
+- A2UI agent surface 的 Round1 token bridge 示例，确保声明式 agent UI 不脱离当前视觉系统；示例必须由 basic catalog / payload factory 生成并经过 schema 校验，不得在页面中散落硬编码长 JSON。
 
 生产环境可隐藏 dev 入口，但组件展示页应保留给本地验收。
 

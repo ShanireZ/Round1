@@ -99,7 +99,7 @@
 
 ### 7. UI/UX 与前端体验收口
 
-- [ ] UI 设计系统中的 tokens、字体托管、组件库、布局、品牌资产、打印样式与 `/dev/ui-gallery` 仍需按当前代码状态逐项验收。（2026-04-27：已新增 `npm run verify:ui-tokens`，阻断 `client/src` TS/TSX 中重新引入原始 hex/rgb/hsl magic color；截图、键盘、移动端、reduced motion 与打印视觉验收仍需继续收口。2026-04-28：已安装 Google A2UI，并在 `/dev/ui-gallery` 增加 A2UI token bridge 示例，用于后续 agent UI/UX 设计辅助验收；它不替代既有 Radix/shadcn 生产组件。同日已扩展 `verify:ui-tokens` 阻断 JSX inline style 与 `color-mix()` 兼容告警回归，并将字体运行时源收口到公开 R2 `/font/`。）
+- [ ] UI 设计系统中的 tokens、字体托管、组件库、布局、品牌资产、打印样式与 `/dev/ui-gallery` 仍需按当前代码状态逐项验收。（2026-04-27：已新增 `npm run verify:ui-tokens`，阻断 `client/src` TS/TSX 中重新引入原始 hex/rgb/hsl magic color；截图、键盘、移动端、reduced motion 与打印视觉验收仍需继续收口。2026-04-28：已安装 Google A2UI，并在 `/dev/ui-gallery` 增加 A2UI token bridge 示例，用于后续 agent UI/UX 设计辅助验收；现有 Radix/shadcn 生产组件作为受控辅助实现。同日已扩展 `verify:ui-tokens` 阻断 JSX inline style、`color-mix()` 与 `min-height:auto` / `min-width:auto` 兼容告警回归，并将字体运行时源收口到公开 R2 `/font/`。）
 - [ ] AI 智能建议文案模板为 v2 事项；MVP 可保持静态规则或占位。
 - [ ] QQ 互联登录视觉需随 feature flag 流程一起补齐。
 - [ ] i18n 多语言为未来扩展项。

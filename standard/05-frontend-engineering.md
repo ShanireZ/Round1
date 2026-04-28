@@ -75,6 +75,7 @@
 - 使用 `cn()` 合并类名，避免手写字符串拼接导致冲突。
 - 禁止在 JSX 中使用 `style` prop 写动态样式；动态视觉值必须收敛为 token、预定义 class、CSS utility 或受控组件属性，避免 Microsoft Edge Tools `no-inline-styles` 告警。
 - 禁止在生产 CSS/TSX 中使用 `color-mix()`，直到浏览器支持基线明确放宽；渐变和透明混色应落到 `tokens.css` 的静态 token，避免 Chrome < 111 兼容告警。
+- 禁止写入会触发当前浏览器基线告警的 CSS 值，例如 `min-height: auto` / `min-width: auto`；需要重置控件尺寸时使用明确的 `width`、`height`、`min-height: 0` 或 token 化尺寸。
 - 不使用 viewport-width 驱动字体大小。
 - 卡片圆角默认遵守 token：按钮/输入 8px，卡片/Dialog 12px。
 - Dark 模式必须通过 token 支持，不得写只适配 light 的硬编码颜色。
@@ -108,9 +109,9 @@
 
 新增依赖前必须说明为什么现有 React、Radix、TanStack Query、Zod、Tailwind 或少量本地 helper 无法解决。纯 UI 便利库、日期库、图表库、表格库尤其要评估包体、可达性和样式一致性。
 
-A2UI 只能作为 agent-facing UI renderer 或设计辅助 surface 使用，用于接收声明式 agent payload 并在本地验收。A2UI surface 必须通过 Round1 token bridge 继承 `tokens.css`，不得替换 Radix/shadcn primitive、页面 IA、品牌色、字体系统或生产核心流程组件。A2UI markdown 内容必须使用官方 sanitizer renderer 或等价的 HTML sanitizer，不得直接渲染未净化的 agent markdown/HTML。
+A2UI 是 agent-facing UI renderer 与设计辅助 surface 的优先体系，用于接收声明式 agent payload 并在本地验收。A2UI surface 必须通过 Round1 token bridge 继承 `tokens.css`，现有 Radix/shadcn primitive 作为生产页面的受控辅助实现，不得绕过页面 IA、品牌色、字体系统或核心流程组件契约。A2UI markdown 内容必须使用官方 sanitizer renderer 或等价的 HTML sanitizer，不得直接渲染未净化的 agent markdown/HTML。
 
-当前 `/dev/ui-gallery` A2UI 示例必须覆盖 surface lifecycle、data model binding、Text/Card/Row/Column/List、Button action、TextField、CheckBox、Slider、DateTimeInput、ChoicePicker 和 sanitizer markdown 渲染。若后续接入真实 agent/MCP payload，必须先补字段级 schema 校验、复杂度限制、权限边界和 XSS/DoS 防护。
+当前 `/dev/ui-gallery` A2UI 示例必须覆盖 surface lifecycle、data model binding、Text/Card/Row/Column/List/Tabs/Divider/Icon、Button action、TextField、CheckBox、Slider、DateTimeInput、ChoicePicker、basic catalog 动态目录和 sanitizer markdown 渲染。A2UI payload 不得以页面内长 JSON 硬编码散落，必须经本地 factory、installed `basicCatalog` schema、组件 id 唯一性、引用完整性、action allowlist 与复杂度上限校验后再交给 renderer。若 Context7 文档示例与本项目已安装 A2UI package schema 出现字段差异，以运行时 package schema 为准并同步测试。若后续接入真实 agent/MCP payload，必须先补字段级 schema 校验、复杂度限制、权限边界和 XSS/DoS 防护。
 
 ## 前端验证
 

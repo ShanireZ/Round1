@@ -4,8 +4,8 @@ import { A2uiSurface, MarkdownContext, type ReactComponentImplementation } from 
 import { type SurfaceModel } from "@a2ui/web_core/v0_9";
 
 import {
-  ROUND1_A2UI_MESSAGES,
   ROUND1_A2UI_SURFACE_ID,
+  createRound1A2uiMessages,
   createRound1A2uiProcessor,
 } from "@/lib/a2ui-design-surface";
 import { useTheme } from "@/lib/theme";
@@ -33,7 +33,7 @@ export function A2uiDesignSurface() {
         deleteSurface: { surfaceId: ROUND1_A2UI_SURFACE_ID },
       },
     ]);
-    processor.processMessages(ROUND1_A2UI_MESSAGES);
+    processor.processMessages(createRound1A2uiMessages());
     setSurface(processor.model.getSurface(ROUND1_A2UI_SURFACE_ID) ?? null);
   }, [processor]);
 
