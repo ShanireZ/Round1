@@ -264,11 +264,11 @@ curl -fsS https://round1.example.com/api/v1/health
 - [ ] SSH 禁用密码登录，仅允许密钥认证
 - [ ] 启用 `fail2ban` 防暴力破解
 - [ ] 定期自动安全更新（`unattended-upgrades`）
-- [ ] 非 root 用户运行所有服务
+- [ ] 应用用户/root 用户运行所有服务
 
 ### 应用层
 
-- [ ] `.env` 文件权限 `600`，仅应用用户可读
+- [ ] `.env` 文件权限仅应用用户/root可读
 - [ ] `NODE_ENV=production` 已设置
 - [ ] Helmet CSP 配置正确（仅允许必要来源）
 - [ ] CSRF 同步器 token 生效
