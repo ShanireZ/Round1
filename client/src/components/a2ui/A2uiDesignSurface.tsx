@@ -56,7 +56,7 @@ export function A2uiDesignSurface() {
       <div className="border-border/70 mb-4 flex flex-wrap items-center justify-between gap-3 border-b pb-3">
         <div>
           <div className="text-muted-foreground font-mono text-[10px] tracking-[0.24em] uppercase">
-            A2UI v0.9
+            A2UI v0.9 package schema
           </div>
           <div className="text-foreground mt-1 text-sm font-medium">
             {surface ? "Surface ready" : "Preparing surface"}

@@ -200,6 +200,7 @@ dotenv.config({ path: findNearestEnvFile(path.resolve(import.meta.dirname, "..")
 const envSchema = z.object({
   // Service
   PORT: z.coerce.number().default(5100),
+  ROUND1_BIND_HOST: z.string().min(1).default("127.0.0.1"),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   ROUND1_PM2_API_INSTANCES: z.coerce.number().default(2),
   ROUND1_PM2_ENABLE_RUNTIME_WORKER: booleanFlagSchema,

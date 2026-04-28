@@ -128,6 +128,7 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 
 - SSH 禁用密码登录，启用 fail2ban 或等价防护。
 - UFW/iptables 只开放 80/443/SSH；Postgres 仅内网。
+- 单 VPS 部署时 Postgres、Redis、Express API 与 cpp-runner 不得公网监听；端口设计和例外必须同步 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`、`plan/step-06-deployment.md` 与 `.env.example`。
 - 服务使用非 root 用户。
 - 自动安全更新按服务器策略开启。
 - Cloudflare Full Strict + Caddy TLS 上线前验证。

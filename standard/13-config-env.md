@@ -77,12 +77,12 @@ Secret 使用应遵循最小范围：服务端读取后只传给需要的 provid
 
 ## 环境划分
 
-| 环境 | 用途 | 规则 |
-| --- | --- | --- |
-| local | 开发 | 可使用本地 HTTPS、开发日志、mock/测试 provider |
-| test | 自动化测试 | 不依赖真实外部服务 |
-| offline-content | 内容生产 | 可运行 LLM/cpp-runner/content worker |
-| production-runtime | 在线考试/API | 不部署 cpp-runner，不消费生成队列 |
+| 环境               | 用途         | 规则                                           |
+| ------------------ | ------------ | ---------------------------------------------- |
+| local              | 开发         | 可使用本地 HTTPS、开发日志、mock/测试 provider |
+| test               | 自动化测试   | 不依赖真实外部服务                             |
+| offline-content    | 内容生产     | 可运行 LLM/cpp-runner/content worker           |
+| production-runtime | 在线考试/API | 不部署 cpp-runner，不消费生成队列              |
 
 ## 配置变更验收
 
@@ -101,23 +101,23 @@ Secret 使用应遵循最小范围：服务端读取后只传给需要的 provid
 
 配置变更按风险分级：
 
-| 风险 | 示例 | 要求 |
-| --- | --- | --- |
-| low | UI 开关、非敏感阈值小幅调整 | Admin audit + smoke |
-| medium | autosave、draft TTL、rate limit | 观察指标 + 回滚值 |
-| high | cookie、OIDC、邮件域名、secret 轮换 | 计划、维护窗口、回滚/失效策略 |
+| 风险   | 示例                                | 要求                          |
+| ------ | ----------------------------------- | ----------------------------- |
+| low    | UI 开关、非敏感阈值小幅调整         | Admin audit + smoke           |
+| medium | autosave、draft TTL、rate limit     | 观察指标 + 回滚值             |
+| high   | cookie、OIDC、邮件域名、secret 轮换 | 计划、维护窗口、回滚/失效策略 |
 
 运行时配置必须保留旧值或回滚方式。高风险配置不得和大版本发布混在一起，除非同一计划明确验证顺序。
 
 ## 配置分类
 
-| 分类 | 示例 | 是否可运行时热更新 |
-| --- | --- | --- |
-| Secret | API key、SESSION_SECRET、KEK | 否 |
-| Process | PORT、NODE_ENV、TRUST_PROXY_HOPS | 否 |
-| Runtime setting | autosave、draft TTL、import size | 是 |
-| Feature flag | QQ 登录开关 | 可按实现决定 |
-| External endpoint | OIDC issuer、LLM base URL、R2 URL | 通常否 |
+| 分类              | 示例                                               | 是否可运行时热更新 |
+| ----------------- | -------------------------------------------------- | ------------------ |
+| Secret            | API key、SESSION_SECRET、KEK                       | 否                 |
+| Process           | PORT、ROUND1_BIND_HOST、NODE_ENV、TRUST_PROXY_HOPS | 否                 |
+| Runtime setting   | autosave、draft TTL、import size                   | 是                 |
+| Feature flag      | QQ 登录开关                                        | 可按实现决定       |
+| External endpoint | OIDC issuer、LLM base URL、R2 URL                  | 通常否             |
 
 Secret 不进入 `app_settings`。
 

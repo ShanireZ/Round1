@@ -4,6 +4,8 @@
 # 启动:  docker compose -f docker-compose.dev.yml up -d
 # 停止:  docker compose -f docker-compose.dev.yml down
 # 重置:  docker compose -f docker-compose.dev.yml down -v
+# 端口仅绑定 127.0.0.1，避免本地数据库/Redis/runner 暴露到局域网。
+# 旧 pgdata 若曾挂载到 /var/lib/postgresql，切换数据目录后需 down -v 重建。
 
 services:
   pg:
@@ -11,13 +13,13 @@ services:
     container_name: r1-pg
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_DB: round1
       POSTGRES_USER: round1
       POSTGRES_PASSWORD: round1_dev
     volumes:
-      - pgdata:/var/lib/postgresql
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U round1 -d round1"]
       interval: 5s
@@ -29,7 +31,7 @@ services:
     container_name: r1-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     command: redis-server --save 60 1 --loglevel warning
     volumes:
       - redisdata:/data
@@ -46,13 +48,19 @@ services:
     container_name: r1-cpp-runner
     restart: unless-stopped
     ports:
-      - "6100:6100"
+      - "127.0.0.1:6100:6100"
     environment:
       PORT: 6100
       COMPILE_TIMEOUT_MS: 10000
       RUN_TIMEOUT_MS: 1000
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:6100/health').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:6100/health').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))",
+        ]
       interval: 10s
       timeout: 3s
       retries: 3

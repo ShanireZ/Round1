@@ -49,9 +49,9 @@ async function main(): Promise<void> {
     logger.info("HTTP server created (production — TLS terminates at Caddy)");
   }
 
-  server.listen(env.PORT, () => {
+  server.listen(env.PORT, env.ROUND1_BIND_HOST, () => {
     const protocol = env.NODE_ENV === "development" ? "https" : "http";
-    logger.info(`Server listening on ${protocol}://localhost:${env.PORT}`);
+    logger.info(`Server listening on ${protocol}://${env.ROUND1_BIND_HOST}:${env.PORT}`);
   });
 
   // Graceful shutdown

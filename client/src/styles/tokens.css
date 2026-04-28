@@ -23,9 +23,18 @@
   --color-primary-soft-alpha: rgba(230, 57, 70, 0.13);
   --color-primary-sheen-alpha: rgba(230, 57, 70, 0.08);
   --color-primary-aura-alpha: rgba(230, 57, 70, 0.36);
+  --color-primary-mesh-strong-alpha: rgba(230, 57, 70, 0.12);
+  --color-primary-mesh-soft-alpha: rgba(230, 57, 70, 0.06);
+  --color-primary-mesh-subtle-alpha: rgba(230, 57, 70, 0.04);
   --color-warning-soft-alpha: rgba(245, 158, 11, 0.08);
   --color-warning-aura-alpha: rgba(245, 158, 11, 0.16);
   --color-destructive-soft-alpha: rgba(200, 16, 46, 0.08);
+  --color-mask-solid: #000000;
+  --color-print-ink: #000000;
+  --color-print-muted: #666666;
+  --color-print-faint: #999999;
+  --color-print-border-subtle: #cccccc;
+  --color-print-border-strong: #999999;
 
   /* ── 数据可视化色板（色盲友好） ── */
   --color-chart-1: #e63946;

@@ -42,7 +42,7 @@ const ROUND1_A2UI_COPY = {
     "Agent payloads render inside the Round1 token bridge, so generated UI can be reviewed without escaping the established visual system.",
   actionLabel: "记录检查点",
   notes:
-    "**A2UI** is the primary agent-facing design surface for generated UI review; production pages still compose local primitives through Round1 tokens.",
+    "**A2UI** is the primary agent-facing design surface for generated UI review; production primitives must stay catalog-compatible through the Round1 token bridge.",
 };
 
 const ROUND1_A2UI_FOCUS_OPTIONS = [

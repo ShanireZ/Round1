@@ -13,6 +13,7 @@
 - Caddy 继续作为唯一公网入口，负责 TLS、静态资源、SPA fallback、`/api/*` 反代与 `/font/*` 同源字体代理。
 - Node API 使用当前仓库已有 `ecosystem.config.cjs` + PM2 cluster 2 实例，或等价 systemd service；短期以 PM2 为准，因为代码、healthcheck 与 plan 已经对齐。
 - Postgres、Redis 使用系统包或受控 systemd service；Postgres 数据目录、备份、恢复演练优先级高于容器化。
+- Postgres、Redis 在单 VPS 上只绑定 `127.0.0.1` 或 Unix socket，不对公网暴露；完整端口盘点与待设计项见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。
 - `client/dist` 由 Caddy 直接托管，hashed assets 长缓存，`index.html` 不长缓存。
 - 离线内容环境继续与生产运行时分离，不在生产机运行 `cpp-runner`、generation 或 sandbox verify。
 
@@ -66,8 +67,8 @@ Caddy :443
 
 systemd/PM2
   |-- round1-api x2
-  |-- redis
-  |-- postgres
+  |-- redis       -> 127.0.0.1:6379 or unix socket
+  |-- postgres    -> 127.0.0.1:5432 or unix socket
 
 offline-content environment
   |-- generation / judge / cpp-runner / content worker
@@ -94,11 +95,11 @@ offline-content environment
 
 ## Decision Matrix
 
-| 方案 | 推荐度 | 优点 | 缺点 | 触发条件 |
-| --- | --- | --- | --- | --- |
-| Caddy + PM2/systemd + native Postgres/Redis | 首发推荐 | 最少移动件，贴合现有代码和 runbook，排障直接 | 依赖隔离弱，Node/npm 需严格 pin | 当前 4H16G 单 VPS |
-| Caddy + rootless Podman Quadlet | 可选二期 | 运行时可重复，rootless 隔离，systemd 管理清晰 | 增加镜像、volume、rootless 网络维护 | 需要镜像化发布或依赖隔离 |
-| k3s/Kubernetes + containerd/CRI-O | 暂缓 | 未来多节点和 GitOps 路径清晰 | 单节点无 HA，控制面和网络/存储复杂度高 | 多节点、托管 K8s 或团队已有集群运维能力 |
+| 方案                                        | 推荐度   | 优点                                          | 缺点                                   | 触发条件                                |
+| ------------------------------------------- | -------- | --------------------------------------------- | -------------------------------------- | --------------------------------------- |
+| Caddy + PM2/systemd + native Postgres/Redis | 首发推荐 | 最少移动件，贴合现有代码和 runbook，排障直接  | 依赖隔离弱，Node/npm 需严格 pin        | 当前 4H16G 单 VPS                       |
+| Caddy + rootless Podman Quadlet             | 可选二期 | 运行时可重复，rootless 隔离，systemd 管理清晰 | 增加镜像、volume、rootless 网络维护    | 需要镜像化发布或依赖隔离                |
+| k3s/Kubernetes + containerd/CRI-O           | 暂缓     | 未来多节点和 GitOps 路径清晰                  | 单节点无 HA，控制面和网络/存储复杂度高 | 多节点、托管 K8s 或团队已有集群运维能力 |
 
 ## Open Verification
 
@@ -109,3 +110,4 @@ offline-content environment
 - Sentry release 与敏感信息过滤。
 - 邮件 SPF/DKIM/DMARC 与真实投递。
 - 静态资源和字体 cache headers。
+- UFW/iptables 仅开放公网 80/443 与受控 SSH；确认 5100/5432/6379/6100 不在公网监听。

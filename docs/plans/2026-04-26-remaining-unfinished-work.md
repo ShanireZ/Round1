@@ -95,12 +95,13 @@
 - [ ] 系统层安全加固：UFW/iptables、SSH 禁用密码、fail2ban、自动安全更新、非 root 运行服务。
 - [ ] 应用层安全加固：`.env` 权限 600、`NODE_ENV=production`、Helmet CSP、CSRF、`__Host-` cookie、`trust proxy = 1`、argon2id。
 - [ ] 数据库层安全加固：Postgres 内网监听、应用用户最小权限、`statement_timeout=30s`、备份权限 600。
+- [ ] 生产端口最终设计与防火墙规则需确认。（2026-04-28：已新增 `docs/plans/2026-04-28-port-map-and-exposure-plan.md` 盘点 80/443/SSH/5100/5173/5432/6379/6100；Express 新增 `ROUND1_BIND_HOST=127.0.0.1` 默认值，本地 compose 已收紧 Postgres/Redis/cpp-runner 到 `127.0.0.1`，单机生产默认不对公网暴露 API/Postgres/Redis。）
 - [ ] 手动部署 SOP 与回滚流程演练。
 - [x] 已纳入 `scripts/healthcheck.ts` 和版本化 `ecosystem.config.cjs`；真实域名、Caddy/TLS、PM2 reload、外部服务 smoke 与回滚仍需实机演练。
 
 ### 7. UI/UX 与前端体验收口
 
-- [ ] UI 设计系统中的 tokens、字体托管、组件库、布局、品牌资产、打印样式与 `/dev/ui-gallery` 仍需按当前代码状态逐项验收。（2026-04-27：已新增 `npm run verify:ui-tokens`，阻断 `client/src` TS/TSX 中重新引入原始 hex/rgb/hsl magic color；截图、键盘、移动端、reduced motion 与打印视觉验收仍需继续收口。2026-04-28：已安装 Google A2UI，并在 `/dev/ui-gallery` 增加 A2UI token bridge 示例，用于后续 agent UI/UX 设计辅助验收；现有 Radix/shadcn 生产组件作为受控辅助实现。同日已扩展 `verify:ui-tokens` 阻断 JSX inline style、`color-mix()` 与 `min-height:auto` / `min-width:auto` 兼容告警回归，并将字体运行时源收口到公开 R2 `/font/`。维护追加已把 A2UI 扩展到 Round1 BYOC custom catalog，并用本地 Card/Badge/Progress 渲染 CoachReport snapshot；`/dev/ui-gallery#plate-11` 浏览器复查 A2UI BYOC 可见且 warning/error 为 0。维护追加（三）已补 AppShell 布局 token 命名漂移、Dashboard 能力雷达/弱项热力图、ExamResult reduced-motion 揭晓和打印页眉页脚，并新增 `server/__tests__/e2e/ui-visual-audit.spec.ts` 覆盖 Dashboard 桌面/移动、ExamResult print/reduced motion 与 A2UI BYOC gallery。）
+- [ ] UI 设计系统中的 tokens、字体托管、组件库、布局、品牌资产、打印样式与 `/dev/ui-gallery` 仍需按当前代码状态逐项验收。（2026-04-27：已新增 `npm run verify:ui-tokens`，阻断 `client/src` TS/TSX 中重新引入原始 hex/rgb/hsl magic color；截图、键盘、移动端、reduced motion 与打印视觉验收仍需继续收口。2026-04-28：已安装 Google A2UI，并在 `/dev/ui-gallery` 增加 A2UI token bridge 示例，用于后续 agent UI/UX 设计辅助验收；现有 Radix/shadcn 生产组件作为受控辅助实现。同日已扩展 `verify:ui-tokens` 阻断 JSX inline style、`color-mix()` 与 `min-height:auto` / `min-width:auto` 兼容告警回归，并将字体运行时源收口到公开 R2 `/font/`。维护追加已把 A2UI 扩展到 Round1 BYOC custom catalog，并用本地 Card/Badge/Progress 渲染 CoachReport snapshot；`/dev/ui-gallery#plate-11` 浏览器复查 A2UI BYOC 可见且 warning/error 为 0。维护追加（三）已补 AppShell 布局 token 命名漂移、Dashboard 能力雷达/弱项热力图、ExamResult reduced-motion 揭晓和打印页眉页脚，并新增 `server/__tests__/e2e/ui-visual-audit.spec.ts` 覆盖 Dashboard 桌面/移动、ExamResult print/reduced motion 与 A2UI BYOC gallery。维护追加（五）已把 `globals.css` / `print.css` 残留 raw color 收敛到 `tokens.css`，并让 `verify:ui-tokens` 扫描非 token CSS。）
 - [x] CppLearn 登录视觉需补齐：`贝塔问天录` 字标使用 HYShangWeiShouShuW 字体，字体通过 `/font/HYShangWeiShouShuW.woff2` 同源代理加载。（2026-04-28：`/login` 已接入真实 AuthLayout 分栏与 CppLearn OIDC provider 入口，`client/public/fonts/README.md` 记录该字体对象来源。）
 - [x] QQ 互联登录视觉先占位。（2026-04-28 维护追加：`enabledAuthProviders/providers` 不再把未实现的 `qq` 当成可用登录流程；`authProviderPlaceholders/placeholders` 在 feature flag 开启时返回 `qq`，登录页渲染禁用占位卡并避免触发 501 OAuth 占位接口。）
 - [ ] i18n 多语言为未来扩展项。

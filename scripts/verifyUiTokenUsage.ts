@@ -4,11 +4,12 @@ import path from "node:path";
 const ROOT = process.cwd();
 const CLIENT_SRC = path.join(ROOT, "client", "src");
 
-const SCANNED_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx"]);
+const COLOR_LITERAL_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".css"]);
 const BROWSER_HINT_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".css"]);
 const IGNORED_RELATIVE_PATHS = new Set([
   path.join("client", "src", "pages", "dev", "UIGallery.tsx"),
 ]);
+const TOKEN_SOURCE_RELATIVE_PATHS = new Set([path.join("client", "src", "styles", "tokens.css")]);
 
 const COLOR_LITERAL_PATTERNS = [/#[0-9A-Fa-f]{3,8}\b/g, /\brgba?\s*\(/g, /\bhsla?\s*\(/g];
 
@@ -36,9 +37,13 @@ function toRelative(filePath: string): string {
   return path.relative(ROOT, filePath);
 }
 
-function shouldScan(filePath: string): boolean {
+function shouldScanColorLiterals(filePath: string): boolean {
   const relative = toRelative(filePath);
-  return SCANNED_EXTENSIONS.has(path.extname(filePath)) && !IGNORED_RELATIVE_PATHS.has(relative);
+  return (
+    COLOR_LITERAL_EXTENSIONS.has(path.extname(filePath)) &&
+    !IGNORED_RELATIVE_PATHS.has(relative) &&
+    !TOKEN_SOURCE_RELATIVE_PATHS.has(relative)
+  );
 }
 
 function shouldScanBrowserHints(filePath: string): boolean {
@@ -46,7 +51,7 @@ function shouldScanBrowserHints(filePath: string): boolean {
 }
 
 function shouldInclude(filePath: string): boolean {
-  return shouldScan(filePath) || shouldScanBrowserHints(filePath);
+  return shouldScanColorLiterals(filePath) || shouldScanBrowserHints(filePath);
 }
 
 function walk(directory: string): string[] {
@@ -61,7 +66,7 @@ function walk(directory: string): string[] {
 }
 
 function findViolations(filePath: string): Violation[] {
-  if (!shouldScan(filePath)) {
+  if (!shouldScanColorLiterals(filePath)) {
     return [];
   }
 
@@ -131,7 +136,7 @@ const violations = scannedFiles.flatMap(findViolations);
 const browserHintViolations = scannedFiles.flatMap(findBrowserHintViolations);
 
 if (violations.length > 0) {
-  console.error("verifyUiTokenUsage: raw color literals found in client TS/TSX files.");
+  console.error("verifyUiTokenUsage: raw color literals found outside token source files.");
   console.error("Use design tokens, semantic Tailwind classes, or shared CSS utilities instead.");
   for (const violation of violations) {
     console.error(`- ${violation.file}:${violation.line} ${violation.text}`);

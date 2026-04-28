@@ -70,7 +70,7 @@
 
 ## Tailwind 与样式
 
-- 所有设计决策进入 `tokens.css` 或 `globals.css` 的 token，不在页面里散落 magic color。
+- 所有设计决策进入 `tokens.css` 或 `globals.css` 的 token，不在页面、组件或非 token CSS 中散落 magic color；`scripts/verifyUiTokenUsage.ts` 必须扫描 TS/TSX 与 CSS（`tokens.css` 作为令牌真源例外）。
 - Tailwind 类用于布局与状态组合；复杂变体优先用 `class-variance-authority`。
 - 使用 `cn()` 合并类名，避免手写字符串拼接导致冲突。
 - 禁止在 JSX 中使用 `style` prop 写动态样式；动态视觉值必须收敛为 token、预定义 class、CSS utility 或受控组件属性，避免 Microsoft Edge Tools `no-inline-styles` 告警。

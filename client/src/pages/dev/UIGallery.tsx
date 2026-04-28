@@ -8,8 +8,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -17,11 +31,31 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 /* ── Brand Components ───────────────────────────────────────── */
 import { Logo } from "@/components/brand/Logo";
@@ -99,35 +133,29 @@ function Plate({
   return (
     <section
       id={`plate-${no}`}
-      className="relative grid scroll-mt-8 gap-8 border-t border-border/70 pt-10 md:grid-cols-[minmax(0,220px)_1fr] md:gap-12 md:pt-14"
+      className="border-border/70 relative grid scroll-mt-8 gap-8 border-t pt-10 md:grid-cols-[minmax(0,220px)_1fr] md:gap-12 md:pt-14"
     >
       {/* Left rail: number + eyebrow + lede */}
       <header className="md:sticky md:top-6 md:self-start">
         <div className="flex items-baseline gap-3">
           <span
-            className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground"
+            className="text-muted-foreground font-mono text-[11px] tracking-[0.2em] uppercase"
             aria-hidden
           >
             Plate
           </span>
-          <span
-            className="font-mono text-4xl font-light tabular-nums text-primary md:text-5xl"
-          >
+          <span className="text-primary font-mono text-4xl font-light tabular-nums md:text-5xl">
             {no}
           </span>
         </div>
-        <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+        <div className="text-muted-foreground mt-3 font-mono text-[10px] tracking-[0.3em] uppercase">
           {eyebrow}
         </div>
-        <h2
-          className="font-display font-ss01-ss02 mt-2 text-[28px] font-light leading-[1.05] tracking-tight text-foreground md:text-[34px]"
-        >
+        <h2 className="font-display font-ss01-ss02 text-foreground mt-2 text-[28px] leading-[1.05] font-light tracking-tight md:text-[34px]">
           {title}
         </h2>
         {lede ? (
-          <p className="mt-3 max-w-[22ch] text-sm leading-relaxed text-muted-foreground">
-            {lede}
-          </p>
+          <p className="text-muted-foreground mt-3 max-w-[22ch] text-sm leading-relaxed">{lede}</p>
         ) : null}
       </header>
 
@@ -152,27 +180,20 @@ function Exhibit({
   className?: string;
   children: React.ReactNode;
 }) {
-  const toneBg =
-    tone === "dim"
-      ? "bg-subtle"
-      : tone === "quiet"
-      ? "bg-transparent"
-      : "bg-card";
+  const toneBg = tone === "dim" ? "bg-subtle" : tone === "quiet" ? "bg-transparent" : "bg-card";
   return (
     <figure
-      className={`group relative flex flex-col overflow-hidden rounded-[--radius-lg] border border-border/70 ${toneBg} ${className ?? ""}`}
+      className={`group border-border/70 relative flex flex-col overflow-hidden rounded-[--radius-lg] border ${toneBg} ${className ?? ""}`}
     >
-      <div className="flex items-center justify-between border-b border-border/60 px-4 py-2">
-        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+      <div className="border-border/60 flex items-center justify-between border-b px-4 py-2">
+        <span className="text-muted-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
           {label}
         </span>
-        <span className="font-mono text-[10px] tabular-nums text-muted-foreground/80">
-          · {idx}
-        </span>
+        <span className="text-muted-foreground/80 font-mono text-[10px] tabular-nums">· {idx}</span>
       </div>
       <div className="flex flex-1 flex-col items-start justify-start p-5">{children}</div>
       {caption ? (
-        <figcaption className="border-t border-border/60 px-4 py-2 text-[11px] leading-relaxed text-muted-foreground">
+        <figcaption className="border-border/60 text-muted-foreground border-t px-4 py-2 text-[11px] leading-relaxed">
           {caption}
         </figcaption>
       ) : null}
@@ -185,13 +206,13 @@ function Chip({ name, cssVar }: { name: string; cssVar: string }) {
   return (
     <div className="group flex flex-col">
       <div
-        className={`relative h-20 w-full overflow-hidden rounded-[--radius-md] border border-border/70 transition-transform duration-[--duration-normal] ease-[--ease-standard] group-hover:-translate-y-0.5 ${colorSwatchClasses[cssVar] ?? "bg-transparent"}`}
+        className={`border-border/70 relative h-20 w-full overflow-hidden rounded-[--radius-md] border transition-transform duration-[--duration-normal] ease-[--ease-standard] group-hover:-translate-y-0.5 ${colorSwatchClasses[cssVar] ?? "bg-transparent"}`}
       >
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 to-black/5 mix-blend-overlay" />
       </div>
       <div className="mt-2 flex items-baseline justify-between gap-2">
-        <span className="text-[13px] font-medium text-foreground">{name}</span>
-        <code className="font-mono truncate text-[10px] uppercase tracking-wider text-muted-foreground">
+        <span className="text-foreground text-[13px] font-medium">{name}</span>
+        <code className="text-muted-foreground truncate font-mono text-[10px] tracking-wider uppercase">
           {cssVar.replace("--color-", "")}
         </code>
       </div>
@@ -228,43 +249,41 @@ export default function UIGallery() {
         {/* ═══════════════════════════════════════════════════════
              COVER —— 封面
              ═══════════════════════════════════════════════════════ */}
-        <section className="relative isolate overflow-hidden border-b border-border">
+        <section className="border-border relative isolate overflow-hidden border-b">
           <MeshGradient variant="hero" />
           <NoiseTexture />
 
           {/* running rule */}
-          <div className="relative z-10 flex items-center justify-between px-6 md:px-10 pt-6 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+          <div className="text-muted-foreground relative z-10 flex items-center justify-between px-6 pt-6 font-mono text-[10px] tracking-[0.3em] uppercase md:px-10">
             <span>Round·One · Specimen Sheet</span>
             <span className="hidden sm:inline">Vol. 01 / Issue 001</span>
             <span>{issueDate}</span>
           </div>
 
-          <div className="relative z-10 grid gap-10 px-6 md:px-10 pb-16 pt-10 md:grid-cols-12 md:gap-6 md:pb-24 md:pt-16">
+          <div className="relative z-10 grid gap-10 px-6 pt-10 pb-16 md:grid-cols-12 md:gap-6 md:px-10 md:pt-16 md:pb-24">
             {/* Left meta column */}
             <div className="md:col-span-3">
-              <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+              <div className="text-muted-foreground font-mono text-[11px] tracking-[0.25em] uppercase">
                 Edition
               </div>
-              <div
-                className="font-display mt-2 text-2xl font-light text-foreground"
-              >
+              <div className="font-display text-foreground mt-2 text-2xl font-light">
                 No.<span className="tabular-nums"> 001</span>
               </div>
 
-              <dl className="mt-8 space-y-3 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                <div className="flex justify-between gap-4 border-b border-border/60 pb-2">
+              <dl className="text-muted-foreground mt-8 space-y-3 font-mono text-[11px] tracking-[0.14em] uppercase">
+                <div className="border-border/60 flex justify-between gap-4 border-b pb-2">
                   <dt>Theme</dt>
                   <dd className="text-foreground">{resolvedTheme}</dd>
                 </div>
-                <div className="flex justify-between gap-4 border-b border-border/60 pb-2">
+                <div className="border-border/60 flex justify-between gap-4 border-b pb-2">
                   <dt>Grid</dt>
                   <dd className="text-foreground">8pt</dd>
                 </div>
-                <div className="flex justify-between gap-4 border-b border-border/60 pb-2">
+                <div className="border-border/60 flex justify-between gap-4 border-b pb-2">
                   <dt>Accent</dt>
                   <dd className="text-foreground">#E63946</dd>
                 </div>
-                <div className="flex justify-between gap-4 border-b border-border/60 pb-2">
+                <div className="border-border/60 flex justify-between gap-4 border-b pb-2">
                   <dt>Serif</dt>
                   <dd className="text-foreground">Fraunces</dd>
                 </div>
@@ -273,23 +292,20 @@ export default function UIGallery() {
 
             {/* Title column */}
             <div className="md:col-span-9">
-              <div
-                className="font-display flex flex-col items-start gap-2 text-foreground"
-              >
-                <h1 className="relative text-[clamp(64px,13vw,188px)] font-light leading-[0.82] tracking-[-0.04em]">
-                  <span className="font-ss01 italic text-primary">
-                    Specimen
-                  </span>
+              <div className="font-display text-foreground flex flex-col items-start gap-2">
+                <h1 className="relative text-[clamp(64px,13vw,188px)] leading-[0.82] font-light tracking-[-0.04em]">
+                  <span className="font-ss01 text-primary italic">Specimen</span>
                 </h1>
-                <h1 className="text-[clamp(56px,11vw,168px)] font-light leading-[0.82] tracking-[-0.04em]">
-                  &amp; <span className="underline decoration-[0.04em] underline-offset-[0.12em] decoration-primary/80">Système</span>
+                <h1 className="text-[clamp(56px,11vw,168px)] leading-[0.82] font-light tracking-[-0.04em]">
+                  &amp;{" "}
+                  <span className="decoration-primary/80 underline decoration-[0.04em] underline-offset-[0.12em]">
+                    Système
+                  </span>
                 </h1>
               </div>
 
               <div className="mt-8 grid max-w-3xl grid-cols-1 gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
-                <p
-                  className="font-display text-base leading-relaxed text-foreground-secondary sm:text-lg"
-                >
+                <p className="font-display text-foreground-secondary text-base leading-relaxed sm:text-lg">
                   Round 1 设计系统视觉样本册 —— 一份关于色彩、字形、节奏与零件的完整陈列。
                   所有展品可被调用于产品实现，所有展品须经得起放大检验。
                 </p>
@@ -320,7 +336,7 @@ export default function UIGallery() {
               </div>
 
               {/* Index */}
-              <nav className="mt-12 grid grid-cols-2 gap-x-6 gap-y-2 border-t border-border/70 pt-4 text-sm sm:grid-cols-3 lg:grid-cols-4">
+              <nav className="border-border/70 mt-12 grid grid-cols-2 gap-x-6 gap-y-2 border-t pt-4 text-sm sm:grid-cols-3 lg:grid-cols-4">
                 {[
                   ["01", "Palette"],
                   ["02", "Typography"],
@@ -337,19 +353,15 @@ export default function UIGallery() {
                   <a
                     key={no}
                     href={`#plate-${no}`}
-                    className="group flex items-center justify-between gap-3 border-b border-transparent py-1 transition-colors hover:border-primary"
+                    className="group hover:border-primary flex items-center justify-between gap-3 border-b border-transparent py-1 transition-colors"
                   >
                     <span className="flex items-baseline gap-2">
-                      <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                      <span className="text-muted-foreground font-mono text-[11px] tabular-nums">
                         {no}
                       </span>
-                      <span
-                        className="font-display text-foreground"
-                      >
-                        {name}
-                      </span>
+                      <span className="font-display text-foreground">{name}</span>
                     </span>
-                    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:-translate-y-px group-hover:translate-x-px group-hover:text-primary" />
+                    <ArrowUpRight className="text-muted-foreground group-hover:text-primary h-3.5 w-3.5 transition-transform group-hover:translate-x-px group-hover:-translate-y-px" />
                   </a>
                 ))}
               </nav>
@@ -357,7 +369,7 @@ export default function UIGallery() {
           </div>
 
           {/* Bottom rule */}
-          <div className="relative z-10 flex items-center justify-between border-t border-border/70 px-6 md:px-10 py-3 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+          <div className="border-border/70 text-muted-foreground relative z-10 flex items-center justify-between border-t px-6 py-3 font-mono text-[10px] tracking-[0.25em] uppercase md:px-10">
             <span>↓ Continue · 向下翻阅</span>
             <span>Printed in 8pt Grid</span>
           </div>
@@ -366,7 +378,7 @@ export default function UIGallery() {
         {/* ═══════════════════════════════════════════════════════
              BODY —— 展品
              ═══════════════════════════════════════════════════════ */}
-        <div className="mx-auto max-w-[1280px] space-y-4 px-6 md:px-10 pb-24 pt-4">
+        <div className="mx-auto max-w-[1280px] space-y-4 px-6 pt-4 pb-24 md:px-10">
           {/* ── 01 Palette ───────────────────────────────────── */}
           <Plate
             no="01"
@@ -376,11 +388,11 @@ export default function UIGallery() {
           >
             <div className="space-y-10">
               <div>
-                <div className="mb-4 flex items-baseline justify-between border-b border-border/60 pb-2">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                <div className="border-border/60 mb-4 flex items-baseline justify-between border-b pb-2">
+                  <span className="text-muted-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
                     Core tokens
                   </span>
-                  <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+                  <span className="text-muted-foreground font-mono text-[10px] tabular-nums">
                     13 entries
                   </span>
                 </div>
@@ -402,11 +414,11 @@ export default function UIGallery() {
               </div>
 
               <div>
-                <div className="mb-4 flex items-baseline justify-between border-b border-border/60 pb-2">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                <div className="border-border/60 mb-4 flex items-baseline justify-between border-b pb-2">
+                  <span className="text-muted-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
                     OJ verdicts
                   </span>
-                  <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+                  <span className="text-muted-foreground font-mono text-[10px] tabular-nums">
                     6 entries
                   </span>
                 </div>
@@ -436,13 +448,11 @@ export default function UIGallery() {
                 caption="var(--font-serif) · 用于海报级标题、仪式页、大号数字"
                 className="md:col-span-12"
               >
-                <div
-                  className="font-display w-full leading-[0.9] tracking-[-0.02em] text-foreground"
-                >
+                <div className="font-display text-foreground w-full leading-[0.9] tracking-[-0.02em]">
                   <div className="text-[clamp(56px,9vw,128px)] font-light">
-                    Aa — <span className="italic text-primary">编程</span>
+                    Aa — <span className="text-primary italic">编程</span>
                   </div>
-                  <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+                  <div className="text-muted-foreground mt-1 font-mono text-[11px] tracking-[0.24em] uppercase">
                     Abcdefghijklmnopqrstuvwxyz &middot; 0123456789
                   </div>
                 </div>
@@ -454,11 +464,9 @@ export default function UIGallery() {
                 caption="var(--font-sans)"
                 className="md:col-span-8"
               >
-                <p
-                  className="font-sans text-xl leading-relaxed text-foreground"
-                >
-                  快速的棕色狐狸跳过了懒狗 —— The quick brown fox jumps over the
-                  lazy dog. 这段落用于验证中英排印的视觉密度与基线对齐。
+                <p className="text-foreground font-sans text-xl leading-relaxed">
+                  快速的棕色狐狸跳过了懒狗 —— The quick brown fox jumps over the lazy dog.
+                  这段落用于验证中英排印的视觉密度与基线对齐。
                 </p>
               </Exhibit>
 
@@ -468,10 +476,8 @@ export default function UIGallery() {
                 caption="var(--font-mono)"
                 className="md:col-span-4"
               >
-                <pre
-                  className="font-mono w-full whitespace-pre-wrap text-[13px] leading-relaxed text-foreground"
-                >
-{`const x = 42;
+                <pre className="text-foreground w-full font-mono text-[13px] leading-relaxed whitespace-pre-wrap">
+                  {`const x = 42;
 const π = 3.14159;
 if (x > 0) ac();`}
                 </pre>
@@ -483,9 +489,7 @@ if (x > 0) ac();`}
                 caption="var(--font-serif) · 中文衬线加重"
                 className="md:col-span-12"
               >
-                <p
-                  className="font-display text-3xl font-black leading-snug tracking-normal text-foreground md:text-4xl"
-                >
+                <p className="font-display text-foreground text-3xl leading-snug font-black tracking-normal md:text-4xl">
                   算法竞赛测试平台
                 </p>
               </Exhibit>
@@ -519,16 +523,14 @@ if (x > 0) ac();`}
                 className="md:col-span-12"
                 tone="quiet"
               >
-                <div className="relative h-56 w-full overflow-hidden rounded-[--radius-lg] border border-border/60">
+                <div className="border-border/60 relative h-56 w-full overflow-hidden rounded-[--radius-lg] border">
                   <MeshGradient variant="hero" />
                   <NoiseTexture />
                   <div className="relative z-10 flex h-full flex-col justify-between p-6">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                    <span className="text-muted-foreground font-mono text-[10px] tracking-[0.25em] uppercase">
                       Backdrop
                     </span>
-                    <span
-                      className="font-display text-3xl font-light italic text-foreground md:text-4xl"
-                    >
+                    <span className="font-display text-foreground text-3xl font-light italic md:text-4xl">
                       Ambient, never loud.
                     </span>
                   </div>
@@ -559,7 +561,9 @@ if (x > 0) ac();`}
                   <Button size="sm">Small</Button>
                   <Button size="md">Default</Button>
                   <Button size="lg">Large</Button>
-                  <Button size="icon"><Plus className="h-4 w-4" /></Button>
+                  <Button size="icon">
+                    <Plus className="h-4 w-4" />
+                  </Button>
                 </div>
               </Exhibit>
               <Exhibit idx="C" label="States" className="md:col-span-6">
@@ -606,7 +610,9 @@ if (x > 0) ac();`}
                     <Input id="demo-input" placeholder="请输入用户名" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="demo-input-err" error>邮箱（错误态）</Label>
+                    <Label htmlFor="demo-input-err" error>
+                      邮箱（错误态）
+                    </Label>
                     <Input id="demo-input-err" placeholder="email@example.com" error />
                   </div>
                   <div className="space-y-2">
@@ -720,7 +726,7 @@ if (x > 0) ac();`}
                   <CardDescription>基础卡片样式</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">卡片内容区域</p>
+                  <p className="text-muted-foreground text-sm">卡片内容区域</p>
                 </CardContent>
                 <CardFooter>
                   <Button size="sm">操作</Button>
@@ -732,7 +738,7 @@ if (x > 0) ac();`}
                   <CardDescription>无阴影、微边框</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">适用于嵌套场景</p>
+                  <p className="text-muted-foreground text-sm">适用于嵌套场景</p>
                 </CardContent>
               </Card>
               <Card variant="interactive">
@@ -741,14 +747,12 @@ if (x > 0) ac();`}
                   <CardDescription>hover 抬升 + 阴影</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">试试 hover 效果</p>
+                  <p className="text-muted-foreground text-sm">试试 hover 效果</p>
                 </CardContent>
               </Card>
               <Card variant="stat">
                 <CardHeader>
-                  <CardTitle
-                    className="font-display text-4xl font-light tabular-nums"
-                  >
+                  <CardTitle className="font-display text-4xl font-light tabular-nums">
                     92.5<span className="text-primary">%</span>
                   </CardTitle>
                   <CardDescription>正确率</CardDescription>
@@ -760,9 +764,7 @@ if (x > 0) ac();`}
                   <CardDescription>accent-wash 背景 + primary border</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    适用于高优先级信息展示和 CTA 区域
-                  </p>
+                  <p className="text-muted-foreground text-sm">适用于高优先级信息展示和 CTA 区域</p>
                 </CardContent>
               </Card>
             </div>
@@ -784,9 +786,7 @@ if (x > 0) ac();`}
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>确认操作</DialogTitle>
-                      <DialogDescription>
-                        此操作无法撤销，确定要继续吗？
-                      </DialogDescription>
+                      <DialogDescription>此操作无法撤销，确定要继续吗？</DialogDescription>
                     </DialogHeader>
                     <div className="flex justify-end gap-2 pt-4">
                       <Button variant="secondary">取消</Button>
@@ -809,10 +809,18 @@ if (x > 0) ac();`}
 
               <Exhibit idx="C" label="Avatar" className="md:col-span-4">
                 <div className="flex items-end gap-3">
-                  <Avatar size="sm"><AvatarFallback>张</AvatarFallback></Avatar>
-                  <Avatar size="md"><AvatarFallback>李</AvatarFallback></Avatar>
-                  <Avatar size="lg"><AvatarFallback>王</AvatarFallback></Avatar>
-                  <Avatar size="xl"><AvatarFallback>教</AvatarFallback></Avatar>
+                  <Avatar size="sm">
+                    <AvatarFallback>张</AvatarFallback>
+                  </Avatar>
+                  <Avatar size="md">
+                    <AvatarFallback>李</AvatarFallback>
+                  </Avatar>
+                  <Avatar size="lg">
+                    <AvatarFallback>王</AvatarFallback>
+                  </Avatar>
+                  <Avatar size="xl">
+                    <AvatarFallback>教</AvatarFallback>
+                  </Avatar>
                 </div>
               </Exhibit>
 
@@ -823,14 +831,23 @@ if (x > 0) ac();`}
                     <TabsTrigger value="tab2">提交记录</TabsTrigger>
                     <TabsTrigger value="tab3">题解</TabsTrigger>
                   </TabsList>
-                  <TabsContent value="tab1" className="mt-3 rounded-[--radius-md] border border-border/70 p-4">
-                    <p className="text-sm text-muted-foreground">题目描述内容区域</p>
+                  <TabsContent
+                    value="tab1"
+                    className="border-border/70 mt-3 rounded-[--radius-md] border p-4"
+                  >
+                    <p className="text-muted-foreground text-sm">题目描述内容区域</p>
                   </TabsContent>
-                  <TabsContent value="tab2" className="mt-3 rounded-[--radius-md] border border-border/70 p-4">
-                    <p className="text-sm text-muted-foreground">提交历史列表</p>
+                  <TabsContent
+                    value="tab2"
+                    className="border-border/70 mt-3 rounded-[--radius-md] border p-4"
+                  >
+                    <p className="text-muted-foreground text-sm">提交历史列表</p>
                   </TabsContent>
-                  <TabsContent value="tab3" className="mt-3 rounded-[--radius-md] border border-border/70 p-4">
-                    <p className="text-sm text-muted-foreground">官方题解与讨论</p>
+                  <TabsContent
+                    value="tab3"
+                    className="border-border/70 mt-3 rounded-[--radius-md] border p-4"
+                  >
+                    <p className="text-muted-foreground text-sm">官方题解与讨论</p>
                   </TabsContent>
                 </Tabs>
               </Exhibit>
@@ -850,25 +867,29 @@ if (x > 0) ac();`}
                   <div className="space-y-1">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">默认</span>
-                      <span className="tabular-nums text-foreground">{progress}%</span>
+                      <span className="text-foreground tabular-nums">{progress}%</span>
                     </div>
                     <Progress value={progress} />
                   </div>
                   <div className="space-y-1">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Thin</span>
-                      <span className="tabular-nums text-foreground">{progress}%</span>
+                      <span className="text-foreground tabular-nums">{progress}%</span>
                     </div>
                     <Progress value={progress} variant="thin" />
                   </div>
                   <div className="space-y-1">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">考试计时</span>
-                      <span className="tabular-nums text-foreground">{progress}%</span>
+                      <span className="text-foreground tabular-nums">{progress}%</span>
                     </div>
                     <Progress value={progress} variant="exam" />
                   </div>
-                  <Button size="sm" variant="secondary" onClick={() => setProgress((p) => (p >= 100 ? 0 : p + 10))}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setProgress((p) => (p >= 100 ? 0 : p + 10))}
+                  >
                     +10%
                   </Button>
                 </div>
@@ -888,7 +909,7 @@ if (x > 0) ac();`}
               </Exhibit>
 
               <Exhibit idx="C" label="Table" className="md:col-span-8">
-                <div className="w-full overflow-hidden rounded-[--radius-md] border border-border/70">
+                <div className="border-border/70 w-full overflow-hidden rounded-[--radius-md] border">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -910,7 +931,11 @@ if (x > 0) ac();`}
                           <TableCell>
                             <Badge
                               variant={
-                                q.diff === "入门" ? "diff-easy" : q.diff === "提高" ? "diff-normal" : "diff-hard"
+                                q.diff === "入门"
+                                  ? "diff-easy"
+                                  : q.diff === "提高"
+                                    ? "diff-normal"
+                                    : "diff-hard"
                               }
                             >
                               {q.diff}
@@ -925,10 +950,10 @@ if (x > 0) ac();`}
               </Exhibit>
 
               <Exhibit idx="D" label="Scroll area" className="md:col-span-4">
-                <ScrollArea className="h-56 w-full rounded-[--radius-md] border border-border/70">
+                <ScrollArea className="border-border/70 h-56 w-full rounded-[--radius-md] border">
                   <div className="space-y-2 p-3">
                     {Array.from({ length: 20 }, (_, i) => (
-                      <div key={i} className="rounded-[--radius-sm] bg-subtle p-2.5 text-sm">
+                      <div key={i} className="bg-subtle rounded-[--radius-sm] p-2.5 text-sm">
                         条目 #{String(i + 1).padStart(2, "0")}
                       </div>
                     ))}
@@ -950,10 +975,8 @@ if (x > 0) ac();`}
                 <div className="flex w-full items-end gap-3">
                   {[4, 8, 12, 16, 24, 32, 48, 64].map((px) => (
                     <div key={px} className="flex flex-col items-center gap-1.5">
-                      <div
-                        className={`bg-primary ${spacingSwatchClasses[px] ?? "h-4 w-4"}`}
-                      />
-                      <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+                      <div className={`bg-primary ${spacingSwatchClasses[px] ?? "h-4 w-4"}`} />
+                      <span className="text-muted-foreground font-mono text-[10px] tabular-nums">
                         {px}
                       </span>
                     </div>
@@ -972,11 +995,9 @@ if (x > 0) ac();`}
                   ].map((r) => (
                     <div key={r.name} className="flex flex-col items-center gap-1.5">
                       <div
-                        className={`h-14 w-14 border-2 border-primary bg-accent-wash ${radiusSwatchClasses[r.name] ?? "rounded-[--radius-md]"}`}
+                        className={`border-primary bg-accent-wash h-14 w-14 border-2 ${radiusSwatchClasses[r.name] ?? "rounded-[--radius-md]"}`}
                       />
-                      <span className="font-mono text-[10px] text-muted-foreground">
-                        {r.name}
-                      </span>
+                      <span className="text-muted-foreground font-mono text-[10px]">{r.name}</span>
                     </div>
                   ))}
                 </div>
@@ -987,9 +1008,9 @@ if (x > 0) ac();`}
                   {["--shadow-sm", "--shadow-md", "--shadow-lg"].map((s) => (
                     <div key={s} className="flex flex-col items-center gap-3">
                       <div
-                        className={`h-24 w-24 rounded-[--radius-lg] bg-surface ${shadowSwatchClasses[s] ?? ""}`}
+                        className={`bg-surface h-24 w-24 rounded-[--radius-lg] ${shadowSwatchClasses[s] ?? ""}`}
                       />
-                      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                      <span className="text-muted-foreground font-mono text-[10px] tracking-[0.2em] uppercase">
                         {s.replace("--shadow-", "")}
                       </span>
                     </div>
@@ -1006,31 +1027,34 @@ if (x > 0) ac();`}
             title="A2UI Surface"
             lede="A2UI payload 在 Round1 token bridge 内渲染，用于设计辅助与 agent 交互验收。"
           >
-            <Exhibit idx="A" label="Google A2UI v0.9" className="md:col-span-12" tone="dim">
+            <Exhibit
+              idx="A"
+              label="Google A2UI v0.9 package schema"
+              className="md:col-span-12"
+              tone="dim"
+            >
               <A2uiDesignSurface />
             </Exhibit>
           </Plate>
 
           {/* ═══ Colophon · 版权尾页 ═══════════════════════════ */}
-          <footer className="mt-16 border-t border-border/70 pt-8">
+          <footer className="border-border/70 mt-16 border-t pt-8">
             <div className="grid gap-6 md:grid-cols-3">
               <div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                <div className="text-muted-foreground font-mono text-[10px] tracking-[0.25em] uppercase">
                   Colophon
                 </div>
-                <p
-                  className="font-display mt-3 text-xl font-light leading-snug text-foreground"
-                >
+                <p className="font-display text-foreground mt-3 text-xl leading-snug font-light">
                   Set in Fraunces &amp; Geist, printed on an 8pt grid.
                 </p>
               </div>
-              <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                <div className="border-b border-border/60 pb-2">—— End of specimen</div>
+              <div className="text-muted-foreground font-mono text-[11px] tracking-[0.18em] uppercase">
+                <div className="border-border/60 border-b pb-2">—— End of specimen</div>
                 <div className="pt-2">© Round 1 · {new Date().getFullYear()}</div>
               </div>
-              <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground md:text-right">
+              <div className="text-muted-foreground font-mono text-[11px] tracking-[0.18em] uppercase md:text-right">
                 <div>Crafted with care</div>
-                <div className="mt-1 text-primary">#E63946</div>
+                <div className="text-primary mt-1">#E63946</div>
               </div>
             </div>
           </footer>

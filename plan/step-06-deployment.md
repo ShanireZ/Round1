@@ -7,6 +7,8 @@
 > **当前对齐说明（2026-04-27）**：本文件描述的是目标部署形态，不是“当前仓库已完成生产上线”的现状快照。当前仓库已经完成“两层架构 + production no-runner”方向的代码收口，并补齐版本化 `ecosystem.config.cjs` 与统一 `scripts/healthcheck.ts`；但真实域名、Caddy/TLS、PM2 reload、外部服务 smoke 与回滚仍需要部署环境演练，不能把生产验收描述成已完成。
 >
 > **部署方式推荐（2026-04-28）**：4H16G、14M 带宽单 VPS 首发不建议引入 Kubernetes/k3s；先使用 Caddy + PM2/systemd + native Postgres/Redis，rootless Podman + Quadlet 仅作为需要镜像化或依赖隔离时的二期选项。详细取舍见 `docs/plans/2026-04-28-single-vps-deployment-recommendation.md`。
+>
+> **端口规划说明（2026-04-28）**：当前端口盘点与待设计项见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。单机部署时 Postgres / Redis 默认只绑定本机，不对公网暴露；生产公网业务入口仅应是 Caddy 的 80/443。
 
 ---
 
@@ -28,6 +30,19 @@
 - 生产运行时不再现编译 / 运行代码题，不依赖 runner 健康检查。
 
 早期小规模部署可采用单机 2C/4GB：同机运行 Caddy + API + Redis + Postgres；离线内容环境独立于生产运行时。
+
+### 14.1.1 端口暴露原则
+
+| 服务        | 当前默认 | 生产暴露范围                               | 配置真源                                             |
+| ----------- | -------- | ------------------------------------------ | ---------------------------------------------------- |
+| Caddy       | 80 / 443 | 公网                                       | 系统部署配置                                         |
+| Express API | 5100     | `127.0.0.1`，仅 Caddy 反代                 | `PORT` / `ROUND1_BIND_HOST` / `ecosystem.config.cjs` |
+| Postgres    | 5432     | 单机仅本机；拆库时仅私网                   | `DATABASE_URL`                                       |
+| Redis       | 6379     | 单机仅本机；拆服务时仅私网                 | `REDIS_URL`                                          |
+| cpp-runner  | 6100     | 离线内容环境本机/内网，生产 runtime 不开放 | `SANDBOX_RUNNER_URL`                                 |
+| Vite dev    | 5173     | 本地开发机                                 | `client/vite.config.ts`                              |
+
+重新设计端口时，先改 `.env` / Caddy / healthcheck / compose，再同步 `plan/reference-config.md` 与端口盘点文档，避免部署 runbook 和代码默认值漂移。若生产 API 与 Caddy 同机，`ROUND1_BIND_HOST` 必须保持 `127.0.0.1`。
 
 ---
 
@@ -66,7 +81,7 @@
 
 - Cloudflare Origin CA 15 年源证书，Full (Strict) 加密模式
 - 覆盖 `X-Forwarded-*` 头，防止客户端伪造：使用 `CF-Connecting-IP` 作为 `X-Forwarded-For`
-- `reverse_proxy localhost:5100`
+- `reverse_proxy 127.0.0.1:5100`
 - `app.set('trust proxy', 1)`（一跳 = Caddy），严禁 `true`
 
 ### 14.3 PM2 配置
@@ -88,7 +103,7 @@
   - `@fonts path /font/*`
   - `reverse_proxy @fonts <R2_PUBLIC_BASE_URL>`（保留 `/font/*` path；避免浏览器直接跨域加载字体）
   - `@api path /api/*`
-  - `reverse_proxy @api localhost:5100`
+  - `reverse_proxy @api 127.0.0.1:5100`
 - 散列文件名 → `Cache-Control: public, max-age=31536000, immutable`
 - `index.html` → `Cache-Control: no-cache`
 

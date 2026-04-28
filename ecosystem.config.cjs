@@ -3,7 +3,11 @@ const path = require("node:path");
 const root = __dirname;
 
 function parseBooleanFlag(value) {
-  return ["1", "true", "yes"].includes(String(value ?? "").trim().toLowerCase());
+  return ["1", "true", "yes"].includes(
+    String(value ?? "")
+      .trim()
+      .toLowerCase(),
+  );
 }
 
 function parseInstances(value, fallback) {
@@ -34,10 +38,12 @@ const apps = [
     env: {
       NODE_ENV: "production",
       PORT: process.env.PORT ?? "5100",
+      ROUND1_BIND_HOST: process.env.ROUND1_BIND_HOST ?? "127.0.0.1",
     },
     env_production: {
       NODE_ENV: "production",
       PORT: process.env.PORT ?? "5100",
+      ROUND1_BIND_HOST: process.env.ROUND1_BIND_HOST ?? "127.0.0.1",
     },
   },
 ];

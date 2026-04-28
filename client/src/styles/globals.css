@@ -243,13 +243,13 @@
       radial-gradient(ellipse 60% 50% at 20% 30%, var(--color-accent-wash) 0%, transparent 70%),
       radial-gradient(
         ellipse 50% 60% at 80% 20%,
-        hsl(var(--color-primary-hsl, 355 78% 56%) / 0.12) 0%,
+        var(--color-primary-mesh-strong-alpha) 0%,
         transparent 70%
       ),
       conic-gradient(
         from 180deg at 50% 50%,
         transparent 0%,
-        hsl(var(--color-primary-hsl, 355 78% 56%) / 0.06) 50%,
+        var(--color-primary-mesh-soft-alpha) 50%,
         transparent 100%
       );
   }
@@ -265,7 +265,7 @@
   .mesh-gradient-subtle {
     background-image: radial-gradient(
       ellipse 50% 50% at 50% 50%,
-      hsl(var(--color-primary-hsl, 355 78% 56%) / 0.04) 0%,
+      var(--color-primary-mesh-subtle-alpha) 0%,
       transparent 80%
     );
   }
@@ -418,8 +418,16 @@
       linear-gradient(to right, var(--color-grid-line-alpha) 1px, transparent 1px),
       linear-gradient(to bottom, var(--color-grid-line-alpha) 1px, transparent 1px);
     background-size: 64px 64px;
-    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 40%, transparent 80%);
-    mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 40%, transparent 80%);
+    -webkit-mask-image: radial-gradient(
+      ellipse 80% 70% at 50% 30%,
+      var(--color-mask-solid) 40%,
+      transparent 80%
+    );
+    mask-image: radial-gradient(
+      ellipse 80% 70% at 50% 30%,
+      var(--color-mask-solid) 40%,
+      transparent 80%
+    );
   }
 
   .ui-progress {

@@ -1,13 +1,21 @@
 # Detail
+
 ---
+
 ## mkcert 安装
+
 ### 用 winget 安装
+
 winget install FiloSottile.mkcert
+
 ### 安装本地 CA
+
 mkcert -install
+
 ### 生成证书
-cd D:\round1
-mkdir certss
+
+cd D:\WorkSpace\Round1
+mkdir certs
 mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost 127.0.0.1 ::1
 
 ## PostgreSQL 18 + Redis（Docker Desktop）
@@ -19,17 +27,21 @@ mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost 127.0.0.1 ::1
 在项目根目录创建了 `docker-compose.dev.yml`，一键拉起：
 
 ```powershell
-cd D:\round1
+cd D:\WorkSpace\Round1
 docker compose -f docker-compose.dev.yml up -d
 ```
 
+当前 compose 只把 Postgres、Redis 与 cpp-runner 发布到 `127.0.0.1`。如果本地旧 `pgdata` volume 曾使用 `/var/lib/postgresql` 作为挂载点，切到官方 `/var/lib/postgresql/data` 后需要执行一次 `docker compose -f docker-compose.dev.yml down -v` 重建本地开发数据。
+
 停止 / 销毁：
+
 ```powershell
 docker compose -f docker-compose.dev.yml down          # 停止，保留数据
 docker compose -f docker-compose.dev.yml down -v        # 停止 + 删除 volume（慎用）
 ```
 
 查看日志：
+
 ```powershell
 docker compose -f docker-compose.dev.yml logs -f pg     # 仅 PostgreSQL
 docker compose -f docker-compose.dev.yml logs -f redis   # 仅 Redis
@@ -40,7 +52,7 @@ docker compose -f docker-compose.dev.yml logs -f redis   # 仅 Redis
 ```powershell
 # PostgreSQL 18
 docker run -d --name r1-pg `
-  -p 5432:5432 `
+  -p 127.0.0.1:5432:5432 `
   -e POSTGRES_DB=round1 `
   -e POSTGRES_USER=round1 `
   -e POSTGRES_PASSWORD=round1_dev `
@@ -49,7 +61,7 @@ docker run -d --name r1-pg `
 
 # Redis 8 (Alpine)
 docker run -d --name r1-redis `
-  -p 6379:6379 `
+  -p 127.0.0.1:6379:6379 `
   -v r1-redisdata:/data `
   redis:8-alpine redis-server --save 60 1 --loglevel warning
 ```
@@ -72,5 +84,6 @@ REDIS_URL=redis://127.0.0.1:6379
 ```
 
 ## 启动开发
-cd D:\round1
-npm run dev:client   # → http://localhost:5173/dev/ui-gallery
+
+cd D:\WorkSpace\Round1
+npm run dev:client # → https://round1.local:5173/dev/ui-gallery（证书缺失时为 HTTP）
