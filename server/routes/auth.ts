@@ -1,6 +1,6 @@
 import { Router, type Request, type Response, type NextFunction } from "express";
 import crypto from "node:crypto";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, or, sql } from "drizzle-orm";
 import argon2 from "argon2";
 import { z } from "zod";
 
@@ -86,6 +86,10 @@ import { registry } from "../openapi/registry.js";
 
 function sha256(data: string): string {
   return crypto.createHash("sha256").update(data).digest("hex");
+}
+
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
 function regenerateSession(req: Request): Promise<void> {
@@ -261,6 +265,7 @@ authRouter.get(
 
       const passkeys = await db
         .select({
+          id: passkeyCredentials.id,
           credentialId: passkeyCredentials.credentialId,
           backupEligible: passkeyCredentials.backupEligible,
           backupState: passkeyCredentials.backupState,
@@ -295,6 +300,7 @@ authRouter.get(
         passwordEnabled: Boolean(user.passwordHash),
         totpEnabledAt: user.totpEnabledAt,
         passkeys: passkeys.map((passkey) => ({
+          id: passkey.id,
           credentialIdSuffix: passkey.credentialId.slice(-8),
           backupEligible: passkey.backupEligible,
           backupState: passkey.backupState,
@@ -1493,15 +1499,16 @@ authRouter.delete(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const credentialId = req.params.credentialId as string;
+      const credentialFilter = isUuid(credentialId)
+        ? or(
+            eq(passkeyCredentials.id, credentialId),
+            eq(passkeyCredentials.credentialId, credentialId),
+          )
+        : eq(passkeyCredentials.credentialId, credentialId);
 
       const result = await db
         .delete(passkeyCredentials)
-        .where(
-          and(
-            eq(passkeyCredentials.credentialId, credentialId),
-            eq(passkeyCredentials.userId, req.session.userId!),
-          ),
-        );
+        .where(and(credentialFilter, eq(passkeyCredentials.userId, req.session.userId!)));
 
       if (result.rowCount === 0) {
         res.fail("ROUND1_PASSKEY_NOT_FOUND", "未找到对应的 Passkey", 404);

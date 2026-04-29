@@ -6,7 +6,7 @@ export const CreateExamDraftBodySchema = z
   .object({
     examType: z.string().trim().min(1),
     difficulty: DifficultySchema,
-    assignmentId: z.string().uuid().optional(),
+    assignmentId: z.uuid().optional(),
   })
   .strict();
 
@@ -17,7 +17,7 @@ export const AutosaveAnswerPatchSchema = z
     slotNo: z.coerce.number().int().min(1).max(500),
     subKey: z.string().trim().min(1).max(64),
     value: z.string().max(20_000),
-    updatedAt: z.string().datetime().optional(),
+    updatedAt: z.iso.datetime().optional(),
   })
   .strict();
 

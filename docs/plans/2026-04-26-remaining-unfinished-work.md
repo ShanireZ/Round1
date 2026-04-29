@@ -15,6 +15,7 @@
 - Deployment-test readiness evidence is recorded in `docs/plans/2026-04-29-release-readiness.md`. Code/build/UI gates, full local `npm run test`, migration status, and local API/frontend healthcheck pass after starting Docker Desktop and local `pg`/`redis`. Production domain, Caddy/TLS, PM2, backup/restore, Sentry, real mail/Turnstile, Redis degradation, and rollback rehearsals remain target-environment work.
 - 2026-04-29 final page closure pass removed additional user-visible implementation copy across Login/AuthCallback/CompleteProfile, Dashboard, ExamNew/Session/Result, Account, Coach, Admin content/import/review/settings/users, and navigation surfaces. Raw enum/internal strings now remain in code/data contracts unless they are explicitly translated before rendering.
 - 2026-04-29 navigation/a11y closure pass aligned AppShell navigation with the role-aware UI/UX contract: desktop sidebar and mobile Sheet now share the same section helper, student users no longer see Coach/Admin links, mobile users get a Sheet navigation trigger, and Auth/App/Focus layouts expose skip-to-content. The visual audit now includes a dedicated role-aware/mobile navigation test.
+- 2026-04-29 Passkey/account security closure pass removed the older browser UX blocker: `client` now includes `@simplewebauthn/browser`; `/login` exposes Passkey login when the provider is enabled; `/account/security` exposes Passkey binding/removal in the Passkey/OIDC tab and adds a current-session logout panel. Full per-device session inventory remains a future backend model rather than a current code-surface blocker.
 
 ## 2026-04-28 Maintenance Addendum: Coach Class Detail UI
 
@@ -28,14 +29,14 @@
 - Closed from the UI/UX placeholder backlog in this slice: `/register`, `/forgot-password`, `/auth/callback`, `/auth/complete-profile`, and the wildcard not-found surface now route to real AuthLayout-compatible pages instead of generic placeholders.
 - Frontend auth helpers now consume the existing email registration, password reset, email-change callback, and OIDC complete-profile endpoints through CSRF-aware JSON requests. Password reset request copy keeps the anti-enumeration contract and completes from an email-link ticket.
 - A2UI BYOC coverage expanded with `Round1AuthEntrySnapshot`; the `/dev/ui-gallery` design surface includes auth-entry coverage through the guarded local payload factory rather than page-scoped long JSON.
-- Follow-up status: passkey registration/delete browser UX still needs `@simplewebauthn/browser` and recent-auth flow polish. Auth entry routes entered the 2026-04-29 visual audit; keyboard/reduced-motion/print manual evidence remains target-environment release work.
+- Follow-up status: passkey registration/delete browser UX is now implemented with `@simplewebauthn/browser`; remaining auth release evidence is keyboard/reduced-motion/manual browser verification in the target environment.
 - Verification recorded for this slice: `npm run client:test -- src/lib/auth.test.ts src/lib/a2ui-design-surface.test.ts` passed outside the default sandbox after `spawn EPERM`, `npm run verify:ui-tokens` passed, `npm run build:client` passed, and the targeted Playwright auth-entry visual smoke passed with `ROUND1_PLAYWRIGHT_BROWSER_CHANNEL=chrome` after the bundled Chromium executable was missing.
 
 ## 2026-04-28 Maintenance Addendum: Account/Class UI
 
 - Closed from the UI/UX placeholder backlog in this slice: `/account/class`, `/join`, and `/account/security` now route to real pages instead of generic placeholders.
 - New current-state APIs for those pages: `GET /api/v1/classes/mine` returns the signed-in user's joined classes with assignment counters, and `GET /api/v1/auth/security/summary` returns the account security snapshot consumed by the account page.
-- Subsequent Auth Entry UI work closed the `/register`, `/forgot-password`, `/auth/callback`, and not-found placeholder debt. Follow-up status: passkey registration/delete UX still needs a browser client dependency and recent-auth flow polish; Account routes entered the 2026-04-29 visual audit, while keyboard/reduced-motion/print manual evidence remains target-environment release work.
+- Subsequent Auth Entry UI work closed the `/register`, `/forgot-password`, `/auth/callback`, and not-found placeholder debt. Follow-up status: Passkey browser login/bind/delete now uses `@simplewebauthn/browser`; Account routes entered the 2026-04-29 visual audit, while keyboard/reduced-motion/print manual evidence remains target-environment release work.
 - Verification recorded for this slice: focused client tests, focused coach class API tests, `verify:ui-tokens`, `build:client`, and `build:server` passed.
 
 > 生成日期：2026-04-26

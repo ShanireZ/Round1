@@ -1,24 +1,36 @@
 import { type FormEvent, useMemo, useState } from "react";
+import { startRegistration } from "@simplewebauthn/browser";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useSearchParams } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import {
   ArrowRight,
   CheckCircle2,
+  Fingerprint,
   KeyRound,
   Link2,
   LockKeyhole,
   LogIn,
+  LogOut,
   Mail,
   RotateCcw,
   ShieldCheck,
   ShieldQuestion,
   Smartphone,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,14 +39,17 @@ import {
   changePassword,
   confirmEmailChange,
   deleteTotpEnrollment,
+  deletePasskeyCredential,
   fetchAccountSecuritySummary,
+  fetchPasskeyRegistrationOptions,
   formatAccountDate,
   requestEmailChange,
   startTotpEnrollment,
+  verifyPasskeyRegistration,
   verifyEmailChangeCode,
   verifyTotpEnrollment,
 } from "@/lib/account";
-import { fetchAuthSession } from "@/lib/auth";
+import { fetchAuthSession, logout } from "@/lib/auth";
 import { fetchClientRuntimeConfig } from "@/lib/client-config";
 
 function LoadingAccountSecurity() {
@@ -76,6 +91,22 @@ function formatExternalProviderLabel(provider: string) {
   if (provider === "cpplearn") return "CppLearn";
   if (provider === "qq") return "QQ 互联";
   return provider;
+}
+
+function formatPasskeyError(error: unknown, fallback: string) {
+  if (error instanceof Error) {
+    if (error.name === "NotAllowedError") {
+      return "Passkey 操作已取消或超时。";
+    }
+
+    if (error.name === "InvalidStateError") {
+      return "这个设备上可能已经绑定过同一个 Passkey。";
+    }
+
+    return error.message;
+  }
+
+  return fallback;
 }
 
 function LoginRequired() {
@@ -281,6 +312,7 @@ function TotpPanel({ enabled }: { enabled: boolean }) {
   const queryClient = useQueryClient();
   const [otpauthUrl, setOtpauthUrl] = useState("");
   const [code, setCode] = useState("");
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const startMutation = useMutation({
     mutationFn: startTotpEnrollment,
@@ -309,6 +341,7 @@ function TotpPanel({ enabled }: { enabled: boolean }) {
   const deleteMutation = useMutation({
     mutationFn: deleteTotpEnrollment,
     onSuccess: async () => {
+      setConfirmDeleteOpen(false);
       toast.success("TOTP 已关闭");
       await queryClient.invalidateQueries({ queryKey: ["account-security"] });
     },
@@ -318,77 +351,297 @@ function TotpPanel({ enabled }: { enabled: boolean }) {
   });
 
   return (
-    <Card variant="flat" className="border-border bg-card">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Smartphone className="text-primary h-5 w-5" />
-          TOTP
-        </CardTitle>
-        <CardDescription>使用一次性验证码作为敏感操作的二次验证方式。</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {enabled ? (
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-2">
-              <Badge variant="saved">已启用</Badge>
-              <span className="text-muted-foreground text-sm">当前账号已启用 TOTP。</span>
-            </div>
-            <Button
-              type="button"
-              variant="secondary"
-              loading={deleteMutation.isPending}
-              onClick={() => {
-                if (window.confirm("确认关闭 TOTP？该操作需要最近一次强认证仍有效。")) {
-                  deleteMutation.mutate();
-                }
-              }}
-            >
-              关闭 TOTP
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <Button
-              type="button"
-              variant="secondary"
-              loading={startMutation.isPending}
-              onClick={() => startMutation.mutate()}
-            >
-              生成 TOTP 密钥
-            </Button>
-
-            {otpauthUrl ? (
-              <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
-                <div className="text-foreground text-sm font-medium">验证器链接</div>
-                <div className="text-muted-foreground mt-2 font-mono text-xs break-all">
-                  {otpauthUrl}
-                </div>
-              </div>
-            ) : null}
-
-            <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
-              <div className="space-y-2">
-                <Label htmlFor="totp-code">验证码</Label>
-                <Input
-                  id="totp-code"
-                  value={code}
-                  onChange={(event) => setCode(event.target.value)}
-                  inputMode="numeric"
-                  maxLength={6}
-                  disabled={!otpauthUrl}
-                />
+    <>
+      <Card variant="flat" className="border-border bg-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Smartphone className="text-primary h-5 w-5" />
+            TOTP
+          </CardTitle>
+          <CardDescription>使用一次性验证码作为敏感操作的二次验证方式。</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {enabled ? (
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-2">
+                <Badge variant="saved">已启用</Badge>
+                <span className="text-muted-foreground text-sm">当前账号已启用 TOTP。</span>
               </div>
               <Button
                 type="button"
-                loading={verifyMutation.isPending}
-                disabled={!otpauthUrl || code.trim().length !== 6}
-                onClick={() => verifyMutation.mutate()}
+                variant="secondary"
+                loading={deleteMutation.isPending}
+                onClick={() => setConfirmDeleteOpen(true)}
               >
-                启用 TOTP
+                关闭 TOTP
               </Button>
             </div>
+          ) : (
+            <div className="space-y-4">
+              <Button
+                type="button"
+                variant="secondary"
+                loading={startMutation.isPending}
+                onClick={() => startMutation.mutate()}
+              >
+                生成 TOTP 密钥
+              </Button>
+
+              {otpauthUrl ? (
+                <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
+                  <div className="text-foreground text-sm font-medium">验证器链接</div>
+                  <div className="text-muted-foreground mt-2 font-mono text-xs break-all">
+                    {otpauthUrl}
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+                <div className="space-y-2">
+                  <Label htmlFor="totp-code">验证码</Label>
+                  <Input
+                    id="totp-code"
+                    value={code}
+                    onChange={(event) => setCode(event.target.value)}
+                    inputMode="numeric"
+                    maxLength={6}
+                    disabled={!otpauthUrl}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  loading={verifyMutation.isPending}
+                  disabled={!otpauthUrl || code.trim().length !== 6}
+                  onClick={() => verifyMutation.mutate()}
+                >
+                  启用 TOTP
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>关闭 TOTP？</DialogTitle>
+            <DialogDescription>
+              关闭后账号将少一个二次验证方式，该操作需要最近一次强认证仍有效。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="secondary" onClick={() => setConfirmDeleteOpen(false)}>
+              取消
+            </Button>
+            <Button
+              type="button"
+              loading={deleteMutation.isPending}
+              onClick={() => deleteMutation.mutate()}
+            >
+              确认关闭
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+function PasskeyPanel({
+  passkeys,
+}: {
+  passkeys: Awaited<ReturnType<typeof fetchAccountSecuritySummary>>["passkeys"];
+}) {
+  const queryClient = useQueryClient();
+  const [pendingDeletePasskey, setPendingDeletePasskey] = useState<(typeof passkeys)[number] | null>(
+    null,
+  );
+
+  const registerMutation = useMutation({
+    mutationFn: async () => {
+      const optionsJSON = await fetchPasskeyRegistrationOptions();
+      const credential = await startRegistration({ optionsJSON });
+      return verifyPasskeyRegistration(credential);
+    },
+    onSuccess: async () => {
+      toast.success("Passkey 已绑定");
+      await queryClient.invalidateQueries({ queryKey: ["account-security"] });
+    },
+    onError: (error) => {
+      toast.error(formatPasskeyError(error, "Passkey 绑定失败"));
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deletePasskeyCredential,
+    onSuccess: async () => {
+      setPendingDeletePasskey(null);
+      toast.success("Passkey 已移除");
+      await queryClient.invalidateQueries({ queryKey: ["account-security"] });
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Passkey 移除失败");
+    },
+  });
+
+  return (
+    <>
+      <Card variant="flat" className="border-border bg-card">
+        <CardHeader className="gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Fingerprint className="text-primary h-5 w-5" />
+              Passkey
+            </CardTitle>
+            <CardDescription>用设备解锁、系统账户或安全密钥作为免密码凭据。</CardDescription>
           </div>
-        )}
+          <Button
+            type="button"
+            variant="secondary"
+            loading={registerMutation.isPending}
+            onClick={() => registerMutation.mutate()}
+          >
+            绑定 Passkey
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {passkeys.length === 0 ? (
+            <div className="border-border bg-subtle/10 rounded-[var(--radius-md)] border border-dashed p-4">
+              <div className="text-foreground flex items-center gap-2 text-sm font-medium">
+                <KeyRound className="text-muted-foreground h-4 w-4" />
+                还没有绑定 Passkey
+              </div>
+              <p className="text-muted-foreground mt-2 text-sm leading-6">
+                绑定后可在登录页使用 Passkey 进入 Round1。
+              </p>
+            </div>
+          ) : (
+            passkeys.map((passkey) => (
+              <div
+                key={passkey.id}
+                className="border-border bg-subtle/15 flex flex-col gap-3 rounded-[var(--radius-md)] border p-4 md:flex-row md:items-center md:justify-between"
+              >
+                <div className="min-w-0">
+                  <div className="text-foreground font-medium">
+                    Passkey · {passkey.credentialIdSuffix}
+                  </div>
+                  <div className="text-muted-foreground mt-1 flex flex-wrap gap-2 text-xs">
+                    <span>{formatAccountDate(passkey.createdAt)}</span>
+                    <span>{passkey.backupEligible ? "可同步" : "单设备"}</span>
+                    <span>{passkey.backupState ? "已备份" : "未备份"}</span>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  loading={deleteMutation.isPending && deleteMutation.variables === passkey.id}
+                  onClick={() => setPendingDeletePasskey(passkey)}
+                >
+                  <Trash2 />
+                  移除
+                </Button>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog
+        open={Boolean(pendingDeletePasskey)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingDeletePasskey(null);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>移除这个 Passkey？</DialogTitle>
+            <DialogDescription>
+              移除后将无法再用这个凭据登录。你仍可继续使用密码或其他已绑定方式。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="secondary" onClick={() => setPendingDeletePasskey(null)}>
+              取消
+            </Button>
+            <Button
+              type="button"
+              loading={deleteMutation.isPending}
+              disabled={!pendingDeletePasskey}
+              onClick={() => {
+                if (pendingDeletePasskey) {
+                  deleteMutation.mutate(pendingDeletePasskey.id);
+                }
+              }}
+            >
+              确认移除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+function SessionsPanel({
+  summary,
+}: {
+  summary: Awaited<ReturnType<typeof fetchAccountSecuritySummary>>;
+}) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const logoutMutation = useMutation({
+    mutationFn: logout,
+    onSuccess: async () => {
+      toast.success("已退出当前会话");
+      await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+      navigate("/login", { replace: true });
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "退出登录失败");
+    },
+  });
+
+  return (
+    <Card variant="flat" className="border-border bg-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <LogOut className="text-primary h-5 w-5" />
+          会话
+        </CardTitle>
+        <CardDescription>当前浏览器会话与账号强认证状态。</CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="grid gap-3 md:grid-cols-3">
+          <div className="border-border bg-subtle/15 rounded-[var(--radius-md)] border p-4">
+            <div className="text-muted-foreground text-xs">当前账号</div>
+            <div className="text-foreground mt-1 font-semibold">{summary.profile.displayName}</div>
+            <div className="text-muted-foreground mt-1 font-mono text-xs">
+              @{summary.profile.username}
+            </div>
+          </div>
+          <div className="border-border bg-subtle/15 rounded-[var(--radius-md)] border p-4">
+            <div className="text-muted-foreground text-xs">强认证</div>
+            <div className="text-foreground mt-1 font-semibold">
+              {formatAccountDate(summary.profile.lastStrongAuthAt)}
+            </div>
+          </div>
+          <div className="border-border bg-subtle/15 rounded-[var(--radius-md)] border p-4">
+            <div className="text-muted-foreground text-xs">其他设备</div>
+            <div className="text-foreground mt-1 text-sm font-semibold">改密后失效</div>
+          </div>
+        </div>
+        <Button
+          type="button"
+          variant="secondary"
+          loading={logoutMutation.isPending}
+          onClick={() => logoutMutation.mutate()}
+        >
+          退出当前会话
+        </Button>
       </CardContent>
     </Card>
   );
@@ -537,15 +790,16 @@ export default function AccountSecurityPage() {
         </Card>
       </div>
 
-      <Tabs defaultValue="identity">
+      <Tabs defaultValue="passkey">
         <TabsList className="w-full overflow-x-auto">
-          <TabsTrigger value="identity">身份</TabsTrigger>
+          <TabsTrigger value="passkey">Passkey/OIDC</TabsTrigger>
           <TabsTrigger value="password">密码</TabsTrigger>
           <TabsTrigger value="email">邮箱</TabsTrigger>
           <TabsTrigger value="totp">TOTP</TabsTrigger>
+          <TabsTrigger value="sessions">会话</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="identity" className="space-y-4">
+        <TabsContent value="passkey" className="space-y-4">
           <Card variant="flat" className="border-border bg-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -635,6 +889,8 @@ export default function AccountSecurityPage() {
               ) : null}
             </CardContent>
           </Card>
+
+          <PasskeyPanel passkeys={summary.passkeys} />
         </TabsContent>
 
         <TabsContent value="password">
@@ -647,6 +903,10 @@ export default function AccountSecurityPage() {
 
         <TabsContent value="totp">
           <TotpPanel enabled={Boolean(summary.totpEnabledAt)} />
+        </TabsContent>
+
+        <TabsContent value="sessions">
+          <SessionsPanel summary={summary} />
         </TabsContent>
       </Tabs>
     </div>

@@ -55,7 +55,7 @@ export const AdminSettingUpdateBody = z.object({
 
 export const PrebuiltPaperSlotInputSchema = z.object({
   slotNo: z.coerce.number().int().min(1),
-  questionId: z.string().uuid().or(z.string().min(1)),
+  questionId: z.uuid().or(z.string().min(1)),
   questionType: QuestionTypeSchema,
   primaryKpId: z.coerce.number().int().positive(),
   difficulty: DifficultySchema,

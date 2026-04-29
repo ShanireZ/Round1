@@ -216,4 +216,4 @@ interface ClientConfig {
 
 - `/account/class` and `/join` are now backed by `GET /api/v1/classes/mine` plus `POST /api/v1/classes/join`; `/join` accepts both `code` and `invite` query parameters and then submits through the same join API.
 - `/account/security` is now backed by `GET /api/v1/auth/security/summary` plus the existing password, email change, TOTP, external identity, and passkey endpoints.
-- `GET /api/v1/auth/security/summary` intentionally returns passkey metadata only. Full passkey registration/deletion browser UX remains a later frontend slice.
+- `GET /api/v1/auth/security/summary` returns passkey metadata plus the opaque credential row id needed for user-initiated deletion; it does not expose public key material or full credential payloads. `/login` and `/account/security` now use `@simplewebauthn/browser` for Passkey login, registration, and deletion flows.

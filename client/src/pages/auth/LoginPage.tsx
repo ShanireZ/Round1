@@ -1,4 +1,5 @@
 import { type FormEvent, useState } from "react";
+import { startAuthentication } from "@simplewebauthn/browser";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { ArrowRight, CircleAlert, KeyRound, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
@@ -9,7 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { fetchClientRuntimeConfig } from "@/lib/client-config";
-import { AuthClientError, passwordLogin, resolveAuthReturnTo } from "@/lib/auth";
+import {
+  AuthClientError,
+  fetchPasskeyLoginOptions,
+  passwordLogin,
+  resolveAuthReturnTo,
+  verifyPasskeyLogin,
+} from "@/lib/auth";
 import { CPPLEARN_BANNER_SRC } from "@/lib/brand-assets";
 
 function startExternalAuth(provider: "cpplearn" | "qq") {
@@ -18,6 +25,24 @@ function startExternalAuth(provider: "cpplearn" | "qq") {
       ? "/api/v1/auth/oidc/cpplearn/start?intent=login"
       : "/api/v1/auth/external/qq/start?intent=login";
   window.location.assign(target);
+}
+
+function formatPasskeyLoginError(error: unknown) {
+  if (error instanceof AuthClientError) {
+    return error.message;
+  }
+
+  if (error instanceof Error) {
+    if (error.name === "NotAllowedError") {
+      return "Passkey 验证已取消或超时。";
+    }
+
+    if (error.name === "InvalidStateError") {
+      return "这个 Passkey 当前不可用于登录，请换一个凭据或使用密码登录。";
+    }
+  }
+
+  return "Passkey 登录失败，请稍后重试。";
 }
 
 export default function LoginPage() {
@@ -37,6 +62,7 @@ export default function LoginPage() {
   });
   const providers = configQuery.data?.enabledAuthProviders ?? ["password"];
   const providerPlaceholders = configQuery.data?.authProviderPlaceholders ?? [];
+  const passkeyEnabled = providers.includes("passkey");
   const cppLearnEnabled = providers.includes("cpplearn");
   const qqPlaceholderEnabled = providerPlaceholders.includes("qq");
 
@@ -54,6 +80,24 @@ export default function LoginPage() {
     },
   });
 
+  const passkeyLoginMutation = useMutation({
+    mutationFn: async () => {
+      const optionsJSON = await fetchPasskeyLoginOptions();
+      const credential = await startAuthentication({ optionsJSON });
+      return verifyPasskeyLogin(credential);
+    },
+    onSuccess: async () => {
+      setFormError(null);
+      await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+      navigate(returnTo, { replace: true });
+    },
+    onError: (error) => {
+      const message = formatPasskeyLoginError(error);
+      setFormError(message);
+      toast.error(message);
+    },
+  });
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError(null);
@@ -61,13 +105,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="login-page">
       <div className="space-y-3">
         <Badge variant="outline">Round1 Account</Badge>
         <div className="space-y-2">
           <h1 className="text-foreground text-2xl font-semibold tracking-tight">登录</h1>
           <p className="text-muted-foreground text-sm leading-6">
-            使用账号密码或已开放的外部身份继续训练。
+            使用账号密码、Passkey 或已开放的外部身份继续训练。
           </p>
         </div>
       </div>
@@ -133,8 +177,36 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      {cppLearnEnabled || qqPlaceholderEnabled ? (
+      {passkeyEnabled || cppLearnEnabled || qqPlaceholderEnabled ? (
         <div className="border-border space-y-3 border-t pt-5">
+          {passkeyEnabled ? (
+            <div className="border-border bg-subtle/40 rounded-[var(--radius-lg)] border p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="border-border bg-surface grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius-md)] border">
+                    <KeyRound className="text-primary h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-foreground text-sm font-semibold">Passkey</div>
+                    <div className="text-muted-foreground mt-1 text-xs">
+                      使用设备解锁或安全密钥登录
+                    </div>
+                  </div>
+                </div>
+                <Badge variant="saved">免密码</Badge>
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                className="mt-4 w-full"
+                loading={passkeyLoginMutation.isPending}
+                onClick={() => passkeyLoginMutation.mutate()}
+              >
+                使用 Passkey 登录
+              </Button>
+            </div>
+          ) : null}
+
           {cppLearnEnabled ? (
             <div className="border-border bg-subtle/40 rounded-[var(--radius-lg)] border p-4">
               <div className="flex items-center gap-3">

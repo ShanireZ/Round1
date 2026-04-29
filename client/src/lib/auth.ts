@@ -1,3 +1,5 @@
+import type { StartAuthenticationOpts } from "@simplewebauthn/browser";
+
 export type AuthSessionUser = {
   id: string;
   username: string;
@@ -254,5 +256,29 @@ export function completeExternalProfile(
   return requestAuthJson<{ userId: string; username: string }>("/api/v1/auth/complete-profile", {
     method: "POST",
     body: JSON.stringify(payload),
+  });
+}
+
+export function fetchPasskeyLoginOptions(): Promise<StartAuthenticationOpts["optionsJSON"]> {
+  return requestAuthJson<StartAuthenticationOpts["optionsJSON"]>(
+    "/api/v1/auth/login/passkey/options",
+    {
+      method: "POST",
+      body: JSON.stringify({}),
+    },
+  );
+}
+
+export function verifyPasskeyLogin(credential: unknown): Promise<{ verified: boolean }> {
+  return requestAuthJson<{ verified: boolean }>("/api/v1/auth/login/passkey/verify", {
+    method: "POST",
+    body: JSON.stringify(credential),
+  });
+}
+
+export function logout(): Promise<{ message: string }> {
+  return requestAuthJson<{ message: string }>("/api/v1/auth/logout", {
+    method: "POST",
+    body: JSON.stringify({}),
   });
 }

@@ -1,3 +1,5 @@
+import type { StartRegistrationOpts } from "@simplewebauthn/browser";
+
 import { getCachedAuthCsrfToken } from "./auth";
 
 export type StudentClassSummary = {
@@ -39,6 +41,7 @@ export type AccountSecuritySummary = {
   passwordEnabled: boolean;
   totpEnabledAt: string | null;
   passkeys: Array<{
+    id: string;
     credentialIdSuffix: string;
     backupEligible: boolean;
     backupState: boolean;
@@ -171,6 +174,29 @@ export function joinClass(payload: { code?: string; inviteToken?: string }) {
 
 export function fetchAccountSecuritySummary() {
   return requestJson<AccountSecuritySummary>("/api/v1/auth/security/summary");
+}
+
+export function fetchPasskeyRegistrationOptions(): Promise<StartRegistrationOpts["optionsJSON"]> {
+  return requestJson<StartRegistrationOpts["optionsJSON"]>(
+    "/api/v1/auth/passkeys/register/options",
+    {
+      method: "POST",
+      body: JSON.stringify({}),
+    },
+  );
+}
+
+export function verifyPasskeyRegistration(credential: unknown): Promise<{ verified: boolean }> {
+  return requestJson<{ verified: boolean }>("/api/v1/auth/passkeys/register/verify", {
+    method: "POST",
+    body: JSON.stringify(credential),
+  });
+}
+
+export function deletePasskeyCredential(id: string): Promise<{ deleted: boolean }> {
+  return requestJson<{ deleted: boolean }>(`/api/v1/auth/passkeys/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
 }
 
 export function changePassword(payload: { currentPassword: string; newPassword: string }) {

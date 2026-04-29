@@ -214,7 +214,7 @@ const envSchema = z.object({
   ROUND1_INITIAL_ADMIN_PASSWORD: z.string().default(""),
 
   // Database
-  DATABASE_URL: z.string().url(),
+  DATABASE_URL: z.url(),
   DATABASE_POOL_MAX_API: z.coerce.number().default(10),
   DATABASE_POOL_MAX_WORKER: z.coerce.number().default(5),
   DATABASE_STATEMENT_TIMEOUT_MS: z.coerce.number().default(30000),
@@ -245,8 +245,8 @@ const envSchema = z.object({
   AUTH_LOGIN_FAIL_PER_DEVICE_PER_10M: z.coerce.number().default(20),
   AUTH_REGISTER_PER_IP_PER_10M: z.coerce.number().default(20),
   AUTH_STEP_UP_WINDOW_MINUTES: z.coerce.number().default(10),
-  APP_PUBLIC_URL: z.string().url().default("https://round1.local"),
-  APP_API_ORIGIN: z.string().url().default("https://round1.local"),
+  APP_PUBLIC_URL: z.url().default("https://round1.local"),
+  APP_API_ORIGIN: z.url().default("https://round1.local"),
   TRUST_PROXY_HOPS: z.coerce.number().default(1),
   DEV_HTTPS_CERT: z.string().default("./certs/dev-cert.pem"),
   DEV_HTTPS_KEY: z.string().default("./certs/dev-key.pem"),

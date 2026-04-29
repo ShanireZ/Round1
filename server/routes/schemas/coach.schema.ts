@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { registry } from "../../openapi/registry.js";
 
-const UuidSchema = z.string().uuid();
+const UuidSchema = z.uuid();
 const ClassCoachRoleSchema = z.enum(["owner", "collaborator"]);
 const DifficultySchema = z.enum(["easy", "medium", "hard"]);
 
@@ -40,7 +40,7 @@ export const CreateClassInviteBodySchema = registry.register(
   "CreateClassInviteBody",
   z
     .object({
-      expiresAt: z.string().datetime(),
+      expiresAt: z.iso.datetime(),
       maxUses: z.coerce.number().int().min(1).max(10_000).default(50),
     })
     .strict(),
@@ -62,7 +62,7 @@ export const CreateAssignmentBodySchema = registry.register(
       classId: UuidSchema,
       title: z.string().trim().min(1).max(200),
       prebuiltPaperId: UuidSchema,
-      dueAt: z.string().datetime(),
+      dueAt: z.iso.datetime(),
     })
     .strict(),
 );
@@ -72,7 +72,7 @@ export const UpdateAssignmentBodySchema = registry.register(
   z
     .object({
       title: z.string().trim().min(1).max(200).optional(),
-      dueAt: z.string().datetime().optional(),
+      dueAt: z.iso.datetime().optional(),
     })
     .strict()
     .refine((value) => Object.keys(value).length > 0, {

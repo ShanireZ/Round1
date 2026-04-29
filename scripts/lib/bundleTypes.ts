@@ -86,7 +86,7 @@ const ExplanationSchema = z.object({
 
 export const BundleIntegritySchema = z.object({
   algorithm: z.literal(CHECKSUM_ALGORITHM),
-  generatedAt: z.string().datetime(),
+  generatedAt: z.iso.datetime(),
   itemChecksums: z.array(
     z.object({
       itemIndex: z.number().int().min(0),
@@ -96,7 +96,7 @@ export const BundleIntegritySchema = z.object({
 });
 
 export const BundleValidationMetaSchema = z.object({
-  validatedAt: z.string().datetime(),
+  validatedAt: z.iso.datetime(),
   validatorVersion: z.string().min(1),
   checksumAlgorithm: z.literal(CHECKSUM_ALGORITHM),
   dbChecksSkipped: z.boolean().optional(),
@@ -151,14 +151,14 @@ export const QuestionBundleMetaSchema = z.object({
   bundleType: z.literal("question_bundle"),
   schemaVersion: z.literal(BUNDLE_SCHEMA_VERSION),
   runId: OfflineRunIdSchema,
-  createdAt: z.string().datetime(),
-  generatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  generatedAt: z.iso.datetime(),
   provider: z.string().min(1),
   model: z.string().min(1),
   promptHash: z.string().length(64),
   sourceBatchId: z.string().min(1),
   sourceBatchIds: z.array(z.string().min(1)).min(1),
-  sourceTimestamp: z.string().datetime(),
+  sourceTimestamp: z.iso.datetime(),
   examType: ExamTypeSchema,
   questionType: QuestionTypeSchema,
   primaryKpCode: z.string().min(1),
@@ -188,7 +188,7 @@ export const QuestionBundleSchema = z.object({
 
 export const PrebuiltPaperSlotSchema = z.object({
   slotNo: z.number().int().min(1),
-  questionId: z.string().uuid(),
+  questionId: z.uuid(),
   questionType: QuestionTypeSchema,
   primaryKpId: z.number().int().positive(),
   difficulty: DifficultySchema,
@@ -208,14 +208,14 @@ export const PrebuiltPaperBundleMetaSchema = z.object({
   bundleType: z.literal("prebuilt_paper_bundle"),
   schemaVersion: z.literal(BUNDLE_SCHEMA_VERSION),
   runId: OfflineRunIdSchema,
-  createdAt: z.string().datetime(),
-  builtAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  builtAt: z.iso.datetime(),
   provider: z.string().min(1).optional(),
   model: z.string().min(1).optional(),
   promptHash: z.string().length(64).optional(),
   sourceBatchId: z.string().min(1),
   sourceBatchIds: z.array(z.string().min(1)).min(1),
-  sourceTimestamp: z.string().datetime(),
+  sourceTimestamp: z.iso.datetime(),
   examType: ExamTypeSchema,
   difficulty: DifficultySchema,
   requestedCount: z.number().int().positive(),

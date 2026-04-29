@@ -8,7 +8,7 @@ export const UsernameSchema = z
   .max(20)
   .regex(/^[A-Za-z0-9]+$/);
 export const PasswordSchema = z.string().min(8).max(128);
-export const EmailSchema = z.string().email().max(255);
+export const EmailSchema = z.email().max(255);
 
 // Register request-challenge
 export const RegisterRequestChallengeBody = registry.register(
@@ -18,7 +18,7 @@ export const RegisterRequestChallengeBody = registry.register(
     turnstileToken: z.string().optional(),
     powSolution: z
       .object({
-        challengeId: z.string().uuid(),
+        challengeId: z.uuid(),
         nonce: z.string().min(1),
       })
       .optional(),
@@ -29,7 +29,7 @@ export const RegisterRequestChallengeBody = registry.register(
 export const VerifyCodeBody = registry.register(
   "VerifyCodeBody",
   z.object({
-    challengeId: z.string().uuid(),
+    challengeId: z.uuid(),
     code: z.string().length(6),
   }),
 );
@@ -38,7 +38,7 @@ export const VerifyCodeBody = registry.register(
 export const RedeemLinkBody = registry.register(
   "RedeemLinkBody",
   z.object({
-    challengeId: z.string().uuid(),
+    challengeId: z.uuid(),
     token: z.string().min(1),
   }),
 );
@@ -64,7 +64,7 @@ export const PasswordLoginBody = registry.register(
     turnstileToken: z.string().optional(),
     powSolution: z
       .object({
-        challengeId: z.string().uuid(),
+        challengeId: z.uuid(),
         nonce: z.string().min(1),
       })
       .optional(),
@@ -80,7 +80,7 @@ export const PasswordResetRequestBody = registry.register(
     turnstileToken: z.string().optional(),
     powSolution: z
       .object({
-        challengeId: z.string().uuid(),
+        challengeId: z.uuid(),
         nonce: z.string().min(1),
       })
       .optional(),
@@ -141,7 +141,7 @@ export const AuthSessionResponse = registry.register(
     authenticated: z.boolean(),
     user: z
       .object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         username: z.string(),
         displayName: z.string(),
         role: z.enum(["student", "coach", "admin"]),
@@ -155,7 +155,7 @@ export const AuthSecuritySummaryResponse = registry.register(
   "AuthSecuritySummaryResponse",
   z.object({
     profile: z.object({
-      id: z.string().uuid(),
+      id: z.uuid(),
       username: z.string(),
       displayName: z.string(),
       role: z.enum(["student", "coach", "admin"]),
@@ -165,7 +165,7 @@ export const AuthSecuritySummaryResponse = registry.register(
     }),
     email: z
       .object({
-        email: z.string().email(),
+        email: z.email(),
         verifiedAt: z.date().nullable().or(z.string().nullable()),
         source: z.string(),
       })
@@ -174,6 +174,7 @@ export const AuthSecuritySummaryResponse = registry.register(
     totpEnabledAt: z.date().nullable().or(z.string().nullable()),
     passkeys: z.array(
       z.object({
+        id: z.uuid(),
         credentialIdSuffix: z.string(),
         backupEligible: z.boolean(),
         backupState: z.boolean(),
@@ -194,19 +195,17 @@ export const AuthSecuritySummaryResponse = registry.register(
 // Passkey login options body
 export const PasskeyLoginOptionsBody = registry.register(
   "PasskeyLoginOptionsBody",
-  z.object({}).passthrough(),
+  z.looseObject({}),
 );
 
-const PasskeyCredentialResponseBody = z
-  .object({
-    id: z.string().min(1),
-    rawId: z.string().optional(),
-    response: z.record(z.string(), z.unknown()),
-    type: z.string().optional(),
-    clientExtensionResults: z.record(z.string(), z.unknown()).optional(),
-    authenticatorAttachment: z.string().optional(),
-  })
-  .passthrough();
+const PasskeyCredentialResponseBody = z.looseObject({
+  id: z.string().min(1),
+  rawId: z.string().optional(),
+  response: z.record(z.string(), z.unknown()),
+  type: z.string().optional(),
+  clientExtensionResults: z.record(z.string(), z.unknown()).optional(),
+  authenticatorAttachment: z.string().optional(),
+});
 
 // Passkey login verify body
 export const PasskeyLoginVerifyBody = registry.register(
@@ -217,7 +216,7 @@ export const PasskeyLoginVerifyBody = registry.register(
 // Passkey register options
 export const PasskeyRegisterOptionsBody = registry.register(
   "PasskeyRegisterOptionsBody",
-  z.object({}).passthrough(),
+  z.looseObject({}),
 );
 
 // Passkey register verify

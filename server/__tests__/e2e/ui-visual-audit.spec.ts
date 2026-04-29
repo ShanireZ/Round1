@@ -110,7 +110,7 @@ async function installAuthEntryRoutes(page: Page) {
           examDraftTtlMinutes: 1440,
           availableExamTypes: ["CSP-J", "CSP-S"],
           availableDifficulties: ["easy", "medium", "hard"],
-          enabledAuthProviders: ["password"],
+          enabledAuthProviders: ["password", "passkey", "cpplearn"],
           authProviderPlaceholders: [],
         },
       },
@@ -123,6 +123,23 @@ async function waitForFonts(page: Page) {
 }
 
 async function hasHorizontalOverflow(page: Page) {
+  await page.waitForLoadState("domcontentloaded").catch(() => undefined);
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      return await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth > 1,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!message.includes("Execution context was destroyed")) {
+        throw error;
+      }
+
+      await page.waitForLoadState("domcontentloaded").catch(() => undefined);
+    }
+  }
+
   return page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth > 1,
   );
@@ -413,6 +430,7 @@ async function installAccountRoutes(page: Page) {
           totpEnabledAt: "2026-04-21T08:00:00.000Z",
           passkeys: [
             {
+              id: "33333333-3333-4333-8333-333333333333",
               credentialIdSuffix: "9f21",
               backupEligible: true,
               backupState: true,
@@ -1022,6 +1040,7 @@ test("Auth entry surfaces render without desktop or mobile overflow", async ({ p
   await installAuthEntryRoutes(page);
 
   const routes = [
+    { path: "/login", testId: "login-page" },
     { path: "/register", testId: "register-page" },
     { path: "/forgot-password", testId: "forgot-password-page" },
     { path: "/auth/callback?error=access_denied", testId: "auth-callback-page" },
@@ -1033,6 +1052,9 @@ test("Auth entry surfaces render without desktop or mobile overflow", async ({ p
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(route.path);
     await expect(page.getByTestId(route.testId)).toBeVisible();
+    if (route.testId === "login-page") {
+      await expect(page.getByRole("button", { name: "使用 Passkey 登录" })).toBeVisible();
+    }
     await waitForFonts(page);
     expect(await hasHorizontalOverflow(page)).toBe(false);
 

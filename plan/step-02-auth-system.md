@@ -300,4 +300,4 @@
 
 - `/account/security` is no longer a router placeholder. `client/src/pages/account/AccountSecurityPage.tsx` now consumes `GET /api/v1/auth/security/summary` and exposes password change, email change challenge/confirm, TOTP enrollment/verification/delete, and CppLearn bind entry points.
 - The new summary endpoint returns the active profile, primary email state, password/TOTP state, passkey metadata, and external identity bindings. It does not expose passkey credential material.
-- Passkey browser registration/deletion UI remains a later slice because the client package does not currently include `@simplewebauthn/browser`; the page surfaces passkey status rather than pretending the full WebAuthn browser flow is complete.
+- Passkey browser login, registration, and deletion UI is now wired through `@simplewebauthn/browser`; `/login` calls the passkey login options/verify endpoints, and `/account/security` calls the passkey register options/verify plus delete endpoint while continuing to surface passkey metadata only.
