@@ -23,19 +23,19 @@
 
 ## 目录职责
 
-| 目录 | 职责 |
-| --- | --- |
-| `client/` | React 19 + Vite 前端 |
-| `server/` | Express 5 API、服务、DB schema、迁移、运行时 worker |
-| `config/` | 跨 server/scripts 共享配置真源 |
-| `scripts/` | 离线内容生产、导入、迁移、验证、运营脚本 |
-| `plan/` | 长期方案、reference、阶段计划 |
-| `docs/plans/` | 日期化执行计划、收口记录、临时推进记录 |
-| `papers/` | 持久化 question bundle 审计输入 |
-| `artifacts/prebuilt-papers/` | 持久化 prebuilt paper bundle |
-| `artifacts/reports/` | 校验报告、judge 摘要、导入记录导出 |
-| `artifacts/tmp/` | 可清理临时产物 |
-| `standard/` | 当前规范体系 |
+| 目录                         | 职责                                                |
+| ---------------------------- | --------------------------------------------------- |
+| `client/`                    | React 19 + Vite 前端                                |
+| `server/`                    | Express 5 API、服务、DB schema、迁移、运行时 worker |
+| `config/`                    | 跨 server/scripts 共享配置真源                      |
+| `scripts/`                   | 离线内容生产、导入、迁移、验证、运营脚本            |
+| `plan/`                      | 长期方案、reference、阶段计划                       |
+| `docs/plans/`                | 日期化执行计划、收口记录、临时推进记录              |
+| `papers/`                    | 持久化 question bundle 审计输入                     |
+| `artifacts/prebuilt-papers/` | 持久化 prebuilt paper bundle                        |
+| `artifacts/reports/`         | 校验报告、judge 摘要、导入记录导出                  |
+| `artifacts/tmp/`             | 可清理临时产物                                      |
+| `standard/`                  | 当前规范体系                                        |
 
 ## 文件命名
 
@@ -43,7 +43,7 @@
 - UI primitives：沿 shadcn 风格小写 kebab 或小写文件名，如 `button.tsx`。
 - 后端路由：按资源名小写复数或领域名，如 `exams.ts`、`admin.ts`。
 - DB schema：按表或领域小驼峰文件名，如 `prebuiltPapers.ts`。
-- 迁移：三位序号 + 动作，如 `011_add_paper_question_slot_points.ts`。序号不得复用；发现重复序号必须在下一次迁移前收口。
+- 迁移：三位序号 + 动作，如 `013_add_paper_question_slot_points.ts`。序号不得复用；发现重复序号必须在下一次迁移前收口。
 - 测试：与被测对象同名加 `.test.ts`；跨模块流程用 `.integration.test.ts`；浏览器流程用 `.spec.ts`。
 - 执行计划：`docs/plans/YYYY-MM-DD-<topic>.md`。
 
@@ -85,14 +85,14 @@
 
 ## TypeScript 命名细则
 
-| 类型 | 规则 | 说明 |
-| --- | --- | --- |
-| 领域服务 | `<domain><Action>Service` 或清晰动词 | `runtimeConfigService` |
-| 路由 schema | `<domain>.schema.ts` | `exams.schema.ts` |
-| 测试 fixture | `<scenario>.sample.json` | `question-bundle.sample.json` |
-| React hook | `useXxx` | 只在 hook 内调用其他 hooks |
-| Query key | 领域数组 | `["admin", "imports", filters]` |
-| Error helper | `toXxxError` / `isXxxError` | 不用模糊 `handleError` |
+| 类型         | 规则                                 | 说明                            |
+| ------------ | ------------------------------------ | ------------------------------- |
+| 领域服务     | `<domain><Action>Service` 或清晰动词 | `runtimeConfigService`          |
+| 路由 schema  | `<domain>.schema.ts`                 | `exams.schema.ts`               |
+| 测试 fixture | `<scenario>.sample.json`             | `question-bundle.sample.json`   |
+| React hook   | `useXxx`                             | 只在 hook 内调用其他 hooks      |
+| Query key    | 领域数组                             | `["admin", "imports", filters]` |
+| Error helper | `toXxxError` / `isXxxError`          | 不用模糊 `handleError`          |
 
 避免把类型写进名字：`userId` 足够，不写 `userIdString`。
 

@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import type { PoolClient } from "pg";
 
 import { pool } from "../server/db.js";
-import { up as migrate011Up } from "../server/db/migrations/011_add_paper_question_slot_points.js";
+import { up as migrate013Up } from "../server/db/migrations/013_add_paper_question_slot_points.js";
 
 const EXPECTED_ERROR = "paper_question_slots.points backfill incomplete";
 
@@ -35,7 +35,7 @@ async function createTempFixture(client: PoolClient) {
   `);
 }
 
-export async function rehearseMigration011Failure(): Promise<void> {
+export async function rehearsePaperSlotPointsMigrationFailure(): Promise<void> {
   const client = await pool.connect();
 
   try {
@@ -43,15 +43,15 @@ export async function rehearseMigration011Failure(): Promise<void> {
     await createTempFixture(client);
 
     try {
-      await migrate011Up(client as never);
-      throw new Error("Migration 011 unexpectedly succeeded on incomplete historical slot points");
+      await migrate013Up(client as never);
+      throw new Error("Paper slot points migration unexpectedly succeeded on incomplete history");
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (!message.includes(EXPECTED_ERROR)) {
         throw error;
       }
 
-      console.log(`Observed expected migration 011 failure: ${message}`);
+      console.log(`Observed expected paper slot points migration failure: ${message}`);
     }
   } finally {
     await client.query("ROLLBACK").catch(() => undefined);
@@ -63,9 +63,11 @@ export async function rehearseMigration011Failure(): Promise<void> {
 const isDirectRun = process.argv[1] === fileURLToPath(import.meta.url);
 
 if (isDirectRun) {
-  rehearseMigration011Failure().catch((error) => {
+  rehearsePaperSlotPointsMigrationFailure().catch((error) => {
     console.error(
-      error instanceof Error ? error.message : "Migration 011 failure rehearsal crashed",
+      error instanceof Error
+        ? error.message
+        : "Paper slot points migration failure rehearsal crashed",
     );
     process.exitCode = 1;
   });

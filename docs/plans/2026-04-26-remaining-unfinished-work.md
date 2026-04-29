@@ -1,5 +1,12 @@
 # Remaining Unfinished Work Summary
 
+## 2026-04-29 Maintenance Addendum: Deployment Second Round
+
+- 第二轮部署前检查证据已记录在 `docs/plans/2026-04-29-deployment-second-readiness.md`：迁移文件名前缀已从重复 `009`/`010` 收口为 `001` 到 `014` 严格递增，历史 `schema_migrations.name` 通过迁移 alias 兼容；`plan/step-06-deployment.md` 与首次部署手册里的构建/迁移回滚命令漂移已修正。
+- 本地测试链路通过：格式检查、离线资源校验、UI token 校验、lint、client test、全仓 test、client/server build、migration status/up 与 paper slot points 失败演练均通过；lint 仅保留既有 Fast Refresh warning。
+- 本地部署演练通过：构建后的 Node API 以 `NODE_ENV=production` 启动，`vite preview` 托管 `client/dist`，`healthcheck` 通过 API/DB/Redis、前端静态页与 cpp-runner；Postgres 容器内 `pg_dump` / `pg_restore` 到唯一临时库通过并已清理。
+- 目标机仍需完成真实域名、Cloudflare Full Strict、Linux 上的 `caddy validate`、PM2 进程、生产邮件/Turnstile/Sentry、`.env` 权限、Redis 降级、回滚、人工浏览器/打印验收与目标库备份恢复演练。
+
 ## 2026-04-29 Maintenance Addendum: UI/UX V2
 
 - UI/UX 标准真源已升级：`standard/04-ui-ux.md` 现在定义 Precision Workbench x Data Arena、四级动效、A2UI production slot、Recharts/shadcn chart 路线和 V2 验收矩阵；`plan/uiux_plan.md` 改为历史设计理由。2026-04-29 追加收口已把 AppShell 侧栏/移动导航纳入同一角色权限 section，并补齐 skip-to-content。
@@ -126,12 +133,12 @@
 
 ### 6. 部署、运维与安全演练
 
-- [ ] 独立域名可访问并完成 Cloudflare Full Strict + Caddy TLS 验证。（2026-04-29：代码与 UI 门禁已准备好进入部署测试；真实域名/Caddy/TLS 仍需实机执行。）
+- [ ] 独立域名可访问并完成 Cloudflare Full Strict + Caddy TLS 验证。（2026-04-29：代码与 UI 门禁已准备好进入部署测试；第二轮本地 `caddy adapt` 通过，Windows `caddy validate` 受 `/var/log/caddy` 路径限制，真实域名/Caddy/TLS 仍需目标 Linux 主机执行。）
 - [ ] `GET /api/v1/health`、邮件通道、Turnstile、离线内容环境 `cpp-runner` 与 `contentWorker` 分别完成部署验收。（2026-04-28 维护追加：`scripts/healthcheck.ts` 已把 `contentWorker` 从生产 PM2 检查拆出为 `--expect-content-worker` 独立验收，`cpp-runner` 继续用 `--include-offline --runner-url` 检查；真实外部邮件/Turnstile smoke 仍按部署 runbook 人工执行，不能混入常规 health。）
-- [ ] PM2 cluster 模式 2 实例启动与优雅停机演练；生产默认不启动运行时 worker。
+- [ ] PM2 cluster 模式 2 实例启动与优雅停机演练；生产默认不启动运行时 worker。（2026-04-29 第二轮：本机未安装 PM2，`ecosystem.config.cjs` 默认 app 解析通过；真实 PM2 start/reload/jlist 仍需目标机执行。）
 - [ ] 按 2026-04-28 单 VPS 部署推荐完成实机取舍验收：首发使用 Caddy + PM2 + native Postgres/Redis；rootless Podman + Quadlet 仅作为二期镜像化/隔离选项。
 - [ ] 静态资源长期缓存头验证。
-- [ ] `pg_dump` 备份与 `pg_restore` 临时库恢复校验。
+- [ ] `pg_dump` 备份与 `pg_restore` 临时库恢复校验。（2026-04-29 第二轮：本地 Postgres 18 容器内已完成 dump -> 唯一临时库 restore -> 核心表计数校验并清理；生产目标库仍需按 runbook 再做一次。）
 - [ ] Sentry 生产环境 release、采样、敏感信息过滤与事件上报验证。
 - [ ] Redis 断开降级演练：已登录用户重新登录，核心答题数据不丢失。
 - [ ] SPF / DKIM / DMARC 生效，验证码邮件不进垃圾箱。
@@ -139,7 +146,7 @@
 - [ ] 应用层安全加固：`.env` 权限 600、`NODE_ENV=production`、Helmet CSP、CSRF、`__Host-` cookie、`trust proxy = 1`、argon2id。
 - [ ] 数据库层安全加固：Postgres 内网监听、应用用户最小权限、`statement_timeout=30s`、备份权限 600。
 - [x] 生产端口最终设计与防火墙规则需确认。（2026-04-28：`docs/plans/2026-04-28-port-map-and-exposure-plan.md` 已从盘点更新为确认后的端口设计：SSH `9179` 公网且不做 IP allowlist，Caddy `80/443` 公网并强制 HTTPS / TLS 1.2+ / HTTP/2+，Express API `7654` 仅 `127.0.0.1` 给 Caddy 反代，Postgres `4397` 与 Redis `4395` 不开放公网，Vite dev `4399` 仅本地开发，cpp-runner `4401` 仅本地开发/离线内容环境且生产不部署；代码默认值、`.env.example` 可选覆盖提示、compose、Vite、PM2 与 healthcheck 已同步。）
-- [ ] 手动部署 SOP 与回滚流程演练。
+- [ ] 手动部署 SOP 与回滚流程演练。（2026-04-29 第二轮：本地构建产物 API/static preview/healthcheck 演练通过，回滚、PM2 reload 与真实域名 smoke 仍需目标机执行。）
 - [x] 已纳入 `scripts/healthcheck.ts` 和版本化 `ecosystem.config.cjs`；真实域名、Caddy/TLS、PM2 reload、外部服务 smoke 与回滚仍需实机演练。
 
 ### 7. UI/UX 与前端体验收口

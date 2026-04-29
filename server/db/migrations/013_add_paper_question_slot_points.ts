@@ -1,6 +1,7 @@
 import type pg from "pg";
 
-export const name = "011_add_paper_question_slot_points";
+export const name = "013_add_paper_question_slot_points";
+export const aliases = ["011_add_paper_question_slot_points"];
 
 export async function up(pool: pg.Pool): Promise<void> {
   await pool.query(`

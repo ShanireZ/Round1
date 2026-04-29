@@ -4,7 +4,7 @@
 
 - Read and applied the relevant standards and plans: `standard/04-ui-ux.md`, `standard/05-frontend-engineering.md`, `standard/11-testing-quality.md`, `standard/14-deployment-ops.md`, `standard/15-performance-accessibility-print.md`, `standard/17-docs-plan-maintenance.md`, `standard/22-standard-adoption-and-audit.md`, `plan/uiux_plan.md`, `plan/step-05-coach-and-admin.md`, and `plan/step-06-deployment.md`.
 - Checked current A2UI, shadcn/ui, and Radix guidance through Context7 before implementation. The resulting boundary remains: A2UI is the agent-facing design surface, while production pages continue to reuse local shadcn/Radix primitives and Round1 tokens.
-- This record covers the final local UI/UX closure and local deployment-test readiness pass for the April 29 deployment test preparation. It is not a claim that the production domain, Caddy/TLS, PM2, database backup, Sentry, email DNS, or rollback exercises have been completed.
+- This record covers the final local UI/UX closure and local deployment-test readiness pass for the April 29 deployment test preparation. The second deployment readiness pass is recorded in `docs/plans/2026-04-29-deployment-second-readiness.md`. It is not a claim that the production domain, Caddy/TLS, PM2, production database backup, Sentry, email DNS, or rollback exercises have been completed on the target host.
 
 ## UI/UX Changes
 
@@ -64,6 +64,11 @@
 - Final local container status: `r1-pg` healthy on `127.0.0.1:4397`, `r1-redis` healthy on `127.0.0.1:4395`, and the existing local `r1-cpp-runner` healthy on `127.0.0.1:4401`.
 - The local API/frontend healthcheck used the development HTTPS certificates and temporarily set `NODE_TLS_REJECT_UNAUTHORIZED=0` only for the local self-signed certificate smoke. Do not use that setting for production validation.
 - The API and frontend dev servers were started only for the healthcheck and stopped after the run.
+
+## Second Deployment Readiness Update
+
+- `docs/plans/2026-04-29-deployment-second-readiness.md` supersedes the earlier local deployment-test snapshot for deployment mechanics: migration filename prefixes are now strictly increasing, the migration runner is alias-aware for historical `schema_migrations.name` values, and the Step 06 build / migration rollback command drift is fixed.
+- The second pass completed a production-shape local rehearsal using built server output, `client/dist` preview, `healthcheck`, and a container-local `pg_dump` / `pg_restore` temporary database restore. Target-host PM2, Linux `caddy validate`, real domain TLS, external provider smoke, Sentry, Redis degradation, rollback, and manual browser/print evidence remain production environment gates.
 
 ## Deployment-Test Gate
 

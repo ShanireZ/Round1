@@ -42,14 +42,12 @@ const pool = new pg.Pool({
 
 interface Migration {
   name: string;
+  aliases: string[];
   up: (pool: pg.Pool) => Promise<void>;
   down: (pool: pg.Pool) => Promise<void>;
 }
 
-const MIGRATIONS_DIR = path.resolve(
-  __dirname,
-  "../server/db/migrations",
-);
+const MIGRATIONS_DIR = path.resolve(__dirname, "../server/db/migrations");
 
 async function ensureMigrationsTable(): Promise<void> {
   await pool.query(`
@@ -81,11 +79,27 @@ async function loadMigrations(): Promise<Migration[]> {
     const mod = await import(fileUrl);
     migrations.push({
       name: mod.name || file.replace(/\.[tj]s$/, ""),
+      aliases: Array.isArray(mod.aliases)
+        ? mod.aliases.filter((alias): alias is string => typeof alias === "string")
+        : [],
       up: mod.up,
       down: mod.down,
     });
   }
   return migrations;
+}
+
+function isMigrationApplied(migration: Migration, applied: Set<string>): boolean {
+  return applied.has(migration.name) || migration.aliases.some((alias) => applied.has(alias));
+}
+
+function findMigrationByRecordedName(
+  migrations: Migration[],
+  recordedName: string,
+): Migration | undefined {
+  return migrations.find(
+    (migration) => migration.name === recordedName || migration.aliases.includes(recordedName),
+  );
 }
 
 async function up(): Promise<void> {
@@ -95,14 +109,12 @@ async function up(): Promise<void> {
 
   let count = 0;
   for (const migration of migrations) {
-    if (applied.has(migration.name)) continue;
+    if (isMigrationApplied(migration, applied)) continue;
 
     console.log(`Applying migration: ${migration.name}`);
     const start = performance.now();
     await migration.up(pool);
-    await pool.query("INSERT INTO schema_migrations (name) VALUES ($1)", [
-      migration.name,
-    ]);
+    await pool.query("INSERT INTO schema_migrations (name) VALUES ($1)", [migration.name]);
     const elapsed = (performance.now() - start).toFixed(1);
     console.log(`  ✓ ${migration.name} (${elapsed}ms)`);
     count++;
@@ -128,7 +140,7 @@ async function down(): Promise<void> {
     return;
   }
 
-  const migration = migrations.find((m) => m.name === lastApplied);
+  const migration = findMigrationByRecordedName(migrations, lastApplied);
   if (!migration) {
     console.error(`Migration file not found for: ${lastApplied}`);
     process.exit(1);
@@ -137,9 +149,7 @@ async function down(): Promise<void> {
   console.log(`Rolling back migration: ${migration.name}`);
   const start = performance.now();
   await migration.down(pool);
-  await pool.query("DELETE FROM schema_migrations WHERE name = $1", [
-    migration.name,
-  ]);
+  await pool.query("DELETE FROM schema_migrations WHERE name = $1", [lastApplied]);
   const elapsed = (performance.now() - start).toFixed(1);
   console.log(`  ✓ Rolled back ${migration.name} (${elapsed}ms)`);
 }
@@ -152,13 +162,14 @@ async function status(): Promise<void> {
   console.log("\nMigration Status:");
   console.log("─".repeat(60));
   for (const migration of migrations) {
-    const mark = applied.has(migration.name) ? "✓" : "✗";
+    const mark = isMigrationApplied(migration, applied) ? "✓" : "✗";
     console.log(`  ${mark} ${migration.name}`);
   }
   console.log("─".repeat(60));
-  console.log(
-    `  ${applied.size}/${migrations.length} applied\n`,
-  );
+  const appliedCount = migrations.filter((migration) =>
+    isMigrationApplied(migration, applied),
+  ).length;
+  console.log(`  ${appliedCount}/${migrations.length} applied\n`);
 }
 
 async function main(): Promise<void> {

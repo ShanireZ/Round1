@@ -1,6 +1,7 @@
 import type pg from "pg";
 
-export const name = "009_question_reviewed_and_prebuilt_paper_lineage";
+export const name = "010_question_reviewed_and_prebuilt_paper_lineage";
+export const aliases = ["009_question_reviewed_and_prebuilt_paper_lineage"];
 
 export async function up(pool: pg.Pool): Promise<void> {
   await pool.query(`

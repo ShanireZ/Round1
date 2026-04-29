@@ -56,7 +56,7 @@
 ### 生产机（默认单机）
 
 1. 安装 Node.js `>=24.15.0` + npm `>=11.12.1` + Redis 7+ + postgreSQL 18
-2. 克隆代码、`npm install` + `npm run build`
+2. 克隆代码、`npm ci` + `npm run build:client` + `npm run build:server`
 3. 用 `npm run env:init -- --profile production-runtime --print` 生成最小 `.env` 骨架，并只填写数据库、密钥、域名和真实外部服务凭证（见 [01-reference.md — 环境变量配置](reference-config.md#环境变量配置env)）
 4. 安装并配置 Caddy（见 [14.2 Caddy 配置](#142-caddy-配置)）
 5. 启动 `Round1-api` 进程
@@ -151,8 +151,8 @@
 ### 14.8 数据库迁移回滚
 
 - 每个迁移文件同时包含 `up` 和 `down`
-- `tsx scripts/migrate.ts --down [count]`（默认回滚最近一次）
-- 不可逆 `down` 脚本打印警告并要求 `--force`
+- `npm run migrate:down` 或 `tsx scripts/migrate.ts down`（当前迁移器默认回滚最近一次）
+- 不可逆迁移不依赖 `down` 直接破坏性回滚；必须先按备份恢复或补偿 migration 方案演练
 
 ### 14.8.1 线上迁移兼容规则
 
@@ -215,7 +215,8 @@ cd /opt/round1 && git pull origin main
 npm ci
 
 # 3. 构建
-npm run build
+npm run build:client
+npm run build:server
 
 # 4. 部署前备份数据库
 mkdir -p data/backups && pg_dump -Fc "$DATABASE_URL" -f data/backups/predeploy-$(date +%Y%m%d-%H%M%S).dump
@@ -246,10 +247,12 @@ curl -sS https://round1.example.com/api/v1/health | jq
 cd /opt/round1 && git checkout tags/<上一版本 tag>
 
 # 2. 重新构建
-npm ci && npm run build
+npm ci
+npm run build:client
+npm run build:server
 
 # 3. 回滚迁移（若本次部署含新迁移）
-tsx scripts/migrate.ts --down 1
+npm run migrate:down
 
 # 4. 重启
 pm2 reload ecosystem.config.cjs --env production
@@ -275,7 +278,7 @@ curl -fsS https://round1.example.com/api/v1/health
 | 状况                       | 操作                                                                                                                                                                                           |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 新代码有 bug，无数据库迁移 | `git checkout` + rebuild + reload                                                                                                                                                              |
-| 新迁移可逆                 | `migrate --down` + 代码回滚                                                                                                                                                                    |
+| 新迁移可逆                 | `npm run migrate:down` + 代码回滚                                                                                                                                                              |
 | 新迁移不可逆，数据库有变更 | 从备份恢复 + 代码回滚                                                                                                                                                                          |
 | Redis 相关问题             | **禁止 `FLUSHDB`**；按 key 前缀分类处理：`sess:*`（session）用 `redis-cli --scan --pattern "sess:*" \| xargs redis-cli DEL`；`bull:*`（队列）/ `rl:*`（频控）/ `cfg:*`（配置通知）同理按需清除 |
 

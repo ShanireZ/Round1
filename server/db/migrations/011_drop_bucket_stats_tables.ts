@@ -1,6 +1,7 @@
 import type pg from "pg";
 
-export const name = "010_drop_bucket_stats_tables";
+export const name = "011_drop_bucket_stats_tables";
+export const aliases = ["010_drop_bucket_stats_tables"];
 
 export async function up(pool: pg.Pool): Promise<void> {
   await pool.query(`

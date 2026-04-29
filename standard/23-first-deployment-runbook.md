@@ -459,4 +459,4 @@ npm run migrate:down
 - `npm run init:admin -- --help` 可列出首个管理员引导参数。
 - 根 `package.json` 没有 `npm run build`；首次部署必须使用 `npm run build:client` 和 `npm run build:server`。
 - `scripts/migrate.ts` 支持 `up`、`down`、`status`；不要使用旧文档里的 `--down` 参数。
-- 当前迁移目录存在重复编号 `009` 和 `010`，触碰部署冻结条件；生产迁移前必须收口或写明例外。
+- 当前迁移文件名前缀已收口为严格递增；历史数据库中旧 `schema_migrations.name` 通过迁移 alias 兼容，不会在已有库重跑旧迁移。

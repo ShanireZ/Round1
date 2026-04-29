@@ -1,6 +1,7 @@
 import type pg from "pg";
 
-export const name = "010_drop_replacements_and_cooldowns";
+export const name = "012_drop_replacements_and_cooldowns";
+export const aliases = ["010_drop_replacements_and_cooldowns"];
 
 export async function up(pool: pg.Pool): Promise<void> {
   await pool.query(`

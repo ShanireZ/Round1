@@ -1,6 +1,7 @@
 import type pg from "pg";
 
-export const name = "012_users_password_change_required";
+export const name = "014_users_password_change_required";
+export const aliases = ["012_users_password_change_required"];
 
 export async function up(pool: pg.Pool): Promise<void> {
   await pool.query(`
