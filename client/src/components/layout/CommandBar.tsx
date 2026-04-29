@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Check, Monitor, Moon, Palette, Search, Sun } from "lucide-react";
+import { Check, Monitor, Moon, Search, Sun } from "lucide-react";
 import { useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -13,32 +13,22 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import { fetchAuthSession, type AuthSessionUser } from "@/lib/auth";
-import { adminNavItems, coachNavItems, primaryNavItems, type NavItem } from "@/lib/navigation";
+import { fetchAuthSession } from "@/lib/auth";
+import {
+  adminNavItems,
+  canSeeAdminNav,
+  canSeeCoachNav,
+  coachNavItems,
+  devNavItems,
+  primaryNavItems,
+  type NavItem,
+} from "@/lib/navigation";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 type CommandGroupItem = NavItem & {
   group: "primary" | "coach" | "admin" | "dev";
 };
-
-const devNavItems: CommandGroupItem[] = [
-  {
-    to: "/dev/ui-gallery",
-    label: "UI Gallery",
-    description: "Token、A2UI 与组件验收面板",
-    icon: Palette,
-    group: "dev",
-  },
-];
-
-function canSeeCoachNav(role: AuthSessionUser["role"] | null) {
-  return role === "coach" || role === "admin";
-}
-
-function canSeeAdminNav(role: AuthSessionUser["role"] | null) {
-  return role === "admin";
-}
 
 function CommandNavItem({
   item,
@@ -89,7 +79,7 @@ export function CommandBar() {
     }
 
     if (import.meta.env.DEV) {
-      items.push(...devNavItems);
+      items.push(...devNavItems.map((item) => ({ ...item, group: "dev" as const })));
     }
 
     return {
@@ -197,7 +187,7 @@ export function CommandBar() {
           {navGroups.dev.length > 0 ? (
             <>
               <CommandSeparator />
-              <CommandGroup heading="Dev">
+              <CommandGroup heading="开发验收">
                 {navGroups.dev.map((item) => (
                   <CommandNavItem key={item.to} item={item} onSelect={navigateTo} />
                 ))}

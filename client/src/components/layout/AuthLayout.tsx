@@ -12,6 +12,9 @@ type AuthLayoutProps = {
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="bg-background relative isolate min-h-dvh overflow-hidden">
+      <a className="skip-to-content" href="#main-content">
+        跳到主要内容
+      </a>
       <MeshGradient variant="hero" />
       <NoiseTexture />
       <div className="relative mx-auto grid min-h-dvh w-full max-w-7xl gap-8 px-4 py-6 md:grid-cols-[1.05fr_0.95fr] md:px-8 md:py-10">
@@ -19,7 +22,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           <div className="flex items-center justify-between gap-4">
             <Logo size="lg" />
             <div className="text-muted-foreground font-mono text-[10px] tracking-[0.24em] uppercase">
-              Contest Ceremony
+              训练赛场
             </div>
           </div>
           <div className="max-w-2xl py-8 md:py-0">
@@ -45,16 +48,16 @@ export function AuthLayout({ children }: AuthLayoutProps) {
               />
             </div>
             <span className="text-muted-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
-              OIDC ready
+              CppLearn 登录
             </span>
           </div>
         </section>
 
-        <div className="flex items-center justify-center md:justify-end">
+        <main className="flex items-center justify-center md:justify-end" id="main-content">
           <div className="border-border bg-surface w-full max-w-md rounded-[var(--radius-xl)] border p-6 shadow-[var(--shadow-md)] sm:p-8">
             {children ?? <Outlet />}
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

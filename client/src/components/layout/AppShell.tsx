@@ -5,6 +5,9 @@ import { Sidebar } from "./Sidebar";
 export function AppShell() {
   return (
     <div className="bg-background text-foreground flex h-dvh flex-col">
+      <a className="skip-to-content" href="#main-content">
+        跳到主要内容
+      </a>
       <TopBar />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />

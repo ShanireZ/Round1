@@ -963,6 +963,31 @@ test("Command bar opens role-aware navigation and reaches Admin dashboard", asyn
   expect(problems).toEqual([]);
 });
 
+test("AppShell navigation hides higher-privilege sections and opens mobile Sheet", async ({
+  page,
+}) => {
+  const problems = collectBrowserProblems(page);
+  await installCommonRoutes(page);
+  await installDashboardRoutes(page);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/dashboard");
+  await expect(page.getByTestId("dashboard-hero")).toBeVisible();
+  await expect(page.getByRole("link", { name: /管理看板/ })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /^报告$/ })).toHaveCount(0);
+
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.reload();
+  await expect(page.getByTestId("mobile-navigation-trigger")).toBeVisible();
+  await page.getByTestId("mobile-navigation-trigger").click();
+  await expect(page.getByRole("dialog").getByText("主导航")).toBeVisible();
+  await expect(page.getByRole("dialog").getByRole("link", { name: /出卷考试/ })).toBeVisible();
+  await expect(page.getByRole("dialog").getByRole("link", { name: /管理看板/ })).toHaveCount(0);
+  await expect(page.getByRole("dialog").getByRole("link", { name: /^报告$/ })).toHaveCount(0);
+  expect(await hasHorizontalOverflow(page)).toBe(false);
+  expect(problems).toEqual([]);
+});
+
 test("ExamNew renders the config-driven catalog without desktop or mobile overflow", async ({
   page,
 }) => {

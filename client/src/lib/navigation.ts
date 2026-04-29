@@ -4,16 +4,24 @@ import {
   BookOpen,
   ClipboardList,
   Home,
+  Palette,
   Settings,
   ShieldCheck,
   Users,
 } from "lucide-react";
+
+export type NavigationRole = "student" | "coach" | "admin" | null;
 
 export interface NavItem {
   to: string;
   label: string;
   description?: string;
   icon: ComponentType<{ className?: string }>;
+}
+
+export interface NavSection {
+  title: string;
+  items: NavItem[];
 }
 
 export const primaryNavItems: NavItem[] = [
@@ -63,3 +71,38 @@ export const adminNavItems: NavItem[] = [
   { to: "/admin/users", label: "用户管理", description: "账号与角色调整", icon: Users },
   { to: "/admin/settings", label: "系统设置", description: "运行时参数与热更新", icon: Settings },
 ];
+
+export const devNavItems: NavItem[] = [
+  {
+    to: "/dev/ui-gallery",
+    label: "UI Gallery",
+    description: "Token、A2UI 与组件验收面板",
+    icon: Palette,
+  },
+];
+
+export function canSeeCoachNav(role: NavigationRole) {
+  return role === "coach" || role === "admin";
+}
+
+export function canSeeAdminNav(role: NavigationRole) {
+  return role === "admin";
+}
+
+export function getNavigationSections(role: NavigationRole, includeDev = false): NavSection[] {
+  const sections: NavSection[] = [{ title: "主导航", items: primaryNavItems }];
+
+  if (canSeeCoachNav(role)) {
+    sections.push({ title: "教练", items: coachNavItems });
+  }
+
+  if (canSeeAdminNav(role)) {
+    sections.push({ title: "管理", items: adminNavItems });
+  }
+
+  if (includeDev) {
+    sections.push({ title: "开发验收", items: devNavItems });
+  }
+
+  return sections;
+}

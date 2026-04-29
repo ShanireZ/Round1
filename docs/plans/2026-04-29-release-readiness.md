@@ -16,6 +16,7 @@
 - Fixed a time-sensitive Coach invite integration fixture that expired on 2026-04-29, changing it to a stable future date so the test remains deterministic.
 - Completed a second UI/UX copy and functional-page closure pass across ExamSession, ExamResult, Dashboard, Account, Coach, Admin, A2UI BYOC, and UI Gallery surfaces. User-visible implementation terms such as API endpoint paths, `runtime`, `payload`, `Attempt ID`, `Tab Nonce`, `owner`, `assignment-only`, raw import states, and English admin status labels were replaced with role-facing Chinese business copy while preserving the underlying API/data contracts.
 - Completed a third UI/UX and functional-page closure pass across Login/AuthCallback/CompleteProfile, Dashboard, ExamNew/Session/Result, Account, Coach, Admin content/import/review/settings/users, command navigation, and sidebar navigation. Remaining raw enum/JSON field names are code/data-contract terms or developer-gallery examples, not production page copy.
+- Completed a fourth navigation/accessibility closure pass: AppShell sidebar and mobile navigation now share the same role-aware navigation sections, student accounts no longer see Coach/Admin links, mobile AppShell gets a Sheet navigation trigger, Auth/App/Focus layouts expose skip-to-content, and the remaining AuthLayout/Sheet visible implementation copy was localized to user-facing Chinese.
 
 ## Browser Visual Acceptance
 
@@ -31,16 +32,17 @@
 - ExamResult reduced-motion ceremony and A4 print markers.
 - A2UI Round1 BYOC gallery surface.
 - UI Gallery V2 Recharts and data-background patterns.
+- Role-aware AppShell navigation and mobile Sheet access.
 
 ## Automated Verification
 
 - `npm run verify:ui-tokens`: passed, `verifyUiTokenUsage: ok (105 files checked)`.
 - `npm run build:client`: passed. Vite still reports `/font/*.woff2` as runtime-resolved, which matches the current same-origin font proxy design. Vite also reports the existing large `UIGallery` chunk warning, which is acceptable for the local dev/visual-audit surface.
 - `npm run build:server`: passed.
-- `npm run client:test`: passed, 14 files / 75 tests.
+- `npm run client:test`: passed, 14 files / 77 tests.
 - `npm run verify:offline-artifacts`: passed, `verifyOfflineArtifactNames: ok (137 files checked)`.
 - `npm run lint`: exit 0, with the existing Fast Refresh warning in `client/src/components/a2ui/round1A2uiCatalog.tsx`.
-- `npm run test:e2e -- ui-visual-audit.spec.ts`: passed, 10 tests.
+- `npm run test:e2e -- ui-visual-audit.spec.ts`: passed, 11 tests.
 - `npm run test -- server/__tests__/coach-classes.integration.test.ts`: passed, 9 tests after fixing the date-sensitive invite fixture.
 - `npm run test`: passed after starting local Redis/Postgres, 29 files / 221 tests.
 - `npm run migrate:status`: passed against local Postgres, 14/14 migrations applied.
@@ -49,6 +51,7 @@
 - Production CSS scan after `build:client`: passed; no invalid CSS custom-property arbitrary values matching `max-width:--*`, `z-index:--*`, `border-radius:--*`, `box-shadow:--*`, `transition-duration:--*`, or related patterns were found in `client/dist/assets`.
 - Second closure pass verification: `npm run verify:ui-tokens`, `npm run client:test`, `npm run build:client`, focused `npx eslint <touched UI/test files>`, focused `npx prettier --check <touched UI/doc/test files>`, `git diff --check`, and `npm run test:e2e -- ui-visual-audit.spec.ts` passed after the copy/localization changes. The UI Gallery visual-audit assertions were synchronized to the localized labels. The default sandbox still hits `spawn EPERM` for Vitest/Vite/Playwright subprocesses, so those commands were rerun with elevated permissions under the known local pattern.
 - Third closure pass verification: `npm run verify:ui-tokens`, `npm run client:test`, `npm run build:client`, focused `npx eslint <touched UI/doc files>`, `git diff --check`, `npm run test:e2e -- ui-visual-audit.spec.ts`, and full `npm run test` passed. Default sandbox again hit `spawn EPERM` for tsx/Vite/Playwright subprocesses; the affected commands passed when rerun with the established elevated local pattern.
+- Fourth closure pass verification: focused `npm run client:test -- src/lib/navigation.test.ts`, full `npm run client:test`, `npm run verify:ui-tokens`, `npm run build:client`, full `npm run lint`, focused `npx eslint <touched UI/e2e files>`, `git diff --check`, and `npm run test:e2e -- ui-visual-audit.spec.ts` passed. The first visual-audit run saw a transient Vite HMR WebSocket `ERR_NO_BUFFER_SPACE`; an immediate fresh rerun passed 11/11. The only lint output remains the pre-existing Fast Refresh warning in `client/src/components/a2ui/round1A2uiCatalog.tsx`.
 
 ## Local Runtime Retest
 
