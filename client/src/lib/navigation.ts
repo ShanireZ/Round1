@@ -23,7 +23,7 @@ export const primaryNavItems: NavItem[] = [
   {
     to: "/account/security",
     label: "账号安全",
-    description: "密码、Passkey 与 OIDC 绑定",
+    description: "密码、通行密钥与外部身份",
     icon: ShieldCheck,
   },
 ];
@@ -56,10 +56,10 @@ export const adminNavItems: NavItem[] = [
   {
     to: "/admin/imports",
     label: "导入中心",
-    description: "bundle dry-run 与 apply",
+    description: "内容包预演与入库",
     icon: BarChart3,
   },
-  { to: "/admin/review", label: "审核队列", description: "真题 AI 审核流", icon: BookOpen },
+  { to: "/admin/review", label: "审核队列", description: "真题差异复核", icon: BookOpen },
   { to: "/admin/users", label: "用户管理", description: "账号与角色调整", icon: Users },
   { to: "/admin/settings", label: "系统设置", description: "运行时参数与热更新", icon: Settings },
 ];

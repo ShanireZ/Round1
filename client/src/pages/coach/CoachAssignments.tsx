@@ -83,6 +83,13 @@ function statusBadgeVariant(status: string) {
   return "secondary" as const;
 }
 
+function formatAssignmentModeLabel(mode: string) {
+  if (mode === "fixed_prebuilt_paper" || mode === "prebuilt_paper") {
+    return "固定预制卷";
+  }
+  return mode;
+}
+
 function LoadingCoachAssignments() {
   return (
     <div className="space-y-6">
@@ -168,8 +175,10 @@ function AssignmentCard({
             </div>
           </div>
           <div className="border-border rounded-[var(--radius-md)] border p-3">
-            <div className="text-muted-foreground text-xs">模式</div>
-            <div className="text-foreground mt-1 text-sm font-medium">{assignment.mode}</div>
+            <div className="text-muted-foreground text-xs">类型</div>
+            <div className="text-foreground mt-1 text-sm font-medium">
+              {formatAssignmentModeLabel(assignment.mode)}
+            </div>
           </div>
         </div>
         <Button
@@ -304,7 +313,7 @@ export default function CoachAssignments() {
       <Card variant="hero" className="overflow-hidden">
         <CardHeader className="gap-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <Badge variant="outline">Coach 任务</Badge>
+            <Badge variant="outline">教练任务</Badge>
             <CardTitle className="mt-3 text-2xl">任务</CardTitle>
             <CardDescription className="mt-2 max-w-2xl">
               按班级创建和查看固定预制卷任务，不混入学生自练数据。

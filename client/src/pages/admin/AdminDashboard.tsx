@@ -38,6 +38,13 @@ const importStatusLabel: Record<AdminImportBatchStatus, string> = {
   failed: "失败",
 };
 
+function formatImportBatchTypeLabel(type: string) {
+  if (type === "question_bundle") return "题目包";
+  if (type === "prebuilt_paper_bundle") return "预制卷包";
+  if (type === "manual_question_import") return "手工题目导入";
+  return type;
+}
+
 function formatTimestamp(value?: string | null) {
   if (!value) {
     return "-";
@@ -250,7 +257,7 @@ export default function AdminDashboard() {
                       </span>
                     </div>
                     <div className="text-muted-foreground mt-2 flex flex-wrap gap-3 text-xs">
-                      <span>{batch.bundleType}</span>
+                      <span>{formatImportBatchTypeLabel(batch.bundleType)}</span>
                       <span className="font-mono">{batch.checksum.slice(0, 12)}</span>
                       <span>{formatTimestamp(batch.createdAt)}</span>
                     </div>
@@ -282,7 +289,7 @@ export default function AdminDashboard() {
             {healthQuery.isError ? (
               <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-start gap-3 rounded-[var(--radius-md)] border p-4 text-sm">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                健康检查不可用，请在部署环境执行 healthcheck。
+                健康检查不可用，请在部署环境执行健康检查。
               </div>
             ) : (
               <>

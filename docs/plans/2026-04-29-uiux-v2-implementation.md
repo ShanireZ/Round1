@@ -34,6 +34,7 @@
 - 2026-04-29 上线测试准备时修复 Tailwind CSS custom-property 任意值写法：生产页面、primitive、A2UI surface 和 UI Gallery 中的 `rounded-[--*]`、`z-[--*]`、`shadow-[--*]`、`duration-[--*]`、`bg-[--*]` 等统一改为显式 `var(--*)`，避免 Vite/Tailwind 产物出现无效 CSS 值。
 - 本轮复查结果见 `docs/plans/2026-04-29-release-readiness.md`：`verify:ui-tokens`、`build:client`、`build:server`、`client:test`、`verify:offline-artifacts`、`lint`、`ui-visual-audit`、完整 `npm run test`、`migrate:status` 和本地 API/frontend `healthcheck` 均已复跑。生产域名、Caddy/TLS、PM2、备份恢复、真实邮件/Turnstile、Sentry 与回滚演练仍必须在目标部署环境完成。
 - 2026-04-29 UI/UX 与功能页面二次收口：复查考试、账号、Coach、Admin、A2UI BYOC 和 UI Gallery 的真实页面文案，把 `runtime`、接口路径、payload、内部状态、owner/assignment-only 等实现词改为面向学生、教练、管理员的业务语义；功能页仍沿用现有 API/data contract，不新增并行视觉系统。
+- 2026-04-29 UI/UX 与功能页面三次收口：继续清理 Login/AuthCallback/CompleteProfile、Dashboard、ExamNew/Session/Result、Account、Coach、Admin content/import/review/settings/users 和导航面上的可见实现词，补齐状态/角色/任务模式/导入类型/JSON 编辑错误等中文映射，并同步 `docs/plans/2026-04-26-remaining-unfinished-work.md` 的历史 backlog 状态。
 
 ## 风险与后续
 

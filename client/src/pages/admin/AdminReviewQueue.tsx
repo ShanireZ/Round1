@@ -282,7 +282,7 @@ export default function AdminReviewQueue() {
                 <ScrollArea className="h-[560px] pr-3">
                   <div className="space-y-3">
                     <div className="space-y-2">
-                      <Label>officialAnswerDiff</Label>
+                      <Label>官方答案差异</Label>
                       <pre className="border-border bg-subtle/20 overflow-auto rounded-[var(--radius-md)] border p-3 text-xs">
                         {stringifyJson(selectedReview.officialAnswerDiff ?? {})}
                       </pre>
@@ -301,19 +301,19 @@ export default function AdminReviewQueue() {
                     ) : questionQuery.data ? (
                       <>
                         <div className="space-y-2">
-                          <Label>contentJson</Label>
+                          <Label>题面 JSON</Label>
                           <pre className="border-border bg-subtle/20 overflow-auto rounded-[var(--radius-md)] border p-3 text-xs">
                             {stringifyJson(questionQuery.data.contentJson)}
                           </pre>
                         </div>
                         <div className="space-y-2">
-                          <Label>answerJson</Label>
+                          <Label>答案 JSON</Label>
                           <pre className="border-border bg-subtle/20 overflow-auto rounded-[var(--radius-md)] border p-3 text-xs">
                             {stringifyJson(questionQuery.data.answerJson)}
                           </pre>
                         </div>
                         <div className="space-y-2">
-                          <Label>explanationJson</Label>
+                          <Label>解析 JSON</Label>
                           <pre className="border-border bg-subtle/20 overflow-auto rounded-[var(--radius-md)] border p-3 text-xs">
                             {stringifyJson(questionQuery.data.explanationJson)}
                           </pre>

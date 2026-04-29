@@ -85,6 +85,13 @@ function getDefaultInviteExpiry() {
   return toDatetimeLocalValue(new Date(Date.now() + DEFAULT_INVITE_DAYS * DAY_MS));
 }
 
+function formatClassMemberRoleLabel(role: string) {
+  if (role === "student") return "学生";
+  if (role === "coach") return "教练";
+  if (role === "admin") return "管理员";
+  return role;
+}
+
 function toAbsoluteJoinUrl(invite: Pick<CoachClassInvite, "joinUrl">) {
   if (!invite.joinUrl) {
     return null;
@@ -206,7 +213,9 @@ function MemberRow({
         <div className="text-foreground truncate font-medium">{member.displayName}</div>
         <div className="text-muted-foreground mt-1 truncate text-xs">@{member.username}</div>
       </div>
-      <Badge variant={member.role === "student" ? "secondary" : "outline"}>{member.role}</Badge>
+      <Badge variant={member.role === "student" ? "secondary" : "outline"}>
+        {formatClassMemberRoleLabel(member.role)}
+      </Badge>
       <div className="text-muted-foreground text-sm">{formatDateTime(member.joinedAt)}</div>
       <Button
         type="button"
@@ -486,8 +495,8 @@ export default function CoachClassDetail() {
   if (!classId) {
     return (
       <DetailAccessPrompt
-        title="缺少班级 ID"
-        description="当前路径没有可读取的班级参数。"
+        title="缺少班级编号"
+        description="当前链接没有可读取的班级参数。"
         action="classes"
       />
     );
@@ -869,14 +878,14 @@ export default function CoachClassDetail() {
                   onSubmit={(event) => {
                     event.preventDefault();
                     if (!coachUserId.trim()) {
-                      toast.error("请输入用户 ID");
+                      toast.error("请输入用户编号");
                       return;
                     }
                     addCoachMutation.mutate();
                   }}
                 >
                   <div className="space-y-2">
-                    <Label htmlFor="coach-user-id">用户 ID</Label>
+                    <Label htmlFor="coach-user-id">用户编号</Label>
                     <Input
                       id="coach-user-id"
                       value={coachUserId}

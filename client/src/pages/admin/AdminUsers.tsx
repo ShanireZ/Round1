@@ -31,6 +31,18 @@ import {
 
 type RoleFilter = UserRole | "all";
 
+const roleLabels: Record<UserRole, string> = {
+  student: "学生",
+  coach: "教练",
+  admin: "管理员",
+};
+
+function formatUserStatusLabel(status: string) {
+  if (status === "active") return "使用中";
+  if (status === "deleted") return "已禁用";
+  return "状态待确认";
+}
+
 function formatTimestamp(value?: string | null) {
   if (!value) {
     return "-";
@@ -128,9 +140,9 @@ export default function AdminUsers() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">全部角色</SelectItem>
-              <SelectItem value="student">Student</SelectItem>
-              <SelectItem value="coach">Coach</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="student">{roleLabels.student}</SelectItem>
+              <SelectItem value="coach">{roleLabels.coach}</SelectItem>
+              <SelectItem value="admin">{roleLabels.admin}</SelectItem>
             </SelectContent>
           </Select>
         </CardHeader>
@@ -182,15 +194,15 @@ export default function AdminUsers() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="student">Student</SelectItem>
-                            <SelectItem value="coach">Coach</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="student">{roleLabels.student}</SelectItem>
+                            <SelectItem value="coach">{roleLabels.coach}</SelectItem>
+                            <SelectItem value="admin">{roleLabels.admin}</SelectItem>
                           </SelectContent>
                         </Select>
                       </TableCell>
                       <TableCell>
                         <Badge variant={user.status === "active" ? "default" : "secondary"}>
-                          {user.status}
+                          {formatUserStatusLabel(user.status)}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">

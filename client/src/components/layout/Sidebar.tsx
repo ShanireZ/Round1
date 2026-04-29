@@ -46,7 +46,7 @@ export function Sidebar() {
         <div className="space-y-6">
           <SidebarSection title="主导航" items={primaryNavItems} />
           <SidebarSection title="教练" items={coachNavItems} />
-          <SidebarSection title="Admin" items={adminNavItems} />
+          <SidebarSection title="管理" items={adminNavItems} />
         </div>
         {import.meta.env.DEV && (
           <nav className="border-border mt-6 flex flex-col gap-1 border-t px-3 pt-4">

@@ -299,7 +299,7 @@ export default function CoachClasses() {
       <Card variant="hero" className="overflow-hidden">
         <CardHeader className="gap-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <Badge variant="outline">Coach 班级</Badge>
+            <Badge variant="outline">教练班级</Badge>
             <CardTitle className="mt-3 text-2xl">班级</CardTitle>
             <CardDescription className="mt-2 max-w-2xl">
               创建班级、分发班级码，并从同一入口进入班级任务报告。

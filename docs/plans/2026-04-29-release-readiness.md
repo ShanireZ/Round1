@@ -15,6 +15,7 @@
 - Added a real `data-testid` root to `CoachReport` so the route can participate in browser visual regression checks.
 - Fixed a time-sensitive Coach invite integration fixture that expired on 2026-04-29, changing it to a stable future date so the test remains deterministic.
 - Completed a second UI/UX copy and functional-page closure pass across ExamSession, ExamResult, Dashboard, Account, Coach, Admin, A2UI BYOC, and UI Gallery surfaces. User-visible implementation terms such as API endpoint paths, `runtime`, `payload`, `Attempt ID`, `Tab Nonce`, `owner`, `assignment-only`, raw import states, and English admin status labels were replaced with role-facing Chinese business copy while preserving the underlying API/data contracts.
+- Completed a third UI/UX and functional-page closure pass across Login/AuthCallback/CompleteProfile, Dashboard, ExamNew/Session/Result, Account, Coach, Admin content/import/review/settings/users, command navigation, and sidebar navigation. Remaining raw enum/JSON field names are code/data-contract terms or developer-gallery examples, not production page copy.
 
 ## Browser Visual Acceptance
 
@@ -47,6 +48,7 @@
 - `npm run healthcheck -- --api-url https://127.0.0.1:7654/api/v1/health --frontend-url https://127.0.0.1:4399 --include-external --include-offline --runner-url http://127.0.0.1:4401/health --json`: passed for local config presence and offline runner health. This does not replace real mail delivery, Turnstile production, or PM2 checks on the target host.
 - Production CSS scan after `build:client`: passed; no invalid CSS custom-property arbitrary values matching `max-width:--*`, `z-index:--*`, `border-radius:--*`, `box-shadow:--*`, `transition-duration:--*`, or related patterns were found in `client/dist/assets`.
 - Second closure pass verification: `npm run verify:ui-tokens`, `npm run client:test`, `npm run build:client`, focused `npx eslint <touched UI/test files>`, focused `npx prettier --check <touched UI/doc/test files>`, `git diff --check`, and `npm run test:e2e -- ui-visual-audit.spec.ts` passed after the copy/localization changes. The UI Gallery visual-audit assertions were synchronized to the localized labels. The default sandbox still hits `spawn EPERM` for Vitest/Vite/Playwright subprocesses, so those commands were rerun with elevated permissions under the known local pattern.
+- Third closure pass verification: `npm run verify:ui-tokens`, `npm run client:test`, `npm run build:client`, focused `npx eslint <touched UI/doc files>`, `git diff --check`, `npm run test:e2e -- ui-visual-audit.spec.ts`, and full `npm run test` passed. Default sandbox again hit `spawn EPERM` for tsx/Vite/Playwright subprocesses; the affected commands passed when rerun with the established elevated local pattern.
 
 ## Local Runtime Retest
 

@@ -124,7 +124,7 @@ export default function AdminSettings() {
             <div>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <RefreshCcw className="text-primary h-4 w-4" />
-                Runtime Settings
+                系统设置项
               </CardTitle>
               <CardDescription>默认配置与数据库覆盖值合并展示。</CardDescription>
             </div>
@@ -147,10 +147,10 @@ export default function AdminSettings() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Key</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Value</TableHead>
-                    <TableHead>Updated</TableHead>
+                    <TableHead>设置键</TableHead>
+                    <TableHead>分类</TableHead>
+                    <TableHead>当前值</TableHead>
+                    <TableHead>更新时间</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -201,7 +201,7 @@ export default function AdminSettings() {
             ) : null}
 
             <div className="space-y-2">
-              <Label htmlFor="setting-key">Key</Label>
+              <Label htmlFor="setting-key">设置键</Label>
               <Input
                 id="setting-key"
                 value={customKey}
@@ -211,7 +211,7 @@ export default function AdminSettings() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="setting-value">valueJson</Label>
+              <Label htmlFor="setting-value">配置值 JSON</Label>
               <Textarea
                 id="setting-value"
                 className="min-h-64 font-mono text-xs"

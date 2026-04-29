@@ -424,8 +424,8 @@ function StudentDetailSheet({
                 value={scoreOrDash(student.averageScore)}
                 description="已评分任务"
               />
-              <KpiCard label="完成" value={String(student.completed)} description="completed" />
-              <KpiCard label="错过" value={String(student.missed)} description="missed" />
+              <KpiCard label="完成" value={String(student.completed)} description="已完成任务" />
+              <KpiCard label="错过" value={String(student.missed)} description="错过任务" />
             </div>
 
             <Card variant="flat">
@@ -615,7 +615,7 @@ export default function CoachReport() {
     return (
       <CoachAccessPrompt
         title="登录后查看班级报告"
-        description="Coach Report 会读取受保护的班级任务与学生作答统计，登录后再进入报表。"
+        description="班级报告会读取受保护的班级任务与学生作答统计，登录后再进入报表。"
         action="login"
       />
     );
@@ -647,7 +647,7 @@ export default function CoachReport() {
       <Card variant="hero" className="overflow-hidden">
         <CardHeader className="gap-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <Badge variant="outline">Coach Report</Badge>
+            <Badge variant="outline">班级报告</Badge>
             <CardTitle className="mt-3 text-2xl">班级报告</CardTitle>
             <CardDescription className="mt-2 max-w-2xl">
               仅统计当前班级固定任务的学生作答，群体热力图用于快速定位共同弱项。
@@ -674,7 +674,7 @@ export default function CoachReport() {
             </Select>
             <Button type="button" variant="secondary" onClick={exportCsv} disabled={!report}>
               <Download />
-              CSV
+              导出 CSV
             </Button>
             <Button type="button" variant="secondary" onClick={() => window.print()}>
               <Printer />
@@ -699,7 +699,7 @@ export default function CoachReport() {
             <KpiCard
               label="均分"
               value={scoreOrDash(report.totals.averageScore)}
-              description="已评分 attempts"
+              description="已评分作答"
             />
           </div>
 
@@ -757,7 +757,7 @@ export default function CoachReport() {
           }
         }}
       />
-      <div className="print-footer hidden">Round1 CoachReport · 班级任务 · {generatedAt}</div>
+      <div className="print-footer hidden">Round1 班级报告 · 班级任务 · {generatedAt}</div>
     </div>
   );
 }

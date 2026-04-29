@@ -150,7 +150,7 @@ export default function LoginPage() {
                   <div className="text-foreground truncate text-sm font-semibold">CppLearn</div>
                   <div className="text-muted-foreground mt-1 flex items-center gap-1.5 text-xs">
                     <ShieldCheck className="h-3.5 w-3.5" />
-                    CppLearn OIDC
+                    CppLearn 身份
                   </div>
                 </div>
               </div>
@@ -174,7 +174,7 @@ export default function LoginPage() {
                   </div>
                   <div className="min-w-0">
                     <div className="text-foreground text-sm font-semibold">QQ 互联登录</div>
-                    <div className="text-muted-foreground mt-1 text-xs">feature flag 视觉占位</div>
+                    <div className="text-muted-foreground mt-1 text-xs">登录方式正在联调</div>
                   </div>
                 </div>
                 <Badge variant="outline">待联调</Badge>

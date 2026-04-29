@@ -211,11 +211,11 @@ export default function AdminQuestionLibrary() {
       ? referencesQuery.isLoading
         ? "正在检查引用。"
         : references?.canDelete === true
-          ? "未被引用的 draft 题目可硬删除。"
+          ? "未被引用的草稿题目可硬删除。"
           : references
-            ? "已有引用的 draft 题目不能硬删除。"
+            ? "已有引用的草稿题目不能硬删除。"
             : "引用信息未加载，暂不能硬删除。"
-      : "仅未被引用的 draft 题目可硬删除。";
+      : "仅未被引用的草稿题目可硬删除。";
   const questionLifecycleHint =
     selectedQuestion?.status === "draft"
       ? "草稿题目需先确认到已审核状态才能发布。"
@@ -242,7 +242,7 @@ export default function AdminQuestionLibrary() {
       setCreateDraft("");
       setSelectedId(created.id);
       void queryClient.invalidateQueries({ queryKey: ["admin-questions"] });
-      toast.success("draft 题目已创建");
+      toast.success("题目草稿已创建");
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "题目创建失败");
@@ -260,9 +260,9 @@ export default function AdminQuestionLibrary() {
         primaryKpId: Number(editState.primaryKpId),
         examTypes: parseExamTypes(editState.examTypes),
         contentHash: editState.contentHash,
-        contentJson: parseJsonObject(editState.contentJson, "contentJson"),
-        answerJson: parseJsonObject(editState.answerJson, "answerJson"),
-        explanationJson: parseJsonObject(editState.explanationJson, "explanationJson"),
+        contentJson: parseJsonObject(editState.contentJson, "题面 JSON"),
+        answerJson: parseJsonObject(editState.answerJson, "答案 JSON"),
+        explanationJson: parseJsonObject(editState.explanationJson, "解析 JSON"),
         source: editState.source,
         sandboxVerified: editState.sandboxVerified === "true",
       };
@@ -272,7 +272,7 @@ export default function AdminQuestionLibrary() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["admin-questions"] });
       void queryClient.invalidateQueries({ queryKey: ["admin-question-detail", selectedId] });
-      toast.success("题目 draft 已保存");
+      toast.success("题目草稿已保存");
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "题目保存失败");
@@ -331,7 +331,7 @@ export default function AdminQuestionLibrary() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">题库管理</h1>
           <p className="text-muted-foreground mt-2 max-w-3xl text-sm">
-            按题型、难度、状态和来源筛选题库资产，处理 draft 编辑、发布、归档与引用核查。
+            按题型、难度、状态和来源筛选题库资产，处理草稿编辑、发布、归档与引用核查。
           </p>
         </div>
         <Card variant="stat" className="min-w-36">
@@ -508,9 +508,7 @@ export default function AdminQuestionLibrary() {
         <Card variant="flat" className="min-w-0">
           <CardHeader>
             <CardTitle className="text-lg">详情与操作</CardTitle>
-            <CardDescription>
-              draft 支持原地编辑；已发布或归档题目只走生命周期操作。
-            </CardDescription>
+            <CardDescription>草稿支持原地编辑；已发布或归档题目只走生命周期操作。</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {!selectedId ? (
@@ -613,7 +611,7 @@ export default function AdminQuestionLibrary() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="question-exam-types">Exam Types</Label>
+                    <Label htmlFor="question-exam-types">适用考试</Label>
                     <Input
                       id="question-exam-types"
                       disabled={!selectedCanEdit}
@@ -627,7 +625,7 @@ export default function AdminQuestionLibrary() {
 
                 <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_160px]">
                   <div className="space-y-2">
-                    <Label htmlFor="question-content-hash">Content Hash</Label>
+                    <Label htmlFor="question-content-hash">内容指纹</Label>
                     <Input
                       id="question-content-hash"
                       disabled={!selectedCanEdit}
@@ -660,7 +658,7 @@ export default function AdminQuestionLibrary() {
                 <ScrollArea className="h-[540px] pr-3">
                   <div className="space-y-3">
                     <div className="space-y-2">
-                      <Label htmlFor="question-content-json">contentJson</Label>
+                      <Label htmlFor="question-content-json">题面 JSON</Label>
                       <Textarea
                         id="question-content-json"
                         className="min-h-40 font-mono text-xs"
@@ -675,7 +673,7 @@ export default function AdminQuestionLibrary() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="question-answer-json">answerJson</Label>
+                      <Label htmlFor="question-answer-json">答案 JSON</Label>
                       <Textarea
                         id="question-answer-json"
                         className="min-h-32 font-mono text-xs"
@@ -690,7 +688,7 @@ export default function AdminQuestionLibrary() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="question-explanation-json">explanationJson</Label>
+                      <Label htmlFor="question-explanation-json">解析 JSON</Label>
                       <Textarea
                         id="question-explanation-json"
                         className="min-h-32 font-mono text-xs"
@@ -711,7 +709,7 @@ export default function AdminQuestionLibrary() {
                   <Button
                     variant="secondary"
                     disabled={!selectedCanEdit}
-                    title={selectedCanEdit ? "保存 draft 题目" : "仅 draft 题目可编辑"}
+                    title={selectedCanEdit ? "保存草稿题目" : "仅草稿题目可编辑"}
                     loading={saveMutation.isPending}
                     onClick={() => saveMutation.mutate()}
                   >
@@ -720,7 +718,7 @@ export default function AdminQuestionLibrary() {
                   </Button>
                   <Button
                     disabled={!selectedCanPublish}
-                    title={selectedCanPublish ? "发布 reviewed 题目" : "仅 reviewed 题目可发布"}
+                    title={selectedCanPublish ? "发布已审核题目" : "仅已审核题目可发布"}
                     loading={
                       lifecycleMutation.isPending && lifecycleMutation.variables === "publish"
                     }
@@ -732,7 +730,7 @@ export default function AdminQuestionLibrary() {
                   <Button
                     variant="secondary"
                     disabled={!selectedCanArchive}
-                    title={selectedCanArchive ? "归档 published 题目" : "仅 published 题目可归档"}
+                    title={selectedCanArchive ? "归档已发布题目" : "仅已发布题目可归档"}
                     loading={
                       lifecycleMutation.isPending && lifecycleMutation.variables === "archive"
                     }
@@ -744,7 +742,7 @@ export default function AdminQuestionLibrary() {
                   <Button
                     variant="destructive"
                     disabled={!selectedCanDelete}
-                    title={selectedCanDelete ? "删除未引用 draft 题目" : questionDeleteHint}
+                    title={selectedCanDelete ? "删除未引用草稿题目" : questionDeleteHint}
                     loading={
                       lifecycleMutation.isPending && lifecycleMutation.variables === "delete"
                     }

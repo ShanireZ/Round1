@@ -44,13 +44,13 @@ import {
 const QUERY_KEY = ["admin-import-batches"] as const;
 
 const bundleLabels: Record<AdminImportBundleType, string> = {
-  question_bundle: "题目 Bundle",
-  prebuilt_paper_bundle: "预制卷 Bundle",
+  question_bundle: "题目内容包",
+  prebuilt_paper_bundle: "预制卷内容包",
 };
 
 const batchTypeLabels: Record<AdminImportBatchType, string> = {
-  question_bundle: "题目 Bundle",
-  prebuilt_paper_bundle: "预制卷 Bundle",
+  question_bundle: "题目内容包",
+  prebuilt_paper_bundle: "预制卷内容包",
   manual_question_import: "手工题目导入",
 };
 
@@ -203,7 +203,7 @@ function BundleResultCard({
             </div>
 
             <div className="border-border bg-subtle/20 text-muted-foreground rounded-[var(--radius-md)] border p-3 font-mono text-xs">
-              checksum: {result.checksum}
+              校验指纹：{result.checksum}
             </div>
 
             {result.summary.errors.length > 0 ? (
@@ -324,7 +324,7 @@ export default function AdminImports() {
       }));
       await importMutation.mutateAsync({ bundleType, action, bundle });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "bundle 解析失败";
+      const message = error instanceof Error ? error.message : "内容包解析失败";
       setParseErrors((current) => ({
         ...current,
         [bundleType]: message,
@@ -370,7 +370,7 @@ export default function AdminImports() {
       ...current,
       [batch.bundleType]: undefined,
     }));
-    toast.success("已切换到对应 bundle 面板，修复 JSON 后先预演再入库");
+    toast.success("已切换到对应内容包面板，修复 JSON 后先预演再入库");
   }
 
   const activeResult = results[activeTab];
@@ -426,13 +426,13 @@ export default function AdminImports() {
               onValueChange={(value) => setActiveTab(value as AdminImportBundleType)}
             >
               <TabsList>
-                <TabsTrigger value="question_bundle">题目 Bundle</TabsTrigger>
-                <TabsTrigger value="prebuilt_paper_bundle">预制卷 Bundle</TabsTrigger>
+                <TabsTrigger value="question_bundle">题目内容包</TabsTrigger>
+                <TabsTrigger value="prebuilt_paper_bundle">预制卷内容包</TabsTrigger>
               </TabsList>
 
               <TabsContent value="question_bundle" className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="question-bundle-json">题目 Bundle JSON</Label>
+                  <Label htmlFor="question-bundle-json">题目内容包 JSON</Label>
                   <Textarea
                     id="question-bundle-json"
                     className="min-h-[320px] font-mono text-xs"
@@ -467,7 +467,7 @@ export default function AdminImports() {
 
               <TabsContent value="prebuilt_paper_bundle" className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="prebuilt-paper-bundle-json">预制卷 Bundle JSON</Label>
+                  <Label htmlFor="prebuilt-paper-bundle-json">预制卷内容包 JSON</Label>
                   <Textarea
                     id="prebuilt-paper-bundle-json"
                     className="min-h-[320px] font-mono text-xs"
@@ -525,12 +525,12 @@ export default function AdminImports() {
               onValueChange={(value) => setBundleTypeFilter(value as BatchTypeFilter)}
             >
               <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="筛选 bundle type" />
+                <SelectValue placeholder="筛选内容类型" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部 bundle 类型</SelectItem>
-                <SelectItem value="question_bundle">题目 Bundle</SelectItem>
-                <SelectItem value="prebuilt_paper_bundle">预制卷 Bundle</SelectItem>
+                <SelectItem value="all">全部内容类型</SelectItem>
+                <SelectItem value="question_bundle">题目内容包</SelectItem>
+                <SelectItem value="prebuilt_paper_bundle">预制卷内容包</SelectItem>
                 <SelectItem value="manual_question_import">手工题目导入</SelectItem>
               </SelectContent>
             </Select>
@@ -559,8 +559,8 @@ export default function AdminImports() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
-            <Badge variant="outline">题目 Bundle</Badge>
-            <Badge variant="outline">预制卷 Bundle</Badge>
+            <Badge variant="outline">题目内容包</Badge>
+            <Badge variant="outline">预制卷内容包</Badge>
             <Separator orientation="vertical" className="h-4" />
             <span>
               统一读取离线内容流程的批次摘要，支持按类型/状态过滤，并默认展开最近失败批次。
@@ -581,9 +581,9 @@ export default function AdminImports() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Bundle</TableHead>
+                  <TableHead>内容类型</TableHead>
                   <TableHead>状态</TableHead>
-                  <TableHead>Source</TableHead>
+                  <TableHead>来源文件</TableHead>
                   <TableHead>摘要</TableHead>
                   <TableHead>创建时间</TableHead>
                   <TableHead className="w-28 text-right">详情</TableHead>
@@ -706,8 +706,7 @@ export default function AdminImports() {
                                       错误明细
                                     </div>
                                     <div className="text-muted-foreground text-xs">
-                                      展示 summary_json.errors 的原始错误项，便于定位 bundle
-                                      中的坏数据。
+                                      展示服务端返回的错误项，便于定位内容包中的坏数据。
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-2">
@@ -751,7 +750,7 @@ export default function AdminImports() {
                                             <Badge variant="outline">{error.code}</Badge>
                                             {typeof error.itemIndex === "number" ? (
                                               <span className="text-muted-foreground font-mono text-xs">
-                                                item #{error.itemIndex}
+                                                第 {error.itemIndex} 项
                                               </span>
                                             ) : null}
                                           </div>

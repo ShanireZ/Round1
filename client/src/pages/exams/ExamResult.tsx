@@ -66,7 +66,7 @@ function formatQuestionTypeLabel(questionType: string): string {
     return "完善程序";
   }
 
-  return questionType;
+  return "题型待确认";
 }
 
 function formatPaperStatusLabel(status: string): string {
@@ -74,21 +74,21 @@ function formatPaperStatusLabel(status: string): string {
   if (status === "started") return "已开始";
   if (status === "completed") return "已完成";
   if (status === "abandoned") return "已放弃";
-  return status;
+  return "状态待确认";
 }
 
 function formatAttemptStatusLabel(status: string): string {
   if (status === "submitted") return "已交卷";
   if (status === "auto_submitted") return "自动交卷";
   if (status === "started") return "进行中";
-  return status;
+  return "状态待确认";
 }
 
 function formatReportStatusLabel(status: string | null | undefined): string {
   if (!status || status === "pending") return "生成中";
   if (status === "completed") return "已完成";
   if (status === "failed") return "生成失败";
-  return status;
+  return "状态待确认";
 }
 
 function extractPrompt(contentJson: unknown): string {
@@ -261,14 +261,12 @@ function ResultOverview({ data }: { data: ExamResultPayload }) {
             <Radar className="text-primary h-5 w-5" />
             错题分布与知识点信号
           </CardTitle>
-          <CardDescription>
-            先看运行时已经算好的 wrongs 与 primary KP 聚合，再决定哪里需要重练。
-          </CardDescription>
+          <CardDescription>先看本次错题和知识点聚合，再决定哪里需要重练。</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           {wrongs.length === 0 ? (
             <div className="border-success/30 bg-success/5 text-success rounded-[var(--radius-lg)] border p-4 text-sm">
-              本次没有 wrongs 记录，当前规则型 grader 判定全部命中。
+              本次没有错题记录，当前评分结果全部命中。
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
@@ -295,17 +293,15 @@ function ResultOverview({ data }: { data: ExamResultPayload }) {
           <Separator />
 
           <div className="space-y-3">
-            <div className="text-foreground text-sm font-medium">薄弱 primary KP</div>
+            <div className="text-foreground text-sm font-medium">薄弱知识点</div>
             {weakKps.length === 0 ? (
-              <p className="text-muted-foreground text-sm">
-                当前 attempt 没有 primary KP 聚合可展示。
-              </p>
+              <p className="text-muted-foreground text-sm">当前结果没有知识点聚合可展示。</p>
             ) : (
               <div className="space-y-3">
                 {weakKps.map((kp) => (
                   <div key={kp.kpId} className="space-y-2">
                     <div className="flex items-center justify-between gap-3 text-sm">
-                      <span className="text-foreground font-medium">KP {kp.kpId}</span>
+                      <span className="text-foreground font-medium">知识点 {kp.kpId}</span>
                       <span className="text-muted-foreground">
                         {kp.correct} / {kp.total} · {Math.round(kp.accuracy * 100)}%
                       </span>
@@ -515,7 +511,7 @@ function CeremonyReveal({
         <div className="w-full max-w-4xl text-center">
           <div className="mx-auto inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-2 text-xs tracking-[0.32em] text-white/70 uppercase">
             <span className="font-semibold">R1</span>
-            <span>Result Reveal</span>
+            <span>成绩揭晓</span>
           </div>
 
           <div
@@ -525,7 +521,7 @@ function CeremonyReveal({
                 : "translate-y-6 scale-95 opacity-0"
             }`}
           >
-            <div className="text-sm tracking-[0.4em] text-white/50 uppercase">Final Score</div>
+            <div className="text-sm tracking-[0.4em] text-white/50 uppercase">最终得分</div>
             <div className="mt-4 text-7xl font-semibold tracking-tight sm:text-8xl">
               {data.attempt.score ?? 0}
             </div>
@@ -544,7 +540,7 @@ function CeremonyReveal({
             </div>
 
             <p className="mx-auto mt-6 max-w-2xl text-sm leading-7 text-white/65">
-              这一步只在 submit 成功后的首次进入触发。ESC
+              这一步只在交卷成功后的首次进入触发。按 ESC
               可跳过，或点击下方按钮直接进入完整结果页详情。
             </p>
           </div>
@@ -564,7 +560,7 @@ function CeremonyReveal({
               查看详情
             </Button>
             <div className="mt-4 text-xs tracking-[0.24em] text-white/40 uppercase">
-              Press ESC To Skip
+              按 ESC 跳过
             </div>
           </div>
         </div>
@@ -664,9 +660,9 @@ export default function ExamResultPage() {
         <CardHeader>
           <CardTitle className="text-destructive flex items-center gap-2">
             <AlertCircle className="h-5 w-5" />
-            缺少结果页 ID
+            缺少结果页编号
           </CardTitle>
-          <CardDescription>当前路由没有提供 paper id，无法读取考试结果。</CardDescription>
+          <CardDescription>当前链接缺少试卷编号，无法读取考试结果。</CardDescription>
         </CardHeader>
       </Card>
     );
@@ -733,7 +729,7 @@ export default function ExamResultPage() {
       ) : null}
 
       <div className="border-border/80 bg-card/80 text-muted-foreground rounded-full border px-4 py-2 text-xs tracking-[0.24em] uppercase">
-        Exam Result
+        考试结果
       </div>
 
       <ResultHero data={data} />

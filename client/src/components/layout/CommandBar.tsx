@@ -166,7 +166,7 @@ export function CommandBar() {
           {navGroups.admin.length > 0 ? (
             <>
               <CommandSeparator />
-              <CommandGroup heading="Admin">
+              <CommandGroup heading="管理">
                 {navGroups.admin.map((item) => (
                   <CommandNavItem key={item.to} item={item} onSelect={navigateTo} />
                 ))}

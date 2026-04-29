@@ -108,7 +108,7 @@ function formatTimestamp(value?: string | null) {
 function parseSlots(raw: string) {
   const parsed = JSON.parse(raw) as unknown;
   if (!Array.isArray(parsed)) {
-    throw new Error("slots 必须是 JSON array");
+    throw new Error("题槽必须是 JSON 数组");
   }
 
   return parsed as AdminPrebuiltPaperSlot[];
@@ -190,11 +190,11 @@ export default function AdminPaperLibrary() {
       ? referencesQuery.isLoading
         ? "正在检查引用。"
         : references?.canDelete === true
-          ? "未被引用的 draft 预制卷可硬删除。"
+          ? "未被引用的草稿预制卷可硬删除。"
           : references
-            ? "已有引用的 draft 预制卷不能硬删除。"
+            ? "已有引用的草稿预制卷不能硬删除。"
             : "引用信息未加载，暂不能硬删除。"
-      : "仅未被引用的 draft 预制卷可硬删除。";
+      : "仅未被引用的草稿预制卷可硬删除。";
   const paperLifecycleHint =
     selectedPaper?.status === "draft"
       ? "草稿预制卷可原地编辑和发布，不需要复制版本。"
@@ -219,7 +219,7 @@ export default function AdminPaperLibrary() {
       setCreateDraft("");
       setSelectedId(created.id);
       void queryClient.invalidateQueries({ queryKey: ["admin-prebuilt-papers"] });
-      toast.success("draft 预制卷已创建");
+      toast.success("预制卷草稿已创建");
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "预制卷创建失败");
@@ -237,7 +237,7 @@ export default function AdminPaperLibrary() {
         examType: editState.examType,
         difficulty: editState.difficulty,
         blueprintVersion: Number(editState.blueprintVersion),
-        metadataJson: parseJsonObject(editState.metadataJson, "metadataJson"),
+        metadataJson: parseJsonObject(editState.metadataJson, "元数据 JSON"),
         slots: parseSlots(editState.slotsJson),
       };
 
@@ -246,7 +246,7 @@ export default function AdminPaperLibrary() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["admin-prebuilt-papers"] });
       void queryClient.invalidateQueries({ queryKey: ["admin-prebuilt-paper-detail", selectedId] });
-      toast.success("预制卷 draft 已保存");
+      toast.success("预制卷草稿已保存");
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "预制卷保存失败");
@@ -279,7 +279,7 @@ export default function AdminPaperLibrary() {
       void queryClient.invalidateQueries({
         queryKey: ["admin-prebuilt-paper-references", selectedId],
       });
-      toast.success(action === "copy" ? "已复制为新的 draft 版本" : "预制卷操作已完成");
+      toast.success(action === "copy" ? "已复制为新的草稿版本" : "预制卷操作已完成");
 
       if (action === "delete") {
         setSelectedId(null);
@@ -303,8 +303,8 @@ export default function AdminPaperLibrary() {
     const confirmMessages = {
       publish: `确认发布预制卷 ${selectedPaper.id.slice(0, 8)}？发布后不能原地编辑。`,
       archive: `确认归档预制卷 ${selectedPaper.id.slice(0, 8)}？归档后不会进入新试卷选择。`,
-      delete: `确认硬删除 draft 预制卷 ${selectedPaper.id.slice(0, 8)}？此操作不可撤销。`,
-      copy: `确认复制预制卷 ${selectedPaper.id.slice(0, 8)} 为新 draft 版本？`,
+      delete: `确认硬删除草稿预制卷 ${selectedPaper.id.slice(0, 8)}？此操作不可撤销。`,
+      copy: `确认复制预制卷 ${selectedPaper.id.slice(0, 8)} 为新草稿版本？`,
     };
 
     if (window.confirm(confirmMessages[action])) {
@@ -318,7 +318,7 @@ export default function AdminPaperLibrary() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">预制卷库</h1>
           <p className="text-muted-foreground mt-2 max-w-3xl text-sm">
-            管理可发布的固定试卷版本。已发布内容不可原地覆盖，修改时复制为新 draft 后再发布。
+            管理可发布的固定试卷版本。已发布内容不可原地覆盖，修改时复制为新草稿后再发布。
           </p>
         </div>
         <Card variant="stat" className="min-w-36">
@@ -338,12 +338,12 @@ export default function AdminPaperLibrary() {
               <RefreshCcw className="text-primary h-4 w-4" />
               预制卷列表
             </CardTitle>
-            <CardDescription>筛选并进入详情，核对 lineage、slots 和运行时引用。</CardDescription>
+            <CardDescription>筛选并进入详情，核对版本来源、题槽和投放引用。</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_180px]">
               <Input
-                placeholder="Exam Type"
+                placeholder="考试类型"
                 value={examTypeFilter}
                 onChange={(event) => setExamTypeFilter(event.target.value)}
               />
@@ -416,7 +416,7 @@ export default function AdminPaperLibrary() {
                       <TableCell>
                         <div className="font-mono text-sm">v{paper.versionNo}</div>
                         <div className="text-muted-foreground mt-1 font-mono text-xs">
-                          root {(paper.rootPaperId ?? paper.id).slice(0, 8)}
+                          根版本 {(paper.rootPaperId ?? paper.id).slice(0, 8)}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -488,11 +488,11 @@ export default function AdminPaperLibrary() {
                   </Badge>
                   <Badge variant="outline">v{selectedPaper.versionNo}</Badge>
                   <Badge variant="outline">
-                    root {(selectedPaper.rootPaperId ?? selectedPaper.id).slice(0, 8)}
+                    根版本 {(selectedPaper.rootPaperId ?? selectedPaper.id).slice(0, 8)}
                   </Badge>
                   {selectedPaper.parentPaperId ? (
                     <Badge variant="outline">
-                      parent {selectedPaper.parentPaperId.slice(0, 8)}
+                      父版本 {selectedPaper.parentPaperId.slice(0, 8)}
                     </Badge>
                   ) : null}
                 </div>
@@ -511,7 +511,7 @@ export default function AdminPaperLibrary() {
                     </div>
                   </div>
                   <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
-                    <div className="text-muted-foreground text-xs">Slots</div>
+                    <div className="text-muted-foreground text-xs">题槽</div>
                     <div className="mt-1 text-2xl font-semibold tabular-nums">
                       {selectedPaper.slots.length}
                     </div>
@@ -531,7 +531,7 @@ export default function AdminPaperLibrary() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="paper-blueprint">Blueprint</Label>
+                    <Label htmlFor="paper-blueprint">蓝图版本</Label>
                     <Input
                       id="paper-blueprint"
                       disabled={!selectedCanEdit}
@@ -548,7 +548,7 @@ export default function AdminPaperLibrary() {
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="paper-exam-type">Exam Type</Label>
+                    <Label htmlFor="paper-exam-type">考试类型</Label>
                     <Input
                       id="paper-exam-type"
                       disabled={!selectedCanEdit}
@@ -582,7 +582,7 @@ export default function AdminPaperLibrary() {
                 <ScrollArea className="h-[540px] pr-3">
                   <div className="space-y-3">
                     <div className="space-y-2">
-                      <Label htmlFor="paper-metadata-json">metadataJson</Label>
+                      <Label htmlFor="paper-metadata-json">元数据 JSON</Label>
                       <Textarea
                         id="paper-metadata-json"
                         className="min-h-32 font-mono text-xs"
@@ -597,7 +597,7 @@ export default function AdminPaperLibrary() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="paper-slots-json">slots</Label>
+                      <Label htmlFor="paper-slots-json">题槽 JSON</Label>
                       <Textarea
                         id="paper-slots-json"
                         className="min-h-72 font-mono text-xs"
@@ -615,7 +615,7 @@ export default function AdminPaperLibrary() {
                   <Button
                     variant="secondary"
                     disabled={!selectedCanEdit}
-                    title={selectedCanEdit ? "保存 draft 预制卷" : "仅 draft 预制卷可编辑"}
+                    title={selectedCanEdit ? "保存草稿预制卷" : "仅草稿预制卷可编辑"}
                     loading={saveMutation.isPending}
                     onClick={() => saveMutation.mutate()}
                   >
@@ -624,7 +624,7 @@ export default function AdminPaperLibrary() {
                   </Button>
                   <Button
                     disabled={!selectedCanPublish}
-                    title={selectedCanPublish ? "发布 draft 预制卷" : "仅 draft 预制卷可发布"}
+                    title={selectedCanPublish ? "发布草稿预制卷" : "仅草稿预制卷可发布"}
                     loading={
                       lifecycleMutation.isPending && lifecycleMutation.variables === "publish"
                     }
@@ -645,9 +645,7 @@ export default function AdminPaperLibrary() {
                   <Button
                     variant="secondary"
                     disabled={!selectedCanArchive}
-                    title={
-                      selectedCanArchive ? "归档 published 预制卷" : "仅 published 预制卷可归档"
-                    }
+                    title={selectedCanArchive ? "归档已发布预制卷" : "仅已发布预制卷可归档"}
                     loading={
                       lifecycleMutation.isPending && lifecycleMutation.variables === "archive"
                     }
@@ -659,7 +657,7 @@ export default function AdminPaperLibrary() {
                   <Button
                     variant="destructive"
                     disabled={!selectedCanDelete}
-                    title={selectedCanDelete ? "删除未引用 draft 预制卷" : paperDeleteHint}
+                    title={selectedCanDelete ? "删除未引用草稿预制卷" : paperDeleteHint}
                     loading={
                       lifecycleMutation.isPending && lifecycleMutation.variables === "delete"
                     }

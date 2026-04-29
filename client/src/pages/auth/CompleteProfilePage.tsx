@@ -80,7 +80,7 @@ export default function CompleteProfilePage() {
   return (
     <div className="space-y-6" data-testid="complete-profile-page">
       <div className="space-y-3">
-        <Badge variant="outline">CppLearn OIDC</Badge>
+        <Badge variant="outline">CppLearn 身份</Badge>
         <div className="space-y-2">
           <h1 className="text-foreground text-2xl font-semibold tracking-tight">补齐账号资料</h1>
           <p className="text-muted-foreground text-sm leading-6">

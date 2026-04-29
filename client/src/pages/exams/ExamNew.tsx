@@ -222,7 +222,7 @@ export default function ExamNew() {
           <NoiseTexture />
           <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div className="space-y-4">
-              <Badge variant="outline">Exam Setup</Badge>
+              <Badge variant="outline">开考配置</Badge>
               <div className="space-y-3">
                 <h1 className="text-foreground text-3xl font-semibold md:text-5xl">出卷考试</h1>
                 <p className="text-muted-foreground max-w-2xl text-sm leading-6">
@@ -285,7 +285,7 @@ export default function ExamNew() {
               <div>
                 <div className="text-destructive font-medium">出卷目录读取失败</div>
                 <div className="text-muted-foreground mt-1 text-sm">
-                  请重试读取运行时配置和预制卷目录。
+                  请重试读取开考配置和预制卷目录。
                 </div>
               </div>
               <Button
@@ -415,7 +415,7 @@ export default function ExamNew() {
                 <ShieldCheck className="text-primary h-5 w-5" />
                 开考确认
               </CardTitle>
-              <CardDescription>开始后由服务端 attempt、倒计时和自动保存兜底。</CardDescription>
+              <CardDescription>开始后由服务端计时、倒计时和自动保存兜底。</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-3">
@@ -440,8 +440,8 @@ export default function ExamNew() {
                 </div>
               </div>
               <div className="text-muted-foreground border-border bg-subtle/20 rounded-[var(--radius-md)] border p-4 text-sm leading-6">
-                提交前请确认网络可用。进入答题页后会创建或复用服务端 attempt，并按
-                运行时自动保存间隔周期保存待提交答案。
+                提交前请确认网络可用。进入答题页后会创建或复用本次作答记录，并按
+                自动保存间隔周期保存待提交答案。
               </div>
               <Button
                 type="button"

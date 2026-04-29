@@ -65,6 +65,19 @@ function securitySignals(summary: Awaited<ReturnType<typeof fetchAccountSecurity
   ];
 }
 
+function formatAccountRoleLabel(role: string) {
+  if (role === "student") return "学生";
+  if (role === "coach") return "教练";
+  if (role === "admin") return "管理员";
+  return role;
+}
+
+function formatExternalProviderLabel(provider: string) {
+  if (provider === "cpplearn") return "CppLearn";
+  if (provider === "qq") return "QQ 互联";
+  return provider;
+}
+
 function LoginRequired() {
   return (
     <div className="grid min-h-[55vh] place-items-center">
@@ -119,9 +132,7 @@ function PasswordPanel() {
           <LockKeyhole className="text-primary h-5 w-5" />
           密码
         </CardTitle>
-        <CardDescription>
-          修改密码会提升 session version，其他旧会话会在校验时失效。
-        </CardDescription>
+        <CardDescription>修改密码后，其他旧会话会在下次校验时失效。</CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -319,7 +330,7 @@ function TotpPanel({ enabled }: { enabled: boolean }) {
         {enabled ? (
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-2">
-              <Badge variant="saved">enabled</Badge>
+              <Badge variant="saved">已启用</Badge>
               <span className="text-muted-foreground text-sm">当前账号已启用 TOTP。</span>
             </div>
             <Button
@@ -348,7 +359,7 @@ function TotpPanel({ enabled }: { enabled: boolean }) {
 
             {otpauthUrl ? (
               <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
-                <div className="text-foreground text-sm font-medium">Authenticator URI</div>
+                <div className="text-foreground text-sm font-medium">验证器链接</div>
                 <div className="text-muted-foreground mt-2 font-mono text-xs break-all">
                   {otpauthUrl}
                 </div>
@@ -448,7 +459,7 @@ export default function AccountSecurityPage() {
       <Card variant="hero" className="overflow-hidden">
         <CardHeader className="gap-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <Badge variant="outline">Account Security</Badge>
+            <Badge variant="outline">账号安全</Badge>
             <CardTitle className="mt-3 text-2xl">账号安全</CardTitle>
             <CardDescription className="mt-2 max-w-2xl">
               管理密码、邮箱、TOTP 和外部身份绑定；高风险操作会要求再次验证并留下安全记录。
@@ -464,7 +475,7 @@ export default function AccountSecurityPage() {
             <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
               <div className="text-muted-foreground text-xs">TOTP</div>
               <div className="text-foreground mt-1 text-sm font-semibold">
-                {summary.totpEnabledAt ? "enabled" : "off"}
+                {summary.totpEnabledAt ? "已启用" : "未启用"}
               </div>
             </div>
             <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
@@ -541,9 +552,7 @@ export default function AccountSecurityPage() {
                 <ShieldQuestion className="text-primary h-5 w-5" />
                 当前身份
               </CardTitle>
-              <CardDescription>
-                账号状态来自后端安全摘要，页面只负责展示和触发受控操作。
-              </CardDescription>
+              <CardDescription>用于核对当前登录身份、角色和安全状态。</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 lg:grid-cols-2">
               <div className="border-border bg-subtle/15 rounded-[var(--radius-md)] border p-4">
@@ -558,11 +567,9 @@ export default function AccountSecurityPage() {
               <div className="border-border bg-subtle/15 rounded-[var(--radius-md)] border p-4">
                 <div className="text-muted-foreground text-xs">角色</div>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <Badge variant="saved">{summary.profile.role}</Badge>
+                  <Badge variant="saved">{formatAccountRoleLabel(summary.profile.role)}</Badge>
                   <Badge variant={summary.profile.passwordChangeRequired ? "tle" : "outline"}>
-                    {summary.profile.passwordChangeRequired
-                      ? "must change password"
-                      : "password ok"}
+                    {summary.profile.passwordChangeRequired ? "需改密" : "密码正常"}
                   </Badge>
                 </div>
               </div>
@@ -592,13 +599,15 @@ export default function AccountSecurityPage() {
                       className="border-border bg-subtle/15 flex flex-col gap-3 rounded-[var(--radius-md)] border p-4 md:flex-row md:items-center md:justify-between"
                     >
                       <div>
-                        <div className="text-foreground font-medium">{identity.provider}</div>
+                        <div className="text-foreground font-medium">
+                          {formatExternalProviderLabel(identity.provider)}
+                        </div>
                         <div className="text-muted-foreground mt-1 text-sm">
                           {identity.providerEmail ?? "未提供邮箱"} ·{" "}
                           {formatAccountDate(identity.createdAt)}
                         </div>
                       </div>
-                      <Badge variant="saved">bound</Badge>
+                      <Badge variant="saved">已绑定</Badge>
                     </div>
                   ))
                 )}

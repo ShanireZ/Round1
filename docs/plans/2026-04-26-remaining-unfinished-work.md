@@ -4,7 +4,7 @@
 
 - UI/UX 标准真源已升级：`standard/04-ui-ux.md` 现在定义 Precision Workbench x Data Arena、四级动效、A2UI production slot、Recharts/shadcn chart 路线和 V2 验收矩阵；`plan/uiux_plan.md` 改为历史设计理由。
 - 已落地基础设施：Recharts 依赖、本地 `ChartContainer`/tooltip/legend primitive、chart helper 单测、motion token 对齐、数据驱动背景 class、A2UI production slot policy、Dashboard/Admin/ExamResult/slot-policy BYOC snapshots。
-- 待继续全量实施：将 V2 chart primitive 和数据背景逐步替换到 Dashboard、CoachReport、AdminDashboard、ExamResult 等真实页面，并补真实浏览器截图、键盘-only、reduced-motion 和打印预览证据。
+- 已被后续收口覆盖：V2 chart primitive、数据背景、Dashboard、CoachReport、AdminDashboard、ExamResult、Account、Auth、Coach、Admin 路由族均已进入真实页面实现和视觉验收；当前不再作为代码侧 UI/UX 阻塞项。剩余真实生产浏览器截图矩阵、键盘人工走查、reduced-motion 复核和打印预览证据归入目标部署/发布环境验收。
 
 ## 2026-04-29 Maintenance Addendum: UI/UX Closure and Release Readiness
 
@@ -13,28 +13,29 @@
 - Functional page copy has been closed for the current code surface: ExamSession, ExamResult, Dashboard, Account, Coach, Admin, A2UI BYOC, and UI Gallery now present role-facing Chinese business copy instead of leaking endpoint paths, runtime/payload terminology, internal attempt identifiers, or raw enum labels.
 - Browser visual acceptance now covers Dashboard, command navigation, ExamNew, Auth entry, Account, Coach, Admin, ExamResult print/reduced-motion, A2UI BYOC gallery, and UI Gallery V2 charts/data backgrounds in `server/__tests__/e2e/ui-visual-audit.spec.ts`; the current run passed 10/10.
 - Deployment-test readiness evidence is recorded in `docs/plans/2026-04-29-release-readiness.md`. Code/build/UI gates, full local `npm run test`, migration status, and local API/frontend healthcheck pass after starting Docker Desktop and local `pg`/`redis`. Production domain, Caddy/TLS, PM2, backup/restore, Sentry, real mail/Turnstile, Redis degradation, and rollback rehearsals remain target-environment work.
+- 2026-04-29 final page closure pass removed additional user-visible implementation copy across Login/AuthCallback/CompleteProfile, Dashboard, ExamNew/Session/Result, Account, Coach, Admin content/import/review/settings/users, and navigation surfaces. Raw enum/internal strings now remain in code/data contracts unless they are explicitly translated before rendering.
 
 ## 2026-04-28 Maintenance Addendum: Coach Class Detail UI
 
 - Closed from the Coach deep-management backlog in this slice: `/coach/classes/:id` now routes to a real `CoachClassDetail` page that reads the class summary, members, invites, and coach group surfaces through existing APIs.
 - The detail page supports owner-only class rename, member removal, invite link creation/revocation, collaborator coach add/remove, and owner transfer. Collaborators keep read access to members/coaches while invite mutation stays owner-only.
 - A2UI BYOC coverage expanded with `Round1CoachClassDetailSnapshot`; the `/dev/ui-gallery` design surface includes the detail-management slice through the guarded local payload factory.
-- Remaining UI/UX debt after this slice: full coach route visual acceptance across desktop/mobile/keyboard/reduced-motion remains open; invite token search/user picker polish is still limited by the current backend surface accepting explicit user IDs for coach add.
+- Follow-up status: full coach route visual acceptance across desktop/mobile entered the 2026-04-29 route audit; keyboard/reduced-motion manual evidence remains target-environment release work. Invite token search/user picker polish is still limited by the current backend surface accepting explicit user IDs for coach add.
 
 ## 2026-04-28 Maintenance Addendum: Auth Entry UI
 
 - Closed from the UI/UX placeholder backlog in this slice: `/register`, `/forgot-password`, `/auth/callback`, `/auth/complete-profile`, and the wildcard not-found surface now route to real AuthLayout-compatible pages instead of generic placeholders.
 - Frontend auth helpers now consume the existing email registration, password reset, email-change callback, and OIDC complete-profile endpoints through CSRF-aware JSON requests. Password reset request copy keeps the anti-enumeration contract and completes from an email-link ticket.
 - A2UI BYOC coverage expanded with `Round1AuthEntrySnapshot`; the `/dev/ui-gallery` design surface includes auth-entry coverage through the guarded local payload factory rather than page-scoped long JSON.
-- Remaining UI/UX debt after this slice: passkey registration/delete browser UX still needs `@simplewebauthn/browser` and recent-auth flow polish; full-route screenshot, keyboard, mobile, reduced-motion, and print acceptance remains open.
-- Verification recorded for this slice: `npm run client:test -- src/lib/auth.test.ts src/lib/a2ui-design-surface.test.ts` passed outside the default sandbox after `spawn EPERM`, `npm run verify:ui-tokens` passed, `npm run build:client` passed, and the targeted Playwright auth-entry visual smoke passed with `ROUND1_PLAYWRIGHT_BROWSER_CHANNEL=chrome` after the bundled Chromium executable was missing. Full-route screenshot, keyboard, reduced-motion, and print acceptance remains open.
+- Follow-up status: passkey registration/delete browser UX still needs `@simplewebauthn/browser` and recent-auth flow polish. Auth entry routes entered the 2026-04-29 visual audit; keyboard/reduced-motion/print manual evidence remains target-environment release work.
+- Verification recorded for this slice: `npm run client:test -- src/lib/auth.test.ts src/lib/a2ui-design-surface.test.ts` passed outside the default sandbox after `spawn EPERM`, `npm run verify:ui-tokens` passed, `npm run build:client` passed, and the targeted Playwright auth-entry visual smoke passed with `ROUND1_PLAYWRIGHT_BROWSER_CHANNEL=chrome` after the bundled Chromium executable was missing.
 
 ## 2026-04-28 Maintenance Addendum: Account/Class UI
 
 - Closed from the UI/UX placeholder backlog in this slice: `/account/class`, `/join`, and `/account/security` now route to real pages instead of generic placeholders.
 - New current-state APIs for those pages: `GET /api/v1/classes/mine` returns the signed-in user's joined classes with assignment counters, and `GET /api/v1/auth/security/summary` returns the account security snapshot consumed by the account page.
-- Subsequent Auth Entry UI work closed the `/register`, `/forgot-password`, `/auth/callback`, and not-found placeholder debt. Remaining UI/UX debt: passkey registration/delete UX still needs a browser client dependency and recent-auth flow polish; full-route screenshot, keyboard, mobile, reduced-motion, and print acceptance remains open.
-- Verification recorded for this slice: focused client tests, focused coach class API tests, `verify:ui-tokens`, `build:client`, and `build:server` passed. Browser screenshot acceptance was not rerun for these account pages in this maintenance slice, so the global visual-audit backlog remains open.
+- Subsequent Auth Entry UI work closed the `/register`, `/forgot-password`, `/auth/callback`, and not-found placeholder debt. Follow-up status: passkey registration/delete UX still needs a browser client dependency and recent-auth flow polish; Account routes entered the 2026-04-29 visual audit, while keyboard/reduced-motion/print manual evidence remains target-environment release work.
+- Verification recorded for this slice: focused client tests, focused coach class API tests, `verify:ui-tokens`, `build:client`, and `build:server` passed.
 
 > 生成日期：2026-04-26
 >

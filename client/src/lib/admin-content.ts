@@ -217,7 +217,7 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
 export function parseJsonObject(raw: string, label: string): Record<string, unknown> {
   const parsed = JSON.parse(raw) as unknown;
   if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-    throw new Error(`${label} 必须是 JSON object`);
+    throw new Error(`${label} 必须是 JSON 对象`);
   }
 
   return parsed as Record<string, unknown>;
@@ -227,14 +227,16 @@ export function stringifyJson(value: unknown) {
   return JSON.stringify(value ?? {}, null, 2);
 }
 
-export function fetchAdminQuestions(params: {
-  page?: number;
-  pageSize?: number;
-  questionType?: QuestionType | "all";
-  difficulty?: Difficulty | "all";
-  status?: QuestionStatus | "all";
-  source?: QuestionSource | "all";
-} = {}) {
+export function fetchAdminQuestions(
+  params: {
+    page?: number;
+    pageSize?: number;
+    questionType?: QuestionType | "all";
+    difficulty?: Difficulty | "all";
+    status?: QuestionStatus | "all";
+    source?: QuestionSource | "all";
+  } = {},
+) {
   return requestJson<PaginatedResult<AdminQuestionListItem>>(
     appendParams("/api/v1/admin/questions", {
       page: params.page ?? 1,
@@ -287,13 +289,15 @@ export function deleteAdminQuestion(id: string) {
   });
 }
 
-export function fetchAdminPrebuiltPapers(params: {
-  page?: number;
-  pageSize?: number;
-  examType?: string;
-  difficulty?: Difficulty | "all";
-  status?: PrebuiltPaperStatus | "all";
-} = {}) {
+export function fetchAdminPrebuiltPapers(
+  params: {
+    page?: number;
+    pageSize?: number;
+    examType?: string;
+    difficulty?: Difficulty | "all";
+    status?: PrebuiltPaperStatus | "all";
+  } = {},
+) {
   return requestJson<PaginatedResult<AdminPrebuiltPaperListItem>>(
     appendParams("/api/v1/admin/prebuilt-papers", {
       page: params.page ?? 1,
@@ -310,7 +314,9 @@ export function fetchAdminPrebuiltPaper(id: string) {
 }
 
 export function fetchAdminPrebuiltPaperReferences(id: string) {
-  return requestJson<AdminPrebuiltPaperReferences>(`/api/v1/admin/prebuilt-papers/${id}/references`);
+  return requestJson<AdminPrebuiltPaperReferences>(
+    `/api/v1/admin/prebuilt-papers/${id}/references`,
+  );
 }
 
 export function createAdminPrebuiltPaper(payload: Required<AdminPrebuiltPaperPayload>) {
@@ -352,11 +358,13 @@ export function deleteAdminPrebuiltPaper(id: string) {
   });
 }
 
-export function fetchQuestionReviews(params: {
-  page?: number;
-  pageSize?: number;
-  status?: ReviewStatus | "all";
-} = {}) {
+export function fetchQuestionReviews(
+  params: {
+    page?: number;
+    pageSize?: number;
+    status?: ReviewStatus | "all";
+  } = {},
+) {
   return requestJson<PaginatedResult<AdminQuestionReview>>(
     appendParams("/api/v1/admin/question-reviews", {
       page: params.page ?? 1,
@@ -383,11 +391,13 @@ export function rejectQuestionReview(questionId: string, reviewerNotes: string) 
   );
 }
 
-export function fetchAdminUsers(params: {
-  page?: number;
-  pageSize?: number;
-  role?: UserRole | "all";
-} = {}) {
+export function fetchAdminUsers(
+  params: {
+    page?: number;
+    pageSize?: number;
+    role?: UserRole | "all";
+  } = {},
+) {
   return requestJson<PaginatedResult<AdminUser>>(
     appendParams("/api/v1/admin/users", {
       page: params.page ?? 1,

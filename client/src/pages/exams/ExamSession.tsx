@@ -116,6 +116,14 @@ function getCountdownBadgeVariant(warningLevel: "normal" | "warning" | "critical
   return "outline" as const;
 }
 
+function formatPaperStatusLabel(status: string) {
+  if (status === "draft") return "草稿";
+  if (status === "started") return "进行中";
+  if (status === "completed") return "已完成";
+  if (status === "abandoned") return "已放弃";
+  return "状态待确认";
+}
+
 function getLatestSavedAtFromAnswers(answers: DraftAnswers): string | null {
   return Object.values(answers).reduce<string | null>((latest, entry) => {
     if (!entry.updatedAt) {
@@ -197,7 +205,9 @@ function AttemptSummary({
             </Card>
             <Card variant="stat" className="border-border bg-card/80">
               <CardDescription>试卷状态</CardDescription>
-              <CardTitle className="mt-2 text-lg">{session.paper.status}</CardTitle>
+              <CardTitle className="mt-2 text-lg">
+                {formatPaperStatusLabel(session.paper.status)}
+              </CardTitle>
             </Card>
           </div>
 
@@ -257,7 +267,7 @@ function ConflictState({ paperId }: { paperId: string }) {
           当前试卷已不在可开始状态
         </CardTitle>
         <CardDescription>
-          后端返回冲突，通常意味着这张卷子已经开始或已经提交。直接查看结果页会更合理。
+          这张卷子已经开始或已经提交。可以直接查看结果，或重新选择一张模拟卷。
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-wrap gap-3">
@@ -728,9 +738,9 @@ export default function ExamSessionPage() {
           <CardHeader>
             <CardTitle className="text-destructive flex items-center gap-2">
               <AlertCircle className="h-5 w-5" />
-              缺少试卷 ID
+              缺少试卷编号
             </CardTitle>
-            <CardDescription>当前路由没有提供 paper id，无法启动答题流程。</CardDescription>
+            <CardDescription>当前链接缺少试卷编号，无法启动答题流程。</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -765,7 +775,7 @@ export default function ExamSessionPage() {
               无法启动答题流程
             </CardTitle>
             <CardDescription>
-              {startError instanceof Error ? startError.message : "启动 attempt 时发生未知错误。"}
+              {startError instanceof Error ? startError.message : "启动考试时发生未知错误。"}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
@@ -798,7 +808,7 @@ export default function ExamSessionPage() {
             <CardDescription>
               {sessionQuery.error instanceof Error
                 ? sessionQuery.error.message
-                : "读取 exam session 时发生未知错误。"}
+                : "读取题面时发生未知错误。"}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">

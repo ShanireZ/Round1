@@ -103,7 +103,7 @@ function statusLabel(status: string) {
     return "已交卷";
   }
 
-  return status;
+  return "状态待确认";
 }
 
 const heatmapBucketClasses = [
@@ -278,11 +278,11 @@ function DashboardHero({ stats }: { stats: NonNullable<ReturnType<typeof normali
 
       <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div className="space-y-4">
-          <Badge variant="outline">Dashboard</Badge>
+          <Badge variant="outline">学习看板</Badge>
           <div className="space-y-3">
             <h1 className="text-foreground text-3xl font-semibold md:text-5xl">我的训练概览</h1>
             <p className="text-muted-foreground max-w-2xl text-sm leading-6">
-              最近考试、能力雷达、弱项热力图与规则建议会跟随运行时结果同步更新。
+              最近考试、能力雷达、弱项热力图与规则建议会跟随作答结果同步更新。
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -432,13 +432,13 @@ function WeaknessHeatmap({ items }: { items: UserWeakPrimaryKp[] }) {
       <div className="grid gap-3">
         {rows.map((row) => (
           <div key={row.kpId} className="grid gap-3 sm:grid-cols-[96px_1fr] sm:items-center">
-            <div className="text-foreground font-mono text-sm font-medium">KP {row.kpId}</div>
+            <div className="text-foreground font-mono text-sm font-medium">知识点 {row.kpId}</div>
             <div className="grid grid-cols-3 gap-2">
               {row.cells.map((cell) => (
                 <div
                   key={cell.key}
                   className={`border-border/70 min-h-16 rounded-[var(--radius-md)] border p-3 ${heatmapBucketClasses[cell.bucket]}`}
-                  aria-label={`KP ${row.kpId} ${cell.label} ${cell.value}`}
+                  aria-label={`知识点 ${row.kpId} ${cell.label} ${cell.value}`}
                 >
                   <div className="text-xs opacity-80">{cell.label}</div>
                   <div className="mt-2 text-lg font-semibold tabular-nums">{cell.value}</div>
@@ -551,7 +551,7 @@ export default function Dashboard() {
               <Target className="text-primary h-5 w-5" />
               弱项热力图
             </CardTitle>
-            <CardDescription>以错题率、错题量和样本量展示当前最需要复盘的 KP。</CardDescription>
+            <CardDescription>以错题率、错题量和样本量展示当前最需要复盘的知识点。</CardDescription>
           </CardHeader>
           <CardContent>
             <WeaknessHeatmap items={stats.weakPrimaryKps} />
@@ -578,11 +578,11 @@ export default function Dashboard() {
                 <Lightbulb className="text-primary h-5 w-5" />
                 智能建议
               </CardTitle>
-              <CardDescription>当前为规则型静态建议区，AI 文案模板保留为 v2。</CardDescription>
+              <CardDescription>基于当前错题和成绩给出可执行的复盘顺序。</CardDescription>
             </CardHeader>
             <CardContent className="text-muted-foreground space-y-3 text-sm leading-6">
-              <div>先复盘最近一次低分题，再做同一 exam type 的中等难度卷。</div>
-              <div>弱项 KP 正确率低于 50% 时，优先回看错题解析和对应知识点笔记。</div>
+              <div>先复盘最近一次低分题，再做同类型的中等难度卷。</div>
+              <div>弱项知识点正确率低于 50% 时，优先回看错题解析和对应知识点笔记。</div>
               <div>连续两次超过 85 分后，再切到更高难度或限时训练。</div>
             </CardContent>
           </Card>

@@ -136,7 +136,7 @@ export default function AuthCallbackPage() {
   return (
     <div className="space-y-6" data-testid="auth-callback-page">
       <div className="space-y-3">
-        <Badge variant={status === "error" ? "tle" : "outline"}>Auth Callback</Badge>
+        <Badge variant={status === "error" ? "tle" : "outline"}>登录回调</Badge>
         <div className="space-y-2">
           <h1 className="text-foreground text-2xl font-semibold tracking-tight">
             {status === "error" ? "认证未完成" : "正在确认身份"}

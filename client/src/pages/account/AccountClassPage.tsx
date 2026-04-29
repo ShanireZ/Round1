@@ -131,7 +131,7 @@ function ClassJoinPanel({
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <Badge variant="outline">Join Class</Badge>
+            <Badge variant="outline">加入班级</Badge>
             <CardTitle className="mt-3 text-xl">加入班级</CardTitle>
           </div>
           <Users className="text-primary h-5 w-5" />
@@ -281,10 +281,10 @@ export default function AccountClassPage({ focusJoin = false }: AccountClassPage
       <Card variant="hero" className="overflow-hidden">
         <CardHeader className="gap-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <Badge variant="outline">{focusJoin ? "Class Invite" : "My Classes"}</Badge>
+            <Badge variant="outline">{focusJoin ? "邀请入班" : "我的班级"}</Badge>
             <CardTitle className="mt-3 text-2xl">我的班级</CardTitle>
             <CardDescription className="mt-2 max-w-2xl">
-              班级入口展示你已加入的训练组、待完成任务和加入状态；教练视图继续从 Coach 工作台管理。
+              班级入口展示你已加入的训练组、待完成任务和加入状态；教练视图继续从教练工作台管理。
             </CardDescription>
           </div>
           <div className="grid w-full grid-cols-3 gap-3 md:min-w-72">
@@ -325,11 +325,11 @@ export default function AccountClassPage({ focusJoin = false }: AccountClassPage
                 <div className="min-w-0">
                   <div className="text-foreground font-medium">教练入口已分离</div>
                   <p className="text-muted-foreground mt-1 text-sm leading-6">
-                    创建班级、轮换班级码和查看班级报告请继续使用 Coach 工作台。
+                    创建班级、轮换班级码和查看班级报告请继续使用教练工作台。
                   </p>
                   <Button asChild variant="link" className="mt-2 h-auto px-0">
                     <Link to="/coach/classes">
-                      进入 Coach 班级
+                      进入教练班级
                       <ArrowRight />
                     </Link>
                   </Button>
