@@ -58,6 +58,8 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 
 ## 生产上线步骤
 
+全新服务器首次部署必须先执行 [23-first-deployment-runbook.md](23-first-deployment-runbook.md)。本节用于常规发布和部署约束；首次部署还需要完成服务器基线、数据服务、生产 `.env`、Caddy、PM2、首个管理员、内容导入、备份恢复演练和人工 smoke。
+
 1. 拉取代码。
 2. 安装依赖，仅在 lockfile 变化时执行。
 3. 构建 client/server。

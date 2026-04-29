@@ -18,30 +18,31 @@
 
 ## 文档清单
 
-| 文件 | 主题 |
-| --- | --- |
-| [01-governance.md](01-governance.md) | 决策治理、规范变更、例外审批 |
-| [02-domain-and-content.md](02-domain-and-content.md) | 产品边界、术语、竞赛内容质量 |
-| [03-naming-and-structure.md](03-naming-and-structure.md) | 命名、目录、文件组织 |
-| [04-ui-ux.md](04-ui-ux.md) | UI/UX、视觉系统、组件与页面规范 |
-| [05-frontend-engineering.md](05-frontend-engineering.md) | React/Tailwind 前端工程规范 |
-| [06-backend-api.md](06-backend-api.md) | Express API、错误、OpenAPI、调用规范 |
-| [07-data-and-migrations.md](07-data-and-migrations.md) | PostgreSQL/Drizzle、状态机、迁移 |
-| [08-security-auth-permissions.md](08-security-auth-permissions.md) | 认证、授权、CSRF、OIDC、step-up |
-| [09-offline-content-artifacts.md](09-offline-content-artifacts.md) | 离线内容生产、bundle、runId 产物命名 |
-| [10-llm-agents-prompts.md](10-llm-agents-prompts.md) | LLM、prompt、内容 agent、模型调用 |
-| [11-testing-quality.md](11-testing-quality.md) | 测试分层、质量门禁、验收 |
-| [12-observability-audit.md](12-observability-audit.md) | 日志、Sentry、审计、可追溯 |
-| [13-config-env.md](13-config-env.md) | 配置、环境变量、运行时设置 |
-| [14-deployment-ops.md](14-deployment-ops.md) | 部署、运维、备份、回滚 |
-| [15-performance-accessibility-print.md](15-performance-accessibility-print.md) | 性能、可达性、打印与浏览器兼容 |
-| [16-git-review-release.md](16-git-review-release.md) | Git、代码评审、发布与回归 |
-| [17-docs-plan-maintenance.md](17-docs-plan-maintenance.md) | 文档、计划、知识库维护 |
-| [18-agent-and-tool-calling.md](18-agent-and-tool-calling.md) | AI agent 协作、工具调用、执行边界 |
-| [19-source-code-style.md](19-source-code-style.md) | TypeScript、注释、复杂度、格式化与代码组织 |
-| [20-product-state-and-workflow.md](20-product-state-and-workflow.md) | 产品流程、状态机、幂等与业务不变量 |
-| [21-privacy-and-data-lifecycle.md](21-privacy-and-data-lifecycle.md) | 隐私、数据生命周期、日志脱敏与导出 |
-| [22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md) | 标准采纳、PR 审计、漂移治理与持续改进 |
+| 文件                                                                           | 主题                                       |
+| ------------------------------------------------------------------------------ | ------------------------------------------ |
+| [01-governance.md](01-governance.md)                                           | 决策治理、规范变更、例外审批               |
+| [02-domain-and-content.md](02-domain-and-content.md)                           | 产品边界、术语、竞赛内容质量               |
+| [03-naming-and-structure.md](03-naming-and-structure.md)                       | 命名、目录、文件组织                       |
+| [04-ui-ux.md](04-ui-ux.md)                                                     | UI/UX、视觉系统、组件与页面规范            |
+| [05-frontend-engineering.md](05-frontend-engineering.md)                       | React/Tailwind 前端工程规范                |
+| [06-backend-api.md](06-backend-api.md)                                         | Express API、错误、OpenAPI、调用规范       |
+| [07-data-and-migrations.md](07-data-and-migrations.md)                         | PostgreSQL/Drizzle、状态机、迁移           |
+| [08-security-auth-permissions.md](08-security-auth-permissions.md)             | 认证、授权、CSRF、OIDC、step-up            |
+| [09-offline-content-artifacts.md](09-offline-content-artifacts.md)             | 离线内容生产、bundle、runId 产物命名       |
+| [10-llm-agents-prompts.md](10-llm-agents-prompts.md)                           | LLM、prompt、内容 agent、模型调用          |
+| [11-testing-quality.md](11-testing-quality.md)                                 | 测试分层、质量门禁、验收                   |
+| [12-observability-audit.md](12-observability-audit.md)                         | 日志、Sentry、审计、可追溯                 |
+| [13-config-env.md](13-config-env.md)                                           | 配置、环境变量、运行时设置                 |
+| [14-deployment-ops.md](14-deployment-ops.md)                                   | 部署、运维、备份、回滚                     |
+| [15-performance-accessibility-print.md](15-performance-accessibility-print.md) | 性能、可达性、打印与浏览器兼容             |
+| [16-git-review-release.md](16-git-review-release.md)                           | Git、代码评审、发布与回归                  |
+| [17-docs-plan-maintenance.md](17-docs-plan-maintenance.md)                     | 文档、计划、知识库维护                     |
+| [18-agent-and-tool-calling.md](18-agent-and-tool-calling.md)                   | AI agent 协作、工具调用、执行边界          |
+| [19-source-code-style.md](19-source-code-style.md)                             | TypeScript、注释、复杂度、格式化与代码组织 |
+| [20-product-state-and-workflow.md](20-product-state-and-workflow.md)           | 产品流程、状态机、幂等与业务不变量         |
+| [21-privacy-and-data-lifecycle.md](21-privacy-and-data-lifecycle.md)           | 隐私、数据生命周期、日志脱敏与导出         |
+| [22-standard-adoption-and-audit.md](22-standard-adoption-and-audit.md)         | 标准采纳、PR 审计、漂移治理与持续改进      |
+| [23-first-deployment-runbook.md](23-first-deployment-runbook.md)               | 全新服务器首次部署手册                     |
 
 ## 关键词
 
