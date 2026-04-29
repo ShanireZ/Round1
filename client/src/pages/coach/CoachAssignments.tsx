@@ -104,7 +104,7 @@ function CoachAccessPrompt({
 }) {
   return (
     <div className="grid min-h-[55vh] place-items-center">
-      <div className="border-border bg-card max-w-xl rounded-[--radius-lg] border p-8 text-center">
+      <div className="border-border bg-card max-w-xl rounded-[var(--radius-lg)] border p-8 text-center">
         <ClipboardList className="text-muted-foreground mx-auto h-9 w-9" />
         <h1 className="text-foreground mt-4 text-2xl font-semibold">{title}</h1>
         <p className="text-muted-foreground mt-3 text-sm leading-6">{description}</p>
@@ -161,13 +161,13 @@ function AssignmentCard({
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 md:min-w-52">
-          <div className="border-border rounded-[--radius-md] border p-3">
+          <div className="border-border rounded-[var(--radius-md)] border p-3">
             <div className="text-muted-foreground text-xs">学生</div>
             <div className="text-foreground mt-1 text-xl font-semibold tabular-nums">
               {assignment.assignedStudents ?? 0}
             </div>
           </div>
-          <div className="border-border rounded-[--radius-md] border p-3">
+          <div className="border-border rounded-[var(--radius-md)] border p-3">
             <div className="text-muted-foreground text-xs">模式</div>
             <div className="text-foreground mt-1 text-sm font-medium">{assignment.mode}</div>
           </div>
@@ -484,7 +484,7 @@ export default function CoachAssignments() {
           </CardContent>
         </Card>
       ) : assignments.length === 0 ? (
-        <div className="border-border bg-subtle/10 grid min-h-64 place-items-center rounded-[--radius-lg] border border-dashed p-8 text-center">
+        <div className="border-border bg-subtle/10 grid min-h-64 place-items-center rounded-[var(--radius-lg)] border border-dashed p-8 text-center">
           <div className="space-y-3">
             <ClipboardList className="text-muted-foreground mx-auto h-8 w-8" />
             <div className="text-foreground font-medium">当前班级还没有任务</div>

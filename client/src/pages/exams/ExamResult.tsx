@@ -15,13 +15,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -117,20 +111,23 @@ function ResultHero({ data }: { data: ExamResultPayload }) {
   const sectionEntries = summarizeSections(data.attempt.perSectionJson);
   const totalQuestions = data.items.reduce((sum, item) => sum + item.result.totalCount, 0);
   const correctAnswers = data.items.reduce((sum, item) => sum + item.result.correctCount, 0);
-  const wrongCount = data.attempt.report?.wrongs.length ?? Math.max(totalQuestions - correctAnswers, 0);
+  const wrongCount =
+    data.attempt.report?.wrongs.length ?? Math.max(totalQuestions - correctAnswers, 0);
   const accuracy = totalQuestions === 0 ? 0 : Math.round((correctAnswers / totalQuestions) * 100);
 
   return (
     <Card
       variant="hero"
-      className="exam-result-hero-surface relative overflow-hidden border border-border"
+      className="exam-result-hero-surface border-border relative overflow-hidden border"
       data-print-surface
     >
       <div className="exam-result-hero-sheen pointer-events-none absolute inset-0" />
       <CardContent className="relative grid gap-8 lg:grid-cols-[1.4fr_0.9fr]">
         <div className="space-y-6">
           <div className="flex flex-wrap items-center gap-3">
-            <Badge variant={formatExamTypeBadgeVariant(data.paper.examType)}>{data.paper.examType}</Badge>
+            <Badge variant={formatExamTypeBadgeVariant(data.paper.examType)}>
+              {data.paper.examType}
+            </Badge>
             <Badge variant="outline">{formatDifficultyLabel(data.paper.difficulty)}</Badge>
             <Badge variant={wrongCount === 0 ? "ac" : "wa"}>
               {wrongCount === 0 ? "全对完成" : `${wrongCount} 处待回看`}
@@ -138,14 +135,16 @@ function ResultHero({ data }: { data: ExamResultPayload }) {
           </div>
 
           <div className="space-y-3">
-            <p className="font-mono text-xs uppercase tracking-[0.28em] text-primary/70">Round1 Result Protocol</p>
+            <p className="text-primary/70 font-mono text-xs tracking-[0.28em] uppercase">
+              Round1 Result Protocol
+            </p>
             <div className="flex flex-wrap items-end gap-4">
-              <div className="text-6xl font-semibold tracking-tight text-foreground sm:text-7xl">
+              <div className="text-foreground text-6xl font-semibold tracking-tight sm:text-7xl">
                 {data.attempt.score ?? 0}
               </div>
-              <div className="pb-2 text-lg text-muted-foreground">/ 100</div>
+              <div className="text-muted-foreground pb-2 text-lg">/ 100</div>
             </div>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            <p className="text-muted-foreground max-w-2xl text-sm leading-6">
               已提交于 {formatTimestamp(data.attempt.submittedAt)}。当前结果页直接消费 runtime 的
               grouped grader 聚合、wrongs 报告和题面解析契约，不再依赖 submit 响应临时态。
             </p>
@@ -174,19 +173,19 @@ function ResultHero({ data }: { data: ExamResultPayload }) {
             <Card variant="stat" className="border-primary/15 bg-card/75">
               <CardDescription>正确率</CardDescription>
               <CardTitle className="mt-2 text-3xl">{accuracy}%</CardTitle>
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-2 text-xs">
                 {correctAnswers} / {totalQuestions} 小题命中
               </p>
             </Card>
             <Card variant="stat" className="border-border bg-card/75">
               <CardDescription>错题数</CardDescription>
               <CardTitle className="mt-2 text-3xl">{wrongCount}</CardTitle>
-              <p className="mt-2 text-xs text-muted-foreground">可直接跳到下方题卡展开复盘</p>
+              <p className="text-muted-foreground mt-2 text-xs">可直接跳到下方题卡展开复盘</p>
             </Card>
             <Card variant="stat" className="border-border bg-card/75">
               <CardDescription>Section 数</CardDescription>
               <CardTitle className="mt-2 text-3xl">{sectionEntries.length}</CardTitle>
-              <p className="mt-2 text-xs text-muted-foreground">题型聚合已和 runtime grader 对齐</p>
+              <p className="text-muted-foreground mt-2 text-xs">题型聚合已和 runtime grader 对齐</p>
             </Card>
           </div>
         </div>
@@ -195,18 +194,22 @@ function ResultHero({ data }: { data: ExamResultPayload }) {
           {sectionEntries.map(({ key, label, summary }) => {
             const value = summary.maxScore === 0 ? 0 : (summary.score / summary.maxScore) * 100;
             return (
-              <Card key={key} variant="flat" className="border-border/80 bg-card/80 backdrop-blur-sm">
+              <Card
+                key={key}
+                variant="flat"
+                className="border-border/80 bg-card/80 backdrop-blur-sm"
+              >
                 <CardContent className="space-y-3">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <div className="text-sm font-medium text-foreground">{label}</div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-foreground text-sm font-medium">{label}</div>
+                      <div className="text-muted-foreground text-xs">
                         {summary.correct} / {summary.total} 小题正确
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xl font-semibold text-foreground">{summary.score}</div>
-                      <div className="text-xs text-muted-foreground">/ {summary.maxScore}</div>
+                      <div className="text-foreground text-xl font-semibold">{summary.score}</div>
+                      <div className="text-muted-foreground text-xs">/ {summary.maxScore}</div>
                     </div>
                   </div>
                   <Progress value={value} />
@@ -233,14 +236,16 @@ function ResultOverview({ data }: { data: ExamResultPayload }) {
       <Card variant="flat" className="border-border bg-card" data-print-surface>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
-            <Radar className="h-5 w-5 text-primary" />
+            <Radar className="text-primary h-5 w-5" />
             错题分布与知识点信号
           </CardTitle>
-          <CardDescription>先看运行时已经算好的 wrongs 与 primary KP 聚合，再决定哪里需要重练。</CardDescription>
+          <CardDescription>
+            先看运行时已经算好的 wrongs 与 primary KP 聚合，再决定哪里需要重练。
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           {wrongs.length === 0 ? (
-            <div className="rounded-[--radius-lg] border border-success/30 bg-success/5 p-4 text-sm text-success">
+            <div className="border-success/30 bg-success/5 text-success rounded-[var(--radius-lg)] border p-4 text-sm">
               本次没有 wrongs 记录，当前规则型 grader 判定全部命中。
             </div>
           ) : (
@@ -248,15 +253,15 @@ function ResultOverview({ data }: { data: ExamResultPayload }) {
               {wrongs.map((wrong) => (
                 <div
                   key={`${wrong.slotNo}-${wrong.subQuestionKey}`}
-                  className="rounded-[--radius-lg] border border-destructive/15 bg-destructive/[0.03] p-4"
+                  className="border-destructive/15 bg-destructive/[0.03] rounded-[var(--radius-lg)] border p-4"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <div className="text-sm font-medium text-foreground">
+                    <div className="text-foreground text-sm font-medium">
                       第 {wrong.slotNo} 题 · 子题 {wrong.subQuestionKey}
                     </div>
                     <Badge variant="wa">-{wrong.points}</Badge>
                   </div>
-                  <div className="mt-3 space-y-1 text-sm text-muted-foreground">
+                  <div className="text-muted-foreground mt-3 space-y-1 text-sm">
                     <p>你的答案：{wrong.submittedAnswer ?? "未作答"}</p>
                     <p>正确答案：{wrong.correctAnswer}</p>
                   </div>
@@ -268,15 +273,17 @@ function ResultOverview({ data }: { data: ExamResultPayload }) {
           <Separator />
 
           <div className="space-y-3">
-            <div className="text-sm font-medium text-foreground">薄弱 primary KP</div>
+            <div className="text-foreground text-sm font-medium">薄弱 primary KP</div>
             {weakKps.length === 0 ? (
-              <p className="text-sm text-muted-foreground">当前 attempt 没有 primary KP 聚合可展示。</p>
+              <p className="text-muted-foreground text-sm">
+                当前 attempt 没有 primary KP 聚合可展示。
+              </p>
             ) : (
               <div className="space-y-3">
                 {weakKps.map((kp) => (
                   <div key={kp.kpId} className="space-y-2">
                     <div className="flex items-center justify-between gap-3 text-sm">
-                      <span className="font-medium text-foreground">KP {kp.kpId}</span>
+                      <span className="text-foreground font-medium">KP {kp.kpId}</span>
                       <span className="text-muted-foreground">
                         {kp.correct} / {kp.total} · {Math.round(kp.accuracy * 100)}%
                       </span>
@@ -293,40 +300,42 @@ function ResultOverview({ data }: { data: ExamResultPayload }) {
       <Card variant="flat" className="border-border bg-card" data-print-surface>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
-            <Target className="h-5 w-5 text-primary" />
+            <Target className="text-primary h-5 w-5" />
             本次构成
           </CardTitle>
-          <CardDescription>按 runtime result payload 直接展示当前这份卷子的结构和状态。</CardDescription>
+          <CardDescription>
+            按 runtime result payload 直接展示当前这份卷子的结构和状态。
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
-          <div className="flex items-center justify-between gap-4 rounded-[--radius-lg] border border-border bg-subtle/20 p-4">
+          <div className="border-border bg-subtle/20 flex items-center justify-between gap-4 rounded-[var(--radius-lg)] border p-4">
             <span className="text-muted-foreground">试卷状态</span>
             <Badge variant="outline">{data.paper.status}</Badge>
           </div>
-          <div className="flex items-center justify-between gap-4 rounded-[--radius-lg] border border-border bg-subtle/20 p-4">
+          <div className="border-border bg-subtle/20 flex items-center justify-between gap-4 rounded-[var(--radius-lg)] border p-4">
             <span className="text-muted-foreground">提交状态</span>
             <Badge variant={data.attempt.status === "submitted" ? "ac" : "secondary"}>
               {data.attempt.status}
             </Badge>
           </div>
-          <div className="flex items-center justify-between gap-4 rounded-[--radius-lg] border border-border bg-subtle/20 p-4">
+          <div className="border-border bg-subtle/20 flex items-center justify-between gap-4 rounded-[var(--radius-lg)] border p-4">
             <span className="text-muted-foreground">Report 状态</span>
             <Badge variant={data.attempt.reportStatus === "completed" ? "ac" : "outline"}>
               {data.attempt.reportStatus ?? "pending"}
             </Badge>
           </div>
-          <div className="flex items-center justify-between gap-4 rounded-[--radius-lg] border border-border bg-subtle/20 p-4">
+          <div className="border-border bg-subtle/20 flex items-center justify-between gap-4 rounded-[var(--radius-lg)] border p-4">
             <span className="text-muted-foreground">来源</span>
-            <span className="font-medium text-foreground">
+            <span className="text-foreground font-medium">
               {data.paper.assignmentId ? "班级任务" : "自练卷"}
             </span>
           </div>
-          <div className="rounded-[--radius-lg] border border-border bg-subtle/15 p-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <Trophy className="h-4 w-4 text-primary" />
+          <div className="border-border bg-subtle/15 rounded-[var(--radius-lg)] border p-4">
+            <div className="text-foreground flex items-center gap-2 text-sm font-medium">
+              <Trophy className="text-primary h-4 w-4" />
               结果页接口说明
             </div>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-sm leading-6">
               当前页面消费的是 GET /api/v1/exams/:id/result。它已经把 attempts 聚合、ai_report_json
               和题面解析统一成稳定读模型，后续结果页扩展只需要在这个契约上增量前进。
             </p>
@@ -337,9 +346,16 @@ function ResultOverview({ data }: { data: ExamResultPayload }) {
   );
 }
 
-function ResultItemCard({ item, defaultOpen = false }: { item: ExamResultItem; defaultOpen?: boolean }) {
+function ResultItemCard({
+  item,
+  defaultOpen = false,
+}: {
+  item: ExamResultItem;
+  defaultOpen?: boolean;
+}) {
   const [open, setOpen] = useState(defaultOpen);
-  const accuracy = item.result.totalCount === 0 ? 0 : (item.result.correctCount / item.result.totalCount) * 100;
+  const accuracy =
+    item.result.totalCount === 0 ? 0 : (item.result.correctCount / item.result.totalCount) * 100;
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
@@ -355,9 +371,12 @@ function ResultItemCard({ item, defaultOpen = false }: { item: ExamResultItem; d
                 </Badge>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-foreground">{extractPrompt(item.contentJson)}</h3>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  已命中 {item.result.correctCount} / {item.result.totalCount} 小题，知识点 KP {item.primaryKpId}。
+                <h3 className="text-foreground text-lg font-semibold">
+                  {extractPrompt(item.contentJson)}
+                </h3>
+                <p className="text-muted-foreground mt-2 text-sm leading-6">
+                  已命中 {item.result.correctCount} / {item.result.totalCount} 小题，知识点 KP{" "}
+                  {item.primaryKpId}。
                 </p>
               </div>
             </div>
@@ -365,7 +384,7 @@ function ResultItemCard({ item, defaultOpen = false }: { item: ExamResultItem; d
             <div className="flex w-full flex-col gap-3 lg:max-w-xs">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">本题准确率</span>
-                <span className="font-medium text-foreground">{Math.round(accuracy)}%</span>
+                <span className="text-foreground font-medium">{Math.round(accuracy)}%</span>
               </div>
               <Progress value={accuracy} />
               <CollapsibleTrigger asChild>
@@ -383,14 +402,16 @@ function ResultItemCard({ item, defaultOpen = false }: { item: ExamResultItem; d
               {item.result.subQuestions.map((subQuestion) => (
                 <div
                   key={subQuestion.key}
-                  className={`rounded-[--radius-lg] border p-4 ${
+                  className={`rounded-[var(--radius-lg)] border p-4 ${
                     subQuestion.isCorrect
                       ? "border-success/25 bg-success/5"
                       : "border-destructive/15 bg-destructive/[0.03]"
                   }`}
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <div className="text-sm font-medium text-foreground">子题 {subQuestion.key}</div>
+                    <div className="text-foreground text-sm font-medium">
+                      子题 {subQuestion.key}
+                    </div>
                     <Badge variant={subQuestion.isCorrect ? "ac" : "wa"}>
                       {subQuestion.isCorrect ? "命中" : "待修正"}
                     </Badge>
@@ -398,19 +419,25 @@ function ResultItemCard({ item, defaultOpen = false }: { item: ExamResultItem; d
                   </div>
 
                   <div className="mt-3 grid gap-3 md:grid-cols-2">
-                    <div className="rounded-[--radius-md] border border-border/70 bg-card/70 p-3">
-                      <div className="text-xs uppercase tracking-wide text-muted-foreground">你的答案</div>
-                      <div className="mt-2 font-mono text-sm text-foreground">
+                    <div className="border-border/70 bg-card/70 rounded-[var(--radius-md)] border p-3">
+                      <div className="text-muted-foreground text-xs tracking-wide uppercase">
+                        你的答案
+                      </div>
+                      <div className="text-foreground mt-2 font-mono text-sm">
                         {subQuestion.submittedAnswer ?? "未作答"}
                       </div>
                     </div>
-                    <div className="rounded-[--radius-md] border border-border/70 bg-card/70 p-3">
-                      <div className="text-xs uppercase tracking-wide text-muted-foreground">正确答案</div>
-                      <div className="mt-2 font-mono text-sm text-foreground">{subQuestion.correctAnswer}</div>
+                    <div className="border-border/70 bg-card/70 rounded-[var(--radius-md)] border p-3">
+                      <div className="text-muted-foreground text-xs tracking-wide uppercase">
+                        正确答案
+                      </div>
+                      <div className="text-foreground mt-2 font-mono text-sm">
+                        {subQuestion.correctAnswer}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="mt-3 rounded-[--radius-md] border border-border/70 bg-card/70 p-3 text-sm leading-6 text-muted-foreground">
+                  <div className="border-border/70 bg-card/70 text-muted-foreground mt-3 rounded-[var(--radius-md)] border p-3 text-sm leading-6">
                     {subQuestion.explanation ?? "当前没有解释文本。"}
                   </div>
                 </div>
@@ -426,7 +453,7 @@ function ResultItemCard({ item, defaultOpen = false }: { item: ExamResultItem; d
 function LoadingState() {
   return (
     <div className="space-y-6">
-      <Skeleton className="h-72 w-full rounded-[--radius-xl]" />
+      <Skeleton className="h-72 w-full rounded-[var(--radius-xl)]" />
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <Skeleton className="h-80 w-full" />
         <Skeleton className="h-80 w-full" />
@@ -450,11 +477,12 @@ function CeremonyReveal({
 }) {
   const totalQuestions = data.items.reduce((sum, item) => sum + item.result.totalCount, 0);
   const correctAnswers = data.items.reduce((sum, item) => sum + item.result.correctCount, 0);
-  const wrongCount = data.attempt.report?.wrongs.length ?? Math.max(totalQuestions - correctAnswers, 0);
+  const wrongCount =
+    data.attempt.report?.wrongs.length ?? Math.max(totalQuestions - correctAnswers, 0);
 
   return (
     <div
-      className="exam-result-ceremony-surface fixed inset-0 z-[--z-ceremony] px-6 py-8 text-white"
+      className="exam-result-ceremony-surface fixed inset-0 z-[var(--z-ceremony)] px-6 py-8 text-white"
       data-no-print
       data-testid="exam-result-ceremony"
     >
@@ -466,17 +494,19 @@ function CeremonyReveal({
       </div>
       <div className="relative flex h-full items-center justify-center">
         <div className="w-full max-w-4xl text-center">
-          <div className="mx-auto inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-2 text-xs uppercase tracking-[0.32em] text-white/70">
+          <div className="mx-auto inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-2 text-xs tracking-[0.32em] text-white/70 uppercase">
             <span className="font-semibold">R1</span>
             <span>Result Reveal</span>
           </div>
 
           <div
             className={`mt-8 transition-all duration-700 ${
-              scoreVisible ? "translate-y-0 scale-100 opacity-100" : "translate-y-6 scale-95 opacity-0"
+              scoreVisible
+                ? "translate-y-0 scale-100 opacity-100"
+                : "translate-y-6 scale-95 opacity-0"
             }`}
           >
-            <div className="text-sm uppercase tracking-[0.4em] text-white/50">Final Score</div>
+            <div className="text-sm tracking-[0.4em] text-white/50 uppercase">Final Score</div>
             <div className="mt-4 text-7xl font-semibold tracking-tight sm:text-8xl">
               {data.attempt.score ?? 0}
             </div>
@@ -495,7 +525,8 @@ function CeremonyReveal({
             </div>
 
             <p className="mx-auto mt-6 max-w-2xl text-sm leading-7 text-white/65">
-              这一步只在 submit 成功后的首次进入触发。ESC 可跳过，或点击下方按钮直接进入完整结果页详情。
+              这一步只在 submit 成功后的首次进入触发。ESC
+              可跳过，或点击下方按钮直接进入完整结果页详情。
             </p>
           </div>
 
@@ -513,7 +544,9 @@ function CeremonyReveal({
             >
               查看详情
             </Button>
-            <div className="mt-4 text-xs uppercase tracking-[0.24em] text-white/40">Press ESC To Skip</div>
+            <div className="mt-4 text-xs tracking-[0.24em] text-white/40 uppercase">
+              Press ESC To Skip
+            </div>
           </div>
         </div>
       </div>
@@ -584,9 +617,14 @@ export default function ExamResultPage() {
       );
     }
 
-    timers.push(window.setTimeout(() => {
-      closeCeremony();
-    }, prefersReducedMotion ? 1600 : 2800));
+    timers.push(
+      window.setTimeout(
+        () => {
+          closeCeremony();
+        },
+        prefersReducedMotion ? 1600 : 2800,
+      ),
+    );
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         closeCeremony();
@@ -605,7 +643,7 @@ export default function ExamResultPage() {
     return (
       <Card variant="flat" className="border-destructive/30 bg-destructive/5">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
+          <CardTitle className="text-destructive flex items-center gap-2">
             <AlertCircle className="h-5 w-5" />
             缺少结果页 ID
           </CardTitle>
@@ -623,12 +661,14 @@ export default function ExamResultPage() {
     return (
       <Card variant="hero" className="exam-session-error-surface border-destructive/20">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
+          <CardTitle className="text-destructive flex items-center gap-2">
             <AlertCircle className="h-5 w-5" />
             结果页加载失败
           </CardTitle>
           <CardDescription>
-            {resultQuery.error instanceof Error ? resultQuery.error.message : "读取考试结果时发生未知错误。"}
+            {resultQuery.error instanceof Error
+              ? resultQuery.error.message
+              : "读取考试结果时发生未知错误。"}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
@@ -673,7 +713,7 @@ export default function ExamResultPage() {
         />
       ) : null}
 
-      <div className="rounded-full border border-border/80 bg-card/80 px-4 py-2 text-xs tracking-[0.24em] text-muted-foreground uppercase">
+      <div className="border-border/80 bg-card/80 text-muted-foreground rounded-full border px-4 py-2 text-xs tracking-[0.24em] uppercase">
         Exam Result
       </div>
 
@@ -683,22 +723,30 @@ export default function ExamResultPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="flex items-center gap-2 text-2xl font-semibold text-foreground">
-              <CircleCheckBig className="h-6 w-6 text-primary" />
+            <h2 className="text-foreground flex items-center gap-2 text-2xl font-semibold">
+              <CircleCheckBig className="text-primary h-6 w-6" />
               逐题讲解
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">卡片内嵌展开，不跳页、不抽屉，直接复盘每个子题的命中情况。</p>
+            <p className="text-muted-foreground mt-1 text-sm">
+              卡片内嵌展开，不跳页、不抽屉，直接复盘每个子题的命中情况。
+            </p>
           </div>
           <Badge variant="outline">{data.items.length} 题</Badge>
         </div>
 
         <div className="space-y-4">
           {data.items.map((item) => (
-            <ResultItemCard key={item.slotNo} item={item} defaultOpen={wrongKeys.has(item.slotNo)} />
+            <ResultItemCard
+              key={item.slotNo}
+              item={item}
+              defaultOpen={wrongKeys.has(item.slotNo)}
+            />
           ))}
         </div>
       </section>
-      <div className="print-footer hidden">生成时间：{formatTimestamp(data.attempt.submittedAt)}</div>
+      <div className="print-footer hidden">
+        生成时间：{formatTimestamp(data.attempt.submittedAt)}
+      </div>
     </div>
   );
 }

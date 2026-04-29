@@ -148,7 +148,7 @@ export default function AuthCallbackPage() {
       {status === "error" ? (
         <div
           role="alert"
-          className="border-destructive bg-subtle text-destructive flex items-start gap-3 rounded-[--radius-lg] border p-4 text-sm"
+          className="border-destructive bg-subtle text-destructive flex items-start gap-3 rounded-[var(--radius-lg)] border p-4 text-sm"
         >
           <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" />
           <span>{message}</span>
@@ -156,7 +156,7 @@ export default function AuthCallbackPage() {
       ) : (
         <div
           role="status"
-          className="border-border bg-subtle/40 text-foreground flex items-start gap-3 rounded-[--radius-lg] border p-4 text-sm"
+          className="border-border bg-subtle/40 text-foreground flex items-start gap-3 rounded-[var(--radius-lg)] border p-4 text-sm"
         >
           {status === "processing" ? (
             <LoaderCircle className="mt-0.5 h-5 w-5 shrink-0 animate-spin" />

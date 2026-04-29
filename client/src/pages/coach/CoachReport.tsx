@@ -120,7 +120,7 @@ function KpiCard({
 
 function EmptyReport() {
   return (
-    <div className="border-border bg-subtle/10 grid min-h-64 place-items-center rounded-[--radius-lg] border border-dashed p-8 text-center">
+    <div className="border-border bg-subtle/10 grid min-h-64 place-items-center rounded-[var(--radius-lg)] border border-dashed p-8 text-center">
       <div className="space-y-3">
         <FileText className="text-muted-foreground mx-auto h-8 w-8" />
         <div className="text-foreground font-medium">当前班级还没有任务统计</div>
@@ -136,7 +136,7 @@ function HeatmapCell({ value }: { value: CoachKpReportSummary }) {
   const bucket = heatmapBucket(value);
   return (
     <div
-      className={`border-border/70 grid h-10 min-w-14 place-items-center rounded-[--radius-sm] border text-xs font-medium tabular-nums ${heatmapBucketClasses[bucket]}`}
+      className={`border-border/70 grid h-10 min-w-14 place-items-center rounded-[var(--radius-sm)] border text-xs font-medium tabular-nums ${heatmapBucketClasses[bucket]}`}
       title={`${value.correct}/${value.total} · ${formatCoachPercent(value.accuracy)}`}
       aria-label={`知识点 ${value.kpId} 正确率 ${formatCoachPercent(value.accuracy)}`}
     >
@@ -190,7 +190,7 @@ function ClassHeatmap({
                 <div key={student.userId} className="flex gap-2">
                   <button
                     type="button"
-                    className="border-border bg-card hover:bg-accent-wash text-foreground w-40 shrink-0 rounded-[--radius-md] border px-3 text-left text-sm font-medium transition-colors focus-visible:shadow-[--shadow-glow]"
+                    className="border-border bg-card hover:bg-accent-wash text-foreground w-40 shrink-0 rounded-[var(--radius-md)] border px-3 text-left text-sm font-medium transition-colors focus-visible:shadow-[var(--shadow-glow)]"
                     aria-label={`从热力图查看 ${student.displayName} 详情`}
                     onClick={() => detail && onSelectStudent(detail)}
                   >
@@ -248,7 +248,7 @@ function ClassHeatmap({
 function QuestionTypeStats({ stats }: { stats: CoachQuestionTypeReportSummary[] }) {
   if (stats.length === 0) {
     return (
-      <div className="border-border bg-subtle/10 text-muted-foreground rounded-[--radius-lg] border border-dashed p-6 text-sm">
+      <div className="border-border bg-subtle/10 text-muted-foreground rounded-[var(--radius-lg)] border border-dashed p-6 text-sm">
         暂无题型统计。
       </div>
     );
@@ -295,7 +295,7 @@ function StudentTable({
 
   return (
     <div className="space-y-4" data-print-surface>
-      <div className="border-border overflow-hidden rounded-[--radius-lg] border">
+      <div className="border-border overflow-hidden rounded-[var(--radius-lg)] border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -442,7 +442,7 @@ function StudentDetailSheet({
                   visibleTrend.map((item) => (
                     <div
                       key={`${student.userId}-${item.assignmentId}`}
-                      className="border-border flex items-center justify-between gap-3 rounded-[--radius-md] border p-3"
+                      className="border-border flex items-center justify-between gap-3 rounded-[var(--radius-md)] border p-3"
                     >
                       <div className="min-w-0">
                         <div className="text-foreground truncate text-sm font-medium">
@@ -526,7 +526,7 @@ function CoachAccessPrompt({
 }) {
   return (
     <div className="grid min-h-[55vh] place-items-center">
-      <div className="border-border bg-card max-w-xl rounded-[--radius-lg] border p-8 text-center">
+      <div className="border-border bg-card max-w-xl rounded-[var(--radius-lg)] border p-8 text-center">
         <Users className="text-muted-foreground mx-auto h-9 w-9" />
         <h1 className="text-foreground mt-4 text-2xl font-semibold">{title}</h1>
         <p className="text-muted-foreground mt-3 text-sm leading-6">{description}</p>

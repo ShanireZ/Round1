@@ -89,8 +89,8 @@ export default function CompleteProfilePage() {
         </div>
       </div>
 
-      <div className="border-border bg-subtle/40 flex items-center gap-3 rounded-[--radius-lg] border p-4">
-        <div className="border-border bg-surface flex h-11 w-28 shrink-0 items-center justify-center overflow-hidden rounded-[--radius-md] border p-1">
+      <div className="border-border bg-subtle/40 flex items-center gap-3 rounded-[var(--radius-lg)] border p-4">
+        <div className="border-border bg-surface flex h-11 w-28 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-md)] border p-1">
           <img
             src={CPPLEARN_BANNER_SRC}
             alt="CppLearn"
@@ -107,7 +107,7 @@ export default function CompleteProfilePage() {
       {formError ? (
         <div
           role="alert"
-          className="border-destructive bg-subtle text-destructive flex items-start gap-2 rounded-[--radius-md] border p-3 text-sm"
+          className="border-destructive bg-subtle text-destructive flex items-start gap-2 rounded-[var(--radius-md)] border p-3 text-sm"
         >
           <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{formError}</span>

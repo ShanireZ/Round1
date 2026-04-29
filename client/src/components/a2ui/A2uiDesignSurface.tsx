@@ -62,7 +62,7 @@ export function A2uiDesignSurface() {
             {surface ? "Surface ready" : "Preparing surface"}
           </div>
         </div>
-        <div className="border-border/80 bg-subtle text-muted-foreground rounded-[--radius-md] border px-3 py-1.5 font-mono text-[11px]">
+        <div className="border-border/80 bg-subtle text-muted-foreground rounded-[var(--radius-md)] border px-3 py-1.5 font-mono text-[11px]">
           {lastAction}
         </div>
       </div>
@@ -70,7 +70,7 @@ export function A2uiDesignSurface() {
       {surfaceError ? (
         <div
           role="alert"
-          className="border-destructive/60 bg-subtle text-destructive rounded-[--radius-md] border p-4 text-sm"
+          className="border-destructive/60 bg-subtle text-destructive rounded-[var(--radius-md)] border p-4 text-sm"
         >
           {surfaceError}
         </div>
@@ -79,7 +79,7 @@ export function A2uiDesignSurface() {
           <A2uiSurface surface={surface} />
         </MarkdownContext.Provider>
       ) : (
-        <div className="border-border/70 bg-subtle text-muted-foreground rounded-[--radius-md] border p-4 text-sm">
+        <div className="border-border/70 bg-subtle text-muted-foreground rounded-[var(--radius-md)] border p-4 text-sm">
           A2UI surface 初始化中。
         </div>
       )}

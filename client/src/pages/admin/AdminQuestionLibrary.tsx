@@ -5,17 +5,17 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   Table,
@@ -74,12 +74,13 @@ const statusLabels: Record<QuestionStatus, string> = {
   archived: "Archived",
 };
 
-const statusVariants: Record<QuestionStatus, "secondary" | "outline" | "destructive" | "default"> = {
-  draft: "outline",
-  reviewed: "secondary",
-  published: "default",
-  archived: "secondary",
-};
+const statusVariants: Record<QuestionStatus, "secondary" | "outline" | "destructive" | "default"> =
+  {
+    draft: "outline",
+    reviewed: "secondary",
+    published: "default",
+    archived: "secondary",
+  };
 
 const questionCreatePlaceholder = `{
   "type": "single_choice",
@@ -143,7 +144,13 @@ export default function AdminQuestionLibrary() {
   });
 
   const questionsQuery = useQuery({
-    queryKey: ["admin-questions", typeFilter, difficultyFilter, statusFilter, sourceFilter] as const,
+    queryKey: [
+      "admin-questions",
+      typeFilter,
+      difficultyFilter,
+      statusFilter,
+      sourceFilter,
+    ] as const,
     queryFn: () =>
       fetchAdminQuestions({
         page: 1,
@@ -323,7 +330,7 @@ export default function AdminQuestionLibrary() {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">题库管理</h1>
-          <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 max-w-3xl text-sm">
             按题型、难度、状态和来源筛选题库资产，处理 draft 编辑、发布、归档与引用核查。
           </p>
         </div>
@@ -341,14 +348,17 @@ export default function AdminQuestionLibrary() {
         <Card variant="flat" className="min-w-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <RefreshCcw className="h-4 w-4 text-primary" />
+              <RefreshCcw className="text-primary h-4 w-4" />
               题目列表
             </CardTitle>
             <CardDescription>选择一行后在右侧查看详情、引用摘要与生命周期操作。</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-3 md:grid-cols-4">
-              <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as QuestionFilterType)}>
+              <Select
+                value={typeFilter}
+                onValueChange={(value) => setTypeFilter(value as QuestionFilterType)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="题型" />
                 </SelectTrigger>
@@ -375,7 +385,10 @@ export default function AdminQuestionLibrary() {
                 </SelectContent>
               </Select>
 
-              <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as QuestionFilterStatus)}>
+              <Select
+                value={statusFilter}
+                onValueChange={(value) => setStatusFilter(value as QuestionFilterStatus)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="状态" />
                 </SelectTrigger>
@@ -388,7 +401,10 @@ export default function AdminQuestionLibrary() {
                 </SelectContent>
               </Select>
 
-              <Select value={sourceFilter} onValueChange={(value) => setSourceFilter(value as QuestionFilterSource)}>
+              <Select
+                value={sourceFilter}
+                onValueChange={(value) => setSourceFilter(value as QuestionFilterSource)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="来源" />
                 </SelectTrigger>
@@ -402,12 +418,14 @@ export default function AdminQuestionLibrary() {
             </div>
 
             {questionsQuery.isLoading ? (
-              <div className="rounded-[--radius-md] border border-border p-4 text-sm text-muted-foreground">
+              <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border p-4 text-sm">
                 正在加载题目列表...
               </div>
             ) : questionsQuery.isError ? (
-              <div className="rounded-[--radius-md] border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
-                {questionsQuery.error instanceof Error ? questionsQuery.error.message : "题目列表加载失败"}
+              <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-[var(--radius-md)] border p-4 text-sm">
+                {questionsQuery.error instanceof Error
+                  ? questionsQuery.error.message
+                  : "题目列表加载失败"}
               </div>
             ) : questionsQuery.data && questionsQuery.data.items.length > 0 ? (
               <Table>
@@ -428,28 +446,38 @@ export default function AdminQuestionLibrary() {
                       onClick={() => setSelectedId(question.id)}
                     >
                       <TableCell>
-                        <div className="font-medium text-foreground">{questionTypeLabels[question.type]}</div>
+                        <div className="text-foreground font-medium">
+                          {questionTypeLabels[question.type]}
+                        </div>
                         <div className="mt-1 flex flex-wrap gap-2">
                           <Badge variant="outline">{difficultyLabels[question.difficulty]}</Badge>
-                          <span className="font-mono text-xs text-muted-foreground">{question.id.slice(0, 8)}</span>
+                          <span className="text-muted-foreground font-mono text-xs">
+                            {question.id.slice(0, 8)}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={statusVariants[question.status]}>{statusLabels[question.status]}</Badge>
+                        <Badge variant={statusVariants[question.status]}>
+                          {statusLabels[question.status]}
+                        </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{sourceLabels[question.source]}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {sourceLabels[question.source]}
+                      </TableCell>
                       <TableCell>
                         <Badge variant={question.sandboxVerified ? "default" : "outline"}>
                           {question.sandboxVerified ? "已校验" : "未校验"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{formatTimestamp(question.createdAt)}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {formatTimestamp(question.createdAt)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             ) : (
-              <div className="rounded-[--radius-md] border border-dashed border-border p-4 text-sm text-muted-foreground">
+              <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border border-dashed p-4 text-sm">
                 当前筛选下暂无题目。
               </div>
             )}
@@ -458,8 +486,10 @@ export default function AdminQuestionLibrary() {
 
             <div className="space-y-3">
               <div>
-                <h2 className="text-sm font-semibold text-foreground">新建 Draft</h2>
-                <p className="mt-1 text-xs text-muted-foreground">提交与 Admin question create body 一致的 JSON。</p>
+                <h2 className="text-foreground text-sm font-semibold">新建 Draft</h2>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  提交与 Admin question create body 一致的 JSON。
+                </p>
               </div>
               <Textarea
                 className="min-h-48 font-mono text-xs"
@@ -478,20 +508,24 @@ export default function AdminQuestionLibrary() {
         <Card variant="flat" className="min-w-0">
           <CardHeader>
             <CardTitle className="text-lg">详情与操作</CardTitle>
-            <CardDescription>draft 支持原地编辑；已发布或归档题目只走生命周期操作。</CardDescription>
+            <CardDescription>
+              draft 支持原地编辑；已发布或归档题目只走生命周期操作。
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {!selectedId ? (
-              <div className="rounded-[--radius-md] border border-dashed border-border p-4 text-sm text-muted-foreground">
+              <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border border-dashed p-4 text-sm">
                 从左侧选择题目。
               </div>
             ) : detailQuery.isLoading ? (
-              <div className="rounded-[--radius-md] border border-border p-4 text-sm text-muted-foreground">
+              <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border p-4 text-sm">
                 正在加载题目详情...
               </div>
             ) : detailQuery.isError || !selectedQuestion ? (
-              <div className="rounded-[--radius-md] border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
-                {detailQuery.error instanceof Error ? detailQuery.error.message : "题目详情加载失败"}
+              <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-[var(--radius-md)] border p-4 text-sm">
+                {detailQuery.error instanceof Error
+                  ? detailQuery.error.message
+                  : "题目详情加载失败"}
               </div>
             ) : (
               <>
@@ -504,21 +538,23 @@ export default function AdminQuestionLibrary() {
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-3">
-                  <div className="rounded-[--radius-md] border border-border bg-subtle/20 p-3">
-                    <div className="text-xs text-muted-foreground">预制卷引用</div>
+                  <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
+                    <div className="text-muted-foreground text-xs">预制卷引用</div>
                     <div className="mt-1 text-2xl font-semibold tabular-nums">
                       {references?.prebuiltPaperReferences ?? "-"}
                     </div>
                   </div>
-                  <div className="rounded-[--radius-md] border border-border bg-subtle/20 p-3">
-                    <div className="text-xs text-muted-foreground">试卷实例</div>
+                  <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
+                    <div className="text-muted-foreground text-xs">试卷实例</div>
                     <div className="mt-1 text-2xl font-semibold tabular-nums">
                       {references?.paperInstanceReferences ?? "-"}
                     </div>
                   </div>
-                  <div className="rounded-[--radius-md] border border-border bg-subtle/20 p-3">
-                    <div className="text-xs text-muted-foreground">可硬删</div>
-                    <div className="mt-1 text-sm font-semibold">{references?.canDelete ? "是" : "否"}</div>
+                  <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
+                    <div className="text-muted-foreground text-xs">可硬删</div>
+                    <div className="mt-1 text-sm font-semibold">
+                      {references?.canDelete ? "是" : "否"}
+                    </div>
                   </div>
                 </div>
 
@@ -631,7 +667,10 @@ export default function AdminQuestionLibrary() {
                         disabled={!selectedCanEdit}
                         value={editState.contentJson}
                         onChange={(event) =>
-                          setEditState((current) => ({ ...current, contentJson: event.target.value }))
+                          setEditState((current) => ({
+                            ...current,
+                            contentJson: event.target.value,
+                          }))
                         }
                       />
                     </div>
@@ -643,7 +682,10 @@ export default function AdminQuestionLibrary() {
                         disabled={!selectedCanEdit}
                         value={editState.answerJson}
                         onChange={(event) =>
-                          setEditState((current) => ({ ...current, answerJson: event.target.value }))
+                          setEditState((current) => ({
+                            ...current,
+                            answerJson: event.target.value,
+                          }))
                         }
                       />
                     </div>
@@ -655,7 +697,10 @@ export default function AdminQuestionLibrary() {
                         disabled={!selectedCanEdit}
                         value={editState.explanationJson}
                         onChange={(event) =>
-                          setEditState((current) => ({ ...current, explanationJson: event.target.value }))
+                          setEditState((current) => ({
+                            ...current,
+                            explanationJson: event.target.value,
+                          }))
                         }
                       />
                     </div>
@@ -676,7 +721,9 @@ export default function AdminQuestionLibrary() {
                   <Button
                     disabled={!selectedCanPublish}
                     title={selectedCanPublish ? "发布 reviewed 题目" : "仅 reviewed 题目可发布"}
-                    loading={lifecycleMutation.isPending && lifecycleMutation.variables === "publish"}
+                    loading={
+                      lifecycleMutation.isPending && lifecycleMutation.variables === "publish"
+                    }
                     onClick={() => runLifecycleAction("publish")}
                   >
                     <CheckCircle2 className="h-4 w-4" />
@@ -686,7 +733,9 @@ export default function AdminQuestionLibrary() {
                     variant="secondary"
                     disabled={!selectedCanArchive}
                     title={selectedCanArchive ? "归档 published 题目" : "仅 published 题目可归档"}
-                    loading={lifecycleMutation.isPending && lifecycleMutation.variables === "archive"}
+                    loading={
+                      lifecycleMutation.isPending && lifecycleMutation.variables === "archive"
+                    }
                     onClick={() => runLifecycleAction("archive")}
                   >
                     <Archive className="h-4 w-4" />
@@ -696,14 +745,16 @@ export default function AdminQuestionLibrary() {
                     variant="destructive"
                     disabled={!selectedCanDelete}
                     title={selectedCanDelete ? "删除未引用 draft 题目" : questionDeleteHint}
-                    loading={lifecycleMutation.isPending && lifecycleMutation.variables === "delete"}
+                    loading={
+                      lifecycleMutation.isPending && lifecycleMutation.variables === "delete"
+                    }
                     onClick={() => runLifecycleAction("delete")}
                   >
                     <Trash2 className="h-4 w-4" />
                     删除
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   {questionLifecycleHint} {questionDeleteHint}
                 </p>
               </>

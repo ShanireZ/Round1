@@ -15,7 +15,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-[--z-overlay] bg-black/50 backdrop-blur-[--backdrop-blur] data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out",
+      "data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out fixed inset-0 z-[var(--z-overlay)] bg-black/50 backdrop-blur-[var(--backdrop-blur)]",
       className,
     )}
     {...props}
@@ -32,13 +32,13 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-[--z-modal] w-full max-w-md translate-x-[-50%] translate-y-[-50%] rounded-[--radius-lg] bg-surface p-[--space-6] shadow-lg duration-[--duration-slow] data-[state=open]:animate-scale-in",
+        "bg-surface data-[state=open]:animate-scale-in fixed top-[50%] left-[50%] z-[var(--z-modal)] w-full max-w-md translate-x-[-50%] translate-y-[-50%] rounded-[var(--radius-lg)] p-[var(--space-6)] shadow-lg duration-[var(--duration-slow)]",
         className,
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-[--radius-sm] opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:shadow-[--shadow-glow]">
+      <DialogPrimitive.Close className="absolute top-4 right-4 rounded-[var(--radius-sm)] opacity-70 transition-opacity hover:opacity-100 focus:shadow-[var(--shadow-glow)] focus:outline-none">
         <X className="h-4 w-4" />
         <span className="sr-only">关闭</span>
       </DialogPrimitive.Close>
@@ -53,7 +53,10 @@ const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 DialogHeader.displayName = "DialogHeader";
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 pt-4", className)} {...props} />
+  <div
+    className={cn("flex flex-col-reverse pt-4 sm:flex-row sm:justify-end sm:space-x-2", className)}
+    {...props}
+  />
 );
 DialogFooter.displayName = "DialogFooter";
 
@@ -63,7 +66,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn("text-lg font-semibold leading-none tracking-tight", className)}
+    className={cn("text-lg leading-none font-semibold tracking-tight", className)}
     {...props}
   />
 ));
@@ -75,7 +78,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-muted-foreground text-sm", className)}
     {...props}
   />
 ));

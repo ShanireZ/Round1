@@ -5,13 +5,7 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -110,8 +104,9 @@ export default function AdminSettings() {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">系统设置</h1>
-          <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
-            维护 app_settings 中的运行时配置。变更会记录审计，并通过 Redis config:change 通知 API 与作业进程热更新。
+          <p className="text-muted-foreground mt-2 max-w-3xl text-sm">
+            维护 app_settings 中的运行时配置。变更会记录审计，并通过 Redis config:change 通知 API
+            与作业进程热更新。
           </p>
         </div>
         <Card variant="stat" className="min-w-36">
@@ -129,7 +124,7 @@ export default function AdminSettings() {
           <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <RefreshCcw className="h-4 w-4 text-primary" />
+                <RefreshCcw className="text-primary h-4 w-4" />
                 Runtime Settings
               </CardTitle>
               <CardDescription>默认配置与数据库覆盖值合并展示。</CardDescription>
@@ -140,12 +135,14 @@ export default function AdminSettings() {
           </CardHeader>
           <CardContent>
             {settingsQuery.isLoading ? (
-              <div className="rounded-[--radius-md] border border-border p-4 text-sm text-muted-foreground">
+              <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border p-4 text-sm">
                 正在加载系统设置...
               </div>
             ) : settingsQuery.isError ? (
-              <div className="rounded-[--radius-md] border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
-                {settingsQuery.error instanceof Error ? settingsQuery.error.message : "系统设置加载失败"}
+              <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-[var(--radius-md)] border p-4 text-sm">
+                {settingsQuery.error instanceof Error
+                  ? settingsQuery.error.message
+                  : "系统设置加载失败"}
               </div>
             ) : settingsQuery.data && settingsQuery.data.items.length > 0 ? (
               <Table>
@@ -165,13 +162,15 @@ export default function AdminSettings() {
                       onClick={() => setSelectedKey(setting.key)}
                     >
                       <TableCell>
-                        <div className="font-medium text-foreground">{setting.label}</div>
-                        <div className="mt-1 font-mono text-xs text-muted-foreground">{setting.key}</div>
+                        <div className="text-foreground font-medium">{setting.label}</div>
+                        <div className="text-muted-foreground mt-1 font-mono text-xs">
+                          {setting.key}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">{setting.category}</Badge>
                       </TableCell>
-                      <TableCell className="max-w-[260px] truncate font-mono text-xs text-muted-foreground">
+                      <TableCell className="text-muted-foreground max-w-[260px] truncate font-mono text-xs">
                         {stringifyJson(setting.valueJson)}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
@@ -182,7 +181,7 @@ export default function AdminSettings() {
                 </TableBody>
               </Table>
             ) : (
-              <div className="rounded-[--radius-md] border border-dashed border-border p-4 text-sm text-muted-foreground">
+              <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border border-dashed p-4 text-sm">
                 暂无系统设置。
               </div>
             )}
@@ -196,9 +195,9 @@ export default function AdminSettings() {
           </CardHeader>
           <CardContent className="space-y-4">
             {selectedSetting ? (
-              <div className="rounded-[--radius-md] border border-border bg-subtle/20 p-3 text-sm">
-                <div className="font-semibold text-foreground">{selectedSetting.label}</div>
-                <div className="mt-1 text-muted-foreground">{selectedSetting.description}</div>
+              <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3 text-sm">
+                <div className="text-foreground font-semibold">{selectedSetting.label}</div>
+                <div className="text-muted-foreground mt-1">{selectedSetting.description}</div>
               </div>
             ) : null}
 
@@ -234,8 +233,8 @@ export default function AdminSettings() {
               ) : null}
             </div>
 
-            <ScrollArea className="h-40 rounded-[--radius-md] border border-border bg-subtle/10 p-3">
-              <pre className="text-xs text-muted-foreground">
+            <ScrollArea className="border-border bg-subtle/10 h-40 rounded-[var(--radius-md)] border p-3">
+              <pre className="text-muted-foreground text-xs">
                 {stringifyJson({
                   selectedKey,
                   updatedBy: selectedSetting?.updatedBy ?? null,

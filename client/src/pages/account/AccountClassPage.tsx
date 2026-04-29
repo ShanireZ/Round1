@@ -147,7 +147,7 @@ function ClassJoinPanel({
           </div>
 
           {inviteToken.trim() ? (
-            <div className="border-border bg-subtle/20 rounded-[--radius-md] border p-3">
+            <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
               <div className="text-foreground text-sm font-medium">已检测到邀请链接</div>
               <div className="text-muted-foreground mt-1 font-mono text-xs break-all">
                 {inviteToken}
@@ -198,19 +198,19 @@ function ClassCard({ klass }: { klass: StudentClassSummary }) {
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="grid grid-cols-3 gap-3">
-          <div className="border-border bg-subtle/15 rounded-[--radius-md] border p-3">
+          <div className="border-border bg-subtle/15 rounded-[var(--radius-md)] border p-3">
             <div className="text-muted-foreground text-xs">待完成</div>
             <div className="text-foreground mt-1 text-2xl font-semibold tabular-nums">
               {klass.openAssignments}
             </div>
           </div>
-          <div className="border-border bg-subtle/15 rounded-[--radius-md] border p-3">
+          <div className="border-border bg-subtle/15 rounded-[var(--radius-md)] border p-3">
             <div className="text-muted-foreground text-xs">已完成</div>
             <div className="text-foreground mt-1 text-2xl font-semibold tabular-nums">
               {klass.completedAssignments}
             </div>
           </div>
-          <div className="border-border bg-subtle/15 rounded-[--radius-md] border p-3">
+          <div className="border-border bg-subtle/15 rounded-[var(--radius-md)] border p-3">
             <div className="text-muted-foreground text-xs">错过</div>
             <div className="text-foreground mt-1 text-2xl font-semibold tabular-nums">
               {klass.missedAssignments}
@@ -278,19 +278,19 @@ export default function AccountClassPage({ focusJoin = false }: AccountClassPage
             </CardDescription>
           </div>
           <div className="grid w-full grid-cols-3 gap-3 md:min-w-72">
-            <div className="border-border bg-card/80 rounded-[--radius-md] border p-3">
+            <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
               <div className="text-muted-foreground text-xs">班级</div>
               <div className="text-foreground mt-1 text-2xl font-semibold tabular-nums">
                 {summary.activeClasses}
               </div>
             </div>
-            <div className="border-border bg-card/80 rounded-[--radius-md] border p-3">
+            <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
               <div className="text-muted-foreground text-xs">待完成</div>
               <div className="text-foreground mt-1 text-2xl font-semibold tabular-nums">
                 {summary.openAssignments}
               </div>
             </div>
-            <div className="border-border bg-card/80 rounded-[--radius-md] border p-3">
+            <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
               <div className="text-muted-foreground text-xs">已完成</div>
               <div className="text-foreground mt-1 text-2xl font-semibold tabular-nums">
                 {summary.completedAssignments}
@@ -350,7 +350,7 @@ export default function AccountClassPage({ focusJoin = false }: AccountClassPage
               </CardContent>
             </Card>
           ) : classes.length === 0 ? (
-            <div className="border-border bg-subtle/10 grid min-h-72 place-items-center rounded-[--radius-lg] border border-dashed p-8 text-center">
+            <div className="border-border bg-subtle/10 grid min-h-72 place-items-center rounded-[var(--radius-lg)] border border-dashed p-8 text-center">
               <div className="space-y-3">
                 <ClipboardCheck className="text-muted-foreground mx-auto h-8 w-8" />
                 <div className="text-foreground font-medium">还没有加入任何班级</div>

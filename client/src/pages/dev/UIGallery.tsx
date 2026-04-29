@@ -127,10 +127,10 @@ const spacingSwatchClasses: Record<number, string> = {
 };
 
 const radiusSwatchClasses: Record<string, string> = {
-  sm: "rounded-[--radius-sm]",
-  md: "rounded-[--radius-md]",
-  lg: "rounded-[--radius-lg]",
-  xl: "rounded-[--radius-xl]",
+  sm: "rounded-[var(--radius-sm)]",
+  md: "rounded-[var(--radius-md)]",
+  lg: "rounded-[var(--radius-lg)]",
+  xl: "rounded-[var(--radius-xl)]",
   full: "rounded-full",
 };
 
@@ -257,7 +257,7 @@ function Exhibit({
   const toneBg = tone === "dim" ? "bg-subtle" : tone === "quiet" ? "bg-transparent" : "bg-card";
   return (
     <figure
-      className={`group border-border/70 relative flex flex-col overflow-hidden rounded-[--radius-lg] border ${toneBg} ${className ?? ""}`}
+      className={`group border-border/70 relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] border ${toneBg} ${className ?? ""}`}
     >
       <div className="border-border/60 flex items-center justify-between border-b px-4 py-2">
         <span className="text-muted-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
@@ -280,7 +280,7 @@ function Chip({ name, cssVar }: { name: string; cssVar: string }) {
   return (
     <div className="group flex flex-col">
       <div
-        className={`border-border/70 relative h-20 w-full overflow-hidden rounded-[--radius-md] border transition-transform duration-[--duration-normal] ease-[--ease-standard] group-hover:-translate-y-0.5 ${colorSwatchClasses[cssVar] ?? "bg-transparent"}`}
+        className={`border-border/70 relative h-20 w-full overflow-hidden rounded-[var(--radius-md)] border transition-transform duration-[var(--duration-normal)] ease-[var(--ease-standard)] group-hover:-translate-y-0.5 ${colorSwatchClasses[cssVar] ?? "bg-transparent"}`}
       >
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 to-black/5 mix-blend-overlay" />
       </div>
@@ -597,7 +597,7 @@ if (x > 0) ac();`}
                 className="md:col-span-12"
                 tone="quiet"
               >
-                <div className="border-border/60 relative h-56 w-full overflow-hidden rounded-[--radius-lg] border">
+                <div className="border-border/60 relative h-56 w-full overflow-hidden rounded-[var(--radius-lg)] border">
                   <MeshGradient variant="hero" />
                   <NoiseTexture />
                   <div className="relative z-10 flex h-full flex-col justify-between p-6">
@@ -907,19 +907,19 @@ if (x > 0) ac();`}
                   </TabsList>
                   <TabsContent
                     value="tab1"
-                    className="border-border/70 mt-3 rounded-[--radius-md] border p-4"
+                    className="border-border/70 mt-3 rounded-[var(--radius-md)] border p-4"
                   >
                     <p className="text-muted-foreground text-sm">题目描述内容区域</p>
                   </TabsContent>
                   <TabsContent
                     value="tab2"
-                    className="border-border/70 mt-3 rounded-[--radius-md] border p-4"
+                    className="border-border/70 mt-3 rounded-[var(--radius-md)] border p-4"
                   >
                     <p className="text-muted-foreground text-sm">提交历史列表</p>
                   </TabsContent>
                   <TabsContent
                     value="tab3"
-                    className="border-border/70 mt-3 rounded-[--radius-md] border p-4"
+                    className="border-border/70 mt-3 rounded-[var(--radius-md)] border p-4"
                   >
                     <p className="text-muted-foreground text-sm">官方题解与讨论</p>
                   </TabsContent>
@@ -1083,7 +1083,7 @@ if (x > 0) ac();`}
               </Exhibit>
 
               <Exhibit idx="F" label="Table" className="md:col-span-8">
-                <div className="border-border/70 w-full overflow-hidden rounded-[--radius-md] border">
+                <div className="border-border/70 w-full overflow-hidden rounded-[var(--radius-md)] border">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -1124,10 +1124,10 @@ if (x > 0) ac();`}
               </Exhibit>
 
               <Exhibit idx="G" label="Scroll area" className="md:col-span-4">
-                <ScrollArea className="border-border/70 h-56 w-full rounded-[--radius-md] border">
+                <ScrollArea className="border-border/70 h-56 w-full rounded-[var(--radius-md)] border">
                   <div className="space-y-2 p-3">
                     {Array.from({ length: 20 }, (_, i) => (
-                      <div key={i} className="bg-subtle rounded-[--radius-sm] p-2.5 text-sm">
+                      <div key={i} className="bg-subtle rounded-[var(--radius-sm)] p-2.5 text-sm">
                         条目 #{String(i + 1).padStart(2, "0")}
                       </div>
                     ))}
@@ -1169,7 +1169,7 @@ if (x > 0) ac();`}
                   ].map((r) => (
                     <div key={r.name} className="flex flex-col items-center gap-1.5">
                       <div
-                        className={`border-primary bg-accent-wash h-14 w-14 border-2 ${radiusSwatchClasses[r.name] ?? "rounded-[--radius-md]"}`}
+                        className={`border-primary bg-accent-wash h-14 w-14 border-2 ${radiusSwatchClasses[r.name] ?? "rounded-[var(--radius-md)]"}`}
                       />
                       <span className="text-muted-foreground font-mono text-[10px]">{r.name}</span>
                     </div>
@@ -1182,7 +1182,7 @@ if (x > 0) ac();`}
                   {["--shadow-sm", "--shadow-md", "--shadow-lg"].map((s) => (
                     <div key={s} className="flex flex-col items-center gap-3">
                       <div
-                        className={`bg-surface h-24 w-24 rounded-[--radius-lg] ${shadowSwatchClasses[s] ?? ""}`}
+                        className={`bg-surface h-24 w-24 rounded-[var(--radius-lg)] ${shadowSwatchClasses[s] ?? ""}`}
                       />
                       <span className="text-muted-foreground font-mono text-[10px] tracking-[0.2em] uppercase">
                         {s.replace("--shadow-", "")}
@@ -1214,7 +1214,7 @@ if (x > 0) ac();`}
                   ].map((item) => (
                     <div
                       key={item.name}
-                      className={`border-border min-h-28 overflow-hidden rounded-[--radius-lg] border p-4 ${item.className}`}
+                      className={`border-border min-h-28 overflow-hidden rounded-[var(--radius-lg)] border p-4 ${item.className}`}
                     >
                       <div className="text-muted-foreground font-mono text-[10px] tracking-[0.24em] uppercase">
                         {item.name}
@@ -1227,21 +1227,21 @@ if (x > 0) ac();`}
 
               <Exhibit idx="E" label="Data backgrounds" className="md:col-span-12">
                 <div className="grid w-full gap-3 md:grid-cols-2">
-                  <div className="data-arena-rank-ribbon border-border min-h-20 rounded-[--radius-lg] border p-4">
+                  <div className="data-arena-rank-ribbon border-border min-h-20 rounded-[var(--radius-lg)] border p-4">
                     <div className="text-foreground text-sm font-medium">Rank Ribbon</div>
                     <div className="text-muted-foreground mt-1 text-xs">最近排名和分位趋势背景</div>
                   </div>
-                  <div className="data-arena-signal-band text-primary-foreground min-h-20 rounded-[--radius-lg] p-4">
+                  <div className="data-arena-signal-band text-primary-foreground min-h-20 rounded-[var(--radius-lg)] p-4">
                     <div className="text-sm font-medium">Signal Band</div>
                     <div className="mt-1 text-xs">API / DB / Redis / Import 状态带</div>
                   </div>
-                  <div className="data-arena-import-timeline border-border min-h-20 rounded-[--radius-lg] border p-4">
+                  <div className="data-arena-import-timeline border-border min-h-20 rounded-[var(--radius-lg)] border p-4">
                     <div className="text-foreground text-sm font-medium">Import Timeline</div>
                     <div className="text-muted-foreground mt-1 text-xs">
                       dry-run / apply / failed 批次节奏
                     </div>
                   </div>
-                  <div className="data-arena-heatmap-aura border-border min-h-20 rounded-[--radius-lg] border p-4">
+                  <div className="data-arena-heatmap-aura border-border min-h-20 rounded-[var(--radius-lg)] border p-4">
                     <div className="text-foreground text-sm font-medium">Heatmap Aura</div>
                     <div className="text-muted-foreground mt-1 text-xs">弱项和知识点热力背景</div>
                   </div>

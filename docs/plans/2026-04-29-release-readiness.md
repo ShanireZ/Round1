@@ -8,6 +8,7 @@
 
 ## UI/UX Changes
 
+- Fixed a final CSS token compilation issue in frontend class names: Tailwind arbitrary values such as `rounded-[--radius-md]`, `z-[--z-modal]`, `shadow-[--shadow-glow]`, and `max-w-[--content-max-width]` now use explicit `var(--...)` syntax. The production CSS no longer emits invalid values such as `border-radius:--radius-md`, `z-index:--z-modal`, or `max-width:--content-max-width`.
 - Added a global command panel in `client/src/components/layout/CommandBar.tsx`, opened by the desktop command trigger or `Cmd/Ctrl+K`. It uses the existing shadcn/Radix command dialog, role-aware navigation, and tokenized theme actions.
 - Added the Admin dashboard entry to `adminNavItems` as `/admin` / `管理看板`, matching the UI/UX navigation contract.
 - Expanded `AdminDashboard.tsx` from a link grid into an operational overview: question total, published prebuilt paper total, import batch total, user total, recent import activity, and API/DB/Redis health from `GET /api/v1/health`.
@@ -27,23 +28,25 @@
 - Admin routes: `/admin`, `/admin/questions`, `/admin/papers`, `/admin/imports`, `/admin/review`, `/admin/users`, `/admin/settings`.
 - ExamResult reduced-motion ceremony and A4 print markers.
 - A2UI Round1 BYOC gallery surface.
+- UI Gallery V2 Recharts and data-background patterns.
 
 ## Automated Verification
 
-- `npm run verify:ui-tokens`: passed, `verifyUiTokenUsage: ok (101 files checked)`.
-- `npm run build:client`: passed. Vite still reports `/font/*.woff2` as runtime-resolved, which matches the current same-origin font proxy design.
+- `npm run verify:ui-tokens`: passed, `verifyUiTokenUsage: ok (105 files checked)`.
+- `npm run build:client`: passed. Vite still reports `/font/*.woff2` as runtime-resolved, which matches the current same-origin font proxy design. Vite also reports the existing large `UIGallery` chunk warning, which is acceptable for the local dev/visual-audit surface.
 - `npm run build:server`: passed.
-- `npm run client:test`: passed, 12 files / 67 tests.
+- `npm run client:test`: passed, 14 files / 75 tests.
 - `npm run verify:offline-artifacts`: passed, `verifyOfflineArtifactNames: ok (137 files checked)`.
 - `npm run lint`: exit 0, with the existing Fast Refresh warning in `client/src/components/a2ui/round1A2uiCatalog.tsx`.
-- `npm run test:e2e -- ui-visual-audit.spec.ts`: passed, 9 tests.
+- `npm run test:e2e -- ui-visual-audit.spec.ts`: passed, 10 tests.
 - `npm run test -- server/__tests__/coach-classes.integration.test.ts`: passed, 9 tests after fixing the date-sensitive invite fixture.
+- Production CSS scan after `build:client`: passed; no invalid CSS custom-property arbitrary values matching `max-width:--*`, `z-index:--*`, `border-radius:--*`, `box-shadow:--*`, `transition-duration:--*`, or related patterns were found in `client/dist/assets`.
 
 ## Local Environment Blockers
 
-- `npm run test`: still blocked by local Redis not running at `127.0.0.1:4395`. After the Coach invite fixture fix, the remaining failures are Redis-dependent suites: `auth-integration`, `pow`, and `bullmq-dead-letter`.
+- `npm run test`: still blocked by local Redis not running at `127.0.0.1:4395`. The fresh run reported 26 passed files, 174 passed tests, 46 skipped tests, and Redis-dependent failures in `auth-integration`, `pow`, and `bullmq-dead-letter`.
 - `npm run migrate:status`: blocked by local Postgres not running at `127.0.0.1:4397`.
-- `npm run healthcheck -- --api-url http://127.0.0.1:3000/api/v1/health --frontend-url http://127.0.0.1:3000`: failed because no local API/frontend server is running on `127.0.0.1:3000`.
+- `npm run healthcheck -- --api-url http://127.0.0.1:7654/api/v1/health --frontend-url http://127.0.0.1:4399 --json`: failed because no local API/frontend server is running on those ports.
 - `docker compose -f docker-compose.dev.yml up -d pg redis`: could not start because Docker Desktop / Docker daemon was not running (`dockerDesktopLinuxEngine` pipe missing).
 
 ## Deployment-Test Gate

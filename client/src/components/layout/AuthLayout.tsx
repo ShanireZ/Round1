@@ -36,7 +36,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="border-border bg-surface/70 flex h-10 w-36 items-center justify-center overflow-hidden rounded-[--radius-md] border p-1.5">
+            <div className="border-border bg-surface/70 flex h-10 w-36 items-center justify-center overflow-hidden rounded-[var(--radius-md)] border p-1.5">
               <img
                 src={CPPLEARN_BANNER_SRC}
                 alt="CppLearn"
@@ -51,7 +51,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         </section>
 
         <div className="flex items-center justify-center md:justify-end">
-          <div className="border-border bg-surface w-full max-w-md rounded-[--radius-xl] border p-6 shadow-[--shadow-md] sm:p-8">
+          <div className="border-border bg-surface w-full max-w-md rounded-[var(--radius-xl)] border p-6 shadow-[var(--shadow-md)] sm:p-8">
             {children ?? <Outlet />}
           </div>
         </div>

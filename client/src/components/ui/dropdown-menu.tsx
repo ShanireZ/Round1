@@ -17,7 +17,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
   <DropdownMenuPrimitive.SubTrigger
     ref={ref}
     className={cn(
-      "flex cursor-default select-none items-center gap-2 rounded-[--radius-sm] px-2 py-1.5 text-sm outline-none focus:bg-accent-wash data-[state=open]:bg-accent-wash [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+      "focus:bg-accent-wash data-[state=open]:bg-accent-wash flex cursor-default items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-sm outline-none select-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
       inset && "pl-8",
       className,
     )}
@@ -36,7 +36,7 @@ const DropdownMenuSubContent = React.forwardRef<
   <DropdownMenuPrimitive.SubContent
     ref={ref}
     className={cn(
-      "z-[--z-dropdown] min-w-[8rem] overflow-hidden rounded-[--radius-lg] border border-border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-fade-in",
+      "border-border bg-popover text-popover-foreground data-[state=open]:animate-fade-in z-[var(--z-dropdown)] min-w-[8rem] overflow-hidden rounded-[var(--radius-lg)] border p-1 shadow-md",
       className,
     )}
     {...props}
@@ -53,7 +53,7 @@ const DropdownMenuContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "z-[--z-dropdown] min-w-[8rem] overflow-hidden rounded-[--radius-lg] border border-border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-fade-in",
+        "border-border bg-popover text-popover-foreground data-[state=open]:animate-fade-in z-[var(--z-dropdown)] min-w-[8rem] overflow-hidden rounded-[var(--radius-lg)] border p-1 shadow-md",
         className,
       )}
       {...props}
@@ -69,7 +69,7 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center gap-2 rounded-[--radius-sm] px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent-wash focus:text-primary data-[disabled]:pointer-events-none data-[disabled]:opacity-60 [&>svg]:size-4 [&>svg]:shrink-0",
+      "focus:bg-accent-wash focus:text-primary relative flex cursor-default items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-sm transition-colors outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-60 [&>svg]:size-4 [&>svg]:shrink-0",
       inset && "pl-8",
       className,
     )}
@@ -85,7 +85,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
   <DropdownMenuPrimitive.CheckboxItem
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-[--radius-sm] py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent-wash focus:text-primary data-[disabled]:pointer-events-none data-[disabled]:opacity-60",
+      "focus:bg-accent-wash focus:text-primary relative flex cursor-default items-center rounded-[var(--radius-sm)] py-1.5 pr-2 pl-8 text-sm transition-colors outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-60",
       className,
     )}
     checked={checked}
@@ -108,7 +108,7 @@ const DropdownMenuRadioItem = React.forwardRef<
   <DropdownMenuPrimitive.RadioItem
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-[--radius-sm] py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent-wash focus:text-primary data-[disabled]:pointer-events-none data-[disabled]:opacity-60",
+      "focus:bg-accent-wash focus:text-primary relative flex cursor-default items-center rounded-[var(--radius-sm)] py-1.5 pr-2 pl-8 text-sm transition-colors outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-60",
       className,
     )}
     {...props}
@@ -141,7 +141,7 @@ const DropdownMenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.Separator
     ref={ref}
-    className={cn("-mx-1 my-1 h-px bg-border", className)}
+    className={cn("bg-border -mx-1 my-1 h-px", className)}
     {...props}
   />
 ));

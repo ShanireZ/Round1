@@ -97,7 +97,7 @@ export default function ForgotPasswordPage() {
       {formError ? (
         <div
           role="alert"
-          className="border-destructive bg-subtle text-destructive flex items-start gap-2 rounded-[--radius-md] border p-3 text-sm"
+          className="border-destructive bg-subtle text-destructive flex items-start gap-2 rounded-[var(--radius-md)] border p-3 text-sm"
         >
           <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{formError}</span>
@@ -133,7 +133,7 @@ export default function ForgotPasswordPage() {
           </Button>
 
           {requestSent ? (
-            <div className="border-border bg-subtle/40 rounded-[--radius-md] border p-3 text-sm leading-6">
+            <div className="border-border bg-subtle/40 rounded-[var(--radius-md)] border p-3 text-sm leading-6">
               请检查邮箱中的 Round1 重置链接。链接过期后可以回到这里重新发送。
             </div>
           ) : null}

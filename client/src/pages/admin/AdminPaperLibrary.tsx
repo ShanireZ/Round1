@@ -5,17 +5,17 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   Table,
@@ -59,7 +59,10 @@ const statusLabels: Record<PrebuiltPaperStatus, string> = {
   archived: "Archived",
 };
 
-const statusVariants: Record<PrebuiltPaperStatus, "secondary" | "outline" | "destructive" | "default"> = {
+const statusVariants: Record<
+  PrebuiltPaperStatus,
+  "secondary" | "outline" | "destructive" | "default"
+> = {
   draft: "outline",
   published: "default",
   archived: "secondary",
@@ -179,7 +182,8 @@ export default function AdminPaperLibrary() {
   const selectedCanEdit = selectedPaper?.status === "draft";
   const selectedCanPublish = selectedPaper?.status === "draft";
   const selectedCanArchive = selectedPaper?.status === "published";
-  const selectedCanCopy = selectedPaper?.status === "published" || selectedPaper?.status === "archived";
+  const selectedCanCopy =
+    selectedPaper?.status === "published" || selectedPaper?.status === "archived";
   const selectedCanDelete = selectedPaper?.status === "draft" && references?.canDelete === true;
   const paperDeleteHint =
     selectedPaper?.status === "draft"
@@ -272,7 +276,9 @@ export default function AdminPaperLibrary() {
     onSuccess: (result, action) => {
       void queryClient.invalidateQueries({ queryKey: ["admin-prebuilt-papers"] });
       void queryClient.invalidateQueries({ queryKey: ["admin-prebuilt-paper-detail", selectedId] });
-      void queryClient.invalidateQueries({ queryKey: ["admin-prebuilt-paper-references", selectedId] });
+      void queryClient.invalidateQueries({
+        queryKey: ["admin-prebuilt-paper-references", selectedId],
+      });
       toast.success(action === "copy" ? "已复制为新的 draft 版本" : "预制卷操作已完成");
 
       if (action === "delete") {
@@ -311,7 +317,7 @@ export default function AdminPaperLibrary() {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">预制卷库</h1>
-          <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 max-w-3xl text-sm">
             管理可发布的固定试卷版本。已发布内容不可原地覆盖，修改时复制为新 draft 后再发布。
           </p>
         </div>
@@ -329,7 +335,7 @@ export default function AdminPaperLibrary() {
         <Card variant="flat" className="min-w-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <RefreshCcw className="h-4 w-4 text-primary" />
+              <RefreshCcw className="text-primary h-4 w-4" />
               预制卷列表
             </CardTitle>
             <CardDescription>筛选并进入详情，核对 lineage、slots 和运行时引用。</CardDescription>
@@ -357,7 +363,10 @@ export default function AdminPaperLibrary() {
                 </SelectContent>
               </Select>
 
-              <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as PaperFilterStatus)}>
+              <Select
+                value={statusFilter}
+                onValueChange={(value) => setStatusFilter(value as PaperFilterStatus)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="状态" />
                 </SelectTrigger>
@@ -371,12 +380,14 @@ export default function AdminPaperLibrary() {
             </div>
 
             {papersQuery.isLoading ? (
-              <div className="rounded-[--radius-md] border border-border p-4 text-sm text-muted-foreground">
+              <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border p-4 text-sm">
                 正在加载预制卷列表...
               </div>
             ) : papersQuery.isError ? (
-              <div className="rounded-[--radius-md] border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
-                {papersQuery.error instanceof Error ? papersQuery.error.message : "预制卷列表加载失败"}
+              <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-[var(--radius-md)] border p-4 text-sm">
+                {papersQuery.error instanceof Error
+                  ? papersQuery.error.message
+                  : "预制卷列表加载失败"}
               </div>
             ) : papersQuery.data && papersQuery.data.items.length > 0 ? (
               <Table>
@@ -396,7 +407,7 @@ export default function AdminPaperLibrary() {
                       onClick={() => setSelectedId(paper.id)}
                     >
                       <TableCell>
-                        <div className="font-medium text-foreground">{paper.title}</div>
+                        <div className="text-foreground font-medium">{paper.title}</div>
                         <div className="mt-1 flex flex-wrap gap-2">
                           <Badge variant="outline">{paper.examType}</Badge>
                           <Badge variant="outline">{difficultyLabels[paper.difficulty]}</Badge>
@@ -404,20 +415,24 @@ export default function AdminPaperLibrary() {
                       </TableCell>
                       <TableCell>
                         <div className="font-mono text-sm">v{paper.versionNo}</div>
-                        <div className="mt-1 font-mono text-xs text-muted-foreground">
+                        <div className="text-muted-foreground mt-1 font-mono text-xs">
                           root {(paper.rootPaperId ?? paper.id).slice(0, 8)}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={statusVariants[paper.status]}>{statusLabels[paper.status]}</Badge>
+                        <Badge variant={statusVariants[paper.status]}>
+                          {statusLabels[paper.status]}
+                        </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{formatTimestamp(paper.publishedAt)}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {formatTimestamp(paper.publishedAt)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             ) : (
-              <div className="rounded-[--radius-md] border border-dashed border-border p-4 text-sm text-muted-foreground">
+              <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border border-dashed p-4 text-sm">
                 当前筛选下暂无预制卷。
               </div>
             )}
@@ -426,8 +441,10 @@ export default function AdminPaperLibrary() {
 
             <div className="space-y-3">
               <div>
-                <h2 className="text-sm font-semibold text-foreground">新建 Draft</h2>
-                <p className="mt-1 text-xs text-muted-foreground">提交与 Admin prebuilt paper create body 一致的 JSON。</p>
+                <h2 className="text-foreground text-sm font-semibold">新建 Draft</h2>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  提交与 Admin prebuilt paper create body 一致的 JSON。
+                </p>
               </div>
               <Textarea
                 className="min-h-56 font-mono text-xs"
@@ -450,44 +467,54 @@ export default function AdminPaperLibrary() {
           </CardHeader>
           <CardContent className="space-y-4">
             {!selectedId ? (
-              <div className="rounded-[--radius-md] border border-dashed border-border p-4 text-sm text-muted-foreground">
+              <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border border-dashed p-4 text-sm">
                 从左侧选择预制卷。
               </div>
             ) : detailQuery.isLoading ? (
-              <div className="rounded-[--radius-md] border border-border p-4 text-sm text-muted-foreground">
+              <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border p-4 text-sm">
                 正在加载预制卷详情...
               </div>
             ) : detailQuery.isError || !selectedPaper ? (
-              <div className="rounded-[--radius-md] border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
-                {detailQuery.error instanceof Error ? detailQuery.error.message : "预制卷详情加载失败"}
+              <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-[var(--radius-md)] border p-4 text-sm">
+                {detailQuery.error instanceof Error
+                  ? detailQuery.error.message
+                  : "预制卷详情加载失败"}
               </div>
             ) : (
               <>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant={statusVariants[selectedPaper.status]}>{statusLabels[selectedPaper.status]}</Badge>
+                  <Badge variant={statusVariants[selectedPaper.status]}>
+                    {statusLabels[selectedPaper.status]}
+                  </Badge>
                   <Badge variant="outline">v{selectedPaper.versionNo}</Badge>
-                  <Badge variant="outline">root {(selectedPaper.rootPaperId ?? selectedPaper.id).slice(0, 8)}</Badge>
+                  <Badge variant="outline">
+                    root {(selectedPaper.rootPaperId ?? selectedPaper.id).slice(0, 8)}
+                  </Badge>
                   {selectedPaper.parentPaperId ? (
-                    <Badge variant="outline">parent {selectedPaper.parentPaperId.slice(0, 8)}</Badge>
+                    <Badge variant="outline">
+                      parent {selectedPaper.parentPaperId.slice(0, 8)}
+                    </Badge>
                   ) : null}
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-3">
-                  <div className="rounded-[--radius-md] border border-border bg-subtle/20 p-3">
-                    <div className="text-xs text-muted-foreground">试卷实例</div>
+                  <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
+                    <div className="text-muted-foreground text-xs">试卷实例</div>
                     <div className="mt-1 text-2xl font-semibold tabular-nums">
                       {references?.paperInstanceReferences ?? "-"}
                     </div>
                   </div>
-                  <div className="rounded-[--radius-md] border border-border bg-subtle/20 p-3">
-                    <div className="text-xs text-muted-foreground">任务引用</div>
+                  <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
+                    <div className="text-muted-foreground text-xs">任务引用</div>
                     <div className="mt-1 text-2xl font-semibold tabular-nums">
                       {references?.assignmentReferences ?? "-"}
                     </div>
                   </div>
-                  <div className="rounded-[--radius-md] border border-border bg-subtle/20 p-3">
-                    <div className="text-xs text-muted-foreground">Slots</div>
-                    <div className="mt-1 text-2xl font-semibold tabular-nums">{selectedPaper.slots.length}</div>
+                  <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
+                    <div className="text-muted-foreground text-xs">Slots</div>
+                    <div className="mt-1 text-2xl font-semibold tabular-nums">
+                      {selectedPaper.slots.length}
+                    </div>
                   </div>
                 </div>
 
@@ -510,7 +537,10 @@ export default function AdminPaperLibrary() {
                       disabled={!selectedCanEdit}
                       value={editState.blueprintVersion}
                       onChange={(event) =>
-                        setEditState((current) => ({ ...current, blueprintVersion: event.target.value }))
+                        setEditState((current) => ({
+                          ...current,
+                          blueprintVersion: event.target.value,
+                        }))
                       }
                     />
                   </div>
@@ -559,7 +589,10 @@ export default function AdminPaperLibrary() {
                         disabled={!selectedCanEdit}
                         value={editState.metadataJson}
                         onChange={(event) =>
-                          setEditState((current) => ({ ...current, metadataJson: event.target.value }))
+                          setEditState((current) => ({
+                            ...current,
+                            metadataJson: event.target.value,
+                          }))
                         }
                       />
                     </div>
@@ -592,7 +625,9 @@ export default function AdminPaperLibrary() {
                   <Button
                     disabled={!selectedCanPublish}
                     title={selectedCanPublish ? "发布 draft 预制卷" : "仅 draft 预制卷可发布"}
-                    loading={lifecycleMutation.isPending && lifecycleMutation.variables === "publish"}
+                    loading={
+                      lifecycleMutation.isPending && lifecycleMutation.variables === "publish"
+                    }
                     onClick={() => runLifecycleAction("publish")}
                   >
                     发布
@@ -610,8 +645,12 @@ export default function AdminPaperLibrary() {
                   <Button
                     variant="secondary"
                     disabled={!selectedCanArchive}
-                    title={selectedCanArchive ? "归档 published 预制卷" : "仅 published 预制卷可归档"}
-                    loading={lifecycleMutation.isPending && lifecycleMutation.variables === "archive"}
+                    title={
+                      selectedCanArchive ? "归档 published 预制卷" : "仅 published 预制卷可归档"
+                    }
+                    loading={
+                      lifecycleMutation.isPending && lifecycleMutation.variables === "archive"
+                    }
                     onClick={() => runLifecycleAction("archive")}
                   >
                     <Archive className="h-4 w-4" />
@@ -621,14 +660,16 @@ export default function AdminPaperLibrary() {
                     variant="destructive"
                     disabled={!selectedCanDelete}
                     title={selectedCanDelete ? "删除未引用 draft 预制卷" : paperDeleteHint}
-                    loading={lifecycleMutation.isPending && lifecycleMutation.variables === "delete"}
+                    loading={
+                      lifecycleMutation.isPending && lifecycleMutation.variables === "delete"
+                    }
                     onClick={() => runLifecycleAction("delete")}
                   >
                     <Trash2 className="h-4 w-4" />
                     删除
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   {paperLifecycleHint} {paperDeleteHint}
                 </p>
               </>

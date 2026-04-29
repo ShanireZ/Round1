@@ -54,7 +54,7 @@ function LoadingState() {
   return (
     <div className="grid h-full place-items-center px-6 py-10">
       <div className="w-full max-w-5xl space-y-6">
-        <Skeleton className="h-48 w-full rounded-[--radius-xl]" />
+        <Skeleton className="h-48 w-full rounded-[var(--radius-xl)]" />
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <Skeleton className="h-[680px] w-full" />
           <Skeleton className="h-[460px] w-full" />
@@ -209,7 +209,7 @@ function AttemptSummary({
           </div>
         </div>
 
-        <div className="border-border/80 bg-card/75 space-y-4 rounded-[--radius-xl] border p-5 backdrop-blur-sm">
+        <div className="border-border/80 bg-card/75 space-y-4 rounded-[var(--radius-xl)] border p-5 backdrop-blur-sm">
           <div className="text-foreground flex items-center gap-2 text-sm font-medium">
             <Clock3 className="text-primary h-4 w-4" />
             当前考试会话
@@ -237,7 +237,7 @@ function AttemptSummary({
 
           <div>
             <div className="text-muted-foreground text-xs tracking-wide uppercase">Tab Nonce</div>
-            <div className="border-border bg-subtle/20 text-foreground mt-2 rounded-[--radius-md] border px-3 py-2 font-mono text-sm">
+            <div className="border-border bg-subtle/20 text-foreground mt-2 rounded-[var(--radius-md)] border px-3 py-2 font-mono text-sm">
               {session.attempt.tabNonce}
             </div>
           </div>
@@ -330,7 +330,7 @@ function SessionQuestionCard({
 
       <CardContent className="space-y-6">
         {renderable.code ? (
-          <pre className="border-border/70 overflow-x-auto rounded-[--radius-lg] border bg-[--color-code-background] p-4 text-sm leading-6 text-[--color-code-foreground]">
+          <pre className="border-border/70 overflow-x-auto rounded-[var(--radius-lg)] border bg-[var(--color-code-background)] p-4 text-sm leading-6 text-[var(--color-code-foreground)]">
             <code>{renderable.code}</code>
           </pre>
         ) : null}
@@ -340,7 +340,7 @@ function SessionQuestionCard({
           return (
             <div
               key={`${item.slotNo}-${part.key}`}
-              className="border-border/70 bg-subtle/10 space-y-3 rounded-[--radius-lg] border p-4"
+              className="border-border/70 bg-subtle/10 space-y-3 rounded-[var(--radius-lg)] border p-4"
             >
               <div className="text-foreground text-sm font-medium">
                 {renderable.parts.length > 1 ? `第 ${index + 1} 小题` : "作答区域"}
@@ -361,7 +361,7 @@ function SessionQuestionCard({
                         htmlFor={optionId}
                         data-testid={`answer-option-${item.slotNo}-${part.key}-${option.value}`}
                         data-selected={currentValue === option.value ? "true" : "false"}
-                        className="border-border/70 bg-card hover:border-primary/50 flex cursor-pointer items-start gap-3 rounded-[--radius-md] border px-4 py-3 text-sm transition-colors"
+                        className="border-border/70 bg-card hover:border-primary/50 flex cursor-pointer items-start gap-3 rounded-[var(--radius-md)] border px-4 py-3 text-sm transition-colors"
                       >
                         <RadioGroupItem id={optionId} value={option.value} />
                         <div className="space-y-1">
@@ -844,7 +844,7 @@ export default function ExamSessionPage() {
         {countdownState.warningLevel !== "normal" ? (
           <div
             data-testid="exam-timer-warning"
-            className={`rounded-[--radius-xl] border px-5 py-4 text-sm ${
+            className={`rounded-[var(--radius-xl)] border px-5 py-4 text-sm ${
               countdownState.warningLevel === "warning"
                 ? "border-warning/40 bg-warning/10 text-warning"
                 : "border-destructive/40 bg-destructive/10 text-destructive"
@@ -887,7 +887,7 @@ export default function ExamSessionPage() {
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-6">
             {autosaveError ? (
-              <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-[--radius-lg] border p-4 text-sm">
+              <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-[var(--radius-lg)] border p-4 text-sm">
                 {autosaveError}
               </div>
             ) : null}
@@ -995,7 +995,7 @@ export default function ExamSessionPage() {
                   </Button>
 
                   {submitAttemptMutation.isError ? (
-                    <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-[--radius-lg] border p-4 text-sm">
+                    <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-[var(--radius-lg)] border p-4 text-sm">
                       {submitAttemptMutation.error instanceof Error
                         ? submitAttemptMutation.error.message
                         : "交卷失败，请稍后重试。"}

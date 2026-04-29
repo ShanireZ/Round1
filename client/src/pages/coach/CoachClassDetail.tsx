@@ -108,7 +108,7 @@ async function copyText(value: string, successMessage: string) {
 
 function DetailMetric({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="border-border bg-card/80 rounded-[--radius-md] border p-3">
+    <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
       <div className="text-muted-foreground text-xs">{label}</div>
       <div className="text-foreground mt-1 text-xl font-semibold tabular-nums">{value}</div>
     </div>
@@ -127,7 +127,7 @@ function InlineState({
   action?: ReactNode;
 }) {
   return (
-    <div className="border-border bg-subtle/10 grid min-h-44 place-items-center rounded-[--radius-lg] border border-dashed p-6 text-center">
+    <div className="border-border bg-subtle/10 grid min-h-44 place-items-center rounded-[var(--radius-lg)] border border-dashed p-6 text-center">
       <div className="space-y-3">
         <Icon className="text-muted-foreground mx-auto h-8 w-8" />
         <div className="text-foreground font-medium">{title}</div>
@@ -151,7 +151,7 @@ function DetailAccessPrompt({
 }) {
   return (
     <div className="grid min-h-[55vh] place-items-center">
-      <div className="border-border bg-card max-w-xl rounded-[--radius-lg] border p-8 text-center">
+      <div className="border-border bg-card max-w-xl rounded-[var(--radius-lg)] border p-8 text-center">
         <ShieldCheck className="text-muted-foreground mx-auto h-9 w-9" />
         <h1 className="text-foreground mt-4 text-2xl font-semibold">{title}</h1>
         <p className="text-muted-foreground mt-3 text-sm leading-6">{description}</p>
@@ -764,7 +764,7 @@ export default function CoachClassDetail() {
                       创建邀请
                     </Button>
                     {latestInviteUrl ? (
-                      <div className="border-border bg-subtle/15 rounded-[--radius-md] border p-3">
+                      <div className="border-border bg-subtle/15 rounded-[var(--radius-md)] border p-3">
                         <div className="text-muted-foreground text-xs">最新邀请链接</div>
                         <div className="text-foreground mt-2 font-mono text-sm break-all">
                           {latestInviteUrl}

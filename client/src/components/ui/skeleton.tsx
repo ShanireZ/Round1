@@ -5,7 +5,7 @@ const Skeleton = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("animate-pulse rounded-[--radius-md] bg-subtle", className)}
+      className={cn("bg-subtle animate-pulse rounded-[var(--radius-md)]", className)}
       {...props}
     />
   ),

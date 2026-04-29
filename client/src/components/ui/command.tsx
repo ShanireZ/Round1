@@ -11,7 +11,7 @@ const Command = React.forwardRef<
   <CommandPrimitive
     ref={ref}
     className={cn(
-      "bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-[--radius-lg]",
+      "bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-[var(--radius-lg)]",
       className,
     )}
     {...props}
@@ -42,7 +42,7 @@ const CommandInput = React.forwardRef<
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        "placeholder:text-muted-foreground flex h-11 w-full rounded-[--radius-md] bg-transparent py-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-60",
+        "placeholder:text-muted-foreground flex h-11 w-full rounded-[var(--radius-md)] bg-transparent py-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-60",
         className,
       )}
       {...props}
@@ -105,7 +105,7 @@ const CommandItem = React.forwardRef<
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      "data-[selected=true]:bg-accent-wash data-[selected=true]:text-primary relative flex cursor-default items-center gap-2 rounded-[--radius-sm] px-2 py-1.5 text-sm outline-none select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+      "data-[selected=true]:bg-accent-wash data-[selected=true]:text-primary relative flex cursor-default items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-sm outline-none select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
       className,
     )}
     {...props}

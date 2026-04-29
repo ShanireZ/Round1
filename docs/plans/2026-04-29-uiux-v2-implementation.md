@@ -29,6 +29,11 @@
 - `npm run test:e2e -- ui-visual-audit.spec.ts`
 - 涉及 server runtime 的完整 `npm run test` 视本机 Redis/Postgres 可用性执行并记录环境阻塞。
 
+## 收口补充
+
+- 2026-04-29 上线测试准备时修复 Tailwind CSS custom-property 任意值写法：生产页面、primitive、A2UI surface 和 UI Gallery 中的 `rounded-[--*]`、`z-[--*]`、`shadow-[--*]`、`duration-[--*]`、`bg-[--*]` 等统一改为显式 `var(--*)`，避免 Vite/Tailwind 产物出现无效 CSS 值。
+- 本轮复查结果见 `docs/plans/2026-04-29-release-readiness.md`：`verify:ui-tokens`、`build:client`、`build:server`、`client:test`、`verify:offline-artifacts`、`lint`、`ui-visual-audit` 和 focused Coach integration 均已复跑；完整 server test、migration status 与 runtime healthcheck 仍等待本机或目标部署环境提供 Redis/Postgres/API/frontend。
+
 ## 风险与后续
 
 - Recharts 只作为图表 primitive 的底层实现，不允许页面绕过本地 chart 组件直接散落样式。

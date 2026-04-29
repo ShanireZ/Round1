@@ -72,7 +72,7 @@ function LoginRequiredExamNew() {
   return (
     <div className="h-full overflow-y-auto px-6 py-8">
       <div className="mx-auto grid min-h-[60vh] max-w-3xl place-items-center">
-        <div className="border-border bg-card w-full rounded-[--radius-lg] border p-8 text-center shadow-sm">
+        <div className="border-border bg-card w-full rounded-[var(--radius-lg)] border p-8 text-center shadow-sm">
           <LogIn className="text-primary mx-auto h-9 w-9" />
           <h1 className="text-foreground mt-5 text-2xl font-semibold tracking-tight">
             登录后开始模拟
@@ -217,7 +217,7 @@ export default function ExamNew() {
   return (
     <div className="h-full overflow-y-auto px-6 py-8">
       <div className="mx-auto max-w-7xl space-y-6" data-testid="exam-new-page">
-        <section className="border-border bg-card relative overflow-hidden rounded-[--radius-xl] border p-6 md:p-8">
+        <section className="border-border bg-card relative overflow-hidden rounded-[var(--radius-xl)] border p-6 md:p-8">
           <MeshGradient variant="hero" className="opacity-70" />
           <NoiseTexture />
           <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
@@ -230,17 +230,17 @@ export default function ExamNew() {
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
-                <div className="border-border bg-card/80 rounded-[--radius-lg] border p-4 backdrop-blur-sm">
+                <div className="border-border bg-card/80 rounded-[var(--radius-lg)] border p-4 backdrop-blur-sm">
                   <div className="text-muted-foreground text-xs">分制</div>
                   <div className="text-foreground mt-2 text-xl font-semibold tabular-nums">
                     100 分
                   </div>
                 </div>
-                <div className="border-border bg-card/80 rounded-[--radius-lg] border p-4 backdrop-blur-sm">
+                <div className="border-border bg-card/80 rounded-[var(--radius-lg)] border p-4 backdrop-blur-sm">
                   <div className="text-muted-foreground text-xs">时长</div>
                   <div className="text-foreground mt-2 text-xl font-semibold">蓝图时长</div>
                 </div>
-                <div className="border-border bg-card/80 rounded-[--radius-lg] border p-4 backdrop-blur-sm">
+                <div className="border-border bg-card/80 rounded-[var(--radius-lg)] border p-4 backdrop-blur-sm">
                   <div className="text-muted-foreground text-xs">草稿回收</div>
                   <div className="text-foreground mt-2 text-xl font-semibold">
                     {formatDraftTtlLabel(configQuery.data?.examDraftTtlMinutes ?? 0)}
@@ -249,7 +249,7 @@ export default function ExamNew() {
               </div>
             </div>
 
-            <div className="border-border bg-card/85 min-w-72 rounded-[--radius-lg] border p-5 backdrop-blur-sm">
+            <div className="border-border bg-card/85 min-w-72 rounded-[var(--radius-lg)] border p-5 backdrop-blur-sm">
               <div className="text-muted-foreground text-xs">当前选择</div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {currentExamType ? (
@@ -312,7 +312,7 @@ export default function ExamNew() {
             return (
               <label
                 key={examType}
-                className={`group border-border bg-card rounded-[--radius-lg] border p-5 text-left transition-all focus-within:shadow-[--shadow-glow] ${
+                className={`group border-border bg-card rounded-[var(--radius-lg)] border p-5 text-left transition-all focus-within:shadow-[var(--shadow-glow)] ${
                   totalCount === 0
                     ? "cursor-not-allowed opacity-55"
                     : "hover:border-primary/60 hover:bg-accent-wash/40 cursor-pointer"
@@ -378,7 +378,7 @@ export default function ExamNew() {
                   return (
                     <label
                       key={difficulty}
-                      className={`border-border bg-card rounded-[--radius-md] border p-4 text-left transition-colors focus-within:shadow-[--shadow-glow] ${
+                      className={`border-border bg-card rounded-[var(--radius-md)] border p-4 text-left transition-colors focus-within:shadow-[var(--shadow-glow)] ${
                         count === 0
                           ? "cursor-not-allowed opacity-55"
                           : "hover:border-primary/60 cursor-pointer"
@@ -419,19 +419,19 @@ export default function ExamNew() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-3">
-                <div className="border-border rounded-[--radius-md] border p-4">
+                <div className="border-border rounded-[var(--radius-md)] border p-4">
                   <div className="text-muted-foreground text-xs">试卷</div>
                   <div className="text-foreground mt-2 font-medium">
                     {currentExamType ?? "未选择"}
                   </div>
                 </div>
-                <div className="border-border rounded-[--radius-md] border p-4">
+                <div className="border-border rounded-[var(--radius-md)] border p-4">
                   <div className="text-muted-foreground text-xs">难度</div>
                   <div className="text-foreground mt-2 font-medium">
                     {formatDifficultyLabel(currentDifficulty)}
                   </div>
                 </div>
-                <div className="border-border rounded-[--radius-md] border p-4">
+                <div className="border-border rounded-[var(--radius-md)] border p-4">
                   <div className="text-muted-foreground text-xs">计时</div>
                   <div className="text-foreground mt-2 flex items-center gap-2 font-medium">
                     <Clock3 className="h-4 w-4" />
@@ -439,7 +439,7 @@ export default function ExamNew() {
                   </div>
                 </div>
               </div>
-              <div className="text-muted-foreground border-border bg-subtle/20 rounded-[--radius-md] border p-4 text-sm leading-6">
+              <div className="text-muted-foreground border-border bg-subtle/20 rounded-[var(--radius-md)] border p-4 text-sm leading-6">
                 提交前请确认网络可用。进入答题页后会创建或复用服务端 attempt，并按
                 运行时自动保存间隔周期保存待提交答案。
               </div>
@@ -465,7 +465,7 @@ export default function ExamNew() {
                 。进入答题页后会立即开始计时。
               </DialogDescription>
             </DialogHeader>
-            <div className="border-border bg-subtle/20 rounded-[--radius-md] border p-4 text-sm">
+            <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-4 text-sm">
               当前可用预制卷：
               <span className="font-mono tabular-nums">{selectedCount}</span> 套。若已有匹配草稿，
               系统会复用草稿而不是重新抽取。

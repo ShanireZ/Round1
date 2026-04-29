@@ -347,7 +347,7 @@ function TotpPanel({ enabled }: { enabled: boolean }) {
             </Button>
 
             {otpauthUrl ? (
-              <div className="border-border bg-subtle/20 rounded-[--radius-md] border p-3">
+              <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
                 <div className="text-foreground text-sm font-medium">Authenticator URI</div>
                 <div className="text-muted-foreground mt-2 font-mono text-xs break-all">
                   {otpauthUrl}
@@ -455,19 +455,19 @@ export default function AccountSecurityPage() {
             </CardDescription>
           </div>
           <div className="grid w-full grid-cols-3 gap-3 md:min-w-72">
-            <div className="border-border bg-card/80 rounded-[--radius-md] border p-3">
+            <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
               <div className="text-muted-foreground text-xs">安全项</div>
               <div className="text-foreground mt-1 text-2xl font-semibold tabular-nums">
                 {signalCount}/5
               </div>
             </div>
-            <div className="border-border bg-card/80 rounded-[--radius-md] border p-3">
+            <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
               <div className="text-muted-foreground text-xs">TOTP</div>
               <div className="text-foreground mt-1 text-sm font-semibold">
                 {summary.totpEnabledAt ? "enabled" : "off"}
               </div>
             </div>
-            <div className="border-border bg-card/80 rounded-[--radius-md] border p-3">
+            <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
               <div className="text-muted-foreground text-xs">强认证</div>
               <div className="text-foreground mt-1 text-sm font-semibold">
                 {formatAccountDate(summary.profile.lastStrongAuthAt)}
@@ -478,13 +478,13 @@ export default function AccountSecurityPage() {
       </Card>
 
       {oidcError ? (
-        <div className="border-destructive/50 bg-subtle/20 text-destructive rounded-[--radius-md] border p-3 text-sm">
+        <div className="border-destructive/50 bg-subtle/20 text-destructive rounded-[var(--radius-md)] border p-3 text-sm">
           外部身份绑定未完成：{oidcError}
         </div>
       ) : null}
 
       {emailChanged ? (
-        <div className="border-success/40 bg-subtle/20 text-success flex items-center gap-2 rounded-[--radius-md] border p-3 text-sm">
+        <div className="border-success/40 bg-subtle/20 text-success flex items-center gap-2 rounded-[var(--radius-md)] border p-3 text-sm">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
           邮箱更换已完成。
         </div>
@@ -546,7 +546,7 @@ export default function AccountSecurityPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 lg:grid-cols-2">
-              <div className="border-border bg-subtle/15 rounded-[--radius-md] border p-4">
+              <div className="border-border bg-subtle/15 rounded-[var(--radius-md)] border p-4">
                 <div className="text-muted-foreground text-xs">用户</div>
                 <div className="text-foreground mt-1 font-semibold">
                   {summary.profile.displayName}
@@ -555,7 +555,7 @@ export default function AccountSecurityPage() {
                   @{summary.profile.username}
                 </div>
               </div>
-              <div className="border-border bg-subtle/15 rounded-[--radius-md] border p-4">
+              <div className="border-border bg-subtle/15 rounded-[var(--radius-md)] border p-4">
                 <div className="text-muted-foreground text-xs">角色</div>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <Badge variant="saved">{summary.profile.role}</Badge>
@@ -582,14 +582,14 @@ export default function AccountSecurityPage() {
             <CardContent className="space-y-4">
               <div className="grid gap-3">
                 {summary.externalIdentities.length === 0 ? (
-                  <div className="border-border bg-subtle/10 text-muted-foreground rounded-[--radius-md] border border-dashed p-4 text-sm">
+                  <div className="border-border bg-subtle/10 text-muted-foreground rounded-[var(--radius-md)] border border-dashed p-4 text-sm">
                     尚未绑定外部身份。
                   </div>
                 ) : (
                   summary.externalIdentities.map((identity) => (
                     <div
                       key={`${identity.provider}-${identity.createdAt}`}
-                      className="border-border bg-subtle/15 flex flex-col gap-3 rounded-[--radius-md] border p-4 md:flex-row md:items-center md:justify-between"
+                      className="border-border bg-subtle/15 flex flex-col gap-3 rounded-[var(--radius-md)] border p-4 md:flex-row md:items-center md:justify-between"
                     >
                       <div>
                         <div className="text-foreground font-medium">{identity.provider}</div>

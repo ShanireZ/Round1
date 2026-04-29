@@ -15,7 +15,7 @@ export function TopBar() {
   const ThemeIcon = theme === "dark" ? Moon : theme === "light" ? Sun : Monitor;
 
   return (
-    <header className="border-border bg-background/80 flex h-[--topbar-height] shrink-0 items-center justify-between border-b px-4 backdrop-blur-md md:px-8">
+    <header className="border-border bg-background/80 flex h-[var(--topbar-height)] shrink-0 items-center justify-between border-b px-4 backdrop-blur-md md:px-8">
       <Logo size="sm" />
       <div className="flex items-center gap-2">
         <CommandBar />

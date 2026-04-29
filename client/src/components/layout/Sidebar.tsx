@@ -4,14 +4,12 @@ import { Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { adminNavItems, coachNavItems, primaryNavItems, type NavItem } from "@/lib/navigation";
 
-const devItems: NavItem[] = [
-  { to: "/dev/ui-gallery", label: "UI Gallery", icon: Palette },
-];
+const devItems: NavItem[] = [{ to: "/dev/ui-gallery", label: "UI Gallery", icon: Palette }];
 
 function SidebarSection({ title, items }: { title: string; items: NavItem[] }) {
   return (
     <nav className="flex flex-col gap-1 px-3">
-      <span className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <span className="text-muted-foreground mb-1 px-3 text-xs font-semibold tracking-wider uppercase">
         {title}
       </span>
       {items.map((item) => (
@@ -28,10 +26,10 @@ function SidebarNavItem({ item }: { item: NavItem }) {
       end={item.to === "/"}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-3 rounded-[--radius-md] border-l-2 px-3 py-2 text-sm font-medium transition-colors duration-[--duration-fast]",
+          "flex items-center gap-3 rounded-[var(--radius-md)] border-l-2 px-3 py-2 text-sm font-medium transition-colors duration-[var(--duration-fast)]",
           isActive
             ? "border-primary bg-accent-wash text-primary"
-            : "border-transparent text-muted-foreground hover:bg-subtle hover:text-foreground",
+            : "text-muted-foreground hover:bg-subtle hover:text-foreground border-transparent",
         )
       }
     >
@@ -43,7 +41,7 @@ function SidebarNavItem({ item }: { item: NavItem }) {
 
 export function Sidebar() {
   return (
-    <aside className="hidden w-[--sidebar-width] shrink-0 border-r border-border bg-surface md:block">
+    <aside className="border-border bg-surface hidden w-[var(--sidebar-width)] shrink-0 border-r md:block">
       <ScrollArea className="h-full py-4">
         <div className="space-y-6">
           <SidebarSection title="主导航" items={primaryNavItems} />
@@ -51,8 +49,8 @@ export function Sidebar() {
           <SidebarSection title="Admin" items={adminNavItems} />
         </div>
         {import.meta.env.DEV && (
-          <nav className="mt-6 flex flex-col gap-1 border-t border-border px-3 pt-4">
-            <span className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <nav className="border-border mt-6 flex flex-col gap-1 border-t px-3 pt-4">
+            <span className="text-muted-foreground mb-1 px-3 text-xs font-semibold tracking-wider uppercase">
               Dev
             </span>
             {devItems.map((item) => (

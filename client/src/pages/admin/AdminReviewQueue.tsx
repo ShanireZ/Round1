@@ -5,16 +5,16 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -120,7 +120,9 @@ export default function AdminReviewQueue() {
     },
     onSuccess: (_result, action) => {
       void queryClient.invalidateQueries({ queryKey: ["admin-question-reviews"] });
-      void queryClient.invalidateQueries({ queryKey: ["admin-review-question", selectedReview?.questionId] });
+      void queryClient.invalidateQueries({
+        queryKey: ["admin-review-question", selectedReview?.questionId],
+      });
       toast.success(action === "confirm" ? "审核已确认" : "审核已拒绝");
     },
     onError: (error) => {
@@ -135,7 +137,7 @@ export default function AdminReviewQueue() {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">审核队列</h1>
-          <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 max-w-3xl text-sm">
             集中处理真题导入后的 AI review 差异，保留人工确认、拒绝备注与审核时间线。
           </p>
         </div>
@@ -154,12 +156,15 @@ export default function AdminReviewQueue() {
           <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <RefreshCcw className="h-4 w-4 text-primary" />
+                <RefreshCcw className="text-primary h-4 w-4" />
                 Review Items
               </CardTitle>
               <CardDescription>按状态筛选，默认查看最新 AI review 记录。</CardDescription>
             </div>
-            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as ReviewStatusFilter)}>
+            <Select
+              value={statusFilter}
+              onValueChange={(value) => setStatusFilter(value as ReviewStatusFilter)}
+            >
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue />
               </SelectTrigger>
@@ -174,12 +179,14 @@ export default function AdminReviewQueue() {
           </CardHeader>
           <CardContent>
             {reviewsQuery.isLoading ? (
-              <div className="rounded-[--radius-md] border border-border p-4 text-sm text-muted-foreground">
+              <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border p-4 text-sm">
                 正在加载审核队列...
               </div>
             ) : reviewsQuery.isError ? (
-              <div className="rounded-[--radius-md] border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
-                {reviewsQuery.error instanceof Error ? reviewsQuery.error.message : "审核队列加载失败"}
+              <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-[var(--radius-md)] border p-4 text-sm">
+                {reviewsQuery.error instanceof Error
+                  ? reviewsQuery.error.message
+                  : "审核队列加载失败"}
               </div>
             ) : reviewsQuery.data && reviewsQuery.data.items.length > 0 ? (
               <Table>
@@ -200,23 +207,29 @@ export default function AdminReviewQueue() {
                     >
                       <TableCell>
                         <div className="font-mono text-sm">{review.questionId.slice(0, 8)}</div>
-                        <div className="mt-1 text-xs text-muted-foreground">{formatTimestamp(review.createdAt)}</div>
+                        <div className="text-muted-foreground mt-1 text-xs">
+                          {formatTimestamp(review.createdAt)}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Badge variant={reviewVariants[review.reviewStatus]}>
                           {reviewLabels[review.reviewStatus]}
                         </Badge>
                       </TableCell>
-                      <TableCell className="tabular-nums text-muted-foreground">
-                        {typeof review.aiConfidence === "number" ? review.aiConfidence.toFixed(2) : "-"}
+                      <TableCell className="text-muted-foreground tabular-nums">
+                        {typeof review.aiConfidence === "number"
+                          ? review.aiConfidence.toFixed(2)
+                          : "-"}
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{formatTimestamp(review.reviewedAt)}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {formatTimestamp(review.reviewedAt)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             ) : (
-              <div className="rounded-[--radius-md] border border-dashed border-border p-4 text-sm text-muted-foreground">
+              <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border border-dashed p-4 text-sm">
                 当前筛选下暂无审核项。
               </div>
             )}
@@ -230,7 +243,7 @@ export default function AdminReviewQueue() {
           </CardHeader>
           <CardContent className="space-y-4">
             {!selectedReview ? (
-              <div className="rounded-[--radius-md] border border-dashed border-border p-4 text-sm text-muted-foreground">
+              <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border border-dashed p-4 text-sm">
                 从左侧选择审核项。
               </div>
             ) : (
@@ -244,21 +257,25 @@ export default function AdminReviewQueue() {
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-3">
-                  <div className="rounded-[--radius-md] border border-border bg-subtle/20 p-3">
-                    <div className="text-xs text-muted-foreground">AI Confidence</div>
+                  <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
+                    <div className="text-muted-foreground text-xs">AI Confidence</div>
                     <div className="mt-1 text-2xl font-semibold tabular-nums">
                       {typeof selectedReview.aiConfidence === "number"
                         ? selectedReview.aiConfidence.toFixed(2)
                         : "-"}
                     </div>
                   </div>
-                  <div className="rounded-[--radius-md] border border-border bg-subtle/20 p-3">
-                    <div className="text-xs text-muted-foreground">Reviewed By</div>
-                    <div className="mt-1 break-all text-sm font-semibold">{selectedReview.reviewedBy ?? "-"}</div>
+                  <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
+                    <div className="text-muted-foreground text-xs">Reviewed By</div>
+                    <div className="mt-1 text-sm font-semibold break-all">
+                      {selectedReview.reviewedBy ?? "-"}
+                    </div>
                   </div>
-                  <div className="rounded-[--radius-md] border border-border bg-subtle/20 p-3">
-                    <div className="text-xs text-muted-foreground">Reviewed At</div>
-                    <div className="mt-1 text-sm font-semibold">{formatTimestamp(selectedReview.reviewedAt)}</div>
+                  <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
+                    <div className="text-muted-foreground text-xs">Reviewed At</div>
+                    <div className="mt-1 text-sm font-semibold">
+                      {formatTimestamp(selectedReview.reviewedAt)}
+                    </div>
                   </div>
                 </div>
 
@@ -266,36 +283,38 @@ export default function AdminReviewQueue() {
                   <div className="space-y-3">
                     <div className="space-y-2">
                       <Label>officialAnswerDiff</Label>
-                      <pre className="overflow-auto rounded-[--radius-md] border border-border bg-subtle/20 p-3 text-xs">
+                      <pre className="border-border bg-subtle/20 overflow-auto rounded-[var(--radius-md)] border p-3 text-xs">
                         {stringifyJson(selectedReview.officialAnswerDiff ?? {})}
                       </pre>
                     </div>
 
                     {questionQuery.isLoading ? (
-                      <div className="rounded-[--radius-md] border border-border p-4 text-sm text-muted-foreground">
+                      <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border p-4 text-sm">
                         正在加载题目快照...
                       </div>
                     ) : questionQuery.isError ? (
-                      <div className="rounded-[--radius-md] border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
-                        {questionQuery.error instanceof Error ? questionQuery.error.message : "题目快照加载失败"}
+                      <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-[var(--radius-md)] border p-4 text-sm">
+                        {questionQuery.error instanceof Error
+                          ? questionQuery.error.message
+                          : "题目快照加载失败"}
                       </div>
                     ) : questionQuery.data ? (
                       <>
                         <div className="space-y-2">
                           <Label>contentJson</Label>
-                          <pre className="overflow-auto rounded-[--radius-md] border border-border bg-subtle/20 p-3 text-xs">
+                          <pre className="border-border bg-subtle/20 overflow-auto rounded-[var(--radius-md)] border p-3 text-xs">
                             {stringifyJson(questionQuery.data.contentJson)}
                           </pre>
                         </div>
                         <div className="space-y-2">
                           <Label>answerJson</Label>
-                          <pre className="overflow-auto rounded-[--radius-md] border border-border bg-subtle/20 p-3 text-xs">
+                          <pre className="border-border bg-subtle/20 overflow-auto rounded-[var(--radius-md)] border p-3 text-xs">
                             {stringifyJson(questionQuery.data.answerJson)}
                           </pre>
                         </div>
                         <div className="space-y-2">
                           <Label>explanationJson</Label>
-                          <pre className="overflow-auto rounded-[--radius-md] border border-border bg-subtle/20 p-3 text-xs">
+                          <pre className="border-border bg-subtle/20 overflow-auto rounded-[var(--radius-md)] border p-3 text-xs">
                             {stringifyJson(questionQuery.data.explanationJson)}
                           </pre>
                         </div>

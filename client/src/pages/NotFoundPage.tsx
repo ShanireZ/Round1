@@ -20,7 +20,7 @@ export default function NotFoundPage() {
         </div>
       </div>
 
-      <div className="border-border bg-subtle/40 flex items-start gap-3 rounded-[--radius-lg] border p-4 text-sm">
+      <div className="border-border bg-subtle/40 flex items-start gap-3 rounded-[var(--radius-lg)] border p-4 text-sm">
         <SearchX className="text-muted-foreground mt-0.5 h-5 w-5 shrink-0" />
         <div className="space-y-1">
           <div className="text-foreground font-medium">可以继续回到 Round1</div>

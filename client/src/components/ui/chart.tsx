@@ -91,7 +91,7 @@ function ChartTooltipContent({
   return (
     <div
       className={cn(
-        "border-border bg-popover text-popover-foreground min-w-36 rounded-[--radius-md] border px-3 py-2 shadow-md",
+        "border-border bg-popover text-popover-foreground min-w-36 rounded-[var(--radius-md)] border px-3 py-2 shadow-md",
         className,
       )}
     >
@@ -109,7 +109,7 @@ function ChartTooltipContent({
               <div className="flex min-w-0 items-center gap-2">
                 <span
                   className={cn(
-                    "h-2.5 w-2.5 rounded-[--radius-full]",
+                    "h-2.5 w-2.5 rounded-[var(--radius-full)]",
                     getIndicatorClass(config, key, index),
                   )}
                   aria-hidden
@@ -150,7 +150,7 @@ function ChartLegendContent({
           >
             <span
               className={cn(
-                "h-2.5 w-2.5 rounded-[--radius-full]",
+                "h-2.5 w-2.5 rounded-[var(--radius-full)]",
                 getIndicatorClass(config, key, index),
               )}
               aria-hidden

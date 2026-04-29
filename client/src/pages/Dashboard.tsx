@@ -130,7 +130,7 @@ function LoginRequiredDashboard() {
   return (
     <div className="h-full overflow-y-auto px-6 py-8">
       <div className="mx-auto grid min-h-[60vh] max-w-3xl place-items-center">
-        <div className="border-border bg-card w-full rounded-[--radius-lg] border p-8 text-center shadow-sm">
+        <div className="border-border bg-card w-full rounded-[var(--radius-lg)] border p-8 text-center shadow-sm">
           <LogIn className="text-primary mx-auto h-9 w-9" />
           <h1 className="text-foreground mt-5 text-2xl font-semibold tracking-tight">
             登录后查看训练概览
@@ -163,7 +163,7 @@ function ScoreTrend({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
 
   if (points.length === 0) {
     return (
-      <div className="border-border bg-subtle/10 grid min-h-64 place-items-center rounded-[--radius-lg] border border-dashed p-8 text-center">
+      <div className="border-border bg-subtle/10 grid min-h-64 place-items-center rounded-[var(--radius-lg)] border border-dashed p-8 text-center">
         <div className="space-y-3">
           <ChartNoAxesColumnIncreasing className="text-muted-foreground mx-auto h-8 w-8" />
           <div className="text-muted-foreground text-sm">完成一次模拟后会显示成绩曲线。</div>
@@ -188,7 +188,7 @@ function ScoreTrend({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
             return (
               <div key={attempt.id} className="flex min-w-0 flex-col items-center gap-2">
                 <div
-                  className={`bg-primary/85 w-full rounded-t-[--radius-sm] transition-all ${scoreTrendBarHeightClass(score)}`}
+                  className={`bg-primary/85 w-full rounded-t-[var(--radius-sm)] transition-all ${scoreTrendBarHeightClass(score)}`}
                   title={`${attempt.examType} ${formatScore(attempt.score)} 分`}
                 />
                 <span className="text-muted-foreground w-full truncate text-center text-xs">
@@ -204,7 +204,7 @@ function ScoreTrend({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
         {points.slice(-4).map((attempt) => (
           <div
             key={attempt.id}
-            className="border-border rounded-[--radius-md] border bg-white/70 p-3"
+            className="border-border rounded-[var(--radius-md)] border bg-white/70 p-3"
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-muted-foreground truncate text-xs">{attempt.examType}</span>
@@ -223,7 +223,7 @@ function ScoreTrend({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
 function AttemptHistory({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
   if (attempts.length === 0) {
     return (
-      <div className="border-border bg-subtle/10 rounded-[--radius-lg] border border-dashed p-8 text-center">
+      <div className="border-border bg-subtle/10 rounded-[var(--radius-lg)] border border-dashed p-8 text-center">
         <BookOpenText className="text-muted-foreground mx-auto h-8 w-8" />
         <div className="text-muted-foreground mt-3 text-sm">还没有答题历史。</div>
         <Button asChild variant="primary" className="mt-5">
@@ -237,7 +237,7 @@ function AttemptHistory({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
   }
 
   return (
-    <div className="divide-border border-border divide-y overflow-hidden rounded-[--radius-lg] border">
+    <div className="divide-border border-border divide-y overflow-hidden rounded-[var(--radius-lg)] border">
       {attempts.slice(0, 8).map((attempt) => (
         <Link
           key={attempt.id}
@@ -269,7 +269,7 @@ function AttemptHistory({ attempts }: { attempts: UserAttemptHistoryItem[] }) {
 function DashboardHero({ stats }: { stats: NonNullable<ReturnType<typeof normalizeStats>> }) {
   return (
     <section
-      className="relative overflow-hidden rounded-[--radius-xl] border border-border bg-card p-6 md:p-8"
+      className="border-border bg-card relative overflow-hidden rounded-[var(--radius-xl)] border p-6 md:p-8"
       data-testid="dashboard-hero"
     >
       <MeshGradient variant="hero" className="opacity-80" />
@@ -299,19 +299,19 @@ function DashboardHero({ stats }: { stats: NonNullable<ReturnType<typeof normali
         </div>
 
         <div className="grid min-w-0 grid-cols-3 gap-3 sm:min-w-80">
-          <div className="rounded-[--radius-lg] border border-border bg-card/80 p-4 backdrop-blur-sm">
+          <div className="border-border bg-card/80 rounded-[var(--radius-lg)] border p-4 backdrop-blur-sm">
             <div className="text-muted-foreground text-xs">次数</div>
             <div className="text-foreground mt-2 text-2xl font-semibold tabular-nums">
               {stats.totalAttempts}
             </div>
           </div>
-          <div className="rounded-[--radius-lg] border border-border bg-card/80 p-4 backdrop-blur-sm">
+          <div className="border-border bg-card/80 rounded-[var(--radius-lg)] border p-4 backdrop-blur-sm">
             <div className="text-muted-foreground text-xs">均分</div>
             <div className="text-foreground mt-2 text-2xl font-semibold tabular-nums">
               {Math.round(stats.averageScore)}
             </div>
           </div>
-          <div className="rounded-[--radius-lg] border border-border bg-card/80 p-4 backdrop-blur-sm">
+          <div className="border-border bg-card/80 rounded-[var(--radius-lg)] border p-4 backdrop-blur-sm">
             <div className="text-muted-foreground text-xs">最佳</div>
             <div className="text-foreground mt-2 text-2xl font-semibold tabular-nums">
               {stats.bestScore}
@@ -327,7 +327,7 @@ function AbilityRadar({ axes }: { axes: DashboardRadarAxis[] }) {
   if (axes.length < 3) {
     return (
       <div
-        className="border-border bg-subtle/10 grid min-h-80 place-items-center rounded-[--radius-lg] border border-dashed p-8 text-center"
+        className="border-border bg-subtle/10 grid min-h-80 place-items-center rounded-[var(--radius-lg)] border border-dashed p-8 text-center"
         data-testid="dashboard-ability-radar"
       >
         <div className="space-y-3">
@@ -347,7 +347,7 @@ function AbilityRadar({ axes }: { axes: DashboardRadarAxis[] }) {
           viewBox="0 0 100 100"
           role="img"
           aria-label="能力雷达图"
-          className="h-full w-full overflow-visible text-muted-foreground"
+          className="text-muted-foreground h-full w-full overflow-visible"
         >
           {[14, 28, 42].map((radius) => (
             <circle
@@ -355,7 +355,7 @@ function AbilityRadar({ axes }: { axes: DashboardRadarAxis[] }) {
               cx="50"
               cy="50"
               r={radius}
-              className="fill-none stroke-border"
+              className="stroke-border fill-none"
               strokeWidth="0.5"
             />
           ))}
@@ -369,14 +369,7 @@ function AbilityRadar({ axes }: { axes: DashboardRadarAxis[] }) {
 
             return (
               <g key={axis.key}>
-                <line
-                  x1="50"
-                  y1="50"
-                  x2={x}
-                  y2={y}
-                  className="stroke-border"
-                  strokeWidth="0.5"
-                />
+                <line x1="50" y1="50" x2={x} y2={y} className="stroke-border" strokeWidth="0.5" />
                 <text
                   x={labelX}
                   y={labelY}
@@ -401,7 +394,10 @@ function AbilityRadar({ axes }: { axes: DashboardRadarAxis[] }) {
 
       <div className="grid gap-2 sm:grid-cols-2">
         {axes.map((axis) => (
-          <div key={axis.key} className="rounded-[--radius-md] border border-border bg-subtle/15 p-3">
+          <div
+            key={axis.key}
+            className="border-border bg-subtle/15 rounded-[var(--radius-md)] border p-3"
+          >
             <div className="flex items-center justify-between gap-3 text-sm">
               <span className="text-foreground font-medium">{axis.label}</span>
               <span className="text-muted-foreground tabular-nums">{axis.value}%</span>
@@ -420,7 +416,7 @@ function WeaknessHeatmap({ items }: { items: UserWeakPrimaryKp[] }) {
   if (rows.length === 0) {
     return (
       <div
-        className="border-border bg-subtle/10 grid min-h-44 place-items-center rounded-[--radius-lg] border border-dashed p-8 text-center"
+        className="border-border bg-subtle/10 grid min-h-44 place-items-center rounded-[var(--radius-lg)] border border-dashed p-8 text-center"
         data-testid="dashboard-weakness-heatmap"
       >
         <div className="space-y-3">
@@ -436,12 +432,12 @@ function WeaknessHeatmap({ items }: { items: UserWeakPrimaryKp[] }) {
       <div className="grid gap-3">
         {rows.map((row) => (
           <div key={row.kpId} className="grid gap-3 sm:grid-cols-[96px_1fr] sm:items-center">
-            <div className="font-mono text-sm font-medium text-foreground">KP {row.kpId}</div>
+            <div className="text-foreground font-mono text-sm font-medium">KP {row.kpId}</div>
             <div className="grid grid-cols-3 gap-2">
               {row.cells.map((cell) => (
                 <div
                   key={cell.key}
-                  className={`min-h-16 rounded-[--radius-md] border border-border/70 p-3 ${heatmapBucketClasses[cell.bucket]}`}
+                  className={`border-border/70 min-h-16 rounded-[var(--radius-md)] border p-3 ${heatmapBucketClasses[cell.bucket]}`}
                   aria-label={`KP ${row.kpId} ${cell.label} ${cell.value}`}
                 >
                   <div className="text-xs opacity-80">{cell.label}</div>
@@ -452,11 +448,11 @@ function WeaknessHeatmap({ items }: { items: UserWeakPrimaryKp[] }) {
           </div>
         ))}
       </div>
-      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground" aria-hidden="true">
+      <div className="text-muted-foreground flex flex-wrap gap-2 text-xs" aria-hidden="true">
         {heatmapBucketClasses.map((className, index) => (
           <span
             key={className}
-            className={`inline-flex h-5 w-10 items-center justify-center rounded-[--radius-sm] border border-border/70 ${className}`}
+            className={`border-border/70 inline-flex h-5 w-10 items-center justify-center rounded-[var(--radius-sm)] border ${className}`}
           >
             {index}
           </span>

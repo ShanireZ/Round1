@@ -5,14 +5,14 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -99,7 +99,7 @@ export default function AdminUsers() {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">用户管理</h1>
-          <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 max-w-3xl text-sm">
             管理账号角色和禁用状态。角色变更、禁用与恢复都走 Admin step-up 与审计链路。
           </p>
         </div>
@@ -117,7 +117,7 @@ export default function AdminUsers() {
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <RefreshCcw className="h-4 w-4 text-primary" />
+              <RefreshCcw className="text-primary h-4 w-4" />
               账号列表
             </CardTitle>
             <CardDescription>按角色筛选，直接调整单个用户的角色或状态。</CardDescription>
@@ -136,11 +136,11 @@ export default function AdminUsers() {
         </CardHeader>
         <CardContent>
           {usersQuery.isLoading ? (
-            <div className="rounded-[--radius-md] border border-border p-4 text-sm text-muted-foreground">
+            <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border p-4 text-sm">
               正在加载用户列表...
             </div>
           ) : usersQuery.isError ? (
-            <div className="rounded-[--radius-md] border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+            <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-[var(--radius-md)] border p-4 text-sm">
               {usersQuery.error instanceof Error ? usersQuery.error.message : "用户列表加载失败"}
             </div>
           ) : usersQuery.data && usersQuery.data.items.length > 0 ? (
@@ -159,13 +159,16 @@ export default function AdminUsers() {
                   const statusAction = user.status === "deleted" ? "restore" : "delete";
                   const isStatusPending =
                     statusMutation.isPending && statusMutation.variables?.userId === user.id;
-                  const isRolePending = roleMutation.isPending && roleMutation.variables?.userId === user.id;
+                  const isRolePending =
+                    roleMutation.isPending && roleMutation.variables?.userId === user.id;
 
                   return (
                     <TableRow key={user.id}>
                       <TableCell>
-                        <div className="font-medium text-foreground">{user.displayName}</div>
-                        <div className="mt-1 font-mono text-xs text-muted-foreground">{user.username}</div>
+                        <div className="text-foreground font-medium">{user.displayName}</div>
+                        <div className="text-muted-foreground mt-1 font-mono text-xs">
+                          {user.username}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Select
@@ -190,13 +193,17 @@ export default function AdminUsers() {
                           {user.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{formatTimestamp(user.createdAt)}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {formatTimestamp(user.createdAt)}
+                      </TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant={statusAction === "delete" ? "destructive" : "secondary"}
                           size="sm"
                           loading={isStatusPending}
-                          onClick={() => statusMutation.mutate({ userId: user.id, action: statusAction })}
+                          onClick={() =>
+                            statusMutation.mutate({ userId: user.id, action: statusAction })
+                          }
                         >
                           {statusAction === "delete" ? (
                             <>
@@ -217,7 +224,7 @@ export default function AdminUsers() {
               </TableBody>
             </Table>
           ) : (
-            <div className="rounded-[--radius-md] border border-dashed border-border p-4 text-sm text-muted-foreground">
+            <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border border-dashed p-4 text-sm">
               当前筛选下暂无用户。
             </div>
           )}

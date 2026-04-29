@@ -133,19 +133,19 @@ export default function AdminDashboard() {
             </CardDescription>
           </div>
           <div className="grid w-full gap-3 sm:grid-cols-3 lg:max-w-xl">
-            <div className="border-border bg-card/80 rounded-[--radius-md] border p-3">
+            <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
               <div className="text-muted-foreground text-xs">API</div>
               <div className="text-foreground mt-1 text-sm font-semibold">
                 {healthQuery.isLoading ? "checking" : (health?.status ?? "unavailable")}
               </div>
             </div>
-            <div className="border-border bg-card/80 rounded-[--radius-md] border p-3">
+            <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
               <div className="text-muted-foreground text-xs">DB</div>
               <div className="text-foreground mt-1 text-sm font-semibold">
                 {healthQuery.isLoading ? "checking" : (health?.db ?? "-")}
               </div>
             </div>
-            <div className="border-border bg-card/80 rounded-[--radius-md] border p-3">
+            <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
               <div className="text-muted-foreground text-xs">Redis</div>
               <div className="text-foreground mt-1 text-sm font-semibold">
                 {healthQuery.isLoading ? "checking" : (health?.redis ?? "-")}
@@ -199,18 +199,18 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             {batchesQuery.isLoading ? (
-              <div className="border-border text-muted-foreground rounded-[--radius-md] border p-4 text-sm">
+              <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border p-4 text-sm">
                 正在读取 import_batches...
               </div>
             ) : batchesQuery.isError ? (
-              <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-[--radius-md] border p-4 text-sm">
+              <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-[var(--radius-md)] border p-4 text-sm">
                 导入批次不可用。
               </div>
             ) : batchesQuery.data?.items.length ? (
               batchesQuery.data.items.map((batch) => (
                 <div
                   key={batch.id}
-                  className="border-border grid gap-3 rounded-[--radius-md] border p-4 md:grid-cols-[1fr_auto] md:items-center"
+                  className="border-border grid gap-3 rounded-[var(--radius-md)] border p-4 md:grid-cols-[1fr_auto] md:items-center"
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
                 </div>
               ))
             ) : (
-              <div className="border-border bg-subtle/10 text-muted-foreground rounded-[--radius-md] border border-dashed p-4 text-sm">
+              <div className="border-border bg-subtle/10 text-muted-foreground rounded-[var(--radius-md)] border border-dashed p-4 text-sm">
                 暂无导入批次。
               </div>
             )}
@@ -250,7 +250,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent className="space-y-4">
             {healthQuery.isError ? (
-              <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-start gap-3 rounded-[--radius-md] border p-4 text-sm">
+              <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-start gap-3 rounded-[var(--radius-md)] border p-4 text-sm">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                 健康检查不可用，请在部署环境执行 healthcheck。
               </div>
@@ -264,7 +264,7 @@ export default function AdminDashboard() {
                   ].map(([label, value]) => (
                     <div
                       key={label}
-                      className="border-border bg-subtle/15 rounded-[--radius-md] border p-3"
+                      className="border-border bg-subtle/15 rounded-[var(--radius-md)] border p-3"
                     >
                       <div className="text-muted-foreground text-xs">{label}</div>
                       <div className="mt-2">
