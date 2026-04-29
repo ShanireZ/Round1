@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 function collectBrowserProblems(page: Page): string[] {
   const problems: string[] = [];
@@ -47,7 +47,21 @@ async function installFontRoute(page: Page) {
   });
 }
 
-async function installCommonRoutes(page: Page, authenticated = true) {
+type VisualAuditRole = "student" | "coach" | "admin";
+type VisualAuditAuth =
+  | boolean
+  | {
+      id?: string;
+      username?: string;
+      displayName?: string;
+      role?: VisualAuditRole;
+    };
+
+async function installCommonRoutes(page: Page, auth: VisualAuditAuth = true) {
+  const authenticated = auth !== false;
+  const userConfig = typeof auth === "object" ? auth : {};
+  const role = userConfig.role ?? "student";
+
   await installFontRoute(page);
   await page.route("**/api/v1/auth/session", async (route) => {
     await route.fulfill({
@@ -57,10 +71,10 @@ async function installCommonRoutes(page: Page, authenticated = true) {
           ? {
               authenticated: true,
               user: {
-                id: "student-visual",
-                username: "visual",
-                displayName: "视觉验收学生",
-                role: "student",
+                id: userConfig.id ?? `${role}-visual`,
+                username: userConfig.username ?? `visual-${role}`,
+                displayName: userConfig.displayName ?? `视觉验收${role}`,
+                role,
                 status: "active",
               },
             }
@@ -112,6 +126,40 @@ async function hasHorizontalOverflow(page: Page) {
   return page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth > 1,
   );
+}
+
+async function expectRouteToFit(page: Page, routePath: string, target: (page: Page) => Locator) {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(routePath);
+  await expect(target(page)).toBeVisible();
+  await waitForFonts(page);
+  expect(await hasHorizontalOverflow(page)).toBe(false);
+
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.reload();
+  await expect(target(page)).toBeVisible();
+  expect(await hasHorizontalOverflow(page)).toBe(false);
+}
+
+async function installClientConfigRoute(page: Page) {
+  await page.route("**/api/v1/config/client", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          turnstileSiteKey: "",
+          powEnabled: false,
+          powBaseDifficulty: 0,
+          autosaveIntervalSeconds: 180,
+          examDraftTtlMinutes: 1440,
+          availableExamTypes: ["CSP-J", "CSP-S"],
+          availableDifficulties: ["easy", "medium", "hard"],
+          enabledAuthProviders: ["password", "cpplearn"],
+          authProviderPlaceholders: [],
+        },
+      },
+    });
+  });
 }
 
 async function installDashboardRoutes(page: Page) {
@@ -319,6 +367,558 @@ async function installExamResultRoute(page: Page) {
   });
 }
 
+async function installAccountRoutes(page: Page) {
+  await installClientConfigRoute(page);
+  await page.route("**/api/v1/classes/mine", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          items: [
+            {
+              classId: "class-1",
+              name: "CSP-J 春季班",
+              archivedAt: null,
+              joinedVia: "code",
+              joinedAt: "2026-04-20T08:00:00.000Z",
+              openAssignments: 2,
+              completedAssignments: 5,
+              missedAssignments: 1,
+            },
+          ],
+        },
+      },
+    });
+  });
+  await page.route("**/api/v1/auth/security/summary", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          profile: {
+            id: "student-visual",
+            username: "visual-student",
+            displayName: "视觉验收学生",
+            role: "student",
+            status: "active",
+            passwordChangeRequired: false,
+            lastStrongAuthAt: "2026-04-28T08:00:00.000Z",
+          },
+          email: {
+            email: "visual@example.com",
+            verifiedAt: "2026-04-20T08:00:00.000Z",
+            source: "password",
+          },
+          passwordEnabled: true,
+          totpEnabledAt: "2026-04-21T08:00:00.000Z",
+          passkeys: [
+            {
+              credentialIdSuffix: "9f21",
+              backupEligible: true,
+              backupState: true,
+              createdAt: "2026-04-22T08:00:00.000Z",
+            },
+          ],
+          externalIdentities: [
+            {
+              provider: "cpplearn",
+              providerType: "oidc",
+              providerEmail: "visual@cpplearn.test",
+              createdAt: "2026-04-23T08:00:00.000Z",
+            },
+          ],
+        },
+      },
+    });
+  });
+}
+
+const coachClass = {
+  id: "class-1",
+  name: "CSP-J 春季班",
+  joinCode: "AB12CD",
+  archivedAt: null,
+  createdBy: "coach-visual",
+  createdAt: "2026-04-20T08:00:00.000Z",
+  updatedAt: "2026-04-28T08:00:00.000Z",
+  coachRole: "owner",
+  memberCount: 2,
+  coachCount: 1,
+};
+
+async function installCoachRoutes(page: Page) {
+  await page.route("**/api/v1/coach/classes**", async (route) => {
+    const url = new URL(route.request().url());
+    const pathname = url.pathname;
+
+    if (pathname === "/api/v1/coach/classes") {
+      await route.fulfill({ json: { success: true, data: { items: [coachClass] } } });
+      return;
+    }
+
+    if (pathname === "/api/v1/coach/classes/class-1") {
+      await route.fulfill({ json: { success: true, data: coachClass } });
+      return;
+    }
+
+    if (pathname === "/api/v1/coach/classes/class-1/members") {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: {
+            items: [
+              {
+                classId: "class-1",
+                userId: "student-1",
+                username: "student1",
+                displayName: "学生一",
+                role: "student",
+                joinedVia: "code",
+                joinedAt: "2026-04-21T08:00:00.000Z",
+              },
+            ],
+          },
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/v1/coach/classes/class-1/invites") {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: {
+            items: [
+              {
+                id: "invite-1",
+                classId: "class-1",
+                expiresAt: "2026-05-06T08:00:00.000Z",
+                maxUses: 50,
+                useCount: 3,
+                revokedAt: null,
+                createdAt: "2026-04-24T08:00:00.000Z",
+              },
+            ],
+          },
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/v1/coach/classes/class-1/coaches") {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: {
+            items: [
+              {
+                classId: "class-1",
+                userId: "coach-visual",
+                username: "visual-coach",
+                displayName: "视觉验收教练",
+                userRole: "coach",
+                coachRole: "owner",
+                addedAt: "2026-04-20T08:00:00.000Z",
+              },
+            ],
+          },
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/v1/coach/classes/class-1/assignments") {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: {
+            items: [
+              {
+                id: "assignment-1",
+                classId: "class-1",
+                createdBy: "coach-visual",
+                title: "第 1 周模拟",
+                mode: "fixed_prebuilt_paper",
+                prebuiltPaperId: "paper-1",
+                examType: "CSP-J",
+                difficulty: "medium",
+                blueprintVersion: 1,
+                dueAt: "2026-05-06T10:00:00.000Z",
+                status: "assigned",
+                createdAt: "2026-04-28T08:00:00.000Z",
+                updatedAt: "2026-04-28T08:00:00.000Z",
+                assignedStudents: 2,
+              },
+            ],
+          },
+        },
+      });
+      return;
+    }
+
+    await route.fulfill({ status: 404, json: { success: false } });
+  });
+
+  await page.route("**/api/v1/coach/prebuilt-papers", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          items: [
+            {
+              id: "paper-1",
+              title: "CSP-J 模拟卷 A",
+              examType: "CSP-J",
+              difficulty: "medium",
+              blueprintVersion: 1,
+              publishedAt: "2026-04-27T08:00:00.000Z",
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  await page.route("**/api/v1/coach/report/class-1", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          classId: "class-1",
+          totals: {
+            students: 2,
+            pending: 1,
+            inProgress: 0,
+            completed: 3,
+            missed: 1,
+            averageScore: 84,
+          },
+          assignments: [
+            {
+              assignmentId: "assignment-1",
+              title: "第 1 周模拟",
+              status: "assigned",
+              dueAt: "2026-05-06T10:00:00.000Z",
+              completed: 1,
+              missed: 0,
+              averageScore: 88,
+            },
+          ],
+          heatmap: {
+            knowledgePointIds: ["101", "203"],
+            students: [
+              {
+                userId: "student-1",
+                displayName: "学生一",
+                values: [
+                  { kpId: "101", total: 4, correct: 3, accuracy: 0.75 },
+                  { kpId: "203", total: 3, correct: 2, accuracy: 0.67 },
+                ],
+              },
+              {
+                userId: "student-2",
+                displayName: "学生二",
+                values: [
+                  { kpId: "101", total: 4, correct: 2, accuracy: 0.5 },
+                  { kpId: "203", total: 3, correct: 3, accuracy: 1 },
+                ],
+              },
+            ],
+          },
+          questionTypeStats: [
+            {
+              questionType: "single_choice",
+              total: 8,
+              correct: 6,
+              score: 60,
+              maxScore: 80,
+              accuracy: 0.75,
+            },
+          ],
+          students: [
+            {
+              userId: "student-1",
+              username: "student1",
+              displayName: "学生一",
+              pending: 0,
+              inProgress: 0,
+              completed: 2,
+              missed: 0,
+              averageScore: 88,
+              latestSubmittedAt: "2026-04-28T10:00:00.000Z",
+              kpStats: [
+                { kpId: "101", total: 4, correct: 3, accuracy: 0.75 },
+                { kpId: "203", total: 3, correct: 2, accuracy: 0.67 },
+              ],
+              questionTypeStats: [
+                {
+                  questionType: "single_choice",
+                  total: 4,
+                  correct: 3,
+                  score: 30,
+                  maxScore: 40,
+                  accuracy: 0.75,
+                },
+              ],
+              trend: [
+                {
+                  assignmentId: "assignment-1",
+                  title: "第 1 周模拟",
+                  status: "assigned",
+                  dueAt: "2026-05-06T10:00:00.000Z",
+                  progressStatus: "completed",
+                  score: 88,
+                  submittedAt: "2026-04-28T10:00:00.000Z",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+  });
+}
+
+const adminQuestionId = "11111111-1111-4111-8111-111111111111";
+const adminPaperId = "22222222-2222-4222-8222-222222222222";
+
+function paginated<T>(items: T[], pageSize = 20) {
+  return {
+    items,
+    pagination: {
+      page: 1,
+      pageSize,
+      total: items.length,
+      totalPages: 1,
+    },
+  };
+}
+
+async function installAdminRoutes(page: Page) {
+  await page.route("**/api/v1/health", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          status: "ok",
+          timestamp: "2026-04-29T08:00:00.000Z",
+          db: "ok",
+          redis: "ok",
+        },
+      },
+    });
+  });
+
+  await page.route("**/api/v1/admin/questions**", async (route) => {
+    const pathname = new URL(route.request().url()).pathname;
+    const listItem = {
+      id: adminQuestionId,
+      type: "single_choice",
+      difficulty: "easy",
+      status: "draft",
+      source: "manual",
+      sandboxVerified: true,
+      createdAt: "2026-04-28T08:00:00.000Z",
+    };
+
+    if (pathname === "/api/v1/admin/questions") {
+      await route.fulfill({ json: { success: true, data: paginated([listItem]) } });
+      return;
+    }
+
+    if (pathname === `/api/v1/admin/questions/${adminQuestionId}/references`) {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: {
+            questionId: adminQuestionId,
+            prebuiltPaperReferences: 0,
+            paperInstanceReferences: 0,
+            assignmentReferences: 0,
+            totalReferences: 0,
+            canDelete: true,
+          },
+        },
+      });
+      return;
+    }
+
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          ...listItem,
+          primaryKpId: 101,
+          contentHash: "visual-question-hash",
+          contentJson: { stem: "中国的国家顶级域名是（）", options: ["A", "B", "C", "D"] },
+          answerJson: { answer: "A" },
+          explanationJson: { explanation: ".cn" },
+          examTypes: ["CSP-J"],
+          publishedAt: null,
+          archivedAt: null,
+          updatedAt: "2026-04-28T08:00:00.000Z",
+        },
+      },
+    });
+  });
+
+  await page.route("**/api/v1/admin/prebuilt-papers**", async (route) => {
+    const pathname = new URL(route.request().url()).pathname;
+    const listItem = {
+      id: adminPaperId,
+      title: "CSP-J 模拟卷 A",
+      examType: "CSP-J",
+      difficulty: "medium",
+      blueprintVersion: 1,
+      rootPaperId: null,
+      parentPaperId: null,
+      versionNo: 1,
+      status: "published",
+      sourceBatchId: null,
+      metadataJson: { source: "visual" },
+      publishedAt: "2026-04-28T08:00:00.000Z",
+      archivedAt: null,
+      createdAt: "2026-04-28T08:00:00.000Z",
+      updatedAt: "2026-04-28T08:00:00.000Z",
+    };
+
+    if (pathname === "/api/v1/admin/prebuilt-papers") {
+      await route.fulfill({ json: { success: true, data: paginated([listItem]) } });
+      return;
+    }
+
+    if (pathname === `/api/v1/admin/prebuilt-papers/${adminPaperId}/references`) {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: {
+            prebuiltPaperId: adminPaperId,
+            paperInstanceReferences: 0,
+            assignmentReferences: 0,
+            totalReferences: 0,
+            canDelete: false,
+          },
+        },
+      });
+      return;
+    }
+
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          ...listItem,
+          slots: [
+            {
+              slotNo: 1,
+              questionId: adminQuestionId,
+              questionType: "single_choice",
+              primaryKpId: 101,
+              difficulty: "easy",
+              points: 5,
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  await page.route("**/api/v1/admin/import-batches**", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          items: [
+            {
+              id: "batch-1",
+              bundleType: "question_bundle",
+              status: "applied",
+              sourceFilename: "visual-question-bundle.json",
+              checksum: "abcdef1234567890",
+              importedBy: "admin-visual",
+              summaryJson: {
+                totalCount: 10,
+                importedCount: 10,
+                rejectedCount: 0,
+                errors: [],
+              },
+              createdAt: "2026-04-28T08:00:00.000Z",
+              updatedAt: "2026-04-28T08:00:00.000Z",
+            },
+          ],
+          pagination: { page: 1, pageSize: 10, total: 1, totalPages: 1 },
+        },
+      },
+    });
+  });
+
+  await page.route("**/api/v1/admin/question-reviews**", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: paginated([
+          {
+            id: "review-1",
+            questionId: adminQuestionId,
+            reviewStatus: "ai_reviewed",
+            aiConfidence: 0.92,
+            officialAnswerDiff: { answer: "match" },
+            reviewerNotes: "",
+            reviewedBy: null,
+            reviewedAt: null,
+            createdAt: "2026-04-28T08:00:00.000Z",
+          },
+        ]),
+      },
+    });
+  });
+
+  await page.route("**/api/v1/admin/users**", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: paginated(
+          [
+            {
+              id: "admin-visual",
+              username: "visual-admin",
+              displayName: "视觉验收管理员",
+              role: "admin",
+              status: "active",
+              createdAt: "2026-04-20T08:00:00.000Z",
+            },
+          ],
+          30,
+        ),
+      },
+    });
+  });
+
+  await page.route("**/api/v1/admin/settings", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          items: [
+            {
+              key: "exam.autosaveIntervalSeconds",
+              category: "exam",
+              label: "Autosave Interval",
+              description: "考试自动保存间隔。",
+              defaultValue: 180,
+              valueJson: 180,
+              isDefault: false,
+              updatedBy: "admin-visual",
+              createdAt: "2026-04-20T08:00:00.000Z",
+              updatedAt: "2026-04-28T08:00:00.000Z",
+            },
+          ],
+        },
+      },
+    });
+  });
+}
+
 test("Dashboard renders radar and heatmap without desktop or mobile overflow", async ({ page }) => {
   const problems = collectBrowserProblems(page);
   await installCommonRoutes(page);
@@ -341,6 +941,28 @@ test("Dashboard renders radar and heatmap without desktop or mobile overflow", a
   expect(problems).toEqual([]);
 });
 
+test("Command bar opens role-aware navigation and reaches Admin dashboard", async ({ page }) => {
+  const problems = collectBrowserProblems(page);
+  await installCommonRoutes(page, {
+    role: "admin",
+    username: "visual-admin",
+    displayName: "视觉验收管理员",
+  });
+  await installDashboardRoutes(page);
+  await installAdminRoutes(page);
+
+  await page.goto("/dashboard");
+  await expect(page.getByTestId("dashboard-hero")).toBeVisible();
+  await page.keyboard.press("Control+K");
+
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByPlaceholder("搜索页面、操作或主题")).toBeVisible();
+  await expect(dialog.getByText("管理看板")).toBeVisible();
+  await dialog.getByText("管理看板").click();
+  await expect(page.getByTestId("admin-dashboard-page")).toBeVisible();
+  expect(problems).toEqual([]);
+});
+
 test("ExamNew renders the config-driven catalog without desktop or mobile overflow", async ({
   page,
 }) => {
@@ -352,7 +974,7 @@ test("ExamNew renders the config-driven catalog without desktop or mobile overfl
   await page.goto("/exams/new");
   await expect(page.getByTestId("exam-new-page")).toBeVisible();
   await expect(page.getByRole("heading", { name: "出卷考试" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /CSP-J/ })).toBeVisible();
+  await expect(page.getByRole("radio", { name: /CSP-J/ })).toBeChecked();
   await page
     .getByRole("button", { name: /创建并进入/ })
     .first()
@@ -393,6 +1015,93 @@ test("Auth entry surfaces render without desktop or mobile overflow", async ({ p
     await page.reload();
     await expect(page.getByTestId(route.testId)).toBeVisible();
     expect(await hasHorizontalOverflow(page)).toBe(false);
+  }
+
+  expect(problems).toEqual([]);
+});
+
+test("Account surfaces render without desktop or mobile overflow", async ({ page }) => {
+  const problems = collectBrowserProblems(page);
+  await installCommonRoutes(page);
+  await installAccountRoutes(page);
+
+  await expectRouteToFit(page, "/account/class", (targetPage) =>
+    targetPage.getByTestId("account-class-page"),
+  );
+  await expectRouteToFit(page, "/join?code=AB12CD", (targetPage) =>
+    targetPage.getByTestId("account-class-page"),
+  );
+  await expectRouteToFit(page, "/account/security", (targetPage) =>
+    targetPage.getByTestId("account-security-page"),
+  );
+
+  expect(problems).toEqual([]);
+});
+
+test("Coach surfaces render without desktop or mobile overflow", async ({ page }) => {
+  const problems = collectBrowserProblems(page);
+  await installCommonRoutes(page, {
+    role: "coach",
+    username: "visual-coach",
+    displayName: "视觉验收教练",
+  });
+  await installCoachRoutes(page);
+
+  await expectRouteToFit(page, "/coach/classes", (targetPage) =>
+    targetPage.getByTestId("coach-classes-page"),
+  );
+  await expectRouteToFit(page, "/coach/classes/class-1", (targetPage) =>
+    targetPage.getByTestId("coach-class-detail-page"),
+  );
+  await expectRouteToFit(page, "/coach/assignments", (targetPage) =>
+    targetPage.getByTestId("coach-assignments-page"),
+  );
+  await expectRouteToFit(page, "/coach/report?classId=class-1", (targetPage) =>
+    targetPage.getByTestId("coach-report-page"),
+  );
+
+  expect(problems).toEqual([]);
+});
+
+test("Admin surfaces render without desktop or mobile overflow", async ({ page }) => {
+  const problems = collectBrowserProblems(page);
+  await installCommonRoutes(page, {
+    role: "admin",
+    username: "visual-admin",
+    displayName: "视觉验收管理员",
+  });
+  await installAdminRoutes(page);
+
+  const routes: Array<{ path: string; target: (page: Page) => Locator }> = [
+    { path: "/admin", target: (targetPage) => targetPage.getByTestId("admin-dashboard-page") },
+    {
+      path: "/admin/questions",
+      target: (targetPage) => targetPage.getByRole("heading", { name: "题库管理" }),
+    },
+    {
+      path: "/admin/papers",
+      target: (targetPage) => targetPage.getByRole("heading", { name: "预制卷库" }),
+    },
+    {
+      path: "/admin/imports",
+      target: (targetPage) => targetPage.getByRole("heading", { name: "导入中心" }),
+    },
+    {
+      path: "/admin/review",
+      target: (targetPage) => targetPage.getByRole("heading", { name: "审核队列" }),
+    },
+    {
+      path: "/admin/users",
+      target: (targetPage) => targetPage.getByRole("heading", { name: "用户管理" }),
+    },
+    {
+      path: "/admin/settings",
+      target: (targetPage) => targetPage.getByRole("heading", { name: "系统设置" }),
+    },
+  ];
+
+  for (const route of routes) {
+    await expectRouteToFit(page, route.path, route.target);
   }
 
   expect(problems).toEqual([]);

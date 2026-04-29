@@ -502,7 +502,7 @@ function StudentDetailSheet({
 
 function LoadingCoachReport() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="coach-report-page">
       <Skeleton className="h-36 w-full" />
       <div className="grid gap-4 md:grid-cols-4">
         <Skeleton className="h-24 w-full" />
@@ -642,7 +642,7 @@ export default function CoachReport() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="coach-report-page">
       <div className="print-header hidden">
         R1 班级报告 · {activeClass?.name ?? "当前班级"} · {generatedAt}
       </div>

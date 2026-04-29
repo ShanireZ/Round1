@@ -241,7 +241,7 @@ describe("coach class api", () => {
         {
           id: "44444444-4444-4444-8444-444444444444",
           classId,
-          expiresAt: new Date("2026-04-29T00:00:00.000Z"),
+          expiresAt: new Date("2030-04-29T00:00:00.000Z"),
           maxUses: 3,
           useCount: 0,
           revokedAt: null,

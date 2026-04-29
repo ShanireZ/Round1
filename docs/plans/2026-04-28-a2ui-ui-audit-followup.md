@@ -1,5 +1,12 @@
 # A2UI and UI Drift Audit Follow-up
 
+## 2026-04-29 Maintenance Addendum: Command Surface, Admin Overview, and Release Gate
+
+- Global command surface landed: `CommandBar` uses shadcn/Radix command dialog primitives, opens from the desktop top bar and `Cmd/Ctrl+K`, lists role-aware navigation, and changes theme through existing Round1 tokenized theme state.
+- Admin IA drift closed: `adminNavItems` now includes `/admin` as `管理看板`; the Admin dashboard now shows operational totals, recent import batches, and API/DB/Redis health instead of acting only as a link grid.
+- Route-family visual acceptance expanded: `ui-visual-audit.spec.ts` now covers Account, Coach, and Admin pages on desktop and mobile, plus the command panel, ExamNew, Dashboard, Auth entry, ExamResult print/reduced-motion, and A2UI BYOC gallery.
+- Release-readiness record added at `docs/plans/2026-04-29-release-readiness.md`, including passing UI/build/test gates and local runtime blockers for Redis/Postgres/API/frontend health checks.
+
 ## 2026-04-28 Maintenance Addendum: Coach Class Detail
 
 - Coach deep management UX landed: `/coach/classes/:id` now renders a real `CoachClassDetail` page instead of falling back to the class list route. The page consumes the existing coach class, members, invites, and coaches APIs, supports owner-only class rename, member removal, invite creation/revocation, collaborator add/remove, and owner transfer.
@@ -154,6 +161,11 @@
 - `npm run verify:ui-tokens`：通过，`verifyUiTokenUsage: ok (89 files checked)`，确认新增 Coach 页面和 A2UI BYOC 未引入 raw color / inline style / CSS compat 回归。
 - `npm run build:client`：通过，确认 `/coach/classes`、`/coach/assignments` lazy route、A2UI catalog 与 UI gallery payload 可通过 TypeScript/Vite 构建；`/font/*.woff2` 仍按运行时同源代理解析。
 - `npm run build:server`：通过，确认 `GET /api/v1/coach/prebuilt-papers` route/schema/service 可通过 TypeScript 构建。
+- `npm run verify:ui-tokens`：通过，`verifyUiTokenUsage: ok (101 files checked)`，覆盖本轮 CommandBar/AdminDashboard/CoachReport test id 变更。
+- `npm run client:test`：通过，12 files / 67 tests。
+- `npm run build:client` 与 `npm run build:server`：通过；字体仍按运行时同源代理解析。
+- `npm run test:e2e -- ui-visual-audit.spec.ts`：通过，9 tests，覆盖 Dashboard、CommandBar、ExamNew、Auth entry、Account、Coach、Admin、ExamResult 和 A2UI BYOC gallery。
+- `npm run test -- server/__tests__/coach-classes.integration.test.ts`：通过，9 tests；本轮修复了 2026-04-29 后会过期的 invite fixture。
 
 ## 剩余风险
 

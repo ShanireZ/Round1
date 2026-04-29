@@ -1,5 +1,12 @@
 # Remaining Unfinished Work Summary
 
+## 2026-04-29 Maintenance Addendum: UI/UX Closure and Release Readiness
+
+- Closed an additional UI/UX contract gap: global command navigation is now implemented through `Cmd/Ctrl+K` / the desktop command trigger, using shadcn/Radix command primitives and tokenized theme actions. Admin navigation now includes `/admin` as `管理看板`.
+- Admin dashboard is no longer a link-only hub: it now summarizes question assets, published prebuilt papers, import batches, users, recent import activity, and API/DB/Redis health.
+- Browser visual acceptance now covers Dashboard, ExamNew, Auth entry, Account, Coach, Admin, ExamResult print/reduced-motion, and A2UI BYOC gallery in `server/__tests__/e2e/ui-visual-audit.spec.ts`; the current run passed 9/9.
+- Deployment-test readiness evidence is recorded in `docs/plans/2026-04-29-release-readiness.md`. Code/build/UI gates pass, but full local `npm run test`, migration status, and healthcheck still require Redis/Postgres/API/frontend runtime availability. Docker Desktop was not running on this machine, so local `pg`/`redis` compose services could not be started during this pass.
+
 ## 2026-04-28 Maintenance Addendum: Coach Class Detail UI
 
 - Closed from the Coach deep-management backlog in this slice: `/coach/classes/:id` now routes to a real `CoachClassDetail` page that reads the class summary, members, invites, and coach group surfaces through existing APIs.
@@ -107,7 +114,7 @@
 
 ### 6. 部署、运维与安全演练
 
-- [ ] 独立域名可访问并完成 Cloudflare Full Strict + Caddy TLS 验证。
+- [ ] 独立域名可访问并完成 Cloudflare Full Strict + Caddy TLS 验证。（2026-04-29：代码与 UI 门禁已准备好进入部署测试；真实域名/Caddy/TLS 仍需实机执行。）
 - [ ] `GET /api/v1/health`、邮件通道、Turnstile、离线内容环境 `cpp-runner` 与 `contentWorker` 分别完成部署验收。（2026-04-28 维护追加：`scripts/healthcheck.ts` 已把 `contentWorker` 从生产 PM2 检查拆出为 `--expect-content-worker` 独立验收，`cpp-runner` 继续用 `--include-offline --runner-url` 检查；真实外部邮件/Turnstile smoke 仍按部署 runbook 人工执行，不能混入常规 health。）
 - [ ] PM2 cluster 模式 2 实例启动与优雅停机演练；生产默认不启动运行时 worker。
 - [ ] 按 2026-04-28 单 VPS 部署推荐完成实机取舍验收：首发使用 Caddy + PM2 + native Postgres/Redis；rootless Podman + Quadlet 仅作为二期镜像化/隔离选项。
@@ -125,7 +132,7 @@
 
 ### 7. UI/UX 与前端体验收口
 
-- [ ] UI 设计系统中的 tokens、字体托管、组件库、布局、品牌资产、打印样式与 `/dev/ui-gallery` 仍需按当前代码状态逐项验收。（2026-04-27：已新增 `npm run verify:ui-tokens`，阻断 `client/src` TS/TSX 中重新引入原始 hex/rgb/hsl magic color；截图、键盘、移动端、reduced motion 与打印视觉验收仍需继续收口。2026-04-28：已安装 Google A2UI，并在 `/dev/ui-gallery` 增加 A2UI token bridge 示例，用于后续 agent UI/UX 设计辅助验收；现有 Radix/shadcn 生产组件作为受控辅助实现。同日已扩展 `verify:ui-tokens` 阻断 JSX inline style、`color-mix()` 与 `min-height:auto` / `min-width:auto` 兼容告警回归，并将字体运行时源收口到公开 R2 `/font/`。维护追加已把 A2UI 扩展到 Round1 BYOC custom catalog，并用本地 Card/Badge/Progress 渲染 CoachReport snapshot；`/dev/ui-gallery#plate-11` 浏览器复查 A2UI BYOC 可见且 warning/error 为 0。维护追加（三）已补 AppShell 布局 token 命名漂移、Dashboard 能力雷达/弱项热力图、ExamResult reduced-motion 揭晓和打印页眉页脚，并新增 `server/__tests__/e2e/ui-visual-audit.spec.ts` 覆盖 Dashboard 桌面/移动、ExamResult print/reduced motion 与 A2UI BYOC gallery。维护追加（五）已把 `globals.css` / `print.css` 残留 raw color 收敛到 `tokens.css`，并让 `verify:ui-tokens` 扫描非 token CSS。维护追加（六）已移除 `/dev/ui-gallery` 整文件 token guard 例外，A2UI payload guard 增加 data binding `/draft` 根与 media URL allowlist，`ui-visual-audit.spec.ts` 增补 `/exams/new` 桌面/移动无溢出与开考确认 Dialog 验收，并把 ExamNew UI 计划从旧在线组卷 cooldown 倒计时更新为 prebuilt-only 可用性/缺卷状态。）
+- [ ] UI 设计系统中的 tokens、字体托管、组件库、布局、品牌资产、打印样式与 `/dev/ui-gallery` 仍需按当前代码状态逐项验收。（2026-04-27：已新增 `npm run verify:ui-tokens`，阻断 `client/src` TS/TSX 中重新引入原始 hex/rgb/hsl magic color；截图、键盘、移动端、reduced motion 与打印视觉验收仍需继续收口。2026-04-28：已安装 Google A2UI，并在 `/dev/ui-gallery` 增加 A2UI token bridge 示例，用于后续 agent UI/UX 设计辅助验收；现有 Radix/shadcn 生产组件作为受控辅助实现。同日已扩展 `verify:ui-tokens` 阻断 JSX inline style、`color-mix()` 与 `min-height:auto` / `min-width:auto` 兼容告警回归，并将字体运行时源收口到公开 R2 `/font/`。维护追加已把 A2UI 扩展到 Round1 BYOC custom catalog，并用本地 Card/Badge/Progress 渲染 CoachReport snapshot；`/dev/ui-gallery#plate-11` 浏览器复查 A2UI BYOC 可见且 warning/error 为 0。维护追加（三）已补 AppShell 布局 token 命名漂移、Dashboard 能力雷达/弱项热力图、ExamResult reduced-motion 揭晓和打印页眉页脚，并新增 `server/__tests__/e2e/ui-visual-audit.spec.ts` 覆盖 Dashboard 桌面/移动、ExamResult print/reduced motion 与 A2UI BYOC gallery。维护追加（五）已把 `globals.css` / `print.css` 残留 raw color 收敛到 `tokens.css`，并让 `verify:ui-tokens` 扫描非 token CSS。维护追加（六）已移除 `/dev/ui-gallery` 整文件 token guard 例外，A2UI payload guard 增加 data binding `/draft` 根与 media URL allowlist，`ui-visual-audit.spec.ts` 增补 `/exams/new` 桌面/移动无溢出与开考确认 Dialog 验收，并把 ExamNew UI 计划从旧在线组卷 cooldown 倒计时更新为 prebuilt-only 可用性/缺卷状态。2026-04-29：新增全局命令面板、Admin 看板运营摘要，并把 Account/Coach/Admin route family 加入 Playwright 桌面/移动无水平溢出验收；本轮 `verify:ui-tokens` 与 9 项 `ui-visual-audit` 均通过。真实生产浏览器截图矩阵与人工交互走查仍需在部署环境执行。）
 - [x] CppLearn 登录视觉需补齐：CppLearn OIDC 入口改用 CppLearn 提供的横幅图片，通过同源 `/logo/cpplearn.jpg` 加载；Vite 开发代理读取 `R2_PUBLIC_BASE_URL`，生产 Caddy 通过 `Caddyfile.example` 中的 R2 源站字面量代理到 R2 `/logo/cpplearn.jpg`；不再使用旧的纯文字字标或单独字体源。（2026-04-28：`/login` 已接入真实 AuthLayout 分栏与 CppLearn OIDC provider 入口。）
 - [x] QQ 互联登录视觉先占位。（2026-04-28 维护追加：`enabledAuthProviders/providers` 不再把未实现的 `qq` 当成可用登录流程；`authProviderPlaceholders/placeholders` 在 feature flag 开启时返回 `qq`，登录页渲染禁用占位卡并避免触发 501 OAuth 占位接口。）
 - [ ] i18n 多语言为未来扩展项。

@@ -9,6 +9,8 @@
 > **部署方式推荐（2026-04-28）**：4H16G、14M 带宽单 VPS 首发不建议引入 Kubernetes/k3s；先使用 Caddy + PM2/systemd + native Postgres/Redis，rootless Podman + Quadlet 仅作为需要镜像化或依赖隔离时的二期选项。详细取舍见 `docs/plans/2026-04-28-single-vps-deployment-recommendation.md`。
 >
 > **端口规划说明（2026-04-28）**：当前端口设计见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。单机部署时 Postgres / Redis 默认只绑定本机，不对公网暴露；生产公网入口为 SSH `9179` 与 Caddy `80/443`。Caddy 必须强制 HTTPS、TLS 1.2+ 与 HTTP/2+；若启用 HTTP/3，同一 `443` 还需允许 UDP。
+>
+> **上线测试准备记录（2026-04-29）**：本轮 UI/UX 与构建门禁已记录在 `docs/plans/2026-04-29-release-readiness.md`。`build:client`、`build:server`、`client:test`、`verify:ui-tokens`、`verify:offline-artifacts`、`ui-visual-audit` 和 focused Coach integration 均通过；本机 `migrate:status`、`healthcheck` 与 full `npm run test` 仍受限于 Postgres `127.0.0.1:4397`、Redis `127.0.0.1:4395`、API/frontend 未运行。Docker Desktop 未运行，无法在本机拉起 compose 服务完成依赖型门禁复查。
 
 ---
 

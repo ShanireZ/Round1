@@ -36,6 +36,12 @@ export const coachNavItems: NavItem[] = [
 
 export const adminNavItems: NavItem[] = [
   {
+    to: "/admin",
+    label: "管理看板",
+    description: "内容运营、导入与系统健康概览",
+    icon: BarChart3,
+  },
+  {
     to: "/admin/questions",
     label: "题库管理",
     description: "题目列表、发布与归档",

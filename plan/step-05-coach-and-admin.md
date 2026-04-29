@@ -3,13 +3,13 @@
 > **前置依赖**：Step 01–04（DB、认证、题库、预制卷考试流程均已就绪）
 > **交付物**：教练完整班级管理流程、管理员题库/预制卷库/导入中心、真题审核与系统设置
 > **可验证 demo**：教练创建班级→生成班级码/邀请链接→学生入班→布置固定预制卷任务→查看热力图；管理员导入并发布题目与预制卷
-> **当前对齐说明（2026-04-28）**：当前运行时已经落地 Admin 内容库闭环的主要页面与接口。后端已挂载 `/api/v1/admin/questions`、`/api/v1/admin/questions/:id/references`、`/api/v1/admin/prebuilt-papers`、`/api/v1/admin/prebuilt-papers/:id/references`、`/api/v1/admin/import-batches`、`/api/v1/admin/question-reviews`、`/api/v1/admin/users`、`/api/v1/admin/settings` 及 publish/archive/copy-version/dry-run/apply 路由；前端 router 已接入 `/admin`、`/admin/questions`、`/admin/papers`、`/admin/imports`、`/admin/review`、`/admin/users`、`/admin/settings`，旧 `/admin/jobs`、`/admin/manual-gen` 已删除并进入 404 fallback；Admin 设置已通过 Redis `config:change` 通知 API/runtime worker/content worker 刷新运行时配置。教练后端 slice 已挂载 `/api/v1/classes/join`、`/api/v1/coach/**` 与 Admin 班级教练组管理接口，覆盖班级 CRUD、班级码、邀请链接、成员、owner/collaborator、多教练 owner 转让、固定预制卷 assignment 创建、assignment-only 报表聚合、群体热力图、题型统计、学生趋势与详情下钻所需 payload；前端 `/coach/report` 已接入班级报告页面。Coach 班级/任务列表页面与报表规模化性能验收仍属于后续目标契约。
+> **当前对齐说明（2026-04-29）**：当前运行时已经落地 Admin 内容库闭环的主要页面与接口。后端已挂载 `/api/v1/admin/questions`、`/api/v1/admin/questions/:id/references`、`/api/v1/admin/prebuilt-papers`、`/api/v1/admin/prebuilt-papers/:id/references`、`/api/v1/admin/import-batches`、`/api/v1/admin/question-reviews`、`/api/v1/admin/users`、`/api/v1/admin/settings` 及 publish/archive/copy-version/dry-run/apply 路由；前端 router 已接入 `/admin`、`/admin/questions`、`/admin/papers`、`/admin/imports`、`/admin/review`、`/admin/users`、`/admin/settings`，`/admin` 已作为 `管理看板` 纳入导航并展示内容资产、导入活动与 API/DB/Redis 健康摘要；旧 `/admin/jobs`、`/admin/manual-gen` 已删除并进入 404 fallback；Admin 设置已通过 Redis `config:change` 通知 API/runtime worker/content worker 刷新运行时配置。教练后端 slice 已挂载 `/api/v1/classes/join`、`/api/v1/coach/**` 与 Admin 班级教练组管理接口，覆盖班级 CRUD、班级码、邀请链接、成员、owner/collaborator、多教练 owner 转让、固定预制卷 assignment 创建、assignment-only 报表聚合、群体热力图、题型统计、学生趋势与详情下钻所需 payload；前端 `/coach/classes`、`/coach/classes/:id`、`/coach/assignments`、`/coach/report` 均已接入真实页面，并已纳入桌面/移动 Playwright visual audit。
 
 ---
 
 > **Maintenance addendum (2026-04-28)**: `/coach/classes/:id` now routes to `client/src/pages/coach/CoachClassDetail.tsx` and consumes the existing class summary, members, invites, and coaches APIs. The page supports owner-only class rename, member removal, invite creation/revocation, collaborator add/remove, and owner transfer. Remaining follow-up is full browser visual acceptance for the coach route family and richer user search for adding coaches.
 
-> **维护追加（2026-04-28）**：`/coach/classes` 与 `/coach/assignments` 已从占位路由切换为真实 Coach 工作台页面。当前已支持班级列表、创建班级、复制/轮换班级码、归档班级、按班级查看/创建/关闭固定预制卷 assignment，并新增 `GET /api/v1/coach/prebuilt-papers` 作为 coach/admin 可用的已发布预制卷选择器。`CoachClassDetail` 的成员、邀请链、教练组深层管理与更完整浏览器视觉验收仍按 12.6 后续推进。
+> **维护追加（2026-04-29）**：`/coach/classes`、`/coach/classes/:id`、`/coach/assignments` 与 `/coach/report` 均已从占位/后续项推进为真实 Coach 工作台页面，支持班级列表、创建班级、复制/轮换班级码、归档班级、成员/邀请/教练组深层管理、按班级查看/创建/关闭固定预制卷 assignment、assignment-only 报告、CSV/打印入口，并新增 `GET /api/v1/coach/prebuilt-papers` 作为 coach/admin 可用的已发布预制卷选择器。2026-04-29 的 `ui-visual-audit.spec.ts` 已覆盖 Coach route family 桌面/移动无水平溢出；更丰富的用户搜索/选择器仍是后续体验增强项。
 
 ## Phase 12 — 教练后台
 
@@ -232,6 +232,8 @@
 - [x] Admin 导入中心 dry-run/apply 流程完整
 - [x] Admin step-up 在设置变更时生效
 - [x] `config:change` 热更新通知所有进程刷新配置
+- [x] Admin 看板进入主导航并展示内容资产/导入/健康摘要（2026-04-29：`/admin` 已作为 `管理看板` 纳入 `adminNavItems`，并通过 Playwright visual audit 覆盖桌面/移动。）
+- [x] Coach/Admin/Account route family 桌面/移动 UI 验收（2026-04-29：`ui-visual-audit.spec.ts` 覆盖 Account、Coach、Admin 主要路由，9 tests passed。）
 
 ## 2026-04-28 Student Class UI Addendum
 
