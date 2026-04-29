@@ -38,6 +38,7 @@
 - 2026-04-29 UI/UX 与功能页面四次收口：补齐 Auth/Account 的 Passkey 浏览器端功能页缺口。`/login` 现在按 `enabledAuthProviders` 展示 Passkey 登录入口，`/account/security` 的 Passkey/OIDC 面板可绑定和移除 Passkey，并新增当前会话管理入口；浏览器端 WebAuthn 流程使用 `@simplewebauthn/browser` 的 `startAuthentication({ optionsJSON })` 与 `startRegistration({ optionsJSON })`，服务端摘要仅回传可删除的凭据记录 id、后缀和备份状态，不暴露公钥材料。
 - 2026-04-29 UI/UX 与功能页面五次收口：`/admin/settings` 从平铺表格改为考试与频控、选卷、导入、自定义分组 Tabs，编辑区只允许修改已登记设置并展示来源、配置修订和 Redis `config:change` 通知状态；运行时设置标签改为中文业务语义。`/account/security` 外部身份卡片补齐解绑操作，前端走 CSRF 请求，后端 `DELETE /api/v1/auth/external/:provider` 纳入最近强认证守卫。
 - 2026-04-29 配置收口：`.env.example` 改为最小模板，新增 `npm run env:init` 生成 local / production-runtime / offline-content 配置骨架和高熵密钥；Redis、worker、sandbox、连接池、session、认证频控、PM2、healthcheck、trust proxy、本地 HTTPS、autosave 与 assignment timing 默认值回归 `config/env.ts` / 初始化脚本。
+- 2026-04-29 UI/UX 与功能页面六次收口：补齐前端路由登录与角色 gate，Dashboard/Exam/Account 入口统一要求登录，Coach/Admin 入口按角色显示 403 业务态而不是落到页面内请求失败；考试 FocusLayout 补齐专注顶栏、可访问交卷入口、移动端作答提示和始终可见的底部题号导航，并把 ExamSession 纳入 Playwright 视觉验收。
 
 ## 风险与后续
 

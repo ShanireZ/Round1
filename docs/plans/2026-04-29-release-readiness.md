@@ -18,6 +18,8 @@
 - Completed a third UI/UX and functional-page closure pass across Login/AuthCallback/CompleteProfile, Dashboard, ExamNew/Session/Result, Account, Coach, Admin content/import/review/settings/users, command navigation, and sidebar navigation. Remaining raw enum/JSON field names are code/data-contract terms or developer-gallery examples, not production page copy.
 - Completed a fourth navigation/accessibility closure pass: AppShell sidebar and mobile navigation now share the same role-aware navigation sections, student accounts no longer see Coach/Admin links, mobile AppShell gets a Sheet navigation trigger, Auth/App/Focus layouts expose skip-to-content, and the remaining AuthLayout/Sheet visible implementation copy was localized to user-facing Chinese.
 - Completed a fifth account-security closure pass: login and account security now expose the enabled Passkey route, support browser WebAuthn login/binding/removal through `@simplewebauthn/browser`, use in-app dialogs for TOTP/Passkey destructive actions, and keep the server passkey summary limited to opaque credential row id, suffix, backup, and creation metadata.
+- Completed a sixth route and FocusLayout closure pass: protected product routes now use a shared login/role gate before rendering page content, while `/dev/ui-gallery` remains locally reachable for visual acceptance. Direct Coach/Admin URL access by lower-privilege users now lands on an in-app 403 state, not a backend request failure.
+- ExamSession now uses the FocusLayout header portal for countdown, save state, progress, and submit access; mobile users see the required "use tablet/desktop if possible" warning; and a fixed bottom question navigator stays visible with accessible per-question state labels.
 
 ## Browser Visual Acceptance
 
@@ -26,6 +28,7 @@
 - Dashboard desktop/mobile overflow.
 - Global command panel role-aware navigation into Admin dashboard.
 - ExamNew catalog rendering and confirmation dialog.
+- ExamSession FocusLayout chrome, mobile warning, and fixed question navigation.
 - Auth entry routes and not-found.
 - Account routes: `/account/class`, `/join`, `/account/security`.
 - Coach routes: `/coach/classes`, `/coach/classes/:id`, `/coach/assignments`, `/coach/report`.

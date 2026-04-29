@@ -1,4 +1,5 @@
 import { startTransition, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   AlertCircle,
@@ -20,6 +21,14 @@ import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   ExamRuntimeClientError,
   autosaveExamAttempt,
@@ -47,8 +56,14 @@ import {
 import { formatDifficultyLabel } from "@/lib/exam-results";
 import type { ExamResultNavigationState } from "@/lib/exam-results";
 import { fetchClientRuntimeConfig, getAutosaveIntervalMs } from "@/lib/client-config";
+import { cn } from "@/lib/utils";
 
 const AUTOSAVE_DEBOUNCE_MS = 30_000;
+
+type QuestionView = {
+  item: ExamSessionPayload["items"][number];
+  renderable: ReturnType<typeof buildRenderableQuestion>;
+};
 
 function LoadingState() {
   return (
@@ -258,6 +273,86 @@ function AttemptSummary({
   );
 }
 
+function FocusHeaderControls({
+  answeredParts,
+  totalParts,
+  autosavePhase,
+  countdownLabel,
+  countdownWarningLevel,
+  onSubmit,
+  isSubmitting,
+  submitDisabled,
+}: {
+  answeredParts: number;
+  totalParts: number;
+  autosavePhase: AutosavePhase;
+  countdownLabel: string;
+  countdownWarningLevel: "normal" | "warning" | "critical" | "expired";
+  onSubmit: () => void;
+  isSubmitting: boolean;
+  submitDisabled: boolean;
+}) {
+  const portalTarget =
+    typeof document === "undefined" ? null : document.getElementById("focus-header-portal");
+  const autosaveBadge = getAutosaveBadge(autosavePhase);
+
+  if (!portalTarget) {
+    return null;
+  }
+
+  return createPortal(
+    <div className="flex min-w-0 items-center justify-end gap-2 text-xs">
+      <Badge variant={autosaveBadge.variant} className="hidden sm:inline-flex">
+        {autosaveBadge.label}
+      </Badge>
+      <Badge variant="outline" className="hidden md:inline-flex">
+        {answeredParts}/{totalParts}
+      </Badge>
+      <Badge
+        variant={getCountdownBadgeVariant(countdownWarningLevel)}
+        className="max-w-28 truncate sm:max-w-none"
+      >
+        <Clock3 className="h-3.5 w-3.5" />
+        {countdownLabel}
+      </Badge>
+      <Button
+        type="button"
+        size="sm"
+        className="min-w-20"
+        loading={isSubmitting}
+        disabled={submitDisabled}
+        onClick={onSubmit}
+      >
+        交卷
+      </Button>
+    </div>,
+    portalTarget,
+  );
+}
+
+function MobileExamWarningDialog({ open, onContinue }: { open: boolean; onContinue: () => void }) {
+  return (
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onContinue()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>建议使用平板或电脑作答</DialogTitle>
+          <DialogDescription>
+            手机屏幕可以继续作答，但代码题、阅读程序和答题卡在更宽的屏幕上更稳定。
+          </DialogDescription>
+        </DialogHeader>
+        <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-4 text-sm leading-6">
+          当前会保留专注顶栏、底部题号导航和自动保存。请避免切换到其他标签页后长时间离开。
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="primary" onClick={onContinue}>
+            继续作答
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function ConflictState({ paperId }: { paperId: string }) {
   return (
     <Card variant="hero" className="exam-session-warning-surface border-warning/30">
@@ -396,6 +491,73 @@ function SessionQuestionCard({
   );
 }
 
+function FixedQuestionNavigation({
+  questionViews,
+  answers,
+  answeredParts,
+  totalParts,
+  onJumpToSlot,
+}: {
+  questionViews: QuestionView[];
+  answers: DraftAnswers;
+  answeredParts: number;
+  totalParts: number;
+  onJumpToSlot: (slotNo: number) => void;
+}) {
+  return (
+    <div
+      className="border-border bg-surface/95 fixed inset-x-0 bottom-0 z-[var(--z-fixed)] border-t px-4 py-3 shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]"
+      data-no-print
+      data-testid="exam-fixed-question-nav"
+    >
+      <div className="mx-auto flex max-w-6xl items-center gap-4">
+        <div className="hidden shrink-0 sm:block">
+          <div className="text-foreground text-sm font-medium">答题导航</div>
+          <div className="text-muted-foreground text-xs tabular-nums">
+            {answeredParts}/{totalParts} 小题
+          </div>
+        </div>
+        <div className="min-w-0 flex-1 overflow-x-auto">
+          <div className="flex min-w-max gap-2">
+            {questionViews.map((entry) => {
+              const answeredCount = entry.renderable.parts.filter(
+                (part) =>
+                  getDraftAnswerValue(answers, entry.item.slotNo, part.key).trim().length > 0,
+              ).length;
+              const isCompleted = answeredCount === entry.renderable.parts.length;
+              const isPartial = answeredCount > 0 && !isCompleted;
+              const stateLabel = isCompleted
+                ? "已完成"
+                : isPartial
+                  ? `${answeredCount}/${entry.renderable.parts.length} 已答`
+                  : "未作答";
+
+              return (
+                <button
+                  key={entry.item.slotNo}
+                  type="button"
+                  aria-label={`跳到第 ${entry.item.slotNo} 题，${stateLabel}`}
+                  className={cn(
+                    "border-border flex h-10 min-w-10 items-center justify-center rounded-[var(--radius-md)] border px-3 text-sm font-medium tabular-nums transition-colors focus-visible:shadow-[var(--shadow-glow)] focus-visible:outline-none",
+                    isCompleted
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : isPartial
+                        ? "bg-accent-wash text-primary border-primary/40"
+                        : "bg-card text-muted-foreground hover:bg-subtle hover:text-foreground",
+                  )}
+                  onClick={() => onJumpToSlot(entry.item.slotNo)}
+                >
+                  {entry.item.slotNo}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ExamSessionPage() {
   const navigate = useNavigate();
   const params = useParams();
@@ -406,6 +568,7 @@ export default function ExamSessionPage() {
   const [autosaveError, setAutosaveError] = useState<string | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [nowMs, setNowMs] = useState(() => Date.now());
+  const [mobileWarningOpen, setMobileWarningOpen] = useState(false);
   const hydratedAttemptIdRef = useRef<string | null>(null);
   const lastSavedSnapshotRef = useRef<string>("{}");
   const autoSubmitTriggeredRef = useRef<string | null>(null);
@@ -520,6 +683,24 @@ export default function ExamSessionPage() {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!paperId || typeof window === "undefined") {
+      return;
+    }
+
+    const isMobileViewport = window.matchMedia("(max-width: 767px)").matches;
+    if (!isMobileViewport) {
+      return;
+    }
+
+    const storageKey = `round1:exam-mobile-warning:${paperId}`;
+    if (window.sessionStorage.getItem(storageKey) === "1") {
+      return;
+    }
+
+    setMobileWarningOpen(true);
+  }, [paperId]);
 
   const autosaveMutation = useMutation({
     mutationFn: autosaveExamAttempt,
@@ -731,6 +912,41 @@ export default function ExamSessionPage() {
     );
   }
 
+  function handleSubmitCurrentAttempt() {
+    if (!session?.attempt) {
+      return;
+    }
+
+    submitAttemptMutation.mutate({
+      attemptId: session.attempt.id,
+      tabNonce: session.attempt.tabNonce,
+      draftAnswers: answers,
+      lastSavedSnapshot: lastSavedSnapshotRef.current,
+      currentAutosavePhase: autosavePhase,
+    });
+  }
+
+  function handleJumpToSlot(slotNo: number) {
+    const target = document.getElementById(`slot-${slotNo}`);
+    if (!target) {
+      return;
+    }
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    target.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      block: "start",
+    });
+  }
+
+  function handleContinueMobileWarning() {
+    if (paperId && typeof window !== "undefined") {
+      window.sessionStorage.setItem(`round1:exam-mobile-warning:${paperId}`, "1");
+    }
+
+    setMobileWarningOpen(false);
+  }
+
   if (!paperId) {
     return (
       <div className="grid h-full place-items-center px-6 py-10">
@@ -847,7 +1063,18 @@ export default function ExamSessionPage() {
   );
 
   return (
-    <div className="h-full overflow-y-auto px-6 py-8" data-testid="exam-session-page">
+    <div className="h-full overflow-y-auto px-6 pt-8 pb-32" data-testid="exam-session-page">
+      <FocusHeaderControls
+        answeredParts={answeredParts}
+        totalParts={totalParts}
+        autosavePhase={autosavePhase}
+        countdownLabel={countdownState.label}
+        countdownWarningLevel={countdownState.warningLevel}
+        onSubmit={handleSubmitCurrentAttempt}
+        isSubmitting={submitAttemptMutation.isPending}
+        submitDisabled={autosaveMutation.isPending}
+      />
+      <MobileExamWarningDialog open={mobileWarningOpen} onContinue={handleContinueMobileWarning} />
       <div className="mx-auto max-w-6xl space-y-6">
         {countdownState.warningLevel !== "normal" ? (
           <div
@@ -930,16 +1157,12 @@ export default function ExamSessionPage() {
                       <Button
                         key={entry.item.slotNo}
                         type="button"
+                        aria-label={`跳到第 ${entry.item.slotNo} 题`}
                         variant={
                           isCompleted ? "primary" : answeredCount > 0 ? "secondary" : "ghost"
                         }
                         className="h-11"
-                        onClick={() => {
-                          document.getElementById(`slot-${entry.item.slotNo}`)?.scrollIntoView({
-                            behavior: "smooth",
-                            block: "start",
-                          });
-                        }}
+                        onClick={() => handleJumpToSlot(entry.item.slotNo)}
                       >
                         {entry.item.slotNo}
                       </Button>
@@ -988,15 +1211,7 @@ export default function ExamSessionPage() {
                     className="w-full"
                     disabled={autosaveMutation.isPending}
                     loading={submitAttemptMutation.isPending}
-                    onClick={() =>
-                      submitAttemptMutation.mutate({
-                        attemptId: session.attempt.id,
-                        tabNonce: session.attempt.tabNonce,
-                        draftAnswers: answers,
-                        lastSavedSnapshot: lastSavedSnapshotRef.current,
-                        currentAutosavePhase: autosavePhase,
-                      })
-                    }
+                    onClick={handleSubmitCurrentAttempt}
                   >
                     <SendHorizontal />
                     交卷并查看结果
@@ -1015,6 +1230,13 @@ export default function ExamSessionPage() {
           </div>
         </div>
       </div>
+      <FixedQuestionNavigation
+        questionViews={questionViews}
+        answers={answers}
+        answeredParts={answeredParts}
+        totalParts={totalParts}
+        onJumpToSlot={handleJumpToSlot}
+      />
     </div>
   );
 }

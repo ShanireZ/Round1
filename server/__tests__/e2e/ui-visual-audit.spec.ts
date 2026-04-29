@@ -303,6 +303,78 @@ async function installExamNewRoutes(page: Page) {
   });
 }
 
+async function installExamSessionRoutes(page: Page) {
+  await installClientConfigRoute(page);
+  await page.route("**/api/v1/auth/csrf-token", async (route) => {
+    await route.fulfill({ json: { success: true, data: { csrfToken: "visual-csrf" } } });
+  });
+  await page.route("**/api/v1/exams/paper-session/attempts", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          id: "attempt-session",
+          paperId: "paper-session",
+          status: "started",
+          tabNonce: "visual-tab-nonce",
+        },
+      },
+    });
+  });
+  await page.route("**/api/v1/exams/paper-session/session", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          paper: {
+            id: "paper-session",
+            examType: "CSP-J",
+            difficulty: "medium",
+            status: "started",
+            assignmentId: null,
+          },
+          attempt: {
+            id: "attempt-session",
+            paperId: "paper-session",
+            status: "started",
+            tabNonce: "visual-tab-nonce",
+            startedAt: "2030-04-29T08:00:00.000Z",
+            submitAt: "2030-04-29T10:00:00.000Z",
+            remainingMs: 7_200_000,
+            answersJson: {},
+          },
+          items: [
+            {
+              slotNo: 1,
+              questionType: "single_choice",
+              primaryKpId: 101,
+              points: 5,
+              contentJson: {
+                stem: "中国的国家顶级域名是（）",
+                options: [".cn", ".com", ".org", ".net"],
+              },
+            },
+            {
+              slotNo: 2,
+              questionType: "reading_program",
+              primaryKpId: 203,
+              points: 10,
+              contentJson: {
+                title: "阅读下面程序，判断输出。",
+                code: "int main(){ return 0; }",
+                subQuestions: [
+                  { stem: "程序返回值是？", options: ["0", "1", "2", "3"] },
+                  { stem: "入口函数是？", options: ["main", "solve", "run", "start"] },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    });
+  });
+}
+
 async function installExamResultRoute(page: Page) {
   await page.route("**/api/v1/exams/paper-visual/result", async (route) => {
     await route.fulfill({
@@ -1030,6 +1102,32 @@ test("ExamNew renders the config-driven catalog without desktop or mobile overfl
   await page.setViewportSize({ width: 375, height: 812 });
   await page.reload();
   await expect(page.getByTestId("exam-new-page")).toBeVisible();
+  expect(await hasHorizontalOverflow(page)).toBe(false);
+  expect(problems).toEqual([]);
+});
+
+test("Exam session keeps FocusLayout controls visible on desktop and mobile", async ({ page }) => {
+  const problems = collectBrowserProblems(page);
+  await installCommonRoutes(page);
+  await installExamSessionRoutes(page);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/exams/paper-session");
+  await expect(page.getByTestId("exam-session-page")).toBeVisible();
+  await expect(
+    page.locator("#focus-header-portal").getByRole("button", { name: "交卷" }),
+  ).toBeVisible();
+  await expect(page.getByTestId("exam-fixed-question-nav")).toBeVisible();
+  await expect(page.getByLabel("跳到第 1 题，未作答")).toBeVisible();
+  await waitForFonts(page);
+  expect(await hasHorizontalOverflow(page)).toBe(false);
+
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.reload();
+  await expect(page.getByRole("dialog").getByText("建议使用平板或电脑作答")).toBeVisible();
+  await page.getByRole("button", { name: "继续作答" }).click();
+  await expect(page.getByTestId("exam-fixed-question-nav")).toBeVisible();
+  await expect(page.getByLabel("跳到第 2 题，未作答")).toBeVisible();
   expect(await hasHorizontalOverflow(page)).toBe(false);
   expect(problems).toEqual([]);
 });

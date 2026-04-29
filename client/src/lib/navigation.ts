@@ -89,6 +89,16 @@ export function canSeeAdminNav(role: NavigationRole) {
   return role === "admin";
 }
 
+export function canAccessRole(role: NavigationRole, minimumRole: Exclude<NavigationRole, null>) {
+  const rank: Record<Exclude<NavigationRole, null>, number> = {
+    student: 0,
+    coach: 1,
+    admin: 2,
+  };
+
+  return role !== null && rank[role] >= rank[minimumRole];
+}
+
 export function getNavigationSections(role: NavigationRole, includeDev = false): NavSection[] {
   const sections: NavSection[] = [{ title: "主导航", items: primaryNavItems }];
 

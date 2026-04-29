@@ -1,9 +1,11 @@
 import { lazy, Suspense } from "react";
+import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router";
 
 import { AppShell } from "./components/layout/AppShell";
 import { AuthLayout } from "./components/layout/AuthLayout";
 import { FocusLayout } from "./components/layout/FocusLayout";
+import { GuestOnly, RequireRole } from "./components/layout/RouteGuards";
 
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminQuestionLibrary = lazy(() => import("./pages/admin/AdminQuestionLibrary"));
@@ -38,42 +40,58 @@ function LoadingSpinner() {
   );
 }
 
+function studentPage(element: ReactNode) {
+  return <RequireRole minimumRole="student">{element}</RequireRole>;
+}
+
+function coachPage(element: ReactNode) {
+  return <RequireRole minimumRole="coach">{element}</RequireRole>;
+}
+
+function adminPage(element: ReactNode) {
+  return <RequireRole minimumRole="admin">{element}</RequireRole>;
+}
+
+function guestPage(element: ReactNode) {
+  return <GuestOnly>{element}</GuestOnly>;
+}
+
 export function AppRouter() {
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <Routes>
         <Route element={<AuthLayout />}>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/login" element={guestPage(<LoginPage />)} />
+          <Route path="/register" element={guestPage(<RegisterPage />)} />
+          <Route path="/forgot-password" element={guestPage(<ForgotPasswordPage />)} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/auth/complete-profile" element={<CompleteProfilePage />} />
         </Route>
 
         <Route element={<FocusLayout />}>
-          <Route path="/exams/:id" element={<ExamSessionPage />} />
+          <Route path="/exams/:id" element={studentPage(<ExamSessionPage />)} />
         </Route>
 
         <Route element={<AppShell />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/exams/new" element={<ExamNewPage />} />
-          <Route path="/exams/:id/result" element={<ExamResultPage />} />
-          <Route path="/account/class" element={<AccountClassPage />} />
-          <Route path="/account/security" element={<AccountSecurityPage />} />
-          <Route path="/join" element={<AccountClassPage focusJoin />} />
+          <Route path="/dashboard" element={studentPage(<Dashboard />)} />
+          <Route path="/exams/new" element={studentPage(<ExamNewPage />)} />
+          <Route path="/exams/:id/result" element={studentPage(<ExamResultPage />)} />
+          <Route path="/account/class" element={studentPage(<AccountClassPage />)} />
+          <Route path="/account/security" element={studentPage(<AccountSecurityPage />)} />
+          <Route path="/join" element={studentPage(<AccountClassPage focusJoin />)} />
 
-          <Route path="/coach/classes" element={<CoachClasses />} />
-          <Route path="/coach/classes/:id" element={<CoachClassDetail />} />
-          <Route path="/coach/assignments" element={<CoachAssignments />} />
-          <Route path="/coach/report" element={<CoachReport />} />
+          <Route path="/coach/classes" element={coachPage(<CoachClasses />)} />
+          <Route path="/coach/classes/:id" element={coachPage(<CoachClassDetail />)} />
+          <Route path="/coach/assignments" element={coachPage(<CoachAssignments />)} />
+          <Route path="/coach/report" element={coachPage(<CoachReport />)} />
 
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/questions" element={<AdminQuestionLibrary />} />
-          <Route path="/admin/papers" element={<AdminPaperLibrary />} />
-          <Route path="/admin/imports" element={<AdminImports />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/review" element={<AdminReviewQueue />} />
-          <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin" element={adminPage(<AdminDashboard />)} />
+          <Route path="/admin/questions" element={adminPage(<AdminQuestionLibrary />)} />
+          <Route path="/admin/papers" element={adminPage(<AdminPaperLibrary />)} />
+          <Route path="/admin/imports" element={adminPage(<AdminImports />)} />
+          <Route path="/admin/users" element={adminPage(<AdminUsers />)} />
+          <Route path="/admin/review" element={adminPage(<AdminReviewQueue />)} />
+          <Route path="/admin/settings" element={adminPage(<AdminSettings />)} />
 
           <Route path="/dev/ui-gallery" element={<UIGallery />} />
         </Route>

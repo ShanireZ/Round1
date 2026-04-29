@@ -3,7 +3,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 
-import { adminNavItems, getNavigationSections, primaryNavItems } from "./navigation";
+import { adminNavItems, canAccessRole, getNavigationSections, primaryNavItems } from "./navigation";
 
 const routerSource = readFileSync(new URL("../router.tsx", import.meta.url), "utf8");
 
@@ -53,6 +53,18 @@ describe("admin information architecture", () => {
       "教练",
       "管理",
     ]);
+  });
+
+  it("enforces the same role ordering for direct route access", () => {
+    expect(canAccessRole(null, "student")).toBe(false);
+    expect(canAccessRole("student", "student")).toBe(true);
+    expect(canAccessRole("student", "coach")).toBe(false);
+    expect(canAccessRole("coach", "student")).toBe(true);
+    expect(canAccessRole("coach", "coach")).toBe(true);
+    expect(canAccessRole("coach", "admin")).toBe(false);
+    expect(canAccessRole("admin", "student")).toBe(true);
+    expect(canAccessRole("admin", "coach")).toBe(true);
+    expect(canAccessRole("admin", "admin")).toBe(true);
   });
 
   it("keeps the dev gallery behind the explicit dev section flag", () => {
