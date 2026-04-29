@@ -417,6 +417,66 @@
     );
   }
 
+  .data-arena-rank-ribbon {
+    background-image:
+      linear-gradient(90deg, transparent, var(--color-primary-soft-alpha), transparent),
+      repeating-linear-gradient(
+        90deg,
+        var(--color-grid-line-alpha) 0 1px,
+        transparent 1px var(--space-8)
+      );
+    background-size:
+      180% 100%,
+      var(--space-8) 100%;
+    animation: data-ribbon-scan var(--duration-ceremony) var(--ease-ceremony) infinite alternate;
+  }
+
+  .data-arena-heatmap-aura {
+    background-image:
+      radial-gradient(circle at 22% 24%, var(--color-primary-soft-alpha), transparent 32%),
+      radial-gradient(circle at 82% 18%, var(--color-warning-soft-alpha), transparent 28%),
+      linear-gradient(to right, var(--color-grid-line-alpha) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--color-grid-line-alpha) 1px, transparent 1px);
+    background-size:
+      auto,
+      auto,
+      var(--space-8) var(--space-8),
+      var(--space-8) var(--space-8);
+    animation: data-aura-drift var(--duration-ceremony) var(--ease-standard) infinite alternate;
+  }
+
+  .data-arena-signal-band {
+    background-image: linear-gradient(
+      90deg,
+      var(--color-success),
+      var(--color-info),
+      var(--color-warning),
+      var(--color-destructive)
+    );
+    background-size: 200% 100%;
+    animation: data-signal-pan var(--duration-deliberate) var(--ease-standard) infinite alternate;
+  }
+
+  .data-arena-import-timeline {
+    background-image:
+      linear-gradient(90deg, var(--color-border), transparent),
+      repeating-linear-gradient(
+        90deg,
+        var(--color-primary-soft-alpha) 0 var(--space-2),
+        transparent var(--space-2) var(--space-6)
+      );
+    background-size:
+      100% 1px,
+      var(--space-16) 100%;
+  }
+
+  .data-arena-ceremony-burst {
+    background-image:
+      radial-gradient(circle at 50% 50%, var(--color-primary-aura-alpha), transparent 30%),
+      radial-gradient(circle at 42% 48%, var(--color-warning-aura-alpha), transparent 22%);
+    animation: ceremony-burst-pulse var(--duration-ceremony) var(--ease-ceremony) both;
+  }
+
   .ui-progress {
     -webkit-appearance: none;
     appearance: none;
@@ -503,9 +563,66 @@
   }
 }
 
+@keyframes data-ribbon-scan {
+  from {
+    background-position:
+      0 0,
+      0 0;
+  }
+  to {
+    background-position:
+      100% 0,
+      var(--space-8) 0;
+  }
+}
+
+@keyframes data-aura-drift {
+  from {
+    background-position:
+      0 0,
+      0 0,
+      0 0,
+      0 0;
+  }
+  to {
+    background-position:
+      var(--space-6) 0,
+      calc(-1 * var(--space-6)) var(--space-3),
+      var(--space-2) var(--space-2),
+      var(--space-2) var(--space-2);
+  }
+}
+
+@keyframes data-signal-pan {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 100% 0;
+  }
+}
+
+@keyframes ceremony-burst-pulse {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .exam-result-ceremony-particles {
     display: none;
+  }
+
+  .data-arena-rank-ribbon,
+  .data-arena-heatmap-aura,
+  .data-arena-signal-band,
+  .data-arena-ceremony-burst {
+    animation: none;
   }
 }
 

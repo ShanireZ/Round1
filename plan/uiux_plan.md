@@ -1,5 +1,11 @@
 # Round1 — UI/UX 与视觉系统设计方案
 
+> 2026-04-29 V2 治理说明：本文件保留 Round1 初稿视觉系统的设计理由、历史决策和背景说明；当前执行、评审与验收真源已经升级为 `standard/04-ui-ux.md`。若本文件旧决策与 `standard/04-ui-ux.md` 冲突，以标准文件为准，并在后续维护中同步修正计划记录，防止初稿约束阻碍 A2UI、shadcn/Radix、Recharts 和动态 UI 的实施。
+
+## V2 方向摘要
+
+Round1 当前视觉方向从初稿的 **Modern Editorial × Contest Ceremony** 升级为 **Precision Workbench × Data Arena**：日常页面保持精密工具台的克制、效率和可扫描性；Dashboard、CoachReport、AdminDashboard、ExamResult 允许使用排名、热力、趋势、系统信号和短时仪式动效增强竞赛氛围。A2UI 已从本地设计 surface 扩展为可生产落地的动态 UI 能力，但必须通过 schema、权限、资源、action、复杂度、审计和静态 fallback；Recharts v3 通过本地 shadcn chart primitive 承担趋势、雷达、排名、柱状等图表，热力矩阵优先保留本地 SVG/CSS 实现。
+
 ## Context
 
 Round1 是独立的信息学竞赛（CSP-J/S、GESP 1~8 级）模拟测试平台，服务青少年学生、教练、管理员三类角色，覆盖 20+ 页面。技术栈 React 19 + shadcn/ui + Tailwind CSS + Vite，支持 Light/Dark 双主题。

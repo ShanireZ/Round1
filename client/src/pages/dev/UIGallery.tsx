@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { A2uiDesignSurface } from "@/components/a2ui/A2uiDesignSurface";
 import { useTheme } from "@/lib/theme";
+import {
+  createRound1ChartSeries,
+  getRound1ChartColor,
+  summarizeRound1ChartData,
+} from "@/lib/chart";
 
 /* ── UI Components ──────────────────────────────────────────── */
 import { Button } from "@/components/ui/button";
@@ -30,6 +35,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import {
+  ChartContainer,
+  ChartLegendContent,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -56,6 +67,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend as RechartsLegend,
+  Line,
+  LineChart,
+  PolarAngleAxis,
+  PolarGrid,
+  Radar,
+  RadarChart,
+  Tooltip as RechartsTooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 /* ── Brand Components ───────────────────────────────────────── */
 import { Logo } from "@/components/brand/Logo";
@@ -111,6 +139,52 @@ const shadowSwatchClasses: Record<string, string> = {
   "--shadow-md": "shadow-[var(--shadow-md)]",
   "--shadow-lg": "shadow-[var(--shadow-lg)]",
 };
+
+const chartSeries = createRound1ChartSeries([
+  { key: "score", label: "分数" },
+  { key: "rank", label: "排名提升" },
+  { key: "accuracy", label: "正确率" },
+]);
+
+const chartConfig: ChartConfig = {
+  score: { label: "分数", indicatorClassName: "bg-chart-1" },
+  rank: { label: "排名提升", indicatorClassName: "bg-chart-2" },
+  accuracy: { label: "正确率", indicatorClassName: "bg-chart-3" },
+  logic: { label: "逻辑", indicatorClassName: "bg-chart-1" },
+  graph: { label: "图论", indicatorClassName: "bg-chart-2" },
+  dp: { label: "动态规划", indicatorClassName: "bg-chart-3" },
+  string: { label: "字符串", indicatorClassName: "bg-chart-4" },
+};
+
+const trendChartData = [
+  { name: "R1", score: 72, rank: 18, accuracy: 62 },
+  { name: "R2", score: 78, rank: 24, accuracy: 68 },
+  { name: "R3", score: 81, rank: 33, accuracy: 73 },
+  { name: "R4", score: 84, rank: 39, accuracy: 76 },
+  { name: "R5", score: 88, rank: 48, accuracy: 81 },
+  { name: "R6", score: 91, rank: 57, accuracy: 86 },
+];
+
+const radarChartData = [
+  { subject: "逻辑", value: 88 },
+  { subject: "图论", value: 76 },
+  { subject: "动态规划", value: 64 },
+  { subject: "字符串", value: 82 },
+  { subject: "模拟", value: 91 },
+];
+
+const rankingChartData = [
+  { name: "前 40%", score: 40 },
+  { name: "前 30%", score: 52 },
+  { name: "前 20%", score: 67 },
+  { name: "前 10%", score: 84 },
+];
+
+const chartSummary = summarizeRound1ChartData({
+  title: "UI Gallery Recharts V2",
+  points: trendChartData.length,
+  series: chartSeries,
+});
 
 /* ════════════════════════════════════════════════════════════════
    Editorial primitives — 专为样本册风格服务的排版部件
@@ -895,7 +969,107 @@ if (x > 0) ac();`}
                 </div>
               </Exhibit>
 
-              <Exhibit idx="B" label="Skeleton" className="md:col-span-6">
+              <Exhibit idx="B" label="Recharts trend" className="md:col-span-6">
+                <ChartContainer
+                  title="最近模拟趋势"
+                  summary={chartSummary}
+                  className="h-64 min-h-64"
+                >
+                  <LineChart
+                    data={trendChartData}
+                    accessibilityLayer
+                    margin={{ top: 12, right: 12, bottom: 8, left: 0 }}
+                  >
+                    <CartesianGrid stroke="var(--color-grid-line-alpha)" vertical={false} />
+                    <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
+                    <YAxis tickLine={false} axisLine={false} width={28} />
+                    <RechartsTooltip content={<ChartTooltipContent config={chartConfig} />} />
+                    <RechartsLegend content={<ChartLegendContent config={chartConfig} />} />
+                    <Line
+                      type="monotone"
+                      dataKey="score"
+                      stroke={getRound1ChartColor(0)}
+                      strokeWidth={2}
+                      dot={{ r: 3 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="accuracy"
+                      stroke={getRound1ChartColor(2)}
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ChartContainer>
+              </Exhibit>
+
+              <Exhibit idx="C" label="Radar + ranking" className="md:col-span-12">
+                <div className="grid w-full gap-4 lg:grid-cols-2">
+                  <ChartContainer
+                    title="能力雷达"
+                    summary="能力雷达，覆盖逻辑、图论、动态规划、字符串和模拟。"
+                    className="h-72 min-h-72"
+                  >
+                    <RadarChart data={radarChartData} accessibilityLayer>
+                      <PolarGrid stroke="var(--color-grid-line-alpha)" />
+                      <PolarAngleAxis dataKey="subject" />
+                      <Radar
+                        dataKey="value"
+                        stroke={getRound1ChartColor(0)}
+                        fill={getRound1ChartColor(0)}
+                        fillOpacity={0.24}
+                      />
+                      <RechartsTooltip content={<ChartTooltipContent config={chartConfig} />} />
+                    </RadarChart>
+                  </ChartContainer>
+
+                  <ChartContainer
+                    title="排名推进"
+                    summary="排名推进柱状图，展示从前 40% 到前 10% 的进度。"
+                    className="h-72 min-h-72"
+                  >
+                    <BarChart
+                      data={rankingChartData}
+                      accessibilityLayer
+                      margin={{ top: 12, right: 12, bottom: 8, left: 0 }}
+                    >
+                      <CartesianGrid stroke="var(--color-grid-line-alpha)" vertical={false} />
+                      <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
+                      <YAxis tickLine={false} axisLine={false} width={28} />
+                      <RechartsTooltip content={<ChartTooltipContent config={chartConfig} />} />
+                      <Bar dataKey="score" fill={getRound1ChartColor(1)} radius={4} />
+                    </BarChart>
+                  </ChartContainer>
+                </div>
+              </Exhibit>
+
+              <Exhibit idx="D" label="Area chart" className="md:col-span-6">
+                <ChartContainer
+                  title="正确率面积图"
+                  summary="正确率面积图，使用 Recharts AreaChart 和 Round1 chart token。"
+                  className="h-56 min-h-56"
+                >
+                  <AreaChart
+                    data={trendChartData}
+                    accessibilityLayer
+                    margin={{ top: 12, right: 12, bottom: 8, left: 0 }}
+                  >
+                    <CartesianGrid stroke="var(--color-grid-line-alpha)" vertical={false} />
+                    <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
+                    <YAxis tickLine={false} axisLine={false} width={28} />
+                    <RechartsTooltip content={<ChartTooltipContent config={chartConfig} />} />
+                    <Area
+                      type="monotone"
+                      dataKey="accuracy"
+                      stroke={getRound1ChartColor(2)}
+                      fill={getRound1ChartColor(2)}
+                      fillOpacity={0.18}
+                    />
+                  </AreaChart>
+                </ChartContainer>
+              </Exhibit>
+
+              <Exhibit idx="E" label="Skeleton" className="md:col-span-6">
                 <div className="w-full space-y-3">
                   <div className="flex items-center gap-3">
                     <Skeleton className="h-10 w-10 rounded-full" />
@@ -908,7 +1082,7 @@ if (x > 0) ac();`}
                 </div>
               </Exhibit>
 
-              <Exhibit idx="C" label="Table" className="md:col-span-8">
+              <Exhibit idx="F" label="Table" className="md:col-span-8">
                 <div className="border-border/70 w-full overflow-hidden rounded-[--radius-md] border">
                   <Table>
                     <TableHeader>
@@ -949,7 +1123,7 @@ if (x > 0) ac();`}
                 </div>
               </Exhibit>
 
-              <Exhibit idx="D" label="Scroll area" className="md:col-span-4">
+              <Exhibit idx="G" label="Scroll area" className="md:col-span-4">
                 <ScrollArea className="border-border/70 h-56 w-full rounded-[--radius-md] border">
                   <div className="space-y-2 p-3">
                     {Array.from({ length: 20 }, (_, i) => (
@@ -1017,6 +1191,62 @@ if (x > 0) ac();`}
                   ))}
                 </div>
               </Exhibit>
+
+              <Exhibit idx="D" label="V2 motion levels" className="md:col-span-12">
+                <div className="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {[
+                    { name: "none", text: "Exam / Print", className: "bg-subtle" },
+                    {
+                      name: "subtle",
+                      text: "Utility / Account",
+                      className: "mesh-gradient-subtle",
+                    },
+                    {
+                      name: "live",
+                      text: "Dashboard / Coach",
+                      className: "data-arena-heatmap-aura",
+                    },
+                    {
+                      name: "ceremony",
+                      text: "ExamResult",
+                      className: "data-arena-ceremony-burst",
+                    },
+                  ].map((item) => (
+                    <div
+                      key={item.name}
+                      className={`border-border min-h-28 overflow-hidden rounded-[--radius-lg] border p-4 ${item.className}`}
+                    >
+                      <div className="text-muted-foreground font-mono text-[10px] tracking-[0.24em] uppercase">
+                        {item.name}
+                      </div>
+                      <div className="text-foreground mt-2 text-sm font-medium">{item.text}</div>
+                    </div>
+                  ))}
+                </div>
+              </Exhibit>
+
+              <Exhibit idx="E" label="Data backgrounds" className="md:col-span-12">
+                <div className="grid w-full gap-3 md:grid-cols-2">
+                  <div className="data-arena-rank-ribbon border-border min-h-20 rounded-[--radius-lg] border p-4">
+                    <div className="text-foreground text-sm font-medium">Rank Ribbon</div>
+                    <div className="text-muted-foreground mt-1 text-xs">最近排名和分位趋势背景</div>
+                  </div>
+                  <div className="data-arena-signal-band text-primary-foreground min-h-20 rounded-[--radius-lg] p-4">
+                    <div className="text-sm font-medium">Signal Band</div>
+                    <div className="mt-1 text-xs">API / DB / Redis / Import 状态带</div>
+                  </div>
+                  <div className="data-arena-import-timeline border-border min-h-20 rounded-[--radius-lg] border p-4">
+                    <div className="text-foreground text-sm font-medium">Import Timeline</div>
+                    <div className="text-muted-foreground mt-1 text-xs">
+                      dry-run / apply / failed 批次节奏
+                    </div>
+                  </div>
+                  <div className="data-arena-heatmap-aura border-border min-h-20 rounded-[--radius-lg] border p-4">
+                    <div className="text-foreground text-sm font-medium">Heatmap Aura</div>
+                    <div className="text-muted-foreground mt-1 text-xs">弱项和知识点热力背景</div>
+                  </div>
+                </div>
+              </Exhibit>
             </div>
           </Plate>
 
@@ -1025,7 +1255,7 @@ if (x > 0) ac();`}
             no="11"
             eyebrow="Agent Surface · 声明式 UI"
             title="A2UI Surface"
-            lede="A2UI payload 在 Round1 token bridge 内渲染，用于设计辅助与 agent 交互验收。"
+            lede="A2UI payload 在 Round1 token bridge 内渲染，用于设计辅助、production slot 与 agent 交互验收。"
           >
             <Exhibit
               idx="A"

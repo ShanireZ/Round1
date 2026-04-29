@@ -2,7 +2,7 @@
 
 ## 技术边界
 
-当前前端技术栈为 React 19、TypeScript、Vite、React Router 7、TanStack Query v5、shadcn/ui、Radix、Tailwind CSS 4、react-hook-form、Zod、lucide-react、motion、sonner。不得无计划引入第二套 UI 组件库、全局状态库或 CSS-in-JS 体系。
+当前前端技术栈为 React 19、TypeScript、Vite、React Router 7、TanStack Query v5、shadcn/ui、Radix、Tailwind CSS 4、react-hook-form、Zod、lucide-react、motion、Recharts、sonner 与 A2UI。不得无计划引入第二套 UI 组件库、全局状态库或 CSS-in-JS 体系。
 
 ## 前端产品原则
 
@@ -109,9 +109,11 @@
 
 新增依赖前必须说明为什么现有 React、Radix、TanStack Query、Zod、Tailwind 或少量本地 helper 无法解决。纯 UI 便利库、日期库、图表库、表格库尤其要评估包体、可达性和样式一致性。
 
-A2UI 是 agent-facing UI renderer 与设计辅助 surface 的优先体系，用于接收声明式 agent payload 并在本地验收。A2UI surface 必须通过 Round1 token bridge 继承 `tokens.css`，现有 Radix/shadcn primitive 作为生产页面的受控辅助实现，不得绕过页面 IA、品牌色、字体系统或核心流程组件契约。A2UI markdown 内容必须使用官方 sanitizer renderer 或等价的 HTML sanitizer，不得直接渲染未净化的 agent markdown/HTML。项目级 BYOC 组件必须注册在专用 A2UI catalog 中，并复用 Round1 Card/Badge/Progress 等本地 primitive；schema 必须与当前安装的 A2UI/Zod 版本兼容，不得把外部文档示例字段直接视为运行时真源。
+A2UI 是 production-capable agent UI renderer 与设计辅助 surface 的优先体系，用于接收声明式 agent payload，并可在受控 slot 中渲染助手面板、页面区块、报告片段、动态表单和操作预览。A2UI surface 必须通过 Round1 token bridge 继承 `tokens.css`，现有 Radix/shadcn primitive 作为生产页面的本地基础组件，不得绕过页面 IA、品牌色、字体系统、后端权限或核心流程组件契约。A2UI markdown 内容必须使用官方 sanitizer renderer 或等价的 HTML sanitizer，不得直接渲染未净化的 agent markdown/HTML。项目级 BYOC 组件必须注册在专用 A2UI catalog 中，并复用 Round1 Card/Badge/Progress/Chart 等本地 primitive；schema 必须与当前安装的 A2UI/Zod 版本兼容，不得把外部文档示例字段直接视为运行时真源。
 
-当前 `/dev/ui-gallery` A2UI 示例必须覆盖 surface lifecycle、data model binding、Text/Card/Row/Column/List/Tabs/Divider/Icon、Image/AudioPlayer/Video/Modal、Button action、TextField、CheckBox、Slider、DateTimeInput、ChoicePicker、basic catalog 动态目录、sanitizer markdown 渲染和至少一个 Round1 BYOC custom catalog 组件。A2UI payload 不得以页面内长 JSON 硬编码散落，必须经本地 factory、installed catalog schema、组件 id 唯一性、引用完整性、action allowlist、资源 URL allowlist 与复杂度上限校验后再交给 renderer。引用完整性必须覆盖动态 `List.children.componentId` 模板。data model 更新路径和组件 data binding path 必须严格限定在允许根路径或其子路径，例如 `/draft` 或 `/draft/*`，禁止仅靠字符串前缀放行。Image / AudioPlayer / Video 等 media 组件在本地设计 surface 中只允许同源资源或受限 data URL，不得让 agent payload 任意触发跨站资源请求。Button action 只允许已登记 `event.name`；`functionCall` action 与 `{ call, args }` 动态函数绑定在未完成显式 agent bridge、权限和审计设计前禁止进入前端 renderer。若 Context7 文档示例与本项目已安装 A2UI package schema 出现字段差异，以运行时 package schema 为准并同步测试。若后续接入真实 agent/MCP payload，必须先补字段级 schema 校验、复杂度限制、权限边界和 XSS/DoS 防护。
+当前 `/dev/ui-gallery` A2UI 示例必须覆盖 surface lifecycle、data model binding、Text/Card/Row/Column/List/Tabs/Divider/Icon、Image/AudioPlayer/Video/Modal、Button action、TextField、CheckBox、Slider、DateTimeInput、ChoicePicker、basic catalog 动态目录、sanitizer markdown 渲染和 Round1 BYOC custom catalog 组件。生产 A2UI slot 还必须覆盖 slot id、role-aware 权限、allowed actions、allowed data roots、allowed media origins、审计事件、错误态和静态 fallback。A2UI payload 不得以页面内长 JSON 硬编码散落，必须经本地 factory、installed catalog schema、组件 id 唯一性、引用完整性、action allowlist、资源 URL allowlist 与复杂度上限校验后再交给 renderer。引用完整性必须覆盖动态 `List.children.componentId` 模板。data model 更新路径和组件 data binding path 必须严格限定在允许根路径或其子路径，例如 `/draft` 或 `/draft/*`，禁止仅靠字符串前缀放行。Image / AudioPlayer / Video 等 media 组件在本地设计 surface 中只允许同源资源或受限 data URL，不得让 agent payload 任意触发跨站资源请求。Button action 只允许已登记 `event.name`；`functionCall` action 与 `{ call, args }` 动态函数绑定在未完成显式 agent bridge、权限和审计设计前禁止进入前端 renderer。若 Context7 文档示例与本项目已安装 A2UI package schema 出现字段差异，以运行时 package schema 为准并同步测试。若接入真实 agent/MCP payload，必须先补字段级 schema 校验、复杂度限制、权限边界、审计和 XSS/DoS 防护。
+
+Recharts 是 V2 数据竞赛场的首选图表库。所有 Recharts 使用必须通过本地 `client/src/components/ui/chart.tsx` primitive，并由 `ChartContainer` 提供明确高度、token 化颜色、tooltip/legend 样式和可访问文本摘要。页面不得绕过本地 chart primitive 直接写 Recharts 样式；大型热力矩阵继续优先使用本地 SVG/CSS helper，并按 `standard/04-ui-ux.md` 做分页、窗口化或虚拟化。
 
 ## 前端验证
 

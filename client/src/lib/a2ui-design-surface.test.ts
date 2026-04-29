@@ -4,12 +4,14 @@ import { ROUND1_A2UI_CATALOG_ID, round1A2uiCatalog } from "@/components/a2ui/rou
 import {
   ROUND1_A2UI_MESSAGES,
   ROUND1_A2UI_SURFACE_ID,
+  assertRound1A2uiProductionSlotAccess,
   assertRound1A2uiMessages,
   createRound1A2uiMessages,
   createRound1A2uiProcessor,
   formatRound1A2uiActionSummary,
   getRound1A2uiBasicCatalogComponents,
   getRound1A2uiCapabilities,
+  getRound1A2uiProductionSlotPolicy,
 } from "./a2ui-design-surface";
 
 describe("Round1 A2UI design surface", () => {
@@ -112,6 +114,18 @@ describe("Round1 A2UI design surface", () => {
     expect(surface?.componentsModel.get("round1-admin-import-snapshot")?.type).toBe(
       "Round1AdminImportSnapshot",
     );
+    expect(surface?.componentsModel.get("round1-dashboard-snapshot")?.type).toBe(
+      "Round1DashboardInsightSnapshot",
+    );
+    expect(surface?.componentsModel.get("round1-admin-health-snapshot")?.type).toBe(
+      "Round1AdminHealthSnapshot",
+    );
+    expect(surface?.componentsModel.get("round1-exam-result-snapshot")?.type).toBe(
+      "Round1ExamResultExplanationSnapshot",
+    );
+    expect(surface?.componentsModel.get("round1-slot-policy-snapshot")?.type).toBe(
+      "Round1A2uiSlotPolicySnapshot",
+    );
     expect(surface?.dataModel.get("/draft/students")).toBe(128);
     expect(surface?.dataModel.get("/draft/printReady")).toBe(true);
     expect(surface?.dataModel.get("/draft/openAssignments")).toBe(4);
@@ -123,6 +137,61 @@ describe("Round1 A2UI design surface", () => {
     expect(surface?.dataModel.get("/draft/adminPublishedQuestions")).toBe(46);
     expect(surface?.dataModel.get("/draft/adminPublishedPapers")).toBe(18);
     expect(surface?.dataModel.get("/draft/adminSharedSummaryReady")).toBe(true);
+    expect(surface?.dataModel.get("/draft/dashboardAttempts")).toBe(12);
+    expect(surface?.dataModel.get("/draft/resultScore")).toBe(91.5);
+    expect(surface?.dataModel.get("/draft/adminRedisHealthy")).toBe(false);
+    expect(surface?.dataModel.get("/draft/productionSlotCount")).toBe(5);
+  });
+
+  it("defines production slot policies for role-aware A2UI surfaces", () => {
+    expect(getRound1A2uiProductionSlotPolicy("admin-ops-insight")).toMatchObject({
+      roles: ["admin"],
+      dataRoots: ["/admin", "/draft"],
+      actions: ["round1_a2ui_review"],
+    });
+
+    expect(() =>
+      assertRound1A2uiProductionSlotAccess({
+        slotId: "coach-report-insight",
+        role: "coach",
+        actionName: "round1_a2ui_review",
+        dataPath: "/coach/report/class-1",
+        mediaUrl: "/logo/cpplearn.jpg",
+      }),
+    ).not.toThrow();
+  });
+
+  it("rejects production slot role, action, data, and media drift", () => {
+    expect(() =>
+      assertRound1A2uiProductionSlotAccess({
+        slotId: "admin-ops-insight",
+        role: "coach",
+      }),
+    ).toThrow(/role is not allowed/);
+
+    expect(() =>
+      assertRound1A2uiProductionSlotAccess({
+        slotId: "dashboard-insight",
+        role: "student",
+        actionName: "unsafe_action",
+      }),
+    ).toThrow(/action is not allowed/);
+
+    expect(() =>
+      assertRound1A2uiProductionSlotAccess({
+        slotId: "dashboard-insight",
+        role: "student",
+        dataPath: "/admin/imports",
+      }),
+    ).toThrow(/data path is not allowed/);
+
+    expect(() =>
+      assertRound1A2uiProductionSlotAccess({
+        slotId: "dashboard-insight",
+        role: "student",
+        mediaUrl: "https://example.invalid/image.png",
+      }),
+    ).toThrow(/media URL is not allowed/);
   });
 
   it("rejects A2UI payloads that drift from installed component schemas", () => {

@@ -6,6 +6,7 @@
 - 首屏不阻塞在非关键字体、图表库、仪式动画上。
 - 动效保持 60fps，优先 transform/opacity。
 - API 热路径 p95 latency 应持续观察并建立告警。
+- V2 数据背景、A2UI slot 和 Recharts 图表不得阻塞登录、考试、提交、结果查看、Coach 报告和 Admin 操作主路径。
 
 性能目标用于发现退化，不用于追求空泛高分。考试作答、保存、提交、恢复的可靠性优先于装饰性动效和低价值包体优化。
 
@@ -25,6 +26,9 @@
 - Exam 页不得因图表、仪式动画或非必要字体阻塞题目渲染。
 - ExamResult 仪式层失败时必须退化为普通结果页，不影响分数和解析查看。
 - Admin 大表格必须分页、筛选和局部刷新；不得一次性渲染全量题库或导入历史。
+- Recharts 图表必须通过本地 chart primitive，并给容器设置明确高度、`min-h-*` 或 aspect，避免 responsive chart 首次测量失败。
+- 动态背景只允许 CSS/SVG/轻量 motion，必须有 reduced-motion 静态降级；禁止视频背景和不可解释循环装饰。
+- A2UI production slot 必须 lazy/idle 初始化或在主内容后渲染；payload 解析失败时显示静态 fallback，不得让页面空白。
 
 ## 后端性能
 
@@ -46,6 +50,7 @@
 - 正文对比度 >= 4.5:1，大字号和 UI 控件 >= 3:1。
 - `prefers-reduced-motion` 下关闭长动画。
 - 页面有 skip-to-content。
+- Recharts 图表、热力图和 A2UI 生成报告必须提供文本摘要或等价数据表；关键结论不能只靠图形或颜色。
 
 可达性实现以语义和可操作性为先，不用 ARIA 修补本来可以用原生元素表达的控件。
 
@@ -79,6 +84,8 @@
 - ExamResult。
 - CoachReport。
 - AdminImports。
+- AdminDashboard。
+- Account/Auth。
 - `/dev/ui-gallery`。
 
 ## 性能例外
@@ -93,14 +100,17 @@
 
 ## 性能预算
 
-| 项           | 目标                        |
-| ------------ | --------------------------- |
-| LCP          | 移动端 < 2.5s               |
-| 交互动画     | 60fps，transform/opacity    |
-| API p95      | 按路由建立基线，异常需告警  |
-| autosave     | 30s debounce 与后端限频对齐 |
-| 页面初始数据 | 只取首屏必要数据            |
-| 图表库       | lazy load                   |
+| 项            | 目标                        |
+| ------------- | --------------------------- |
+| LCP           | 移动端 < 2.5s               |
+| 交互动画      | 60fps，transform/opacity    |
+| 动态背景      | reduced motion 可静态降级   |
+| Recharts 图表 | 容器尺寸明确，首屏可测量    |
+| A2UI slot     | 有 fallback，payload 有上限 |
+| API p95       | 按路由建立基线，异常需告警  |
+| autosave      | 30s debounce 与后端限频对齐 |
+| 页面初始数据  | 只取首屏必要数据            |
+| 图表库        | lazy load                   |
 
 性能预算不是绝对上线阻断，但超过预算必须记录原因和优化计划。
 
@@ -122,6 +132,7 @@
 - 表单错误与字段关联。
 - 图表有文本摘要或数据表替代。
 - reduced motion 模式。
+- A2UI slot 的异常/fallback、键盘可达和 action 确认路径。
 
 测试时至少包含一次“只用键盘完成核心路径”的检查。考试、登录、Admin step-up、导入 apply、Coach 下钻属于核心路径。
 

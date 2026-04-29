@@ -11,11 +11,74 @@ const ROUND1_A2UI_DRAFT_ROOT = "/draft";
 const ROUND1_A2UI_ACTION_NAME = "round1_a2ui_review";
 const ROUND1_A2UI_LIMITS = {
   maxMessages: 4,
-  maxComponents: 80,
+  maxComponents: 120,
   maxDataUrlLength: 50_000,
 } as const;
 
 export const ROUND1_A2UI_SURFACE_ID = "round1-design-assistant";
+
+export type Round1A2uiRole = "student" | "coach" | "admin";
+export type Round1A2uiProductionSlotId =
+  | "assistant-panel"
+  | "dashboard-insight"
+  | "coach-report-insight"
+  | "admin-ops-insight"
+  | "exam-result-explanation";
+
+export type Round1A2uiProductionSlotPolicy = {
+  id: Round1A2uiProductionSlotId;
+  label: string;
+  roles: readonly Round1A2uiRole[];
+  dataRoots: readonly string[];
+  actions: readonly string[];
+  auditEvent: string;
+};
+
+export const ROUND1_A2UI_PRODUCTION_SLOT_POLICIES: Record<
+  Round1A2uiProductionSlotId,
+  Round1A2uiProductionSlotPolicy
+> = {
+  "assistant-panel": {
+    id: "assistant-panel",
+    label: "全局助手面板",
+    roles: ["student", "coach", "admin"],
+    dataRoots: ["/assistant", "/draft"],
+    actions: [ROUND1_A2UI_ACTION_NAME],
+    auditEvent: "a2ui.assistant_panel.action",
+  },
+  "dashboard-insight": {
+    id: "dashboard-insight",
+    label: "Dashboard 学习建议",
+    roles: ["student", "coach", "admin"],
+    dataRoots: ["/dashboard", "/draft"],
+    actions: [ROUND1_A2UI_ACTION_NAME],
+    auditEvent: "a2ui.dashboard_insight.action",
+  },
+  "coach-report-insight": {
+    id: "coach-report-insight",
+    label: "CoachReport 报告片段",
+    roles: ["coach", "admin"],
+    dataRoots: ["/coach", "/draft"],
+    actions: [ROUND1_A2UI_ACTION_NAME],
+    auditEvent: "a2ui.coach_report_insight.action",
+  },
+  "admin-ops-insight": {
+    id: "admin-ops-insight",
+    label: "Admin 运维洞察",
+    roles: ["admin"],
+    dataRoots: ["/admin", "/draft"],
+    actions: [ROUND1_A2UI_ACTION_NAME],
+    auditEvent: "a2ui.admin_ops_insight.action",
+  },
+  "exam-result-explanation": {
+    id: "exam-result-explanation",
+    label: "ExamResult 讲解片段",
+    roles: ["student", "coach", "admin"],
+    dataRoots: ["/result", "/draft"],
+    actions: [ROUND1_A2UI_ACTION_NAME],
+    auditEvent: "a2ui.exam_result_explanation.action",
+  },
+};
 
 const ROUND1_A2UI_MEDIA = {
   imageUrl: "/favicon.svg",
@@ -26,7 +89,7 @@ const ROUND1_A2UI_MEDIA = {
 const ROUND1_A2UI_DRAFT = {
   page: "CoachReport",
   density: 72,
-  dueAt: "2026-04-28T18:00:00+08:00",
+  dueAt: "2026-04-28T18:00:00",
   enabled: true,
   students: 128,
   averageScore: 86,
@@ -69,6 +132,21 @@ const ROUND1_A2UI_DRAFT = {
   adminRejectedItems: 6,
   adminSharedSummaryReady: true,
   adminRepairReady: true,
+  dashboardAttempts: 12,
+  dashboardRankPercentile: 0.18,
+  dashboardWeakKps: 5,
+  dashboardTrendReady: true,
+  resultScore: 91.5,
+  resultAccuracy: 0.88,
+  resultExplanations: 8,
+  resultCeremonyReady: true,
+  adminApiHealthy: true,
+  adminDbHealthy: true,
+  adminRedisHealthy: false,
+  adminImportRisk: 2,
+  productionSlotCount: 5,
+  productionGuardCount: 7,
+  productionFallbackReady: true,
   note: "Validate agent-authored surfaces against Round1 tokens before production use.",
   checks: ["theme", "keyboard"],
   target: "utility-first, token-bound, keyboard-safe",
@@ -293,6 +371,10 @@ function createRound1A2uiComponents(
               "round1-admin-question-snapshot",
               "round1-admin-paper-snapshot",
               "round1-admin-import-snapshot",
+              "round1-dashboard-snapshot",
+              "round1-admin-health-snapshot",
+              "round1-exam-result-snapshot",
+              "round1-slot-policy-snapshot",
               "round1-report-snapshot",
             ]
           : []),
@@ -507,6 +589,45 @@ function createRound1A2uiComponents(
             repairReady: bindDraftField("adminRepairReady"),
             tone: "risk",
           },
+          {
+            id: "round1-dashboard-snapshot",
+            component: "Round1DashboardInsightSnapshot",
+            title: "DashboardInsight",
+            attempts: bindDraftField("dashboardAttempts"),
+            rankPercentile: bindDraftField("dashboardRankPercentile"),
+            weakKnowledgePoints: bindDraftField("dashboardWeakKps"),
+            trendReady: bindDraftField("dashboardTrendReady"),
+            tone: "improving",
+          },
+          {
+            id: "round1-admin-health-snapshot",
+            component: "Round1AdminHealthSnapshot",
+            title: "AdminOpsInsight",
+            apiHealthy: bindDraftField("adminApiHealthy"),
+            dbHealthy: bindDraftField("adminDbHealthy"),
+            redisHealthy: bindDraftField("adminRedisHealthy"),
+            importRisk: bindDraftField("adminImportRisk"),
+            tone: "risk",
+          },
+          {
+            id: "round1-exam-result-snapshot",
+            component: "Round1ExamResultExplanationSnapshot",
+            title: "ExamResultExplanation",
+            score: bindDraftField("resultScore"),
+            accuracy: bindDraftField("resultAccuracy"),
+            explanations: bindDraftField("resultExplanations"),
+            ceremonyReady: bindDraftField("resultCeremonyReady"),
+            tone: "stable",
+          },
+          {
+            id: "round1-slot-policy-snapshot",
+            component: "Round1A2uiSlotPolicySnapshot",
+            title: "A2UIProductionSlots",
+            slotCount: bindDraftField("productionSlotCount"),
+            guardCount: bindDraftField("productionGuardCount"),
+            fallbackReady: bindDraftField("productionFallbackReady"),
+            tone: "stable",
+          },
         ]
       : []),
     {
@@ -659,6 +780,10 @@ function isAllowedDataModelPath(path: string): boolean {
   return path === ROUND1_A2UI_DRAFT_ROOT || path.startsWith(`${ROUND1_A2UI_DRAFT_ROOT}/`);
 }
 
+function isAllowedPathForRoots(path: string, roots: readonly string[]): boolean {
+  return roots.some((root) => path === root || path.startsWith(`${root}/`));
+}
+
 function isSafeRound1A2uiMediaUrl(url: string): boolean {
   if (url.startsWith("/") && !url.startsWith("//")) {
     return true;
@@ -684,6 +809,42 @@ function assertSafeMediaUrl(component: A2uiComponentPayload, props: Record<strin
   const url = props["url"];
   if (typeof url === "string" && !isSafeRound1A2uiMediaUrl(url)) {
     throw new Error(`A2UI media URL is not allowed: ${component.id}`);
+  }
+}
+
+export function getRound1A2uiProductionSlotPolicy(slotId: Round1A2uiProductionSlotId) {
+  return ROUND1_A2UI_PRODUCTION_SLOT_POLICIES[slotId];
+}
+
+export function assertRound1A2uiProductionSlotAccess({
+  slotId,
+  role,
+  actionName,
+  dataPath,
+  mediaUrl,
+}: {
+  slotId: Round1A2uiProductionSlotId;
+  role: Round1A2uiRole;
+  actionName?: string;
+  dataPath?: string;
+  mediaUrl?: string;
+}): void {
+  const policy = getRound1A2uiProductionSlotPolicy(slotId);
+
+  if (!policy.roles.includes(role)) {
+    throw new Error(`A2UI slot role is not allowed: ${slotId}:${role}`);
+  }
+
+  if (actionName && !policy.actions.includes(actionName)) {
+    throw new Error(`A2UI slot action is not allowed: ${slotId}:${actionName}`);
+  }
+
+  if (dataPath && !isAllowedPathForRoots(dataPath, policy.dataRoots)) {
+    throw new Error(`A2UI slot data path is not allowed: ${slotId}:${dataPath}`);
+  }
+
+  if (mediaUrl && !isSafeRound1A2uiMediaUrl(mediaUrl)) {
+    throw new Error(`A2UI slot media URL is not allowed: ${slotId}`);
   }
 }
 

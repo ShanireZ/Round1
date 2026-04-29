@@ -1,5 +1,11 @@
 # Remaining Unfinished Work Summary
 
+## 2026-04-29 Maintenance Addendum: UI/UX V2
+
+- UI/UX 标准真源已升级：`standard/04-ui-ux.md` 现在定义 Precision Workbench x Data Arena、四级动效、A2UI production slot、Recharts/shadcn chart 路线和 V2 验收矩阵；`plan/uiux_plan.md` 改为历史设计理由。
+- 已落地基础设施：Recharts 依赖、本地 `ChartContainer`/tooltip/legend primitive、chart helper 单测、motion token 对齐、数据驱动背景 class、A2UI production slot policy、Dashboard/Admin/ExamResult/slot-policy BYOC snapshots。
+- 待继续全量实施：将 V2 chart primitive 和数据背景逐步替换到 Dashboard、CoachReport、AdminDashboard、ExamResult 等真实页面，并补真实浏览器截图、键盘-only、reduced-motion 和打印预览证据。
+
 ## 2026-04-29 Maintenance Addendum: UI/UX Closure and Release Readiness
 
 - Closed an additional UI/UX contract gap: global command navigation is now implemented through `Cmd/Ctrl+K` / the desktop command trigger, using shadcn/Radix command primitives and tokenized theme actions. Admin navigation now includes `/admin` as `管理看板`.

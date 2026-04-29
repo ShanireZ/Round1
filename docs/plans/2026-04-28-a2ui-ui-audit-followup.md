@@ -1,5 +1,14 @@
 # A2UI and UI Drift Audit Follow-up
 
+## 2026-04-29 V2 Addendum: Production Slots and Data Arena
+
+- UI/UX 真源升级：`standard/04-ui-ux.md` 已从初稿定稿清单改为 V2 执行标准，当前评审以 `standard` 为准，`plan/uiux_plan.md` 保留历史设计理由。
+- Data Arena 路线落地：`client` workspace 新增 Recharts，新增本地 shadcn chart primitive 和 chart helper，UI Gallery 覆盖 Recharts 趋势、雷达、排名与面积图样本。
+- Motion V2 落地：`client/src/lib/motion.ts` 与 CSS token 时长/曲线对齐，新增 none/subtle/live/ceremony 强度口径和 reduced-motion 降级 helper；`globals.css` 新增 Rank Ribbon、Heatmap Aura、Signal Band、Import Timeline、Ceremony Burst 等数据驱动背景 class。
+- A2UI production slot guard 落地：新增 `assistant-panel`、`dashboard-insight`、`coach-report-insight`、`admin-ops-insight`、`exam-result-explanation` slot policy，覆盖角色、data root、action、media 和 audit event 边界。
+- A2UI BYOC 扩展：Round1 catalog 新增 Dashboard insight、Admin health、ExamResult explanation、A2UI slot policy snapshot，UI Gallery 的 guarded surface 可直接验收生产 slot 形态。
+- 验证：`npm run client:test -- src/lib/chart.test.ts src/lib/motion.test.ts src/lib/a2ui-design-surface.test.ts` 通过，3 files / 20 tests；默认沙箱首次仍因 esbuild `spawn EPERM` 失败，按既有模式提升权限后通过。
+
 ## 2026-04-29 Maintenance Addendum: Command Surface, Admin Overview, and Release Gate
 
 - Global command surface landed: `CommandBar` uses shadcn/Radix command dialog primitives, opens from the desktop top bar and `Cmd/Ctrl+K`, lists role-aware navigation, and changes theme through existing Round1 tokenized theme state.

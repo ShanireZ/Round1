@@ -1160,6 +1160,39 @@ test("A2UI gallery renders Round1 BYOC surface without browser problems", async 
   await expect(page.getByText("AdminQuestionLibrary")).toBeVisible();
   await expect(page.getByText("AdminPaperLibrary")).toBeVisible();
   await expect(page.getByText("AdminImports")).toBeVisible();
+  await expect(page.getByText("DashboardInsight")).toBeVisible();
+  await expect(page.getByText("AdminOpsInsight")).toBeVisible();
+  await expect(page.getByText("ExamResultExplanation")).toBeVisible();
+  await expect(page.getByText("A2UIProductionSlots")).toBeVisible();
+  await waitForFonts(page);
+  expect(await hasHorizontalOverflow(page)).toBe(false);
+  expect(problems).toEqual([]);
+});
+
+test("UI gallery shows V2 charts and data-background patterns", async ({ page }) => {
+  const problems = collectBrowserProblems(page);
+  await installCommonRoutes(page, false);
+
+  await page.goto("/dev/ui-gallery#plate-09");
+  await expect(page.getByText("Recharts trend")).toBeVisible();
+  await expect(page.getByText("Radar + ranking")).toBeVisible();
+  await expect(page.getByText("Area chart")).toBeVisible();
+  await expect(page.locator(".recharts-wrapper")).toHaveCount(4);
+
+  await page.goto("/dev/ui-gallery#plate-10");
+  await expect(page.getByText("V2 motion levels")).toBeVisible();
+  const rhythmPlate = page.locator("#plate-10");
+  await expect(rhythmPlate.getByText("Rank Ribbon", { exact: true })).toBeVisible();
+  await expect(rhythmPlate.getByText("Signal Band", { exact: true })).toBeVisible();
+  await expect(rhythmPlate.getByText("Import Timeline", { exact: true })).toBeVisible();
+  await expect(rhythmPlate.getByText("Heatmap Aura", { exact: true })).toBeVisible();
+
+  const backgroundPatternCount = await page
+    .locator(
+      ".data-arena-rank-ribbon, .data-arena-heatmap-aura, .data-arena-signal-band, .data-arena-import-timeline, .data-arena-ceremony-burst",
+    )
+    .count();
+  expect(backgroundPatternCount).toBeGreaterThanOrEqual(5);
   await waitForFonts(page);
   expect(await hasHorizontalOverflow(page)).toBe(false);
   expect(problems).toEqual([]);
