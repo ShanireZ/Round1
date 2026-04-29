@@ -50,6 +50,7 @@
 
 - migrate.ts：数据库迁移管理，支持 up/down/status。
 - dev-setup.ts：本地 HTTPS 开发环境初始化。
+- initEnv.ts：生成最小 `.env` 骨架并自动生成高熵 `SESSION_SECRET` / `TOTP_ENCRYPTION_KEK`；默认值继续由 `config/env.ts` 承接，支持 `--profile local|production-runtime|offline-content`、`--print` 与 `--force`。
 - workers/contentWorker.ts：离线内容 worker 入口，仅运行 generation / sandbox verify，不属于生产运行时入口。
 - bootstrapKnowledgePoints.ts：初始化知识点树。
 - seedBlueprint.ts：初始化蓝图配置。
@@ -77,6 +78,9 @@
 
 ## 推荐命令
 
+- 生成本地 `.env` 预览：`npm run env:init -- --profile local --print`
+- 生成生产运行时 `.env` 预览：`npm run env:init -- --profile production-runtime --print`
+- 生成离线内容环境 `.env` 文件：`npm run env:init -- --profile offline-content --path .env.offline --force`
 - explanation 质量回归：`npx tsx scripts/auditRealPapers.ts quality --dir csp-s`
 - 元数据回归：`npx tsx scripts/auditRealPapers.ts metadata --dir csp-j,csp-s`
 - explanation 定点重写：`npx tsx scripts/rewritePaperExplanations.ts --dir csp-s --file 2025.json --start-q 16 --end-q 18 --write --chunk-size 1 --timeout 180000`

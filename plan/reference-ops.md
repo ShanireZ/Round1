@@ -39,6 +39,8 @@ tsx scripts/importPrebuiltPaperBundle.ts artifacts/prebuilt-papers/<year>/<runId
 tsx scripts/importPrebuiltPaperBundle.ts artifacts/prebuilt-papers/<year>/<runId>/<bundle-file>.json --apply
 
 # 9. 创建首个管理员账号
+# 临时强密码可用以下命令生成：
+# node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
 ROUND1_INITIAL_ADMIN_PASSWORD='<临时强密码>' tsx scripts/initAdmin.ts --dry-run
 ROUND1_INITIAL_ADMIN_PASSWORD='<临时强密码>' tsx scripts/initAdmin.ts
 # 固定用户名 elder；脚本只用于首个管理员引导，首次登录后会被 password_change_required 强制要求改密

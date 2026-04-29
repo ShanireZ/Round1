@@ -199,6 +199,12 @@ export function deletePasskeyCredential(id: string): Promise<{ deleted: boolean 
   });
 }
 
+export function deleteExternalIdentity(provider: string): Promise<{ message: string }> {
+  return requestJson<{ message: string }>(`/api/v1/auth/external/${encodeURIComponent(provider)}`, {
+    method: "DELETE",
+  });
+}
+
 export function changePassword(payload: { currentPassword: string; newPassword: string }) {
   return requestJson<{ message: string; passwordChangeRequired: boolean }>(
     "/api/v1/auth/password/change",

@@ -1,10 +1,23 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  deleteExternalIdentity,
   normalizeClassJoinCode,
   summarizeStudentClasses,
   type StudentClassSummary,
 } from "./account";
+
+vi.mock("./auth", () => ({
+  getCachedAuthCsrfToken: vi.fn(async () => "csrf-token"),
+}));
+
+const fetchMock = vi.fn();
+
+vi.stubGlobal("fetch", fetchMock);
+
+afterEach(() => {
+  fetchMock.mockReset();
+});
 
 describe("account helpers", () => {
   it("normalizes class join codes before submit", () => {
@@ -41,5 +54,24 @@ describe("account helpers", () => {
       completedAssignments: 7,
       missedAssignments: 1,
     });
+  });
+
+  it("requests external identity unlink with CSRF protection", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: { message: "已解除绑定" },
+      }),
+    });
+
+    await expect(deleteExternalIdentity("cpplearn")).resolves.toEqual({ message: "已解除绑定" });
+
+    const [path, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(path).toBe("/api/v1/auth/external/cpplearn");
+    expect(init.method).toBe("DELETE");
+    expect(init.credentials).toBe("include");
+    expect(init.headers).toBeInstanceOf(Headers);
+    expect((init.headers as Headers).get("X-CSRF-Token")).toBe("csrf-token");
   });
 });

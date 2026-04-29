@@ -139,11 +139,29 @@ export interface AdminSettingItem {
   label: string;
   description: string;
   defaultValue: unknown;
+  valueType: "number" | "boolean" | "string" | "json";
   valueJson: unknown;
   isDefault: boolean;
   updatedBy?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
+}
+
+export interface AdminSettingUpdateResult {
+  key: string;
+  valueJson: unknown;
+  updatedBy?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  runtimeConfig?: {
+    revision: number;
+    loadedAt: string | null;
+  };
+  configChange?: {
+    channel: string;
+    published: boolean;
+    subscriberCount: number;
+  };
 }
 
 interface ApiErrorPayload {
@@ -431,8 +449,11 @@ export function fetchAdminSettings() {
 }
 
 export function updateAdminSetting(key: string, valueJson: unknown) {
-  return requestJson<AdminSettingItem>(`/api/v1/admin/settings/${encodeURIComponent(key)}`, {
-    method: "PATCH",
-    body: JSON.stringify({ valueJson }),
-  });
+  return requestJson<AdminSettingUpdateResult>(
+    `/api/v1/admin/settings/${encodeURIComponent(key)}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ valueJson }),
+    },
+  );
 }

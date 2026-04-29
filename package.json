@@ -19,6 +19,7 @@
     "build:client": "npm run build --workspace=client",
     "build:server": "npm run build --workspace=server",
     "dev:setup": "tsx scripts/dev-setup.ts",
+    "env:init": "tsx scripts/initEnv.ts",
     "init:admin": "tsx scripts/initAdmin.ts",
     "healthcheck": "tsx scripts/healthcheck.ts",
     "migrate": "tsx scripts/migrate.ts",

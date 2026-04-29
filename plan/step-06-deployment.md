@@ -8,7 +8,7 @@
 >
 > **部署方式推荐（2026-04-28）**：4H16G、14M 带宽单 VPS 首发不建议引入 Kubernetes/k3s；先使用 Caddy + PM2/systemd + native Postgres/Redis，rootless Podman + Quadlet 仅作为需要镜像化或依赖隔离时的二期选项。详细取舍见 `docs/plans/2026-04-28-single-vps-deployment-recommendation.md`。
 >
-> **端口规划说明（2026-04-28）**：当前端口设计见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。单机部署时 Postgres / Redis 默认只绑定本机，不对公网暴露；生产公网入口为 SSH `9179` 与 Caddy `80/443`。Caddy 必须强制 HTTPS、TLS 1.2+ 与 HTTP/2+；若启用 HTTP/3，同一 `443` 还需允许 UDP。
+> **端口规划说明（2026-04-29）**：当前端口设计见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。单机部署时 Postgres / Redis 默认只绑定本机，不对公网暴露；生产公网入口为 SSH `9179` 与 Caddy `80/443`。`PORT`、`ROUND1_BIND_HOST`、Redis、PM2、healthcheck、session、sandbox 等默认值由 `config/env.ts` / `npm run env:init` 承接，`.env.example` 仅保留最小必填与可选覆盖提示。Caddy 必须强制 HTTPS、TLS 1.2+ 与 HTTP/2+；若启用 HTTP/3，同一 `443` 还需允许 UDP。
 >
 > **上线测试准备记录（2026-04-29）**：本轮 UI/UX 与构建门禁已记录在 `docs/plans/2026-04-29-release-readiness.md`。已修复 Tailwind CSS var 任意值写法导致的无效生产 CSS 风险；`build:client`、`build:server`、`client:test`、`verify:ui-tokens`、`verify:offline-artifacts`、`ui-visual-audit`、focused Coach integration、完整 `npm run test`、`migrate:status` 与本地 API/frontend `healthcheck` 均已复跑通过；构建后 CSS 扫描未发现 `max-width:--*`、`z-index:--*`、`border-radius:--*` 等无效 token 值。生产域名、Cloudflare Full Strict + Caddy TLS、PM2 reload、真实邮件/Turnstile、备份恢复、Sentry、Redis 降级和回滚演练仍必须在目标部署环境完成，不能用本地门禁替代。
 
@@ -35,19 +35,19 @@
 
 ### 14.1.1 端口暴露原则
 
-| 服务        | 当前默认 | 生产暴露范围                                   | 配置真源                                             |
-| ----------- | -------- | ---------------------------------------------- | ---------------------------------------------------- |
-| Caddy       | 80 / 443 | 公网；强制 HTTPS、TLS 1.2+、HTTP/2+            | 系统部署配置                                         |
-| SSH         | 9179     | 公网；不做 IP allowlist                        | VPS 系统层                                           |
-| Express API | 7654     | `127.0.0.1`，仅 Caddy 反代                     | `PORT` / `ROUND1_BIND_HOST` / `ecosystem.config.cjs` |
-| Postgres    | 4397     | 单机仅本机；拆库时仅私网                       | `DATABASE_URL`                                       |
-| Redis       | 4395     | 单机仅本机；拆服务时仅私网                     | `REDIS_URL`                                          |
-| cpp-runner  | 4401     | 本地开发/离线内容环境本机，生产 runtime 不部署 | `SANDBOX_RUNNER_URL`                                 |
-| Vite dev    | 4399     | 本地开发机，生产不部署                         | `client/vite.config.ts`                              |
+| 服务        | 当前默认 | 生产暴露范围                                   | 配置真源                                                          |
+| ----------- | -------- | ---------------------------------------------- | ----------------------------------------------------------------- |
+| Caddy       | 80 / 443 | 公网；强制 HTTPS、TLS 1.2+、HTTP/2+            | 系统部署配置                                                      |
+| SSH         | 9179     | 公网；不做 IP allowlist                        | VPS 系统层                                                        |
+| Express API | 7654     | `127.0.0.1`，仅 Caddy 反代                     | `config/env.ts` 默认值 / `.env` 显式覆盖 / `ecosystem.config.cjs` |
+| Postgres    | 4397     | 单机仅本机；拆库时仅私网                       | `DATABASE_URL`                                                    |
+| Redis       | 4395     | 单机仅本机；拆服务时仅私网                     | `REDIS_URL`                                                       |
+| cpp-runner  | 4401     | 本地开发/离线内容环境本机，生产 runtime 不部署 | `SANDBOX_RUNNER_URL`                                              |
+| Vite dev    | 4399     | 本地开发机，生产不部署                         | `client/vite.config.ts`                                           |
 
 条件出站端口：默认外部 API（R2、LLM、Resend/Postmark、Turnstile、OIDC、Sentry）走 HTTPS `443`；若启用 `MAIL_PROVIDER=tencent-ses`，腾讯云 SES SMTP 需要出站 `465`。
 
-重新设计端口时，先改 `.env`、`Caddyfile.example`、healthcheck 与 compose，再同步 `plan/reference-config.md` 与端口盘点文档，避免部署 runbook 和代码默认值漂移。若生产 API 与 Caddy 同机，`ROUND1_BIND_HOST` 必须保持 `127.0.0.1`。
+重新设计端口时，先改 `config/env.ts` 默认值或明确的 `.env` 覆盖、`Caddyfile.example`、healthcheck 与 compose，再同步 `plan/reference-config.md`、`.env.example` 可选覆盖提示与端口盘点文档，避免部署 runbook 和代码默认值漂移。若生产 API 与 Caddy 同机，`ROUND1_BIND_HOST` 必须保持 `127.0.0.1`。
 
 ---
 
@@ -57,7 +57,7 @@
 
 1. 安装 Node.js `>=24.15.0` + npm `>=11.12.1` + Redis 7+ + postgreSQL 18
 2. 克隆代码、`npm install` + `npm run build`
-3. 配置 `.env`（见 [01-reference.md — 环境变量配置](reference-config.md#环境变量配置env)）
+3. 用 `npm run env:init -- --profile production-runtime --print` 生成最小 `.env` 骨架，并只填写数据库、密钥、域名和真实外部服务凭证（见 [01-reference.md — 环境变量配置](reference-config.md#环境变量配置env)）
 4. 安装并配置 Caddy（见 [14.2 Caddy 配置](#142-caddy-配置)）
 5. 启动 `Round1-api` 进程
 6. 执行首次部署初始化脚本（见 [01-reference.md — 首次部署初始化顺序](reference-ops.md#首次部署初始化顺序)）

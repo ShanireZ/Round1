@@ -36,6 +36,8 @@
 - 2026-04-29 UI/UX 与功能页面二次收口：复查考试、账号、Coach、Admin、A2UI BYOC 和 UI Gallery 的真实页面文案，把 `runtime`、接口路径、payload、内部状态、owner/assignment-only 等实现词改为面向学生、教练、管理员的业务语义；功能页仍沿用现有 API/data contract，不新增并行视觉系统。
 - 2026-04-29 UI/UX 与功能页面三次收口：继续清理 Login/AuthCallback/CompleteProfile、Dashboard、ExamNew/Session/Result、Account、Coach、Admin content/import/review/settings/users 和导航面上的可见实现词，补齐状态/角色/任务模式/导入类型/JSON 编辑错误等中文映射，并同步 `docs/plans/2026-04-26-remaining-unfinished-work.md` 的历史 backlog 状态。
 - 2026-04-29 UI/UX 与功能页面四次收口：补齐 Auth/Account 的 Passkey 浏览器端功能页缺口。`/login` 现在按 `enabledAuthProviders` 展示 Passkey 登录入口，`/account/security` 的 Passkey/OIDC 面板可绑定和移除 Passkey，并新增当前会话管理入口；浏览器端 WebAuthn 流程使用 `@simplewebauthn/browser` 的 `startAuthentication({ optionsJSON })` 与 `startRegistration({ optionsJSON })`，服务端摘要仅回传可删除的凭据记录 id、后缀和备份状态，不暴露公钥材料。
+- 2026-04-29 UI/UX 与功能页面五次收口：`/admin/settings` 从平铺表格改为考试与频控、选卷、导入、自定义分组 Tabs，编辑区只允许修改已登记设置并展示来源、配置修订和 Redis `config:change` 通知状态；运行时设置标签改为中文业务语义。`/account/security` 外部身份卡片补齐解绑操作，前端走 CSRF 请求，后端 `DELETE /api/v1/auth/external/:provider` 纳入最近强认证守卫。
+- 2026-04-29 配置收口：`.env.example` 改为最小模板，新增 `npm run env:init` 生成 local / production-runtime / offline-content 配置骨架和高熵密钥；Redis、worker、sandbox、连接池、session、认证频控、PM2、healthcheck、trust proxy、本地 HTTPS、autosave 与 assignment timing 默认值回归 `config/env.ts` / 初始化脚本。
 
 ## 风险与后续
 

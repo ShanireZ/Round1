@@ -4,7 +4,7 @@
 >
 > 范围：汇总当前仓库代码、`.env.example`、`docker-compose.dev.yml`、Vite、PM2、healthcheck 与部署计划中出现的端口；供正式部署前重新设计端口与防火墙策略。
 >
-> 状态：端口设计已确认并同步到代码默认值、`.env.example`、`Caddyfile.example`、本地 compose、Vite、PM2、healthcheck 与部署 runbook；当前代码默认值以 `config/env.ts`、`client/vite.config.ts`、`docker-compose.dev.yml` 为真源，生产 Caddyfile 的域名、静态目录、API upstream、日志路径与 R2 源站使用独立字面量配置。
+> 状态：端口设计已确认并同步到代码默认值、`.env.example` 可选覆盖提示、`Caddyfile.example`、本地 compose、Vite、PM2、healthcheck 与部署 runbook；当前代码默认值以 `config/env.ts`、`client/vite.config.ts`、`docker-compose.dev.yml` 为真源，`.env.example` 仅保留最小模板，生产 Caddyfile 的域名、静态目录、API upstream、日志路径与 R2 源站使用独立字面量配置。
 
 ## 结论
 
@@ -21,10 +21,10 @@ Caddy 必须强制 HTTPS，并配置 TLS 1.2+ 与 HTTP/2+；`80` 只用于 Caddy
 | 80           | Caddy HTTP                                      | 部署层                                    | 公网                       | VPS / Caddy                                                        | 仅用于 HTTP -> HTTPS、ACME 或 Cloudflare 到源站策略。          |
 | 443          | Caddy HTTPS                                     | 部署层                                    | 公网                       | VPS / Caddy                                                        | 生产唯一公网业务入口；强制 SSL，TLS 1.2+，HTTP/2+。            |
 | 9179         | SSH                                             | VPS 系统层                                | 公网                       | VPS 系统层                                                         | 允许公网访问，不做 IP allowlist；仍应禁用密码登录并启用防护。  |
-| 7654         | Express API                                     | `PORT=7654`、`ROUND1_BIND_HOST=127.0.0.1` | 仅 `127.0.0.1`             | `config/env.ts`、`.env.example`、`ecosystem.config.cjs`            | Caddy `reverse_proxy 127.0.0.1:7654`；生产不得公网监听。       |
+| 7654         | Express API                                     | `PORT=7654`、`ROUND1_BIND_HOST=127.0.0.1` | 仅 `127.0.0.1`             | `config/env.ts`、`.env` 显式覆盖、`ecosystem.config.cjs`           | Caddy `reverse_proxy 127.0.0.1:7654`；生产不得公网监听。       |
 | 4399         | Vite dev server                                 | `4399`                                    | 仅开发机 `127.0.0.1`       | `client/vite.config.ts`                                            | 只用于本地开发，生产不部署、不开放。                           |
-| 4397         | Postgres                                        | `127.0.0.1:4397`                          | 单机为本机；拆库时仅私网   | `.env.example`、`docker-compose.dev.yml`                           | 单机部署不开放公网；本地示例密码与 compose 保持 `round1_dev`。 |
-| 4395         | Redis                                           | `127.0.0.1:4395`                          | 单机为本机；拆服务时仅私网 | `.env.example`、`docker-compose.dev.yml`                           | 不开放公网；禁止无鉴权公网 Redis。                             |
+| 4397         | Postgres                                        | `127.0.0.1:4397`                          | 单机为本机；拆库时仅私网   | `.env` / `npm run env:init`、`docker-compose.dev.yml`              | 单机部署不开放公网；本地示例密码与 compose 保持 `round1_dev`。 |
+| 4395         | Redis                                           | `127.0.0.1:4395`                          | 单机为本机；拆服务时仅私网 | `config/env.ts`、`docker-compose.dev.yml`                          | 不开放公网；禁止无鉴权公网 Redis。                             |
 | 4401         | cpp-runner                                      | `127.0.0.1:4401`                          | 仅本地开发/离线环境本机    | `config/env.ts`、`docker-compose.dev.yml`、`cpp-runner/Dockerfile` | 生产环境不部署；不进入生产 runtime health。                    |
 | 443 outbound | R2 / LLM / mail API / Turnstile / OIDC / Sentry | 外部服务 HTTPS                            | 出站                       | env 中各 provider URL                                              | 不是入站端口；按 provider 域名做 egress 审计即可。             |
 | 465 outbound | Tencent SES SMTP                                | `MAIL_PROVIDER=tencent-ses`               | 条件出站                   | `server/services/mail/index.ts`                                    | 仅选择腾讯云 SES SMTP 时需要；Resend/Postmark 走 HTTPS 443。   |
@@ -46,7 +46,7 @@ Caddy 必须强制 HTTPS，并配置 TLS 1.2+ 与 HTTP/2+；`80` 只用于 Caddy
 若未来再次重新设计端口，必须同步：
 
 - `config/env.ts` 默认值或部署 `.env`：`PORT`、`ROUND1_BIND_HOST`、`DATABASE_URL`、`REDIS_URL`、`SANDBOX_RUNNER_URL`。
-- `.env.example` 与 `plan/reference-config.md` 的示例值。
+- `.env.example` 的可选覆盖提示与 `plan/reference-config.md` 的配置说明。
 - `client/vite.config.ts` 的 dev proxy：`/api/v1 -> API`。
 - `docker-compose.dev.yml` 的 loopback port mapping。
 - `ecosystem.config.cjs`、`Caddyfile.example` 与实际 Caddy reverse proxy。

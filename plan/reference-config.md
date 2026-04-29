@@ -92,162 +92,70 @@ Round1/
 
 ## 环境变量配置（`.env`）
 
+`config/env.ts` 是默认值真源；`.env.example` 只保留最小模板，避免把单机部署默认值重复写进环境文件。Redis、worker、sandbox、连接池、session TTL、认证频控、PM2、healthcheck、trust proxy、本地 HTTPS 证书、autosave 与 assignment timing 等默认值均由代码或初始化脚本承接，部署时只有确实需要覆盖拓扑时才写入 `.env`。
+
+生成最小配置骨架：
+
+```bash
+npm run env:init -- --profile local --print
+npm run env:init -- --profile production-runtime --print
+npm run env:init -- --profile offline-content --print
+```
+
+高熵密钥生成命令：
+
+```bash
+node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"
+```
+
+生产运行时 `.env` 建议只保留以下骨架，并把真实域名、数据库口令和服务凭证替换为部署值：
+
 ```env
-# 服务
-PORT=7654
-ROUND1_BIND_HOST=127.0.0.1
-NODE_ENV=development
-ROUND1_PM2_API_INSTANCES=2
-ROUND1_PM2_ENABLE_RUNTIME_WORKER=0
-ROUND1_PM2_ENABLE_CONTENT_WORKER=0
-ROUND1_HEALTHCHECK_API_URL=
-ROUND1_HEALTHCHECK_FRONTEND_URL=
-ROUND1_HEALTHCHECK_TIMEOUT_MS=5000
-ROUND1_HEALTHCHECK_INCLUDE_OFFLINE=0
-ROUND1_HEALTHCHECK_INCLUDE_EXTERNAL=0
-ROUND1_HEALTHCHECK_PM2=0
+NODE_ENV=production
+DATABASE_URL=postgres://round1:<数据库密码>@127.0.0.1:4397/round1
+APP_PUBLIC_URL=https://round1.example.com
+APP_API_ORIGIN=https://round1.example.com
 
-# 数据库
-DATABASE_URL=postgres://round1:round1_dev@127.0.0.1:4397/round1
-DATABASE_POOL_MAX_API=10
-DATABASE_POOL_MAX_WORKER=5
-DATABASE_STATEMENT_TIMEOUT_MS=30000
-
-# 认证
 SESSION_SECRET=<高熵密钥>
 TOTP_ENCRYPTION_KEK=<高熵 KEK 密钥>
-SESSION_COOKIE_SECURE=1
-SESSION_COOKIE_SAMESITE=lax
-SESSION_IDLE_MINUTES=480
-SESSION_ABSOLUTE_MINUTES=10080
-EXAM_DRAFT_TTL_MINUTES=1440
 ROUND1_INITIAL_ADMIN_PASSWORD=
-SESSION_STORE=redis
-AUTH_TURNSTILE_SITE_KEY=
-AUTH_TURNSTILE_SECRET_KEY=
-AUTH_POW_ENABLED=1
-AUTH_POW_BASE_DIFFICULTY=18
-AUTH_TEMP_EMAIL_BLOCKLIST_PATH=./config/temp-email-blocklist.txt
-AUTH_EMAIL_CODE_EXPIRES_SECONDS=600
-AUTH_EMAIL_CODE_RESEND_SECONDS=60
-AUTH_EMAIL_CODE_MAX_PER_EMAIL_PER_HOUR=5
-AUTH_EMAIL_CODE_MAX_PER_IP_PER_10M=20
-AUTH_FORGOT_PASSWORD_MAX_PER_EMAIL_PER_HOUR=3
-AUTH_LOGIN_FAIL_PER_ACCOUNT_PER_15M=10
-AUTH_LOGIN_FAIL_PER_DEVICE_PER_10M=20
-AUTH_REGISTER_PER_IP_PER_10M=20
-AUTH_STEP_UP_WINDOW_MINUTES=10
-APP_PUBLIC_URL=https://round1.local
-APP_API_ORIGIN=https://round1.local
-TRUST_PROXY_HOPS=1
-DEV_HTTPS_CERT=./certs/dev-cert.pem
-DEV_HTTPS_KEY=./certs/dev-key.pem
 
-# 邮件
 MAIL_PROVIDER=resend
-MAIL_FROM=
+MAIL_FROM=Round1 <no-reply@round1.example.com>
 RESEND_API_KEY=
 # POSTMARK_SERVER_TOKEN=
 # TENCENT_SES_SECRET_ID=
 # TENCENT_SES_SECRET_KEY=
-# TENCENT_SES_REGION=
+# TENCENT_SES_REGION=ap-hongkong
 
-# 第三方身份
-AUTH_PROVIDER_QQ_ENABLED=0
-QQ_CONNECT_CLIENT_ID=
-QQ_CONNECT_CLIENT_SECRET=
-QQ_CONNECT_REDIRECT_URI=
+AUTH_TURNSTILE_SITE_KEY=
+AUTH_TURNSTILE_SECRET_KEY=
+
 CPPLEARN_OIDC_ISSUER=
 CPPLEARN_OIDC_CLIENT_ID=
 CPPLEARN_OIDC_CLIENT_SECRET=
 CPPLEARN_OIDC_REDIRECT_URI=
 
-# 大模型
-# 推荐直接配置提供商通道；离线脚本与审核脚本共用同一组提供商直连路由解析逻辑
-# 场景：
-#   generate     -> 离线题目生成脚本
-#   judge        -> 离线判官/审核脚本
-#   rewrite      -> scripts/rewritePaperExplanations.ts
-#   paper_audit  -> scripts/reviewRealPapers.ts
-#   answer_fill  -> 答案回填/补全脚本
-# 当前提供商直连方案只保留 2 条通道：
-#   LLM_PROVIDER_DEFAULT -> 主通道的提供商标识
-#   LLM_PROVIDER_BACKUP  -> 备用通道的提供商标识
-# 日常脚本入口不写提供商覆盖参数；显式路由覆盖仅用于内部诊断，
-# 并限制在 deepseek / xiaomi / alibaba / minimax 四个提供商内。
-# 示例：
-# LLM_PROVIDER_DEFAULT=xiaomi
-# LLM_PROVIDER_BACKUP=deepseek
-# LLM_REASONING_DEFAULT=xhigh>high>default
-# LLM_REASONING_SUMMARY_DEFAULT=auto
-LLM_PROVIDER_DEFAULT=
-LLM_PROVIDER_BACKUP=
-LLM_REASONING_DEFAULT=
-LLM_REASONING_SUMMARY_DEFAULT=
-OPENAI_API_KEY=
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_MODEL=gpt-5.4-mini
-ANTHROPIC_API_KEY=
-ANTHROPIC_BASE_URL=https://api.anthropic.com/v1
-ANTHROPIC_MODEL=claude-sonnet-4-20250514
-GOOGLE_API_KEY=
-GOOGLE_BASE_URL=https://generativelanguage.googleapis.com/v1beta
-GOOGLE_MODEL=gemini-2.5-flash
-XIAOMI_API_KEY=
-XIAOMI_BASE_URL=https://api.xiaomimimo.com/v1
-XIAOMI_MODEL=mimo-v2.5-pro
-ALIBABA_API_KEY=
-ALIBABA_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
-ALIBABA_MODEL=qwen3.6-plus
-DEEPSEEK_API_KEY=
-DEEPSEEK_BASE_URL=https://api.deepseek.com
-DEEPSEEK_MODEL=deepseek-v4-pro
-MOONSHOTAI_API_KEY=
-MOONSHOTAI_BASE_URL=https://api.moonshot.ai/v1
-MOONSHOTAI_MODEL=kimi-k2.5
-OPENROUTER_API_KEY=
-OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-OPENROUTER_MODEL=openai/gpt-5.2
-MINIMAX_API_KEY=
-MINIMAX_BASE_URL=https://api.minimax.io/v1
-MINIMAX_MODEL=MiniMax-M2.7
-VOLCENGINE_API_KEY=
-VOLCENGINE_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
-VOLCENGINE_MODEL=doubao-seed-2-0-lite-260215
-XAI_API_KEY=
-XAI_BASE_URL=https://api.x.ai/v1
-XAI_MODEL=grok-3-beta
+R2_PUBLIC_BASE_URL=
+```
 
-# 沙箱
+离线内容环境才需要补充 LLM 和 runner 相关配置，例如：
+
+```env
+ROUND1_PM2_ENABLE_CONTENT_WORKER=1
 SANDBOX_RUNNER_URL=http://127.0.0.1:4401
-SANDBOX_RUNNER_IMAGE=cpp-runner:latest
-SANDBOX_RUNNER_RUNTIME=runsc
-SANDBOX_COMPILE_TIMEOUT_MS=10000
-SANDBOX_TIMEOUT_MS=1000
-SANDBOX_MEM_MB=256
-SANDBOX_PIDS_LIMIT=64
-
-# Redis 与工作器
-REDIS_URL=redis://127.0.0.1:4395
-ROUND1_WORKER_ENABLED=0              # 生产默认关闭运行时 worker；离线内容环境单独启 content worker
-ROUND1_WORKER_CONCURRENCY=3
-
-
-# 其他
-MIN_ASSIGNMENT_START_MINUTES=1
-AUTOSAVE_INTERVAL_SECONDS=180          # 前端周期性 autosave flush 间隔（通过 GET /api/v1/config/client 下发）；后端 per-user 限频默认由 exam.autosaveRateLimitSeconds=30 管理
-
-# R2 公开资源
-R2_ACCOUNT_ID=
-R2_ACCESS_KEY_ID=
-R2_SECRET_ACCESS_KEY=
-R2_API_TOKEN=
-R2_PUBLIC_BASE_URL=                    # 公开资源源站；Vite 开发代理把同源 /font/* 与 /logo/* 代理到该源站
-
+LLM_PROVIDER_DEFAULT=openrouter
+LLM_PROVIDER_BACKUP=
+OPENROUTER_API_KEY=
+OPENROUTER_MODEL=openai/gpt-5.4
+LLM_REASONING_DEFAULT=max>xhigh>high>medium>default
+LLM_THINKING_TYPE_DEFAULT=enabled
+LLM_THINKING_BUDGET_DEFAULT=default
+LLM_REASONING_SUMMARY_DEFAULT=auto
 ```
 
 字体当前需要在 `${R2_PUBLIC_BASE_URL}/font/` 下提供 Geist、HarmonyOS、Fraunces 与 Source Han Serif SC。CppLearn OIDC 横幅图片由 CppLearn 提供并上传到 `${R2_PUBLIC_BASE_URL}/logo/cpplearn.jpg`；运行时页面只引用同源 `/logo/cpplearn.jpg`。
 
-端口设计与暴露面见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。单机部署时 `PORT=7654` 必须配合 `ROUND1_BIND_HOST=127.0.0.1`，`DATABASE_URL` 使用 `127.0.0.1:4397`，`REDIS_URL` 使用 `127.0.0.1:4395`，`SANDBOX_RUNNER_URL` 使用 `127.0.0.1:4401` 且仅用于本地开发/离线内容环境；生产公网入口只开放 Caddy `80/443` 与 SSH `9179`。`Caddyfile.example` 为独立配置文件，不从 `.env` 读取域名、静态目录、API upstream、日志路径或 R2 源站；部署时直接修改 Caddyfile 中的字面量。Caddy 默认协议集为 `h1/h2/h3`；不要只配置 `h2/h3`，因为当前 `h2` 仍需要 `h1`。若保留 Caddy HTTP/3，同一 `443` 还需允许 UDP；若使用 `MAIL_PROVIDER=tencent-ses`，需要允许 SMTP 465 出站。若重新设计端口，必须同步 `.env.example`、`docker-compose.dev.yml`、`Caddyfile.example`、Vite proxy、healthcheck 与部署 runbook。
+端口设计与暴露面见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。单机部署时 `PORT=7654`、`ROUND1_BIND_HOST=127.0.0.1`、`REDIS_URL=redis://127.0.0.1:4395` 与离线 runner 默认值均已在 `config/env.ts` 中定义；生产 `.env` 通常只需要写 `DATABASE_URL`、密钥、域名和真实外部服务凭证。生产公网入口只开放 Caddy `80/443` 与 SSH `9179`。`Caddyfile.example` 为独立配置文件，不从 `.env` 读取域名、静态目录、API upstream、日志路径或 R2 源站；部署时直接修改 Caddyfile 中的字面量。Caddy 默认协议集为 `h1/h2/h3`；不要只配置 `h2/h3`，因为当前 `h2` 仍需要 `h1`。若保留 Caddy HTTP/3，同一 `443` 还需允许 UDP；若使用 `MAIL_PROVIDER=tencent-ses`，需要允许 SMTP 465 出站。若重新设计端口，必须同步 `config/env.ts` 默认值或明确的 `.env` 覆盖、`docker-compose.dev.yml`、`Caddyfile.example`、Vite proxy、healthcheck、`.env.example` 可选覆盖提示与部署 runbook。
 
 > 邮件提供商、大模型提供商通道、工作器开关与默认值以 `config/env.ts` 为准；本节示例仅保留最常用部署骨架，避免与代码真源重复漂移。

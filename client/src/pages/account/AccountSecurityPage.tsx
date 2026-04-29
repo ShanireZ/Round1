@@ -38,6 +38,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   changePassword,
   confirmEmailChange,
+  deleteExternalIdentity,
   deleteTotpEnrollment,
   deletePasskeyCredential,
   fetchAccountSecuritySummary,
@@ -454,9 +455,9 @@ function PasskeyPanel({
   passkeys: Awaited<ReturnType<typeof fetchAccountSecuritySummary>>["passkeys"];
 }) {
   const queryClient = useQueryClient();
-  const [pendingDeletePasskey, setPendingDeletePasskey] = useState<(typeof passkeys)[number] | null>(
-    null,
-  );
+  const [pendingDeletePasskey, setPendingDeletePasskey] = useState<
+    (typeof passkeys)[number] | null
+  >(null);
 
   const registerMutation = useMutation({
     mutationFn: async () => {
@@ -649,6 +650,10 @@ function SessionsPanel({
 
 export default function AccountSecurityPage() {
   const [searchParams] = useSearchParams();
+  const queryClient = useQueryClient();
+  const [pendingDeleteIdentity, setPendingDeleteIdentity] = useState<
+    Awaited<ReturnType<typeof fetchAccountSecuritySummary>>["externalIdentities"][number] | null
+  >(null);
 
   const sessionQuery = useQuery({
     queryKey: ["auth-session"],
@@ -681,6 +686,17 @@ export default function AccountSecurityPage() {
   const securityPercent = Math.round((signalCount / 5) * 100);
   const oidcError = searchParams.get("error");
   const emailChanged = searchParams.get("email") === "changed";
+  const deleteIdentityMutation = useMutation({
+    mutationFn: deleteExternalIdentity,
+    onSuccess: async () => {
+      setPendingDeleteIdentity(null);
+      toast.success("外部身份已解除绑定");
+      await queryClient.invalidateQueries({ queryKey: ["account-security"] });
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "外部身份解绑失败");
+    },
+  });
 
   if (sessionQuery.isPending || (session?.authenticated === true && securityQuery.isPending)) {
     return <LoadingAccountSecurity />;
@@ -861,7 +877,22 @@ export default function AccountSecurityPage() {
                           {formatAccountDate(identity.createdAt)}
                         </div>
                       </div>
-                      <Badge variant="saved">已绑定</Badge>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="saved">已绑定</Badge>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          loading={
+                            deleteIdentityMutation.isPending &&
+                            deleteIdentityMutation.variables === identity.provider
+                          }
+                          onClick={() => setPendingDeleteIdentity(identity)}
+                        >
+                          <Trash2 />
+                          解除绑定
+                        </Button>
+                      </div>
                     </div>
                   ))
                 )}
@@ -889,6 +920,49 @@ export default function AccountSecurityPage() {
               ) : null}
             </CardContent>
           </Card>
+
+          <Dialog
+            open={Boolean(pendingDeleteIdentity)}
+            onOpenChange={(open) => {
+              if (!open) {
+                setPendingDeleteIdentity(null);
+              }
+            }}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>解除外部身份绑定？</DialogTitle>
+                <DialogDescription>
+                  解除后将无法再用{" "}
+                  {pendingDeleteIdentity
+                    ? formatExternalProviderLabel(pendingDeleteIdentity.provider)
+                    : "该外部身份"}{" "}
+                  直接进入账号。本操作需要最近一次强认证仍有效。
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setPendingDeleteIdentity(null)}
+                >
+                  取消
+                </Button>
+                <Button
+                  type="button"
+                  loading={deleteIdentityMutation.isPending}
+                  disabled={!pendingDeleteIdentity}
+                  onClick={() => {
+                    if (pendingDeleteIdentity) {
+                      deleteIdentityMutation.mutate(pendingDeleteIdentity.provider);
+                    }
+                  }}
+                >
+                  确认解绑
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           <PasskeyPanel passkeys={summary.passkeys} />
         </TabsContent>

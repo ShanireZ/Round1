@@ -1674,6 +1674,7 @@ authRouter.post(
 authRouter.delete(
   "/auth/external/:provider",
   requireAuth,
+  requireRecentAuth,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.session.userId!;

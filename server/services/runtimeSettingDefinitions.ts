@@ -18,7 +18,7 @@ export const RUNTIME_SETTING_DEFINITIONS: readonly RuntimeSettingDefinition[] = 
   {
     key: "exam.autosaveIntervalSeconds",
     category: "exam",
-    label: "Autosave Interval",
+    label: "答题自动保存间隔",
     description: "学生答题页自动保存间隔秒数。",
     defaultValue: env.AUTOSAVE_INTERVAL_SECONDS,
     valueType: "number",
@@ -29,7 +29,7 @@ export const RUNTIME_SETTING_DEFINITIONS: readonly RuntimeSettingDefinition[] = 
   {
     key: "exam.autosaveRateLimitSeconds",
     category: "exam",
-    label: "Autosave Rate Limit",
+    label: "保存请求最小间隔",
     description: "服务端按用户限制 autosave 请求的最小间隔秒数。",
     defaultValue: 30,
     valueType: "number",
@@ -40,7 +40,7 @@ export const RUNTIME_SETTING_DEFINITIONS: readonly RuntimeSettingDefinition[] = 
   {
     key: "exam.draftTtlMinutes",
     category: "exam",
-    label: "Draft TTL",
+    label: "草稿保留时间",
     description: "未开始或未提交草稿试卷的保留分钟数。",
     defaultValue: env.EXAM_DRAFT_TTL_MINUTES,
     valueType: "number",
@@ -51,7 +51,7 @@ export const RUNTIME_SETTING_DEFINITIONS: readonly RuntimeSettingDefinition[] = 
   {
     key: "paper.selection.recentExcludeAttempts",
     category: "paper",
-    label: "Recent Paper Exclude",
+    label: "最近试卷排除数",
     description: "运行时选卷时软排除最近 attempt 对应预制卷的数量。",
     defaultValue: 3,
     valueType: "number",
@@ -62,7 +62,7 @@ export const RUNTIME_SETTING_DEFINITIONS: readonly RuntimeSettingDefinition[] = 
   {
     key: "import.maxBundleSizeMb",
     category: "import",
-    label: "Max Bundle Size",
+    label: "导入包大小上限",
     description: "Admin 导入中心允许提交的 bundle JSON 大小上限。",
     defaultValue: 8,
     valueType: "number",

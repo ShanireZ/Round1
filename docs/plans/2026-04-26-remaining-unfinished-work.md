@@ -16,6 +16,7 @@
 - 2026-04-29 final page closure pass removed additional user-visible implementation copy across Login/AuthCallback/CompleteProfile, Dashboard, ExamNew/Session/Result, Account, Coach, Admin content/import/review/settings/users, and navigation surfaces. Raw enum/internal strings now remain in code/data contracts unless they are explicitly translated before rendering.
 - 2026-04-29 navigation/a11y closure pass aligned AppShell navigation with the role-aware UI/UX contract: desktop sidebar and mobile Sheet now share the same section helper, student users no longer see Coach/Admin links, mobile users get a Sheet navigation trigger, and Auth/App/Focus layouts expose skip-to-content. The visual audit now includes a dedicated role-aware/mobile navigation test.
 - 2026-04-29 Passkey/account security closure pass removed the older browser UX blocker: `client` now includes `@simplewebauthn/browser`; `/login` exposes Passkey login when the provider is enabled; `/account/security` exposes Passkey binding/removal in the Passkey/OIDC tab and adds a current-session logout panel. Full per-device session inventory remains a future backend model rather than a current code-surface blocker.
+- 2026-04-29 Admin/settings and env closure pass: `/admin/settings` now uses grouped Tabs with hot-update status instead of a flat/internal settings table; `/account/security` can unlink external identities behind CSRF and recent strong-auth; `.env.example` is now a minimal template backed by `npm run env:init`, while single-machine Redis/sandbox/worker/session/rate/PM2/healthcheck defaults stay in `config/env.ts`.
 
 ## 2026-04-28 Maintenance Addendum: Coach Class Detail UI
 
@@ -136,7 +137,7 @@
 - [ ] 系统层安全加固：UFW/iptables、SSH 禁用密码、fail2ban、自动安全更新、非 root 运行服务。
 - [ ] 应用层安全加固：`.env` 权限 600、`NODE_ENV=production`、Helmet CSP、CSRF、`__Host-` cookie、`trust proxy = 1`、argon2id。
 - [ ] 数据库层安全加固：Postgres 内网监听、应用用户最小权限、`statement_timeout=30s`、备份权限 600。
-- [x] 生产端口最终设计与防火墙规则需确认。（2026-04-28：`docs/plans/2026-04-28-port-map-and-exposure-plan.md` 已从盘点更新为确认后的端口设计：SSH `9179` 公网且不做 IP allowlist，Caddy `80/443` 公网并强制 HTTPS / TLS 1.2+ / HTTP/2+，Express API `7654` 仅 `127.0.0.1` 给 Caddy 反代，Postgres `4397` 与 Redis `4395` 不开放公网，Vite dev `4399` 仅本地开发，cpp-runner `4401` 仅本地开发/离线内容环境且生产不部署；代码默认值、`.env.example`、compose、Vite、PM2 与 healthcheck 已同步。）
+- [x] 生产端口最终设计与防火墙规则需确认。（2026-04-28：`docs/plans/2026-04-28-port-map-and-exposure-plan.md` 已从盘点更新为确认后的端口设计：SSH `9179` 公网且不做 IP allowlist，Caddy `80/443` 公网并强制 HTTPS / TLS 1.2+ / HTTP/2+，Express API `7654` 仅 `127.0.0.1` 给 Caddy 反代，Postgres `4397` 与 Redis `4395` 不开放公网，Vite dev `4399` 仅本地开发，cpp-runner `4401` 仅本地开发/离线内容环境且生产不部署；代码默认值、`.env.example` 可选覆盖提示、compose、Vite、PM2 与 healthcheck 已同步。）
 - [ ] 手动部署 SOP 与回滚流程演练。
 - [x] 已纳入 `scripts/healthcheck.ts` 和版本化 `ecosystem.config.cjs`；真实域名、Caddy/TLS、PM2 reload、外部服务 smoke 与回滚仍需实机演练。
 
