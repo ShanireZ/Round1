@@ -30,6 +30,14 @@ const importStatusVariant: Record<
   failed: "destructive",
 };
 
+const importStatusLabel: Record<AdminImportBatchStatus, string> = {
+  dry_run: "预演",
+  processing: "处理中",
+  applied: "已应用",
+  partial_failed: "部分失败",
+  failed: "失败",
+};
+
 function formatTimestamp(value?: string | null) {
   if (!value) {
     return "-";
@@ -47,6 +55,21 @@ function formatTimestamp(value?: string | null) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function formatHealthLabel(label: string) {
+  if (label === "overall") return "应用";
+  if (label === "db") return "数据库";
+  if (label === "redis") return "Redis";
+  return label;
+}
+
+function formatHealthValue(value?: string | null) {
+  if (!value) return "-";
+  if (value === "ok") return "正常";
+  if (value === "degraded") return "降级";
+  if (value === "error") return "异常";
+  return value;
 }
 
 async function fetchAdminHealthSummary(): Promise<HealthSummary> {
@@ -120,13 +143,18 @@ export default function AdminDashboard() {
   });
   const workflowItems = adminNavItems.filter((item) => item.to !== "/admin");
   const health = healthQuery.data;
+  const healthRows: Array<[string, string | undefined]> = [
+    ["overall", health?.status],
+    ["db", health?.db],
+    ["redis", health?.redis],
+  ];
 
   return (
     <div className="space-y-6" data-testid="admin-dashboard-page">
       <Card variant="hero" className="admin-dashboard-hero overflow-hidden">
         <CardHeader className="gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <Badge variant="outline">Admin Overview</Badge>
+            <Badge variant="outline">管理看板</Badge>
             <CardTitle className="mt-3 text-2xl">内容运营中枢</CardTitle>
             <CardDescription className="mt-2 max-w-2xl">
               汇总题库、预制卷、导入批次和运行时健康状态，作为上线部署测试前的运营检查入口。
@@ -134,21 +162,21 @@ export default function AdminDashboard() {
           </div>
           <div className="grid w-full gap-3 sm:grid-cols-3 lg:max-w-xl">
             <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
-              <div className="text-muted-foreground text-xs">API</div>
+              <div className="text-muted-foreground text-xs">应用</div>
               <div className="text-foreground mt-1 text-sm font-semibold">
-                {healthQuery.isLoading ? "checking" : (health?.status ?? "unavailable")}
+                {healthQuery.isLoading ? "检查中" : formatHealthValue(health?.status)}
               </div>
             </div>
             <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
-              <div className="text-muted-foreground text-xs">DB</div>
+              <div className="text-muted-foreground text-xs">数据库</div>
               <div className="text-foreground mt-1 text-sm font-semibold">
-                {healthQuery.isLoading ? "checking" : (health?.db ?? "-")}
+                {healthQuery.isLoading ? "检查中" : formatHealthValue(health?.db)}
               </div>
             </div>
             <div className="border-border bg-card/80 rounded-[var(--radius-md)] border p-3">
               <div className="text-muted-foreground text-xs">Redis</div>
               <div className="text-foreground mt-1 text-sm font-semibold">
-                {healthQuery.isLoading ? "checking" : (health?.redis ?? "-")}
+                {healthQuery.isLoading ? "检查中" : formatHealthValue(health?.redis)}
               </div>
             </div>
           </div>
@@ -160,28 +188,28 @@ export default function AdminDashboard() {
           icon={FileJson}
           label="题目资产"
           value={questionsQuery.data?.pagination.total ?? "-"}
-          description="admin questions total"
+          description="题库可运营条目"
           loading={questionsQuery.isLoading}
         />
         <KpiCard
           icon={ShieldCheck}
           label="已发布预制卷"
           value={papersQuery.data?.pagination.total ?? "-"}
-          description="published prebuilt papers"
+          description="可进入考试与任务"
           loading={papersQuery.isLoading}
         />
         <KpiCard
           icon={Activity}
           label="导入批次"
           value={batchesQuery.data?.pagination.total ?? "-"}
-          description="recent import_batches"
+          description="最近内容入库记录"
           loading={batchesQuery.isLoading}
         />
         <KpiCard
           icon={Users}
           label="用户"
           value={usersQuery.data?.pagination.total ?? "-"}
-          description="admin users total"
+          description="当前账号总量"
           loading={usersQuery.isLoading}
         />
       </div>
@@ -194,13 +222,13 @@ export default function AdminDashboard() {
               最近导入活动
             </CardTitle>
             <CardDescription>
-              优先查看 dry-run、apply 和失败批次，确认内容入库链路没有漂移。
+              优先查看预演、入库和失败批次，确认内容入库链路没有漂移。
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {batchesQuery.isLoading ? (
               <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border p-4 text-sm">
-                正在读取 import_batches...
+                正在读取导入批次...
               </div>
             ) : batchesQuery.isError ? (
               <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-[var(--radius-md)] border p-4 text-sm">
@@ -214,7 +242,9 @@ export default function AdminDashboard() {
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant={importStatusVariant[batch.status]}>{batch.status}</Badge>
+                      <Badge variant={importStatusVariant[batch.status]}>
+                        {importStatusLabel[batch.status]}
+                      </Badge>
                       <span className="text-foreground truncate text-sm font-medium">
                         {batch.sourceFilename}
                       </span>
@@ -246,7 +276,7 @@ export default function AdminDashboard() {
               <Database className="text-primary h-5 w-5" />
               系统健康
             </CardTitle>
-            <CardDescription>来自 API readiness、数据库与 Redis 探测。</CardDescription>
+            <CardDescription>来自应用服务、数据库与 Redis 探测。</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {healthQuery.isError ? (
@@ -257,19 +287,17 @@ export default function AdminDashboard() {
             ) : (
               <>
                 <div className="grid gap-3 sm:grid-cols-3">
-                  {[
-                    ["overall", health?.status],
-                    ["db", health?.db],
-                    ["redis", health?.redis],
-                  ].map(([label, value]) => (
+                  {healthRows.map(([label, value]) => (
                     <div
                       key={label}
                       className="border-border bg-subtle/15 rounded-[var(--radius-md)] border p-3"
                     >
-                      <div className="text-muted-foreground text-xs">{label}</div>
+                      <div className="text-muted-foreground text-xs">
+                        {formatHealthLabel(label)}
+                      </div>
                       <div className="mt-2">
                         <Badge variant={value === "ok" ? "saved" : "outline"}>
-                          {healthQuery.isLoading ? "checking" : (value ?? "-")}
+                          {healthQuery.isLoading ? "检查中" : formatHealthValue(value)}
                         </Badge>
                       </div>
                     </div>

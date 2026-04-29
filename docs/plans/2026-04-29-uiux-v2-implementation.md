@@ -32,7 +32,8 @@
 ## 收口补充
 
 - 2026-04-29 上线测试准备时修复 Tailwind CSS custom-property 任意值写法：生产页面、primitive、A2UI surface 和 UI Gallery 中的 `rounded-[--*]`、`z-[--*]`、`shadow-[--*]`、`duration-[--*]`、`bg-[--*]` 等统一改为显式 `var(--*)`，避免 Vite/Tailwind 产物出现无效 CSS 值。
-- 本轮复查结果见 `docs/plans/2026-04-29-release-readiness.md`：`verify:ui-tokens`、`build:client`、`build:server`、`client:test`、`verify:offline-artifacts`、`lint`、`ui-visual-audit` 和 focused Coach integration 均已复跑；完整 server test、migration status 与 runtime healthcheck 仍等待本机或目标部署环境提供 Redis/Postgres/API/frontend。
+- 本轮复查结果见 `docs/plans/2026-04-29-release-readiness.md`：`verify:ui-tokens`、`build:client`、`build:server`、`client:test`、`verify:offline-artifacts`、`lint`、`ui-visual-audit`、完整 `npm run test`、`migrate:status` 和本地 API/frontend `healthcheck` 均已复跑。生产域名、Caddy/TLS、PM2、备份恢复、真实邮件/Turnstile、Sentry 与回滚演练仍必须在目标部署环境完成。
+- 2026-04-29 UI/UX 与功能页面二次收口：复查考试、账号、Coach、Admin、A2UI BYOC 和 UI Gallery 的真实页面文案，把 `runtime`、接口路径、payload、内部状态、owner/assignment-only 等实现词改为面向学生、教练、管理员的业务语义；功能页仍沿用现有 API/data contract，不新增并行视觉系统。
 
 ## 风险与后续
 

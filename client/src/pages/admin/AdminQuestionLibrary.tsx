@@ -56,22 +56,22 @@ const questionTypeLabels: Record<QuestionType, string> = {
 };
 
 const difficultyLabels: Record<Difficulty, string> = {
-  easy: "Easy",
-  medium: "Medium",
-  hard: "Hard",
+  easy: "简单",
+  medium: "中等",
+  hard: "困难",
 };
 
 const sourceLabels: Record<QuestionSource, string> = {
   ai: "AI",
-  manual: "Manual",
-  real_paper: "Real Paper",
+  manual: "手工",
+  real_paper: "真题",
 };
 
 const statusLabels: Record<QuestionStatus, string> = {
-  draft: "Draft",
-  reviewed: "Reviewed",
-  published: "Published",
-  archived: "Archived",
+  draft: "草稿",
+  reviewed: "已审核",
+  published: "已发布",
+  archived: "已归档",
 };
 
 const statusVariants: Record<QuestionStatus, "secondary" | "outline" | "destructive" | "default"> =
@@ -218,13 +218,13 @@ export default function AdminQuestionLibrary() {
       : "仅未被引用的 draft 题目可硬删除。";
   const questionLifecycleHint =
     selectedQuestion?.status === "draft"
-      ? "Draft 题目需先确认到 reviewed 才能发布。"
+      ? "草稿题目需先确认到已审核状态才能发布。"
       : selectedQuestion?.status === "reviewed"
-        ? "Reviewed 题目可发布，发布后只允许归档。"
+        ? "已审核题目可发布，发布后只允许归档。"
         : selectedQuestion?.status === "published"
-          ? "Published 题目不能原地编辑，只允许归档。"
+          ? "已发布题目不能原地编辑，只允许归档。"
           : selectedQuestion?.status === "archived"
-            ? "Archived 题目已退出投放，不能再次发布。"
+            ? "已归档题目已退出投放，不能再次发布。"
             : "";
 
   const listSummary = useMemo(() => {
@@ -317,7 +317,7 @@ export default function AdminQuestionLibrary() {
     const confirmMessages = {
       publish: `确认发布题目 ${selectedQuestion.id.slice(0, 8)}？发布后不能原地编辑。`,
       archive: `确认归档题目 ${selectedQuestion.id.slice(0, 8)}？归档后不会进入新试卷选择。`,
-      delete: `确认硬删除 draft 题目 ${selectedQuestion.id.slice(0, 8)}？此操作不可撤销。`,
+      delete: `确认硬删除草稿题目 ${selectedQuestion.id.slice(0, 8)}？此操作不可撤销。`,
     };
 
     if (window.confirm(confirmMessages[action])) {
@@ -379,9 +379,9 @@ export default function AdminQuestionLibrary() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">全部难度</SelectItem>
-                  <SelectItem value="easy">Easy</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="hard">Hard</SelectItem>
+                  <SelectItem value="easy">简单</SelectItem>
+                  <SelectItem value="medium">中等</SelectItem>
+                  <SelectItem value="hard">困难</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -394,10 +394,10 @@ export default function AdminQuestionLibrary() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">全部状态</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="reviewed">Reviewed</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
-                  <SelectItem value="archived">Archived</SelectItem>
+                  <SelectItem value="draft">草稿</SelectItem>
+                  <SelectItem value="reviewed">已审核</SelectItem>
+                  <SelectItem value="published">已发布</SelectItem>
+                  <SelectItem value="archived">已归档</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -410,8 +410,8 @@ export default function AdminQuestionLibrary() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">全部来源</SelectItem>
-                  <SelectItem value="real_paper">Real Paper</SelectItem>
-                  <SelectItem value="manual">Manual</SelectItem>
+                  <SelectItem value="real_paper">真题</SelectItem>
+                  <SelectItem value="manual">手工</SelectItem>
                   <SelectItem value="ai">AI</SelectItem>
                 </SelectContent>
               </Select>
@@ -434,7 +434,7 @@ export default function AdminQuestionLibrary() {
                     <TableHead>题目</TableHead>
                     <TableHead>状态</TableHead>
                     <TableHead>来源</TableHead>
-                    <TableHead>Sandbox</TableHead>
+                    <TableHead>沙箱校验</TableHead>
                     <TableHead>创建时间</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -486,9 +486,9 @@ export default function AdminQuestionLibrary() {
 
             <div className="space-y-3">
               <div>
-                <h2 className="text-foreground text-sm font-semibold">新建 Draft</h2>
+                <h2 className="text-foreground text-sm font-semibold">新建草稿</h2>
                 <p className="text-muted-foreground mt-1 text-xs">
-                  提交与 Admin question create body 一致的 JSON。
+                  提交与题目创建结构一致的 JSON。
                 </p>
               </div>
               <Textarea
@@ -572,9 +572,9 @@ export default function AdminQuestionLibrary() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="easy">Easy</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="hard">Hard</SelectItem>
+                        <SelectItem value="easy">简单</SelectItem>
+                        <SelectItem value="medium">中等</SelectItem>
+                        <SelectItem value="hard">困难</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -592,8 +592,8 @@ export default function AdminQuestionLibrary() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="real_paper">Real Paper</SelectItem>
-                        <SelectItem value="manual">Manual</SelectItem>
+                        <SelectItem value="real_paper">真题</SelectItem>
+                        <SelectItem value="manual">手工</SelectItem>
                         <SelectItem value="ai">AI</SelectItem>
                       </SelectContent>
                     </Select>
@@ -602,7 +602,7 @@ export default function AdminQuestionLibrary() {
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="question-primary-kp">Primary KP</Label>
+                    <Label htmlFor="question-primary-kp">主知识点</Label>
                     <Input
                       id="question-primary-kp"
                       disabled={!selectedCanEdit}
@@ -638,7 +638,7 @@ export default function AdminQuestionLibrary() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="question-sandbox">Sandbox</Label>
+                    <Label htmlFor="question-sandbox">沙箱校验</Label>
                     <Select
                       value={editState.sandboxVerified}
                       disabled={!selectedCanEdit}

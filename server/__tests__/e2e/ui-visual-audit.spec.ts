@@ -1174,18 +1174,18 @@ test("UI gallery shows V2 charts and data-background patterns", async ({ page })
   await installCommonRoutes(page, false);
 
   await page.goto("/dev/ui-gallery#plate-09");
-  await expect(page.getByText("Recharts trend")).toBeVisible();
-  await expect(page.getByText("Radar + ranking")).toBeVisible();
-  await expect(page.getByText("Area chart")).toBeVisible();
+  await expect(page.getByText("Recharts 趋势")).toBeVisible();
+  await expect(page.getByText("雷达与排名")).toBeVisible();
+  await expect(page.getByText("面积图", { exact: true })).toBeVisible();
   await expect(page.locator(".recharts-wrapper")).toHaveCount(4);
 
   await page.goto("/dev/ui-gallery#plate-10");
-  await expect(page.getByText("V2 motion levels")).toBeVisible();
+  await expect(page.getByText("V2 动效层级")).toBeVisible();
   const rhythmPlate = page.locator("#plate-10");
-  await expect(rhythmPlate.getByText("Rank Ribbon", { exact: true })).toBeVisible();
-  await expect(rhythmPlate.getByText("Signal Band", { exact: true })).toBeVisible();
-  await expect(rhythmPlate.getByText("Import Timeline", { exact: true })).toBeVisible();
-  await expect(rhythmPlate.getByText("Heatmap Aura", { exact: true })).toBeVisible();
+  await expect(rhythmPlate.getByText("排名丝带", { exact: true })).toBeVisible();
+  await expect(rhythmPlate.getByText("运维信号带", { exact: true })).toBeVisible();
+  await expect(rhythmPlate.getByText("导入时间线", { exact: true })).toBeVisible();
+  await expect(rhythmPlate.getByText("热力光晕", { exact: true })).toBeVisible();
 
   const backgroundPatternCount = await page
     .locator(

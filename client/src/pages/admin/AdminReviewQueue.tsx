@@ -36,10 +36,10 @@ import {
 type ReviewStatusFilter = ReviewStatus | "all";
 
 const reviewLabels: Record<ReviewStatus, string> = {
-  pending: "Pending",
-  ai_reviewed: "AI Reviewed",
-  confirmed: "Confirmed",
-  rejected: "Rejected",
+  pending: "待处理",
+  ai_reviewed: "AI 已审",
+  confirmed: "已确认",
+  rejected: "已拒绝",
 };
 
 const reviewVariants: Record<ReviewStatus, "secondary" | "outline" | "destructive" | "default"> = {
@@ -138,7 +138,7 @@ export default function AdminReviewQueue() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">审核队列</h1>
           <p className="text-muted-foreground mt-2 max-w-3xl text-sm">
-            集中处理真题导入后的 AI review 差异，保留人工确认、拒绝备注与审核时间线。
+            集中处理真题导入后的 AI 审核差异，保留人工确认、拒绝备注与审核时间线。
           </p>
         </div>
         <Card variant="stat" className="min-w-36">
@@ -157,9 +157,9 @@ export default function AdminReviewQueue() {
             <div>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <RefreshCcw className="text-primary h-4 w-4" />
-                Review Items
+                审核项
               </CardTitle>
-              <CardDescription>按状态筛选，默认查看最新 AI review 记录。</CardDescription>
+              <CardDescription>按状态筛选，默认查看最新 AI 审核记录。</CardDescription>
             </div>
             <Select
               value={statusFilter}
@@ -170,10 +170,10 @@ export default function AdminReviewQueue() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部状态</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="ai_reviewed">AI Reviewed</SelectItem>
-                <SelectItem value="confirmed">Confirmed</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
+                <SelectItem value="pending">待处理</SelectItem>
+                <SelectItem value="ai_reviewed">AI 已审</SelectItem>
+                <SelectItem value="confirmed">已确认</SelectItem>
+                <SelectItem value="rejected">已拒绝</SelectItem>
               </SelectContent>
             </Select>
           </CardHeader>
@@ -192,10 +192,10 @@ export default function AdminReviewQueue() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Question</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Confidence</TableHead>
-                    <TableHead>Reviewed</TableHead>
+                    <TableHead>题目</TableHead>
+                    <TableHead>状态</TableHead>
+                    <TableHead>置信度</TableHead>
+                    <TableHead>审核时间</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -252,13 +252,13 @@ export default function AdminReviewQueue() {
                   <Badge variant={reviewVariants[selectedReview.reviewStatus]}>
                     {reviewLabels[selectedReview.reviewStatus]}
                   </Badge>
-                  <Badge variant="outline">review {selectedReview.id.slice(0, 8)}</Badge>
-                  <Badge variant="outline">question {selectedReview.questionId.slice(0, 8)}</Badge>
+                  <Badge variant="outline">审核 {selectedReview.id.slice(0, 8)}</Badge>
+                  <Badge variant="outline">题目 {selectedReview.questionId.slice(0, 8)}</Badge>
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-3">
                   <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
-                    <div className="text-muted-foreground text-xs">AI Confidence</div>
+                    <div className="text-muted-foreground text-xs">AI 置信度</div>
                     <div className="mt-1 text-2xl font-semibold tabular-nums">
                       {typeof selectedReview.aiConfidence === "number"
                         ? selectedReview.aiConfidence.toFixed(2)
@@ -266,13 +266,13 @@ export default function AdminReviewQueue() {
                     </div>
                   </div>
                   <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
-                    <div className="text-muted-foreground text-xs">Reviewed By</div>
+                    <div className="text-muted-foreground text-xs">审核人</div>
                     <div className="mt-1 text-sm font-semibold break-all">
                       {selectedReview.reviewedBy ?? "-"}
                     </div>
                   </div>
                   <div className="border-border bg-subtle/20 rounded-[var(--radius-md)] border p-3">
-                    <div className="text-muted-foreground text-xs">Reviewed At</div>
+                    <div className="text-muted-foreground text-xs">审核时间</div>
                     <div className="mt-1 text-sm font-semibold">
                       {formatTimestamp(selectedReview.reviewedAt)}
                     </div>

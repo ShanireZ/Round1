@@ -358,20 +358,20 @@ export function scoreOrDash(value: number | null | undefined): string {
 
 export function formatCoachClassRoleLabel(role: CoachClassSummary["coachRole"]): string {
   if (role === "owner") {
-    return "owner";
+    return "负责人";
   }
   if (role === "collaborator") {
-    return "collaborator";
+    return "协作教练";
   }
-  return "coach";
+  return "教练";
 }
 
 export function formatCoachAssignmentStatusLabel(status: string): string {
   if (status === "assigned") {
-    return "assigned";
+    return "进行中";
   }
   if (status === "closed") {
-    return "closed";
+    return "已关闭";
   }
   return status;
 }
@@ -408,15 +408,15 @@ export function getCoachClassInviteStatus(
 
 export function formatCoachClassInviteStatusLabel(status: CoachClassInviteStatus): string {
   if (status === "active") {
-    return "active";
+    return "可使用";
   }
   if (status === "revoked") {
-    return "revoked";
+    return "已撤销";
   }
   if (status === "expired") {
-    return "expired";
+    return "已过期";
   }
-  return "full";
+  return "已用完";
 }
 
 export function countActiveCoachClassInvites(

@@ -10,7 +10,7 @@
 >
 > **端口规划说明（2026-04-28）**：当前端口设计见 `docs/plans/2026-04-28-port-map-and-exposure-plan.md`。单机部署时 Postgres / Redis 默认只绑定本机，不对公网暴露；生产公网入口为 SSH `9179` 与 Caddy `80/443`。Caddy 必须强制 HTTPS、TLS 1.2+ 与 HTTP/2+；若启用 HTTP/3，同一 `443` 还需允许 UDP。
 >
-> **上线测试准备记录（2026-04-29）**：本轮 UI/UX 与构建门禁已记录在 `docs/plans/2026-04-29-release-readiness.md`。已修复 Tailwind CSS var 任意值写法导致的无效生产 CSS 风险；`build:client`、`build:server`、`client:test`、`verify:ui-tokens`、`verify:offline-artifacts`、`ui-visual-audit` 和 focused Coach integration 均通过；构建后 CSS 扫描未发现 `max-width:--*`、`z-index:--*`、`border-radius:--*` 等无效 token 值。本机 `migrate:status`、`healthcheck` 与 full `npm run test` 仍受限于 Postgres `127.0.0.1:4397`、Redis `127.0.0.1:4395`、API/frontend 未运行。Docker Desktop 未运行，无法在本机拉起 compose 服务完成依赖型门禁复查。
+> **上线测试准备记录（2026-04-29）**：本轮 UI/UX 与构建门禁已记录在 `docs/plans/2026-04-29-release-readiness.md`。已修复 Tailwind CSS var 任意值写法导致的无效生产 CSS 风险；`build:client`、`build:server`、`client:test`、`verify:ui-tokens`、`verify:offline-artifacts`、`ui-visual-audit`、focused Coach integration、完整 `npm run test`、`migrate:status` 与本地 API/frontend `healthcheck` 均已复跑通过；构建后 CSS 扫描未发现 `max-width:--*`、`z-index:--*`、`border-radius:--*` 等无效 token 值。生产域名、Cloudflare Full Strict + Caddy TLS、PM2 reload、真实邮件/Turnstile、备份恢复、Sentry、Redis 降级和回滚演练仍必须在目标部署环境完成，不能用本地门禁替代。
 
 ---
 

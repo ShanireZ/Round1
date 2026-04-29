@@ -16,12 +16,18 @@
 - Route-family visual acceptance expanded: `ui-visual-audit.spec.ts` now covers Account, Coach, and Admin pages on desktop and mobile, plus the command panel, ExamNew, Dashboard, Auth entry, ExamResult print/reduced-motion, and A2UI BYOC gallery.
 - Release-readiness record added at `docs/plans/2026-04-29-release-readiness.md`, including passing UI/build/test gates and local runtime blockers for Redis/Postgres/API/frontend health checks.
 
+## 2026-04-29 Maintenance Addendum: Page Copy and Function Surface Closure
+
+- Real page copy was re-audited for implementation leakage: ExamSession, ExamResult, Dashboard, Account, Coach, Admin, A2UI BYOC, and UI Gallery no longer surface API endpoint paths, runtime/payload wording, `Attempt ID`, `Tab Nonce`, raw import state labels, or English owner/assignment-only labels in user-facing UI.
+- Coach/Admin helper labels now map internal roles and statuses to Chinese business labels while preserving request payload fields and backend enum contracts.
+- A2UI samples keep their schema/component identifiers unchanged, but visible metric labels and health values now follow the same Chinese role-facing copy standard as production pages.
+
 ## 2026-04-28 Maintenance Addendum: Coach Class Detail
 
 - Coach deep management UX landed: `/coach/classes/:id` now renders a real `CoachClassDetail` page instead of falling back to the class list route. The page consumes the existing coach class, members, invites, and coaches APIs, supports owner-only class rename, member removal, invite creation/revocation, collaborator add/remove, and owner transfer.
 - A2UI BYOC coverage expanded: the Round1 custom catalog now includes `Round1CoachClassDetailSnapshot`, and the `/dev/ui-gallery` design surface binds the detail-management slice through the guarded local A2UI payload factory.
 - Token/primitive boundary: the page reuses Round1 `Card`, `Button`, `Badge`, `Input`, `Tabs`, and token classes; no new raw colors or page-scoped inline styles are required for this slice.
-- Verification for this addendum should cover `npm run client:test -- src/lib/coach.test.ts src/lib/a2ui-design-surface.test.ts`, `npm run verify:ui-tokens`, and `npm run build:client`. Full browser visual acceptance for the entire coach route family remains open.
+- Verification for this addendum should cover `npm run client:test -- src/lib/coach.test.ts src/lib/a2ui-design-surface.test.ts`, `npm run verify:ui-tokens`, and `npm run build:client`. 2026-04-29 superseding visual acceptance now covers the coach route family in `ui-visual-audit.spec.ts`.
 
 ## 2026-04-28 Maintenance Addendum: Auth Entry Surfaces
 
@@ -180,5 +186,5 @@
 
 - A2UI 当前只接入 `/dev/ui-gallery` 示例 surface，尚未连接真实 agent/MCP payload；后续若接入外部 agent 消息，必须先补 payload 校验、权限边界、复杂度限制与 XSS/DoS 防护。Markdown 已接入 sanitizer renderer，但外部 payload 的字段级校验与执行限制仍不能省略。
 - 字体和品牌图片代理当前按本机 `.env` 的公开 `R2_PUBLIC_BASE_URL=https://r2.round1.cc` 以及 `Caddyfile.example` 的 R2 源站字面量收口；若部署环境变更公开域名，必须同步 Vite `/font/*`、`/logo/*` 开发代理、Caddyfile 生产代理、CSP 和本文件记录，避免资源源再次漂移。
-- UI/UX 仍保留全路由截图、键盘、真实 Chrome 打印预览 PDF、登录/考试/Admin 全流程截图等整体视觉验收债务；本轮已收口 A2UI bridge、R2 字体源、浏览器告警 guard、导航/回跳漂移、Dashboard 雷达/热力图、ExamResult reduced-motion 与打印 marker 验收。
+- 2026-04-29 追加验收已覆盖全局命令面板、Auth/Account/Coach/Admin route family、UI Gallery V2 charts/data background、ExamResult reduced-motion 与打印 marker，当前代码侧 UI/UX 收口见 `docs/plans/2026-04-29-release-readiness.md`。真实 Chrome 打印预览 PDF、登录/考试/Admin 全流程截图和生产浏览器截图矩阵仍属于目标部署环境的人工验收，不再作为本地代码阻塞项。
 - 单 VPS 部署推荐已形成，但真实域名、Caddy/TLS、PM2 reload、备份恢复、Sentry、邮件 DNS、安全加固与回滚仍未实机演练，不能视为生产上线完成。

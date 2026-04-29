@@ -44,14 +44,14 @@ import {
 const QUERY_KEY = ["admin-import-batches"] as const;
 
 const bundleLabels: Record<AdminImportBundleType, string> = {
-  question_bundle: "Question Bundle",
-  prebuilt_paper_bundle: "Prebuilt Paper Bundle",
+  question_bundle: "题目 Bundle",
+  prebuilt_paper_bundle: "预制卷 Bundle",
 };
 
 const batchTypeLabels: Record<AdminImportBatchType, string> = {
-  question_bundle: "Question Bundle",
-  prebuilt_paper_bundle: "Prebuilt Paper Bundle",
-  manual_question_import: "Manual Question Import",
+  question_bundle: "题目 Bundle",
+  prebuilt_paper_bundle: "预制卷 Bundle",
+  manual_question_import: "手工题目导入",
 };
 
 type BatchTypeFilter = AdminImportBatchType | "all";
@@ -103,11 +103,11 @@ const bundlePlaceholders: Record<AdminImportBundleType, string> = {
 };
 
 const statusLabels: Record<AdminImportBatchStatus, string> = {
-  dry_run: "Dry Run",
-  processing: "Processing",
-  applied: "Applied",
-  partial_failed: "Partial Failed",
-  failed: "Failed",
+  dry_run: "预演",
+  processing: "处理中",
+  applied: "已应用",
+  partial_failed: "部分失败",
+  failed: "失败",
 };
 
 const statusVariants: Record<
@@ -166,9 +166,7 @@ function BundleResultCard({
           <FileJson className="text-primary h-4 w-4" />
           {bundleLabels[bundleType]} 回显
         </CardTitle>
-        <CardDescription>
-          展示最近一次 dry-run / apply 的返回摘要，优先暴露契约级错误。
-        </CardDescription>
+        <CardDescription>展示最近一次预演或入库结果，优先暴露数据结构错误。</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
         {parseError ? (
@@ -224,13 +222,13 @@ function BundleResultCard({
               </ScrollArea>
             ) : (
               <div className="border-border bg-subtle/20 text-muted-foreground rounded-[var(--radius-md)] border p-3">
-                当前返回没有 error items。
+                当前返回没有错误条目。
               </div>
             )}
           </>
         ) : (
           <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border border-dashed p-4">
-            粘贴一份 raw bundle JSON 后执行 dry-run 或 apply，这里会显示最新结果。
+            粘贴一份离线内容 JSON 后执行预演或入库，这里会显示最新结果。
           </div>
         )}
       </CardContent>
@@ -308,8 +306,8 @@ export default function AdminImports() {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       toast.success(
         action === "dry-run"
-          ? `${bundleLabels[bundleType]} dry-run 已完成`
-          : `${bundleLabels[bundleType]} apply 已完成`,
+          ? `${bundleLabels[bundleType]}预演已完成`
+          : `${bundleLabels[bundleType]}入库已完成`,
       );
     },
     onError: (error) => {
@@ -359,7 +357,7 @@ export default function AdminImports() {
 
   function handlePrepareRepair(batch: AdminImportBatch) {
     if (batch.bundleType === "manual_question_import") {
-      toast.error("manual_question_import 不支持在 raw bundle 面板中重新导入");
+      toast.error("手工题目导入不支持在离线内容面板中重新导入");
       return;
     }
 
@@ -372,7 +370,7 @@ export default function AdminImports() {
       ...current,
       [batch.bundleType]: undefined,
     }));
-    toast.success("已切换到对应 bundle 面板，修复 JSON 后先 dry-run 再 apply");
+    toast.success("已切换到对应 bundle 面板，修复 JSON 后先预演再入库");
   }
 
   const activeResult = results[activeTab];
@@ -383,8 +381,8 @@ export default function AdminImports() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">导入中心</h1>
           <p className="text-muted-foreground mt-2 max-w-3xl text-sm">
-            这里直接对接 raw bundle 契约。运营侧粘贴离线生成的完整 JSON，服务端会计算 checksum、写入
-            import_batches，并复用离线 workflow 的 dry-run / apply 语义。
+            运营侧粘贴离线生成的完整
+            JSON，服务端会校验完整性、记录导入批次，并按“先预演、再入库”的节奏处理。
           </p>
         </div>
 
@@ -405,9 +403,7 @@ export default function AdminImports() {
             </CardHeader>
             <CardContent>
               <div className="text-foreground text-sm font-semibold">{bundleLabels[activeTab]}</div>
-              <div className="text-muted-foreground mt-1 text-xs">
-                raw bundle in, shared workflow out
-              </div>
+              <div className="text-muted-foreground mt-1 text-xs">离线内容统一处理</div>
             </CardContent>
           </Card>
         </div>
@@ -418,11 +414,10 @@ export default function AdminImports() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Upload className="text-primary h-4 w-4" />
-              Raw Bundle 提交
+              离线内容提交
             </CardTitle>
             <CardDescription>
-              直接粘贴 raw question bundle / prebuilt paper bundle
-              JSON。客户端只做基础解析，真正的结构校验和业务规则仍由服务端 workflow 执行。
+              直接粘贴题目或预制卷 JSON。客户端只做基础解析，真正的结构校验和业务规则由服务端执行。
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -431,13 +426,13 @@ export default function AdminImports() {
               onValueChange={(value) => setActiveTab(value as AdminImportBundleType)}
             >
               <TabsList>
-                <TabsTrigger value="question_bundle">Question Bundle</TabsTrigger>
-                <TabsTrigger value="prebuilt_paper_bundle">Prebuilt Paper Bundle</TabsTrigger>
+                <TabsTrigger value="question_bundle">题目 Bundle</TabsTrigger>
+                <TabsTrigger value="prebuilt_paper_bundle">预制卷 Bundle</TabsTrigger>
               </TabsList>
 
               <TabsContent value="question_bundle" className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="question-bundle-json">question bundle JSON</Label>
+                  <Label htmlFor="question-bundle-json">题目 Bundle JSON</Label>
                   <Textarea
                     id="question-bundle-json"
                     className="min-h-[320px] font-mono text-xs"
@@ -459,20 +454,20 @@ export default function AdminImports() {
                     loading={isSubmitting("question_bundle", "dry-run")}
                     onClick={() => handleSubmit("question_bundle", "dry-run")}
                   >
-                    Dry Run
+                    预演
                   </Button>
                   <Button
                     loading={isSubmitting("question_bundle", "apply")}
                     onClick={() => handleSubmit("question_bundle", "apply")}
                   >
-                    Apply
+                    入库
                   </Button>
                 </div>
               </TabsContent>
 
               <TabsContent value="prebuilt_paper_bundle" className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="prebuilt-paper-bundle-json">prebuilt paper bundle JSON</Label>
+                  <Label htmlFor="prebuilt-paper-bundle-json">预制卷 Bundle JSON</Label>
                   <Textarea
                     id="prebuilt-paper-bundle-json"
                     className="min-h-[320px] font-mono text-xs"
@@ -494,13 +489,13 @@ export default function AdminImports() {
                     loading={isSubmitting("prebuilt_paper_bundle", "dry-run")}
                     onClick={() => handleSubmit("prebuilt_paper_bundle", "dry-run")}
                   >
-                    Dry Run
+                    预演
                   </Button>
                   <Button
                     loading={isSubmitting("prebuilt_paper_bundle", "apply")}
                     onClick={() => handleSubmit("prebuilt_paper_bundle", "apply")}
                   >
-                    Apply
+                    入库
                   </Button>
                 </div>
               </TabsContent>
@@ -522,9 +517,7 @@ export default function AdminImports() {
               <RefreshCcw className="text-primary h-4 w-4" />
               最近导入批次
             </CardTitle>
-            <CardDescription>
-              按 import_batches 读取最近 10 条记录，用于核对 dry-run / apply 的落库结果。
-            </CardDescription>
+            <CardDescription>读取最近 10 条导入记录，用于核对预演和入库结果。</CardDescription>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <Select
@@ -536,9 +529,9 @@ export default function AdminImports() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部 bundle 类型</SelectItem>
-                <SelectItem value="question_bundle">Question Bundle</SelectItem>
-                <SelectItem value="prebuilt_paper_bundle">Prebuilt Paper Bundle</SelectItem>
-                <SelectItem value="manual_question_import">Manual Question Import</SelectItem>
+                <SelectItem value="question_bundle">题目 Bundle</SelectItem>
+                <SelectItem value="prebuilt_paper_bundle">预制卷 Bundle</SelectItem>
+                <SelectItem value="manual_question_import">手工题目导入</SelectItem>
               </SelectContent>
             </Select>
 
@@ -551,11 +544,11 @@ export default function AdminImports() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部状态</SelectItem>
-                <SelectItem value="dry_run">Dry Run</SelectItem>
-                <SelectItem value="processing">Processing</SelectItem>
-                <SelectItem value="applied">Applied</SelectItem>
-                <SelectItem value="partial_failed">Partial Failed</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
+                <SelectItem value="dry_run">预演</SelectItem>
+                <SelectItem value="processing">处理中</SelectItem>
+                <SelectItem value="applied">已应用</SelectItem>
+                <SelectItem value="partial_failed">部分失败</SelectItem>
+                <SelectItem value="failed">失败</SelectItem>
               </SelectContent>
             </Select>
 
@@ -566,17 +559,17 @@ export default function AdminImports() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
-            <Badge variant="outline">question_bundle</Badge>
-            <Badge variant="outline">prebuilt_paper_bundle</Badge>
+            <Badge variant="outline">题目 Bundle</Badge>
+            <Badge variant="outline">预制卷 Bundle</Badge>
             <Separator orientation="vertical" className="h-4" />
             <span>
-              统一读取 raw bundle 流程的批次摘要，支持按类型/状态过滤，并默认展开最近失败批次。
+              统一读取离线内容流程的批次摘要，支持按类型/状态过滤，并默认展开最近失败批次。
             </span>
           </div>
 
           {batchesQuery.isLoading ? (
             <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border p-4 text-sm">
-              正在加载 import batch 列表…
+              正在加载导入批次列表…
             </div>
           ) : batchesQuery.isError ? (
             <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-[var(--radius-md)] border p-4 text-sm">
@@ -589,7 +582,7 @@ export default function AdminImports() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Bundle</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>状态</TableHead>
                   <TableHead>Source</TableHead>
                   <TableHead>摘要</TableHead>
                   <TableHead>创建时间</TableHead>
@@ -771,8 +764,7 @@ export default function AdminImports() {
                                   </ScrollArea>
                                 ) : (
                                   <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border border-dashed p-4 text-sm">
-                                    这一批次没有 error items，可直接依据摘要判断 dry-run / apply
-                                    结果。
+                                    这一批次没有错误条目，可直接依据摘要判断预演或入库结果。
                                   </div>
                                 )}
                               </div>
@@ -787,7 +779,7 @@ export default function AdminImports() {
             </Table>
           ) : (
             <div className="border-border text-muted-foreground rounded-[var(--radius-md)] border border-dashed p-4 text-sm">
-              暂无 import batch 记录。
+              暂无导入批次记录。
             </div>
           )}
         </CardContent>

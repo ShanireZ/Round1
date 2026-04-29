@@ -413,9 +413,7 @@ function StudentDetailSheet({
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
         <SheetHeader>
           <SheetTitle>{student?.displayName ?? "学生详情"}</SheetTitle>
-          <SheetDescription>
-            成绩趋势、弱项知识点和题型表现来自当前班级 assignment attempts。
-          </SheetDescription>
+          <SheetDescription>成绩趋势、弱项知识点和题型表现来自当前班级任务作答。</SheetDescription>
         </SheetHeader>
 
         {student ? (
@@ -627,7 +625,7 @@ export default function CoachReport() {
     return (
       <CoachAccessPrompt
         title="当前账号没有教练权限"
-        description="只有 coach 或 admin 可以查看群体热力图、题型统计和学生下钻。"
+        description="只有教练或管理员可以查看群体热力图、题型统计和学生下钻。"
       />
     );
   }
@@ -636,7 +634,7 @@ export default function CoachReport() {
     return (
       <CoachAccessPrompt
         title="还没有可查看的班级"
-        description="你成为班级 coach 或 admin 后，这里会显示 assignment-only 报表。"
+        description="你成为班级教练或管理员后，这里会显示班级任务报表。"
       />
     );
   }
@@ -696,11 +694,7 @@ export default function CoachReport() {
               value={String(report.totals.students)}
               description={activeClass?.name ?? "当前班级"}
             />
-            <KpiCard
-              label="完成"
-              value={String(report.totals.completed)}
-              description="assignment progress"
-            />
+            <KpiCard label="完成" value={String(report.totals.completed)} description="任务进度" />
             <KpiCard label="错过" value={String(report.totals.missed)} description="需要教练跟进" />
             <KpiCard
               label="均分"
@@ -763,9 +757,7 @@ export default function CoachReport() {
           }
         }}
       />
-      <div className="print-footer hidden">
-        Round1 CoachReport · assignment-only · {generatedAt}
-      </div>
+      <div className="print-footer hidden">Round1 CoachReport · 班级任务 · {generatedAt}</div>
     </div>
   );
 }

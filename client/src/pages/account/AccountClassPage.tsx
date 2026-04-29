@@ -56,7 +56,7 @@ function LoginRequired({ focusJoin }: { focusJoin: boolean }) {
           <div>
             <h1 className="text-foreground text-2xl font-semibold">登录后加入班级</h1>
             <p className="text-muted-foreground mt-3 text-sm leading-6">
-              班级码、邀请链接和 assignment 进度都绑定到你的 Round1 账号。
+              班级码、邀请链接和任务进度都绑定到你的 Round1 账号。
             </p>
           </div>
           <Button asChild>
@@ -69,6 +69,16 @@ function LoginRequired({ focusJoin }: { focusJoin: boolean }) {
       </Card>
     </div>
   );
+}
+
+function formatJoinedViaLabel(value: string): string {
+  if (value === "invite_link") {
+    return "邀请链接";
+  }
+  if (value === "code") {
+    return "班级码";
+  }
+  return value;
 }
 
 function ClassJoinPanel({
@@ -192,7 +202,7 @@ function ClassCard({ klass }: { klass: StudentClassSummary }) {
             </CardDescription>
           </div>
           <Badge variant={archived ? "outline" : "saved"}>
-            {archived ? "archived" : klass.joinedVia}
+            {archived ? "已归档" : formatJoinedViaLabel(klass.joinedVia)}
           </Badge>
         </div>
       </CardHeader>
@@ -336,7 +346,7 @@ export default function AccountClassPage({ focusJoin = false }: AccountClassPage
                 <div>
                   <div className="text-destructive font-medium">班级列表读取失败</div>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    当前会话可用时可以重试我的班级 API。
+                    当前登录状态有效时，可以重试读取我的班级。
                   </p>
                 </div>
                 <Button
@@ -355,7 +365,7 @@ export default function AccountClassPage({ focusJoin = false }: AccountClassPage
                 <ClipboardCheck className="text-muted-foreground mx-auto h-8 w-8" />
                 <div className="text-foreground font-medium">还没有加入任何班级</div>
                 <p className="text-muted-foreground mx-auto max-w-md text-sm leading-6">
-                  加入班级后，这里会展示 assignment 进度和来自教练的固定预制卷任务。
+                  加入班级后，这里会展示任务进度和来自教练的固定预制卷任务。
                 </p>
               </div>
             </div>

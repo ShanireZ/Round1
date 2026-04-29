@@ -105,8 +105,7 @@ export default function AdminSettings() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">系统设置</h1>
           <p className="text-muted-foreground mt-2 max-w-3xl text-sm">
-            维护 app_settings 中的运行时配置。变更会记录审计，并通过 Redis config:change 通知 API
-            与作业进程热更新。
+            维护运行时配置。变更会记录审计，并通知应用服务与后台进程热更新。
           </p>
         </div>
         <Card variant="stat" className="min-w-36">
@@ -174,7 +173,7 @@ export default function AdminSettings() {
                         {stringifyJson(setting.valueJson)}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {setting.isDefault ? "default" : formatTimestamp(setting.updatedAt)}
+                        {setting.isDefault ? "默认值" : formatTimestamp(setting.updatedAt)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -191,7 +190,7 @@ export default function AdminSettings() {
         <Card variant="flat" className="min-w-0">
           <CardHeader>
             <CardTitle className="text-lg">编辑设置</CardTitle>
-            <CardDescription>保存时使用 PATCH /api/v1/admin/settings/:key。</CardDescription>
+            <CardDescription>保存后会进入配置热更新流程。</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {selectedSetting ? (
@@ -228,7 +227,7 @@ export default function AdminSettings() {
               </Button>
               {selectedSetting ? (
                 <Badge variant={selectedSetting.isDefault ? "outline" : "default"}>
-                  {selectedSetting.isDefault ? "Default" : "DB Override"}
+                  {selectedSetting.isDefault ? "默认值" : "数据库覆盖"}
                 </Badge>
               ) : null}
             </div>

@@ -59,7 +59,7 @@ export function A2uiDesignSurface() {
             A2UI v0.9 package schema
           </div>
           <div className="text-foreground mt-1 text-sm font-medium">
-            {surface ? "Surface ready" : "Preparing surface"}
+            {surface ? "Surface 已就绪" : "正在准备 Surface"}
           </div>
         </div>
         <div className="border-border/80 bg-subtle text-muted-foreground rounded-[var(--radius-md)] border px-3 py-1.5 font-mono text-[11px]">

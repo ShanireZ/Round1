@@ -156,7 +156,7 @@ function AssignmentCard({
                 <Clock3 className="h-3.5 w-3.5" />
                 {formatDate(assignment.dueAt)}
               </span>
-              <span className="tabular-nums">blueprint v{assignment.blueprintVersion}</span>
+              <span className="tabular-nums">蓝图 v{assignment.blueprintVersion}</span>
             </div>
           </div>
         </div>
@@ -275,7 +275,7 @@ export default function CoachAssignments() {
     return (
       <CoachAccessPrompt
         title="登录后查看任务"
-        description="任务管理会读取受保护的班级和 assignment progress。"
+        description="任务管理会读取受保护的班级和任务进度。"
         action="login"
       />
     );
@@ -285,7 +285,7 @@ export default function CoachAssignments() {
     return (
       <CoachAccessPrompt
         title="当前账号没有教练权限"
-        description="只有 coach 或 admin 可以查看班级任务。"
+        description="只有教练或管理员可以查看班级任务。"
       />
     );
   }
@@ -304,7 +304,7 @@ export default function CoachAssignments() {
       <Card variant="hero" className="overflow-hidden">
         <CardHeader className="gap-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <Badge variant="outline">Coach Assignments</Badge>
+            <Badge variant="outline">Coach 任务</Badge>
             <CardTitle className="mt-3 text-2xl">任务</CardTitle>
             <CardDescription className="mt-2 max-w-2xl">
               按班级创建和查看固定预制卷任务，不混入学生自练数据。
@@ -340,7 +340,7 @@ export default function CoachAssignments() {
         <CardHeader>
           <CardTitle className="text-lg">创建任务</CardTitle>
           <CardDescription>
-            任务会绑定一张已发布预制卷，并为当前班级学生生成 pending progress。
+            任务会绑定一张已发布预制卷，并为当前班级学生生成待完成进度。
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -448,7 +448,7 @@ export default function CoachAssignments() {
             <div className="text-foreground mt-2 text-2xl font-semibold tabular-nums">
               {openCount}
             </div>
-            <div className="text-muted-foreground mt-1 text-xs">assigned</div>
+            <div className="text-muted-foreground mt-1 text-xs">待完成任务</div>
           </CardContent>
         </Card>
         <Card variant="stat" className="border-border bg-card">
@@ -457,7 +457,7 @@ export default function CoachAssignments() {
             <div className="text-foreground mt-2 text-2xl font-semibold tabular-nums">
               {assignedStudents}
             </div>
-            <div className="text-muted-foreground mt-1 text-xs">assignment progress</div>
+            <div className="text-muted-foreground mt-1 text-xs">任务进度</div>
           </CardContent>
         </Card>
       </div>
@@ -469,9 +469,7 @@ export default function CoachAssignments() {
           <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="text-destructive font-medium">任务列表读取失败</div>
-              <div className="text-muted-foreground mt-1 text-sm">
-                请重试当前班级 assignment API。
-              </div>
+              <div className="text-muted-foreground mt-1 text-sm">请重试读取当前班级任务。</div>
             </div>
             <Button
               type="button"
@@ -489,7 +487,7 @@ export default function CoachAssignments() {
             <ClipboardList className="text-muted-foreground mx-auto h-8 w-8" />
             <div className="text-foreground font-medium">当前班级还没有任务</div>
             <div className="text-muted-foreground text-sm">
-              创建任务后，系统会绑定已发布预制卷并为当前学生成员写入 progress。
+              创建任务后，系统会绑定已发布预制卷并为当前学生成员记录进度。
             </div>
           </div>
         </div>
@@ -509,7 +507,7 @@ export default function CoachAssignments() {
       <Card variant="flat" className="border-border bg-card">
         <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="text-foreground font-medium">查看 assignment-only 聚合报告</div>
+            <div className="text-foreground font-medium">查看班级任务聚合报告</div>
             <div className="text-muted-foreground mt-1 text-sm">
               报告页会按当前班级聚合热力图、题型统计和学生下钻。
             </div>

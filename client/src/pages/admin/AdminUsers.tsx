@@ -100,7 +100,7 @@ export default function AdminUsers() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">用户管理</h1>
           <p className="text-muted-foreground mt-2 max-w-3xl text-sm">
-            管理账号角色和禁用状态。角色变更、禁用与恢复都走 Admin step-up 与审计链路。
+            管理账号角色和禁用状态。角色变更、禁用与恢复都走管理员二次验证与审计链路。
           </p>
         </div>
         <Card variant="stat" className="min-w-36">

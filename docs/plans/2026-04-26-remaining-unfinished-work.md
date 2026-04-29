@@ -10,8 +10,9 @@
 
 - Closed an additional UI/UX contract gap: global command navigation is now implemented through `Cmd/Ctrl+K` / the desktop command trigger, using shadcn/Radix command primitives and tokenized theme actions. Admin navigation now includes `/admin` as `管理看板`.
 - Admin dashboard is no longer a link-only hub: it now summarizes question assets, published prebuilt papers, import batches, users, recent import activity, and API/DB/Redis health.
-- Browser visual acceptance now covers Dashboard, ExamNew, Auth entry, Account, Coach, Admin, ExamResult print/reduced-motion, and A2UI BYOC gallery in `server/__tests__/e2e/ui-visual-audit.spec.ts`; the current run passed 9/9.
-- Deployment-test readiness evidence is recorded in `docs/plans/2026-04-29-release-readiness.md`. Code/build/UI gates pass, but full local `npm run test`, migration status, and healthcheck still require Redis/Postgres/API/frontend runtime availability. Docker Desktop was not running on this machine, so local `pg`/`redis` compose services could not be started during this pass.
+- Functional page copy has been closed for the current code surface: ExamSession, ExamResult, Dashboard, Account, Coach, Admin, A2UI BYOC, and UI Gallery now present role-facing Chinese business copy instead of leaking endpoint paths, runtime/payload terminology, internal attempt identifiers, or raw enum labels.
+- Browser visual acceptance now covers Dashboard, command navigation, ExamNew, Auth entry, Account, Coach, Admin, ExamResult print/reduced-motion, A2UI BYOC gallery, and UI Gallery V2 charts/data backgrounds in `server/__tests__/e2e/ui-visual-audit.spec.ts`; the current run passed 10/10.
+- Deployment-test readiness evidence is recorded in `docs/plans/2026-04-29-release-readiness.md`. Code/build/UI gates, full local `npm run test`, migration status, and local API/frontend healthcheck pass after starting Docker Desktop and local `pg`/`redis`. Production domain, Caddy/TLS, PM2, backup/restore, Sentry, real mail/Turnstile, Redis degradation, and rollback rehearsals remain target-environment work.
 
 ## 2026-04-28 Maintenance Addendum: Coach Class Detail UI
 
@@ -96,7 +97,7 @@
 ### 4. 教练后台与班级/任务闭环
 
 - [x] 挂载 `/api/v1/classes/join`。（2026-04-28：`server/routes/coach.ts` 已挂载，支持 `code` 或 `inviteToken` 二选一。）
-- [x] 挂载 `/api/v1/coach/**` 路由组与后端服务：班级、成员、邀请、任务、报表。（2026-04-28：后端 slice 覆盖 classes/members/invites/coaches/assignments/report；Coach 前端页面仍为后续项。）
+- [x] 挂载 `/api/v1/coach/**` 路由组与后端服务：班级、成员、邀请、任务、报表。（2026-04-28：后端 slice 覆盖 classes/members/invites/coaches/assignments/report。2026-04-29：Coach 前端 `/coach/classes`、`/coach/classes/:id`、`/coach/assignments`、`/coach/report` 均已接入真实页面并进入视觉验收。）
 - [x] 教练创建/编辑/归档班级，生成与轮换班级码。（2026-04-28：创建者自动成为 owner，归档后拒绝新入班和新邀请。）
 - [x] 邀请链接签发、加入、撤销、过期与最大使用次数原子扣减。（2026-04-28：邀请 token 服务端只存 hash，join 用 `UPDATE class_invites SET use_count = use_count + 1` 的条件更新扣减。）
 - [x] 学生通过班级码或邀请链接入班；重复入班幂等成功；归档班级拒绝加入。（2026-04-28：重复 membership 返回当前记录，不制造重复行；归档班级拒绝新 membership。）
@@ -107,8 +108,8 @@
 - [x] 教练报表只包含班级 assignment attempts，不混入学生自练数据。（2026-04-28：`GET /api/v1/coach/report/:classId` 从 `assignments -> assignment_progress -> attempts` 聚合。）
 - [x] coach/admin 以学生身份体验答题的数据需在班级统计中排除。（2026-04-28：基础报表聚合显式过滤 `users.role = 'student'`。）
 - [x] 群体热力图、题型统计、学生详情、学生趋势与下钻 Sheet 需要落地和性能验收。（2026-04-28：后端 `GET /api/v1/coach/report/:classId` 已追加 heatmap、questionTypeStats、students、student trend；前端 `/coach/report` 已从占位页切到真实页面，支持班级选择、群体热力图、题型统计、学生详情 Sheet、CSV 导出和打印入口。维护追加已用 Playwright 拦截 API 注入 180 名学生 × 24 个知识点规模化数据，桌面 643ms、移动 2418ms 渲染到第一页热力图，学生详情 Sheet 与题型下钻可用，browser warning/error/pageerror/requestfailed 均为 0；真实生产 p95 继续按性能标准观测。）
-- [x] Coach 权限边界验收：只能看到自己参与班级的数据。（2026-04-28：后端 Coach API 均通过 `class_coaches` 关系授权；Coach 前端页面接入与视觉验收仍随下一条 UI 项推进。）
-- [x] Coach 班级/任务列表前端入口落地。（2026-04-28 维护追加：`/coach/classes` 已接入真实班级工作台，支持班级列表、创建班级、复制/轮换班级码、归档和进入报告/任务；`/coach/assignments` 已接入班级选择、assignment 列表、已发布预制卷选择器、创建任务和关闭任务。新增 `GET /api/v1/coach/prebuilt-papers` 避免 Coach UI 依赖 Admin 预制卷库权限。`CoachClassDetail` 的成员/邀请/教练组深层管理，以及桌面/移动/键盘浏览器视觉验收仍保留在 UI/UX backlog。）
+- [x] Coach 权限边界验收：只能看到自己参与班级的数据。（2026-04-28：后端 Coach API 均通过 `class_coaches` 关系授权；Admin 全局教练组管理走独立 step-up/audit 路由。2026-04-29：Coach route family 已进入桌面/移动视觉验收。）
+- [x] Coach 工作台前端入口落地。（2026-04-28 维护追加：`/coach/classes` 已接入真实班级工作台，支持班级列表、创建班级、复制/轮换班级码、归档和进入报告/任务；`/coach/assignments` 已接入班级选择、assignment 列表、已发布预制卷选择器、创建任务和关闭任务。新增 `GET /api/v1/coach/prebuilt-papers` 避免 Coach UI 依赖 Admin 预制卷库权限。2026-04-29：`/coach/classes/:id` 已补成员/邀请/教练组深层管理，CoachClasses/CoachClassDetail/CoachAssignments/CoachReport 已进入 `ui-visual-audit.spec.ts` 桌面/移动无横向溢出验收；更丰富的教练用户搜索/选择器保留为体验增强。）
 
 ### 5. API 与配置契约补齐
 
@@ -138,7 +139,7 @@
 
 ### 7. UI/UX 与前端体验收口
 
-- [ ] UI 设计系统中的 tokens、字体托管、组件库、布局、品牌资产、打印样式与 `/dev/ui-gallery` 仍需按当前代码状态逐项验收。（2026-04-27：已新增 `npm run verify:ui-tokens`，阻断 `client/src` TS/TSX 中重新引入原始 hex/rgb/hsl magic color；截图、键盘、移动端、reduced motion 与打印视觉验收仍需继续收口。2026-04-28：已安装 Google A2UI，并在 `/dev/ui-gallery` 增加 A2UI token bridge 示例，用于后续 agent UI/UX 设计辅助验收；现有 Radix/shadcn 生产组件作为受控辅助实现。同日已扩展 `verify:ui-tokens` 阻断 JSX inline style、`color-mix()` 与 `min-height:auto` / `min-width:auto` 兼容告警回归，并将字体运行时源收口到公开 R2 `/font/`。维护追加已把 A2UI 扩展到 Round1 BYOC custom catalog，并用本地 Card/Badge/Progress 渲染 CoachReport snapshot；`/dev/ui-gallery#plate-11` 浏览器复查 A2UI BYOC 可见且 warning/error 为 0。维护追加（三）已补 AppShell 布局 token 命名漂移、Dashboard 能力雷达/弱项热力图、ExamResult reduced-motion 揭晓和打印页眉页脚，并新增 `server/__tests__/e2e/ui-visual-audit.spec.ts` 覆盖 Dashboard 桌面/移动、ExamResult print/reduced motion 与 A2UI BYOC gallery。维护追加（五）已把 `globals.css` / `print.css` 残留 raw color 收敛到 `tokens.css`，并让 `verify:ui-tokens` 扫描非 token CSS。维护追加（六）已移除 `/dev/ui-gallery` 整文件 token guard 例外，A2UI payload guard 增加 data binding `/draft` 根与 media URL allowlist，`ui-visual-audit.spec.ts` 增补 `/exams/new` 桌面/移动无溢出与开考确认 Dialog 验收，并把 ExamNew UI 计划从旧在线组卷 cooldown 倒计时更新为 prebuilt-only 可用性/缺卷状态。2026-04-29：新增全局命令面板、Admin 看板运营摘要，并把 Account/Coach/Admin route family 加入 Playwright 桌面/移动无水平溢出验收；本轮 `verify:ui-tokens` 与 9 项 `ui-visual-audit` 均通过。真实生产浏览器截图矩阵与人工交互走查仍需在部署环境执行。）
+- [x] UI 设计系统中的 tokens、字体托管、组件库、布局、品牌资产、打印样式与 `/dev/ui-gallery` 已按当前代码状态完成本地收口验收。（2026-04-27：已新增 `npm run verify:ui-tokens`，阻断 `client/src` TS/TSX 中重新引入原始 hex/rgb/hsl magic color。2026-04-28：已安装 Google A2UI，并在 `/dev/ui-gallery` 增加 A2UI token bridge 示例；扩展 `verify:ui-tokens` 阻断 JSX inline style、`color-mix()` 与 `min-height:auto` / `min-width:auto` 兼容告警回归；字体运行时源收口到公开 R2 `/font/`；A2UI 扩展到 Round1 BYOC custom catalog；Dashboard 雷达/热力图、ExamResult reduced-motion 揭晓、打印页眉页脚、A2UI BYOC gallery 与 `/exams/new` 均纳入 Playwright 视觉验收。2026-04-29：新增全局命令面板、Admin 看板运营摘要、CoachClassDetail 深层管理，并把 Account/Coach/Admin route family 与 UI Gallery V2 charts/data background 加入 Playwright 桌面/移动无水平溢出验收；`verify:ui-tokens` 与 10 项 `ui-visual-audit` 均通过。真实生产浏览器截图矩阵、人工交互走查和真实打印预览归入部署/发布环境验收，不再作为当前代码 UI/UX 收口阻塞项。）
 - [x] CppLearn 登录视觉需补齐：CppLearn OIDC 入口改用 CppLearn 提供的横幅图片，通过同源 `/logo/cpplearn.jpg` 加载；Vite 开发代理读取 `R2_PUBLIC_BASE_URL`，生产 Caddy 通过 `Caddyfile.example` 中的 R2 源站字面量代理到 R2 `/logo/cpplearn.jpg`；不再使用旧的纯文字字标或单独字体源。（2026-04-28：`/login` 已接入真实 AuthLayout 分栏与 CppLearn OIDC provider 入口。）
 - [x] QQ 互联登录视觉先占位。（2026-04-28 维护追加：`enabledAuthProviders/providers` 不再把未实现的 `qq` 当成可用登录流程；`authProviderPlaceholders/placeholders` 在 feature flag 开启时返回 `qq`，登录页渲染禁用占位卡并避免触发 501 OAuth 占位接口。）
 - [ ] i18n 多语言为未来扩展项。

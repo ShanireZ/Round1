@@ -329,8 +329,8 @@ export default function UIGallery() {
 
           {/* running rule */}
           <div className="text-muted-foreground relative z-10 flex items-center justify-between px-6 pt-6 font-mono text-[10px] tracking-[0.3em] uppercase md:px-10">
-            <span>Round·One · Specimen Sheet</span>
-            <span className="hidden sm:inline">Vol. 01 / Issue 001</span>
+            <span>Round·One · 视觉样本册</span>
+            <span className="hidden sm:inline">卷 01 / 期 001</span>
             <span>{issueDate}</span>
           </div>
 
@@ -346,19 +346,19 @@ export default function UIGallery() {
 
               <dl className="text-muted-foreground mt-8 space-y-3 font-mono text-[11px] tracking-[0.14em] uppercase">
                 <div className="border-border/60 flex justify-between gap-4 border-b pb-2">
-                  <dt>Theme</dt>
+                  <dt>主题</dt>
                   <dd className="text-foreground">{resolvedTheme}</dd>
                 </div>
                 <div className="border-border/60 flex justify-between gap-4 border-b pb-2">
-                  <dt>Grid</dt>
+                  <dt>栅格</dt>
                   <dd className="text-foreground">8pt</dd>
                 </div>
                 <div className="border-border/60 flex justify-between gap-4 border-b pb-2">
-                  <dt>Accent</dt>
+                  <dt>焦点色</dt>
                   <dd className="text-foreground">--color-primary</dd>
                 </div>
                 <div className="border-border/60 flex justify-between gap-4 border-b pb-2">
-                  <dt>Serif</dt>
+                  <dt>衬线</dt>
                   <dd className="text-foreground">Fraunces</dd>
                 </div>
               </dl>
@@ -368,12 +368,12 @@ export default function UIGallery() {
             <div className="md:col-span-9">
               <div className="font-display text-foreground flex flex-col items-start gap-2">
                 <h1 className="relative text-[clamp(64px,13vw,188px)] leading-[0.82] font-light tracking-[-0.04em]">
-                  <span className="font-ss01 text-primary italic">Specimen</span>
+                  <span className="font-ss01 text-primary italic">样本</span>
                 </h1>
                 <h1 className="text-[clamp(56px,11vw,168px)] leading-[0.82] font-light tracking-[-0.04em]">
                   &amp;{" "}
                   <span className="decoration-primary/80 underline decoration-[0.04em] underline-offset-[0.12em]">
-                    Système
+                    系统
                   </span>
                 </h1>
               </div>
@@ -390,21 +390,21 @@ export default function UIGallery() {
                     size="sm"
                     onClick={() => setTheme("light")}
                   >
-                    <Sun className="mr-1 h-3.5 w-3.5" /> Light
+                    <Sun className="mr-1 h-3.5 w-3.5" /> 亮色
                   </Button>
                   <Button
                     variant={theme === "dark" ? "primary" : "secondary"}
                     size="sm"
                     onClick={() => setTheme("dark")}
                   >
-                    <Moon className="mr-1 h-3.5 w-3.5" /> Dark
+                    <Moon className="mr-1 h-3.5 w-3.5" /> 暗色
                   </Button>
                   <Button
                     variant={theme === "system" ? "primary" : "secondary"}
                     size="sm"
                     onClick={() => setTheme("system")}
                   >
-                    <Monitor className="mr-1 h-3.5 w-3.5" /> Sys
+                    <Monitor className="mr-1 h-3.5 w-3.5" /> 系统
                   </Button>
                 </div>
               </div>
@@ -412,16 +412,16 @@ export default function UIGallery() {
               {/* Index */}
               <nav className="border-border/70 mt-12 grid grid-cols-2 gap-x-6 gap-y-2 border-t pt-4 text-sm sm:grid-cols-3 lg:grid-cols-4">
                 {[
-                  ["01", "Palette"],
-                  ["02", "Typography"],
-                  ["03", "Brand"],
-                  ["04", "Controls"],
-                  ["05", "Form"],
-                  ["06", "Signals"],
-                  ["07", "Surfaces"],
-                  ["08", "Overlay"],
-                  ["09", "Data"],
-                  ["10", "Rhythm"],
+                  ["01", "色板"],
+                  ["02", "字体"],
+                  ["03", "品牌"],
+                  ["04", "控件"],
+                  ["05", "表单"],
+                  ["06", "信号"],
+                  ["07", "表面"],
+                  ["08", "浮层"],
+                  ["09", "数据"],
+                  ["10", "节奏"],
                   ["11", "A2UI"],
                 ].map(([no, name]) => (
                   <a
@@ -445,7 +445,7 @@ export default function UIGallery() {
           {/* Bottom rule */}
           <div className="border-border/70 text-muted-foreground relative z-10 flex items-center justify-between border-t px-6 py-3 font-mono text-[10px] tracking-[0.25em] uppercase md:px-10">
             <span>↓ Continue · 向下翻阅</span>
-            <span>Printed in 8pt Grid</span>
+            <span>8pt 栅格排印</span>
           </div>
         </section>
 
@@ -457,40 +457,40 @@ export default function UIGallery() {
           <Plate
             no="01"
             eyebrow="Pigments · 颜料"
-            title="Palette"
+            title="色板"
             lede="语义色令牌，承载产品所有信号与情绪层级。"
           >
             <div className="space-y-10">
               <div>
                 <div className="border-border/60 mb-4 flex items-baseline justify-between border-b pb-2">
                   <span className="text-muted-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
-                    Core tokens
+                    核心令牌
                   </span>
                   <span className="text-muted-foreground font-mono text-[10px] tabular-nums">
                     13 entries
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                  <Chip name="Primary" cssVar="--color-primary" />
-                  <Chip name="Primary FG" cssVar="--color-primary-foreground" />
-                  <Chip name="Background" cssVar="--color-background" />
-                  <Chip name="Foreground" cssVar="--color-foreground" />
-                  <Chip name="Surface" cssVar="--color-surface" />
-                  <Chip name="Subtle" cssVar="--color-subtle" />
-                  <Chip name="Muted FG" cssVar="--color-muted-foreground" />
-                  <Chip name="Border" cssVar="--color-border" />
-                  <Chip name="Accent Wash" cssVar="--color-accent-wash" />
-                  <Chip name="Destructive" cssVar="--color-destructive" />
-                  <Chip name="Success" cssVar="--color-success" />
-                  <Chip name="Warning" cssVar="--color-warning" />
-                  <Chip name="Info" cssVar="--color-info" />
+                  <Chip name="主色" cssVar="--color-primary" />
+                  <Chip name="主色前景" cssVar="--color-primary-foreground" />
+                  <Chip name="背景" cssVar="--color-background" />
+                  <Chip name="前景" cssVar="--color-foreground" />
+                  <Chip name="表面" cssVar="--color-surface" />
+                  <Chip name="次级表面" cssVar="--color-subtle" />
+                  <Chip name="弱化文字" cssVar="--color-muted-foreground" />
+                  <Chip name="边框" cssVar="--color-border" />
+                  <Chip name="焦点浅底" cssVar="--color-accent-wash" />
+                  <Chip name="危险" cssVar="--color-destructive" />
+                  <Chip name="成功" cssVar="--color-success" />
+                  <Chip name="警告" cssVar="--color-warning" />
+                  <Chip name="信息" cssVar="--color-info" />
                 </div>
               </div>
 
               <div>
                 <div className="border-border/60 mb-4 flex items-baseline justify-between border-b pb-2">
                   <span className="text-muted-foreground font-mono text-[10px] tracking-[0.22em] uppercase">
-                    OJ verdicts
+                    判题状态
                   </span>
                   <span className="text-muted-foreground font-mono text-[10px] tabular-nums">
                     6 entries
@@ -512,13 +512,13 @@ export default function UIGallery() {
           <Plate
             no="02"
             eyebrow="Letterforms · 字形"
-            title="Typography"
+            title="字体"
             lede="衬线显示体与无衬线正文的对位，兼顾中英双轨。"
           >
             <div className="grid gap-4 md:grid-cols-12">
               <Exhibit
                 idx="A"
-                label="Display · Fraunces"
+                label="展示字 · Fraunces"
                 caption="var(--font-serif) · 用于海报级标题、仪式页、大号数字"
                 className="md:col-span-12"
               >
@@ -534,7 +534,7 @@ export default function UIGallery() {
 
               <Exhibit
                 idx="B"
-                label="Body · Geist / HarmonyOS"
+                label="正文 · Geist / HarmonyOS"
                 caption="var(--font-sans)"
                 className="md:col-span-8"
               >
@@ -546,7 +546,7 @@ export default function UIGallery() {
 
               <Exhibit
                 idx="C"
-                label="Mono · Geist Mono"
+                label="等宽 · Geist Mono"
                 caption="var(--font-mono)"
                 className="md:col-span-4"
               >
@@ -559,7 +559,7 @@ if (x > 0) ac();`}
 
               <Exhibit
                 idx="D"
-                label="Serif CN · Source Han Serif"
+                label="中文衬线 · Source Han Serif"
                 caption="var(--font-serif) · 中文衬线加重"
                 className="md:col-span-12"
               >
@@ -574,25 +574,25 @@ if (x > 0) ac();`}
           <Plate
             no="03"
             eyebrow="Identity · 标识"
-            title="Brand Marks"
+            title="品牌标识"
             lede="Logo 尺寸、组合变体，以及品牌氛围背景。"
           >
             <div className="grid gap-4 md:grid-cols-12">
-              <Exhibit idx="A" label="Logo scale" className="md:col-span-6">
+              <Exhibit idx="A" label="Logo 尺寸" className="md:col-span-6">
                 <div className="flex w-full flex-wrap items-end gap-8">
                   <Logo size="sm" />
                   <Logo size="md" />
                   <Logo size="lg" />
                 </div>
               </Exhibit>
-              <Exhibit idx="B" label="Logo mark" className="md:col-span-6" tone="dim">
+              <Exhibit idx="B" label="Logo 图标" className="md:col-span-6" tone="dim">
                 <div className="flex w-full items-center justify-center py-6">
                   <Logo size="lg" variant="mark" />
                 </div>
               </Exhibit>
               <Exhibit
                 idx="C"
-                label="Atmosphere · mesh + noise"
+                label="氛围 · mesh + noise"
                 caption="MeshGradient variant='hero' + NoiseTexture"
                 className="md:col-span-12"
                 tone="quiet"
@@ -617,24 +617,24 @@ if (x > 0) ac();`}
           <Plate
             no="04"
             eyebrow="Actuators · 按键"
-            title="Controls"
+            title="控件"
             lede="触发操作的五种声调 —— 主、副、鬼、毁、链。"
           >
             <div className="grid gap-4 md:grid-cols-12">
               <Exhibit idx="A" label="Variants" className="md:col-span-7">
                 <div className="flex flex-wrap items-center gap-3">
-                  <Button>Primary</Button>
-                  <Button variant="secondary">Secondary</Button>
-                  <Button variant="ghost">Ghost</Button>
-                  <Button variant="destructive">Destructive</Button>
-                  <Button variant="link">Link</Button>
+                  <Button>主要</Button>
+                  <Button variant="secondary">次要</Button>
+                  <Button variant="ghost">轻按钮</Button>
+                  <Button variant="destructive">危险</Button>
+                  <Button variant="link">链接</Button>
                 </div>
               </Exhibit>
               <Exhibit idx="B" label="Sizes" className="md:col-span-5">
                 <div className="flex flex-wrap items-center gap-3">
-                  <Button size="sm">Small</Button>
-                  <Button size="md">Default</Button>
-                  <Button size="lg">Large</Button>
+                  <Button size="sm">小</Button>
+                  <Button size="md">默认</Button>
+                  <Button size="lg">大</Button>
                   <Button size="icon">
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -643,10 +643,10 @@ if (x > 0) ac();`}
               <Exhibit idx="C" label="States" className="md:col-span-6">
                 <div className="flex flex-wrap items-center gap-3">
                   <Button loading>Loading…</Button>
-                  <Button disabled>Disabled</Button>
+                  <Button disabled>禁用</Button>
                 </div>
               </Exhibit>
-              <Exhibit idx="D" label="Dropdown" className="md:col-span-6">
+              <Exhibit idx="D" label="下拉菜单" className="md:col-span-6">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="secondary">
@@ -673,7 +673,7 @@ if (x > 0) ac();`}
           <Plate
             no="05"
             eyebrow="Intake · 表单"
-            title="Form Inputs"
+            title="表单输入"
             lede="接收意图、口令与选择的一切字段部件。"
           >
             <div className="grid gap-4 md:grid-cols-12">
@@ -745,19 +745,19 @@ if (x > 0) ac();`}
           <Plate
             no="06"
             eyebrow="Signals · 标签"
-            title="Badges"
+            title="状态徽章"
             lede="状态徽章 —— 用极小面积传递结构化信号。"
           >
             <div className="grid gap-4 md:grid-cols-12">
               <Exhibit idx="A" label="Core" className="md:col-span-6">
                 <div className="flex flex-wrap gap-2">
-                  <Badge>Default</Badge>
-                  <Badge variant="secondary">Secondary</Badge>
-                  <Badge variant="outline">Outline</Badge>
-                  <Badge variant="destructive">Destructive</Badge>
+                  <Badge>默认</Badge>
+                  <Badge variant="secondary">次要</Badge>
+                  <Badge variant="outline">描边</Badge>
+                  <Badge variant="destructive">危险</Badge>
                 </div>
               </Exhibit>
-              <Exhibit idx="B" label="OJ verdicts" className="md:col-span-6">
+              <Exhibit idx="B" label="判题状态" className="md:col-span-6">
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="ac">AC</Badge>
                   <Badge variant="wa">WA</Badge>
@@ -969,7 +969,7 @@ if (x > 0) ac();`}
                 </div>
               </Exhibit>
 
-              <Exhibit idx="B" label="Recharts trend" className="md:col-span-6">
+              <Exhibit idx="B" label="Recharts 趋势" className="md:col-span-6">
                 <ChartContainer
                   title="最近模拟趋势"
                   summary={chartSummary}
@@ -1003,7 +1003,7 @@ if (x > 0) ac();`}
                 </ChartContainer>
               </Exhibit>
 
-              <Exhibit idx="C" label="Radar + ranking" className="md:col-span-12">
+              <Exhibit idx="C" label="雷达与排名" className="md:col-span-12">
                 <div className="grid w-full gap-4 lg:grid-cols-2">
                   <ChartContainer
                     title="能力雷达"
@@ -1043,7 +1043,7 @@ if (x > 0) ac();`}
                 </div>
               </Exhibit>
 
-              <Exhibit idx="D" label="Area chart" className="md:col-span-6">
+              <Exhibit idx="D" label="面积图" className="md:col-span-6">
                 <ChartContainer
                   title="正确率面积图"
                   summary="正确率面积图，使用 Recharts AreaChart 和 Round1 chart token。"
@@ -1192,7 +1192,7 @@ if (x > 0) ac();`}
                 </div>
               </Exhibit>
 
-              <Exhibit idx="D" label="V2 motion levels" className="md:col-span-12">
+              <Exhibit idx="D" label="V2 动效层级" className="md:col-span-12">
                 <div className="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   {[
                     { name: "none", text: "Exam / Print", className: "bg-subtle" },
@@ -1225,24 +1225,24 @@ if (x > 0) ac();`}
                 </div>
               </Exhibit>
 
-              <Exhibit idx="E" label="Data backgrounds" className="md:col-span-12">
+              <Exhibit idx="E" label="数据背景" className="md:col-span-12">
                 <div className="grid w-full gap-3 md:grid-cols-2">
                   <div className="data-arena-rank-ribbon border-border min-h-20 rounded-[var(--radius-lg)] border p-4">
-                    <div className="text-foreground text-sm font-medium">Rank Ribbon</div>
+                    <div className="text-foreground text-sm font-medium">排名丝带</div>
                     <div className="text-muted-foreground mt-1 text-xs">最近排名和分位趋势背景</div>
                   </div>
                   <div className="data-arena-signal-band text-primary-foreground min-h-20 rounded-[var(--radius-lg)] p-4">
-                    <div className="text-sm font-medium">Signal Band</div>
-                    <div className="mt-1 text-xs">API / DB / Redis / Import 状态带</div>
+                    <div className="text-sm font-medium">运维信号带</div>
+                    <div className="mt-1 text-xs">应用 / 数据库 / Redis / 导入状态带</div>
                   </div>
                   <div className="data-arena-import-timeline border-border min-h-20 rounded-[var(--radius-lg)] border p-4">
-                    <div className="text-foreground text-sm font-medium">Import Timeline</div>
+                    <div className="text-foreground text-sm font-medium">导入时间线</div>
                     <div className="text-muted-foreground mt-1 text-xs">
-                      dry-run / apply / failed 批次节奏
+                      预演 / 应用 / 失败批次节奏
                     </div>
                   </div>
                   <div className="data-arena-heatmap-aura border-border min-h-20 rounded-[var(--radius-lg)] border p-4">
-                    <div className="text-foreground text-sm font-medium">Heatmap Aura</div>
+                    <div className="text-foreground text-sm font-medium">热力光晕</div>
                     <div className="text-muted-foreground mt-1 text-xs">弱项和知识点热力背景</div>
                   </div>
                 </div>
@@ -1253,13 +1253,13 @@ if (x > 0) ac();`}
           {/* ── 11 A2UI ──────────────────────────────────────── */}
           <Plate
             no="11"
-            eyebrow="Agent Surface · 声明式 UI"
-            title="A2UI Surface"
-            lede="A2UI payload 在 Round1 token bridge 内渲染，用于设计辅助、production slot 与 agent 交互验收。"
+            eyebrow="Agent 设计面 · 声明式 UI"
+            title="A2UI 设计面"
+            lede="A2UI 内容在 Round1 视觉令牌内渲染，用于设计辅助、生产槽位与 agent 交互验收。"
           >
             <Exhibit
               idx="A"
-              label="Google A2UI v0.9 package schema"
+              label="Google A2UI v0.9 组件契约"
               className="md:col-span-12"
               tone="dim"
             >

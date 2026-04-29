@@ -289,7 +289,9 @@ function CoachRow({
         </div>
         <div className="text-muted-foreground mt-1 truncate text-xs">@{coach.username}</div>
       </div>
-      <Badge variant={isOwner ? "saved" : "secondary"}>{coach.coachRole}</Badge>
+      <Badge variant={isOwner ? "saved" : "secondary"}>
+        {formatCoachClassRoleLabel(coach.coachRole)}
+      </Badge>
       <div className="text-muted-foreground text-sm">{formatDateTime(coach.addedAt)}</div>
       <div className="flex flex-wrap justify-start gap-2 md:justify-end">
         <Button
@@ -300,7 +302,7 @@ function CoachRow({
           onClick={() => onTransfer(coach)}
         >
           <Crown />
-          转为 owner
+          转为负责人
         </Button>
         <Button
           type="button"
@@ -473,11 +475,11 @@ export default function CoachClassDetail() {
   const transferOwnerMutation = useMutation({
     mutationFn: (userId: string) => transferCoachClassOwner(classId!, userId),
     onSuccess: async () => {
-      toast.success("班级 owner 已转移");
+      toast.success("班级负责人已转移");
       await invalidateClassDetail();
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "转移 owner 失败");
+      toast.error(error instanceof Error ? error.message : "转移负责人失败");
     },
   });
 
@@ -499,7 +501,7 @@ export default function CoachClassDetail() {
     return (
       <DetailAccessPrompt
         title="登录后管理班级"
-        description="班级成员、邀请链接和教练组管理都需要受保护的 coach 会话。"
+        description="班级成员、邀请链接和教练组管理都需要受保护的教练会话。"
         action="login"
       />
     );
@@ -509,7 +511,7 @@ export default function CoachClassDetail() {
     return (
       <DetailAccessPrompt
         title="当前账号没有教练权限"
-        description="只有 coach 或 admin 可以进入班级深层管理。"
+        description="只有教练或管理员可以进入班级深层管理。"
         action="classes"
       />
     );
@@ -538,7 +540,7 @@ export default function CoachClassDetail() {
             </Button>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={klass.archivedAt ? "outline" : "saved"}>
-                {klass.archivedAt ? "archived" : "active"}
+                {klass.archivedAt ? "已归档" : "使用中"}
               </Badge>
               <Badge variant={klass.coachRole === "owner" ? "saved" : "secondary"}>
                 {formatCoachClassRoleLabel(klass.coachRole)}
@@ -600,8 +602,7 @@ export default function CoachClassDetail() {
               )}
             </div>
             <CardDescription className="mt-2 max-w-2xl">
-              成员、邀请链接与教练组在同一权限边界内管理；生产答题数据继续由 assignment-only
-              报告读取。
+              成员、邀请链接与教练组在同一权限边界内管理；生产答题数据继续由班级任务报告读取。
             </CardDescription>
           </div>
           <div className="grid min-w-72 grid-cols-3 gap-3">
@@ -671,7 +672,7 @@ export default function CoachClassDetail() {
           <Card variant="flat" className="border-border bg-card">
             <CardHeader>
               <CardTitle className="text-xl">成员</CardTitle>
-              <CardDescription>当前班级学生成员，owner 可以移出错误加入的成员。</CardDescription>
+              <CardDescription>当前班级学生成员，班级负责人可以移出误加入的成员。</CardDescription>
             </CardHeader>
             <CardContent>
               {membersQuery.isPending ? (
@@ -683,7 +684,7 @@ export default function CoachClassDetail() {
                 <InlineState
                   icon={RefreshCcw}
                   title="成员读取失败"
-                  description="当前 members API 没有返回可用数据。"
+                  description="当前成员数据暂时不可用。"
                   action={
                     <Button
                       type="button"
@@ -727,7 +728,7 @@ export default function CoachClassDetail() {
             <Card variant="flat" className="border-border bg-card">
               <CardHeader>
                 <CardTitle className="text-xl">新邀请链接</CardTitle>
-                <CardDescription>邀请 token 只在创建后展示一次。</CardDescription>
+                <CardDescription>邀请链接只在创建后展示一次。</CardDescription>
               </CardHeader>
               <CardContent>
                 {canManage ? (
@@ -786,7 +787,7 @@ export default function CoachClassDetail() {
                   <InlineState
                     icon={Link2}
                     title="不能创建邀请"
-                    description="只有未归档班级的 owner 可以创建新邀请链接。"
+                    description="只有未归档班级的负责人可以创建新邀请链接。"
                   />
                 )}
               </CardContent>
@@ -796,15 +797,15 @@ export default function CoachClassDetail() {
               <CardHeader>
                 <CardTitle className="text-xl">邀请历史</CardTitle>
                 <CardDescription>
-                  列表不回显 token，已创建链接请在创建成功后复制保存。
+                  列表不回显完整链接，已创建链接请在创建成功后复制保存。
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {!canViewInvites ? (
                   <InlineState
                     icon={ShieldCheck}
-                    title="邀请历史受 owner 权限保护"
-                    description="当前账号不是班级 owner，invite API 不会被调用。"
+                    title="邀请历史受负责人权限保护"
+                    description="当前账号不是班级负责人，暂不能查看邀请历史。"
                   />
                 ) : invitesQuery.isPending ? (
                   <div className="space-y-3">
@@ -815,7 +816,7 @@ export default function CoachClassDetail() {
                   <InlineState
                     icon={RefreshCcw}
                     title="邀请历史读取失败"
-                    description="当前 invites API 没有返回可用数据。"
+                    description="当前邀请历史暂时不可用。"
                     action={
                       <Button
                         type="button"
@@ -860,7 +861,7 @@ export default function CoachClassDetail() {
             <Card variant="flat" className="border-border bg-card">
               <CardHeader>
                 <CardTitle className="text-xl">添加协作教练</CardTitle>
-                <CardDescription>目标用户必须是 active coach/admin。</CardDescription>
+                <CardDescription>目标用户必须是已启用的教练或管理员账号。</CardDescription>
               </CardHeader>
               <CardContent>
                 <form
@@ -894,7 +895,7 @@ export default function CoachClassDetail() {
             <Card variant="flat" className="border-border bg-card">
               <CardHeader>
                 <CardTitle className="text-xl">教练组</CardTitle>
-                <CardDescription>班级至少保留一位 owner；owner 可转移给协作教练。</CardDescription>
+                <CardDescription>班级至少保留一位负责人；负责人可转移给协作教练。</CardDescription>
               </CardHeader>
               <CardContent>
                 {coachesQuery.isPending ? (
@@ -906,7 +907,7 @@ export default function CoachClassDetail() {
                   <InlineState
                     icon={RefreshCcw}
                     title="教练组读取失败"
-                    description="当前 coaches API 没有返回可用数据。"
+                    description="当前教练组数据暂时不可用。"
                     action={
                       <Button
                         type="button"
@@ -922,7 +923,7 @@ export default function CoachClassDetail() {
                   <InlineState
                     icon={Users}
                     title="暂无教练记录"
-                    description="该状态通常意味着后端数据需要修复，因为班级应至少有一位 owner。"
+                    description="该状态通常意味着班级数据需要修复，因为班级应至少有一位负责人。"
                   />
                 ) : (
                   <div>
@@ -938,7 +939,7 @@ export default function CoachClassDetail() {
                           }
                         }}
                         onTransfer={(target) => {
-                          if (window.confirm(`确认将 owner 转移给「${target.displayName}」？`)) {
+                          if (window.confirm(`确认将负责人转移给「${target.displayName}」？`)) {
                             transferOwnerMutation.mutate(target.userId);
                           }
                         }}

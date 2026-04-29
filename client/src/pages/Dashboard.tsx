@@ -537,7 +537,7 @@ export default function Dashboard() {
                 <Target className="text-primary h-5 w-5" />
                 能力雷达
               </CardTitle>
-              <CardDescription>按 runtime stats 里的 KP 准确率生成，不伪造趋势。</CardDescription>
+              <CardDescription>根据最近作答中的知识点准确率生成。</CardDescription>
             </CardHeader>
             <CardContent>
               <AbilityRadar axes={radarAxes} />

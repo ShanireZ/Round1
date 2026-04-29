@@ -313,7 +313,7 @@ function TotpPanel({ enabled }: { enabled: boolean }) {
           <Smartphone className="text-primary h-5 w-5" />
           TOTP
         </CardTitle>
-        <CardDescription>使用一次性验证码作为敏感操作的 step-up 因子。</CardDescription>
+        <CardDescription>使用一次性验证码作为敏感操作的二次验证方式。</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {enabled ? (
@@ -432,7 +432,7 @@ export default function AccountSecurityPage() {
         <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="text-destructive font-medium">账号安全状态读取失败</div>
-            <p className="text-muted-foreground mt-1 text-sm">请重试当前安全摘要 API。</p>
+            <p className="text-muted-foreground mt-1 text-sm">请重试账号安全摘要。</p>
           </div>
           <Button type="button" variant="secondary" onClick={() => void securityQuery.refetch()}>
             <RotateCcw />
@@ -451,7 +451,7 @@ export default function AccountSecurityPage() {
             <Badge variant="outline">Account Security</Badge>
             <CardTitle className="mt-3 text-2xl">账号安全</CardTitle>
             <CardDescription className="mt-2 max-w-2xl">
-              管理密码、邮箱、TOTP 和外部身份绑定；敏感操作继续由后端 step-up 与审计链兜底。
+              管理密码、邮箱、TOTP 和外部身份绑定；高风险操作会要求再次验证并留下安全记录。
             </CardDescription>
           </div>
           <div className="grid w-full grid-cols-3 gap-3 md:min-w-72">

@@ -356,7 +356,7 @@ const Round1CoachClassSnapshot = createComponentImplementation(
               <span className="text-muted-foreground">
                 {inviteReady ? "班级码可分发" : "邀请码待确认"}
               </span>
-              <span className="text-foreground tabular-nums">{activePercent}% active</span>
+              <span className="text-foreground tabular-nums">{activePercent}% 使用中</span>
             </div>
             <Progress value={activePercent} variant="exam" />
           </div>
@@ -418,7 +418,7 @@ const Round1StudentClassSnapshot = createComponentImplementation(
               <span className="text-muted-foreground">
                 {inviteReady ? "邀请入口可用" : "等待班级码"}
               </span>
-              <span className="text-foreground tabular-nums">{completionPercent}% done</span>
+              <span className="text-foreground tabular-nums">{completionPercent}% 完成</span>
             </div>
             <Progress value={completionPercent} variant="exam" />
           </div>
@@ -478,9 +478,9 @@ const Round1CoachClassDetailSnapshot = createComponentImplementation(
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">
-                {ownerReady ? "owner 边界已就绪" : "等待 owner 审核"}
+                {ownerReady ? "负责人边界已就绪" : "等待负责人确认"}
               </span>
-              <span className="text-foreground tabular-nums">{governancePercent}% managed</span>
+              <span className="text-foreground tabular-nums">{governancePercent}% 已治理</span>
             </div>
             <Progress value={governancePercent} variant="exam" />
           </div>
@@ -525,13 +525,13 @@ const Round1AccountSecuritySnapshot = createComponentImplementation(
             <div>
               <div className="text-muted-foreground text-xs">邮箱</div>
               <div className="text-foreground mt-1 text-sm font-medium">
-                {emailVerified ? "verified" : "pending"}
+                {emailVerified ? "已验证" : "待验证"}
               </div>
             </div>
             <div>
               <div className="text-muted-foreground text-xs">TOTP</div>
               <div className="text-foreground mt-1 text-sm font-medium">
-                {totpEnabled ? "enabled" : "off"}
+                {totpEnabled ? "已启用" : "未启用"}
               </div>
             </div>
             <div>
@@ -545,9 +545,9 @@ const Round1AccountSecuritySnapshot = createComponentImplementation(
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">
-                {passwordEnabled ? `${externalBindings} external binding` : "password pending"}
+                {passwordEnabled ? `${externalBindings} 个外部绑定` : "等待设置密码"}
               </span>
-              <span className="text-foreground tabular-nums">{securityPercent}% covered</span>
+              <span className="text-foreground tabular-nums">{securityPercent}% 覆盖</span>
             </div>
             <Progress value={securityPercent} variant="exam" />
           </div>
@@ -590,20 +590,20 @@ const Round1AuthEntrySnapshot = createComponentImplementation(
             <div>
               <div className="text-muted-foreground text-xs">Callback</div>
               <div className="text-foreground mt-1 text-sm font-medium">
-                {callbackReady ? "ready" : "pending"}
+                {callbackReady ? "已就绪" : "待确认"}
               </div>
             </div>
             <div>
               <div className="text-muted-foreground text-xs">404</div>
               <div className="text-foreground mt-1 text-sm font-medium">
-                {notFoundReady ? "ready" : "pending"}
+                {notFoundReady ? "已就绪" : "待确认"}
               </div>
             </div>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">AuthLayout coverage</span>
+              <span className="text-muted-foreground">AuthLayout 覆盖</span>
               <span className="text-foreground tabular-nums">{completionPercent}%</span>
             </div>
             <Progress value={completionPercent} variant="exam" />
@@ -642,18 +642,18 @@ const Round1AdminQuestionSnapshot = createComponentImplementation(
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <SnapshotMetric label="Draft" value={draftQuestions} />
-            <SnapshotMetric label="Reviewed" value={reviewedQuestions} />
-            <SnapshotMetric label="Published" value={publishedQuestions} />
-            <SnapshotMetric label="Archived" value={archivedQuestions} />
+            <SnapshotMetric label="草稿" value={draftQuestions} />
+            <SnapshotMetric label="已审核" value={reviewedQuestions} />
+            <SnapshotMetric label="已发布" value={publishedQuestions} />
+            <SnapshotMetric label="已归档" value={archivedQuestions} />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">
-                {referenceChecks} reference checks / {totalQuestions} lifecycle items
+                {referenceChecks} 次引用检查 / {totalQuestions} 个生命周期条目
               </span>
-              <span className="text-foreground tabular-nums">{sandboxPercent}% sandbox</span>
+              <span className="text-foreground tabular-nums">{sandboxPercent}% 沙箱覆盖</span>
             </div>
             <Progress value={sandboxPercent} variant="exam" />
           </div>
@@ -692,19 +692,19 @@ const Round1AdminPaperSnapshot = createComponentImplementation(
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <SnapshotMetric label="Draft" value={draftPapers} />
-            <SnapshotMetric label="Published" value={publishedPapers} />
-            <SnapshotMetric label="Archived" value={archivedPapers} />
+            <SnapshotMetric label="草稿" value={draftPapers} />
+            <SnapshotMetric label="已发布" value={publishedPapers} />
+            <SnapshotMetric label="已归档" value={archivedPapers} />
             <SnapshotMetric label="Slots" value={slotCount} />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">
-                {copyVersionReady ? "copy-version ready" : "copy-version pending"} /{" "}
-                {immutableReady ? "immutable published" : "immutability pending"}
+                {copyVersionReady ? "复制版本已就绪" : "等待复制版本"} /{" "}
+                {immutableReady ? "已发布不可变" : "等待不可变校验"}
               </span>
-              <span className="text-foreground tabular-nums">{governancePercent}% governed</span>
+              <span className="text-foreground tabular-nums">{governancePercent}% 已治理</span>
             </div>
             <Progress value={governancePercent} variant="exam" />
           </div>
@@ -742,19 +742,19 @@ const Round1AdminImportSnapshot = createComponentImplementation(
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <SnapshotMetric label="Dry runs" value={dryRuns} />
-            <SnapshotMetric label="Applied" value={appliedImports} />
-            <SnapshotMetric label="Failed" value={failedImports} />
-            <SnapshotMetric label="Rejected" value={rejectedItems} />
+            <SnapshotMetric label="预演" value={dryRuns} />
+            <SnapshotMetric label="已应用" value={appliedImports} />
+            <SnapshotMetric label="失败" value={failedImports} />
+            <SnapshotMetric label="已拒绝" value={rejectedItems} />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">
-                {sharedSummaryReady ? "shared summary" : "summary pending"} /{" "}
-                {repairReady ? "repair retry ready" : "repair retry pending"}
+                {sharedSummaryReady ? "摘要已对齐" : "等待摘要"} /{" "}
+                {repairReady ? "可修复重试" : "等待修复重试"}
               </span>
-              <span className="text-foreground tabular-nums">{appliedPercent}% applied</span>
+              <span className="text-foreground tabular-nums">{appliedPercent}% 已应用</span>
             </div>
             <Progress value={appliedPercent} variant="exam" />
           </div>
@@ -790,7 +790,7 @@ const Round1DashboardInsightSnapshot = createComponentImplementation(
           <div className="grid grid-cols-3 gap-3">
             <SnapshotMetric label="模拟" value={attempts} />
             <SnapshotMetric label="弱项" value={weakKnowledgePoints} />
-            <SnapshotMetric label="趋势" value={trendReady ? "ready" : "pending"} />
+            <SnapshotMetric label="趋势" value={trendReady ? "已就绪" : "待确认"} />
           </div>
 
           <div className="space-y-2">
@@ -809,7 +809,7 @@ const Round1DashboardInsightSnapshot = createComponentImplementation(
 const Round1AdminHealthSnapshot = createComponentImplementation(
   Round1AdminHealthSnapshotApi,
   ({ props }) => {
-    const title = props.title ?? "AdminOpsInsight";
+    const title = props.title ?? "运维信号";
     const apiHealthy = props.apiHealthy ?? false;
     const dbHealthy = props.dbHealthy ?? false;
     const redisHealthy = props.redisHealthy ?? false;
@@ -825,22 +825,22 @@ const Round1AdminHealthSnapshot = createComponentImplementation(
         <CardContent className="space-y-4 p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <div className="text-muted-foreground text-xs">Round1 BYOC · Signal Band</div>
+              <div className="text-muted-foreground text-xs">Round1 BYOC · 运维信号带</div>
               <div className="text-foreground mt-1 text-lg font-semibold">{title}</div>
             </div>
             <Badge variant={toneBadgeVariant[safeTone]}>{toneLabel[safeTone]}</Badge>
           </div>
 
           <div className="grid grid-cols-4 gap-3">
-            <SnapshotMetric label="API" value={apiHealthy ? "up" : "down"} />
-            <SnapshotMetric label="DB" value={dbHealthy ? "up" : "down"} />
-            <SnapshotMetric label="Redis" value={redisHealthy ? "up" : "down"} />
-            <SnapshotMetric label="Risk" value={importRisk} />
+            <SnapshotMetric label="应用" value={apiHealthy ? "正常" : "异常"} />
+            <SnapshotMetric label="数据库" value={dbHealthy ? "正常" : "异常"} />
+            <SnapshotMetric label="Redis" value={redisHealthy ? "正常" : "异常"} />
+            <SnapshotMetric label="风险" value={importRisk} />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">system health</span>
+              <span className="text-muted-foreground">系统健康度</span>
               <span className="text-foreground tabular-nums">{healthPercent}%</span>
             </div>
             <Progress value={healthPercent} variant="exam" />
@@ -854,7 +854,7 @@ const Round1AdminHealthSnapshot = createComponentImplementation(
 const Round1ExamResultExplanationSnapshot = createComponentImplementation(
   Round1ExamResultExplanationSnapshotApi,
   ({ props }) => {
-    const title = props.title ?? "ExamResultExplanation";
+    const title = props.title ?? "成绩讲解";
     const score = props.score ?? 0;
     const accuracy = props.accuracy ?? 0;
     const explanations = props.explanations ?? 0;
@@ -877,7 +877,7 @@ const Round1ExamResultExplanationSnapshot = createComponentImplementation(
           <div className="grid grid-cols-3 gap-3">
             <SnapshotMetric label="分数" value={scoreOrDash(score)} />
             <SnapshotMetric label="讲解" value={explanations} />
-            <SnapshotMetric label="仪式" value={ceremonyReady ? "ready" : "static"} />
+            <SnapshotMetric label="仪式" value={ceremonyReady ? "已就绪" : "静态"} />
           </div>
 
           <div className="space-y-2">
@@ -918,7 +918,7 @@ const Round1A2uiSlotPolicySnapshot = createComponentImplementation(
           <div className="grid grid-cols-3 gap-3">
             <SnapshotMetric label="Slots" value={slotCount} />
             <SnapshotMetric label="Guards" value={guardCount} />
-            <SnapshotMetric label="Fallback" value={fallbackReady ? "ready" : "missing"} />
+            <SnapshotMetric label="兜底" value={fallbackReady ? "已就绪" : "缺失"} />
           </div>
 
           <div className="space-y-2">

@@ -14,6 +14,7 @@
 - Expanded `AdminDashboard.tsx` from a link grid into an operational overview: question total, published prebuilt paper total, import batch total, user total, recent import activity, and API/DB/Redis health from `GET /api/v1/health`.
 - Added a real `data-testid` root to `CoachReport` so the route can participate in browser visual regression checks.
 - Fixed a time-sensitive Coach invite integration fixture that expired on 2026-04-29, changing it to a stable future date so the test remains deterministic.
+- Completed a second UI/UX copy and functional-page closure pass across ExamSession, ExamResult, Dashboard, Account, Coach, Admin, A2UI BYOC, and UI Gallery surfaces. User-visible implementation terms such as API endpoint paths, `runtime`, `payload`, `Attempt ID`, `Tab Nonce`, `owner`, `assignment-only`, raw import states, and English admin status labels were replaced with role-facing Chinese business copy while preserving the underlying API/data contracts.
 
 ## Browser Visual Acceptance
 
@@ -40,24 +41,28 @@
 - `npm run lint`: exit 0, with the existing Fast Refresh warning in `client/src/components/a2ui/round1A2uiCatalog.tsx`.
 - `npm run test:e2e -- ui-visual-audit.spec.ts`: passed, 10 tests.
 - `npm run test -- server/__tests__/coach-classes.integration.test.ts`: passed, 9 tests after fixing the date-sensitive invite fixture.
+- `npm run test`: passed after starting local Redis/Postgres, 29 files / 221 tests.
+- `npm run migrate:status`: passed against local Postgres, 14/14 migrations applied.
+- `npm run healthcheck -- --api-url https://127.0.0.1:7654/api/v1/health --frontend-url https://127.0.0.1:4399 --json`: passed after temporarily starting the local API and frontend dev servers; API reported db=ok and redis=ok.
+- `npm run healthcheck -- --api-url https://127.0.0.1:7654/api/v1/health --frontend-url https://127.0.0.1:4399 --include-external --include-offline --runner-url http://127.0.0.1:4401/health --json`: passed for local config presence and offline runner health. This does not replace real mail delivery, Turnstile production, or PM2 checks on the target host.
 - Production CSS scan after `build:client`: passed; no invalid CSS custom-property arbitrary values matching `max-width:--*`, `z-index:--*`, `border-radius:--*`, `box-shadow:--*`, `transition-duration:--*`, or related patterns were found in `client/dist/assets`.
+- Second closure pass verification: `npm run verify:ui-tokens`, `npm run client:test`, `npm run build:client`, focused `npx eslint <touched UI/test files>`, focused `npx prettier --check <touched UI/doc/test files>`, `git diff --check`, and `npm run test:e2e -- ui-visual-audit.spec.ts` passed after the copy/localization changes. The UI Gallery visual-audit assertions were synchronized to the localized labels. The default sandbox still hits `spawn EPERM` for Vitest/Vite/Playwright subprocesses, so those commands were rerun with elevated permissions under the known local pattern.
 
-## Local Environment Blockers
+## Local Runtime Retest
 
-- `npm run test`: still blocked by local Redis not running at `127.0.0.1:4395`. The fresh run reported 26 passed files, 174 passed tests, 46 skipped tests, and Redis-dependent failures in `auth-integration`, `pow`, and `bullmq-dead-letter`.
-- `npm run migrate:status`: blocked by local Postgres not running at `127.0.0.1:4397`.
-- `npm run healthcheck -- --api-url http://127.0.0.1:7654/api/v1/health --frontend-url http://127.0.0.1:4399 --json`: failed because no local API/frontend server is running on those ports.
-- `docker compose -f docker-compose.dev.yml up -d pg redis`: could not start because Docker Desktop / Docker daemon was not running (`dockerDesktopLinuxEngine` pipe missing).
+- Docker Desktop was initially stopped. It was started locally, then `docker compose -f docker-compose.dev.yml up -d pg redis` brought the local Postgres and Redis services online.
+- Final local container status: `r1-pg` healthy on `127.0.0.1:4397`, `r1-redis` healthy on `127.0.0.1:4395`, and the existing local `r1-cpp-runner` healthy on `127.0.0.1:4401`.
+- The local API/frontend healthcheck used the development HTTPS certificates and temporarily set `NODE_TLS_REJECT_UNAUTHORIZED=0` only for the local self-signed certificate smoke. Do not use that setting for production validation.
+- The API and frontend dev servers were started only for the healthcheck and stopped after the run.
 
 ## Deployment-Test Gate
 
-Current code and UI are ready for the next deployment-test pass once the runtime environment is available. Before marking the release test green, run these on the target deployment host or after starting local infra:
+Current code, UI, local DB/Redis-backed tests, local migration status, and local API/frontend healthchecks are green. Before marking the production deployment test green, run these on the target deployment host:
 
 ```bash
-docker compose -f docker-compose.dev.yml up -d pg redis
 npm run migrate:status
 npm run test
-npm run healthcheck -- --api-url https://<domain>/api/v1/health --frontend-url https://<domain> --pm2
+npm run healthcheck -- --api-url https://<domain>/api/v1/health --frontend-url https://<domain> --include-external --pm2
 ```
 
 Production deployment still requires the Step 06 manual checks: domain and Cloudflare Full Strict, Caddy TLS/static cache headers, PM2 reload, `.env` permissions, backup/restore rehearsal, Sentry smoke, mail/Turnstile smoke, Redis degradation rehearsal, and rollback rehearsal.

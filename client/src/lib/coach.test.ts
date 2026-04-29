@@ -34,11 +34,11 @@ describe("coach report helpers", () => {
   });
 
   it("summarizes coach class and assignment UI states", () => {
-    expect(formatCoachClassRoleLabel("owner")).toBe("owner");
-    expect(formatCoachClassRoleLabel("collaborator")).toBe("collaborator");
-    expect(formatCoachClassRoleLabel(undefined)).toBe("coach");
-    expect(formatCoachAssignmentStatusLabel("assigned")).toBe("assigned");
-    expect(formatCoachAssignmentStatusLabel("closed")).toBe("closed");
+    expect(formatCoachClassRoleLabel("owner")).toBe("负责人");
+    expect(formatCoachClassRoleLabel("collaborator")).toBe("协作教练");
+    expect(formatCoachClassRoleLabel(undefined)).toBe("教练");
+    expect(formatCoachAssignmentStatusLabel("assigned")).toBe("进行中");
+    expect(formatCoachAssignmentStatusLabel("closed")).toBe("已关闭");
     expect(formatCoachAssignmentStatusLabel("paused")).toBe("paused");
 
     expect(
@@ -110,7 +110,10 @@ describe("coach report helpers", () => {
     };
 
     expect(getCoachClassInviteStatus(active, now)).toBe("active");
-    expect(formatCoachClassInviteStatusLabel("active")).toBe("active");
+    expect(formatCoachClassInviteStatusLabel("active")).toBe("可使用");
+    expect(formatCoachClassInviteStatusLabel("revoked")).toBe("已撤销");
+    expect(formatCoachClassInviteStatusLabel("expired")).toBe("已过期");
+    expect(formatCoachClassInviteStatusLabel("full")).toBe("已用完");
     expect(
       getCoachClassInviteStatus({ ...active, revokedAt: "2026-04-27T00:00:00.000Z" }, now),
     ).toBe("revoked");

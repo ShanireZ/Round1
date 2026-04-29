@@ -48,15 +48,15 @@ type PaperFilterStatus = PrebuiltPaperStatus | "all";
 type PaperFilterDifficulty = Difficulty | "all";
 
 const difficultyLabels: Record<Difficulty, string> = {
-  easy: "Easy",
-  medium: "Medium",
-  hard: "Hard",
+  easy: "简单",
+  medium: "中等",
+  hard: "困难",
 };
 
 const statusLabels: Record<PrebuiltPaperStatus, string> = {
-  draft: "Draft",
-  published: "Published",
-  archived: "Archived",
+  draft: "草稿",
+  published: "已发布",
+  archived: "已归档",
 };
 
 const statusVariants: Record<
@@ -197,11 +197,11 @@ export default function AdminPaperLibrary() {
       : "仅未被引用的 draft 预制卷可硬删除。";
   const paperLifecycleHint =
     selectedPaper?.status === "draft"
-      ? "Draft 预制卷可原地编辑和发布，不需要复制版本。"
+      ? "草稿预制卷可原地编辑和发布，不需要复制版本。"
       : selectedPaper?.status === "published"
-        ? "Published 预制卷不能原地覆盖；修改请先复制新 draft，或归档旧版本。"
+        ? "已发布预制卷不能原地覆盖；修改请先复制新草稿，或归档旧版本。"
         : selectedPaper?.status === "archived"
-          ? "Archived 预制卷已退出投放；可复制为新 draft。"
+          ? "已归档预制卷已退出投放；可复制为新草稿。"
           : "";
 
   const listSummary = useMemo(() => {
@@ -357,9 +357,9 @@ export default function AdminPaperLibrary() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">全部难度</SelectItem>
-                  <SelectItem value="easy">Easy</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="hard">Hard</SelectItem>
+                  <SelectItem value="easy">简单</SelectItem>
+                  <SelectItem value="medium">中等</SelectItem>
+                  <SelectItem value="hard">困难</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -372,9 +372,9 @@ export default function AdminPaperLibrary() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">全部状态</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
-                  <SelectItem value="archived">Archived</SelectItem>
+                  <SelectItem value="draft">草稿</SelectItem>
+                  <SelectItem value="published">已发布</SelectItem>
+                  <SelectItem value="archived">已归档</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -441,9 +441,9 @@ export default function AdminPaperLibrary() {
 
             <div className="space-y-3">
               <div>
-                <h2 className="text-foreground text-sm font-semibold">新建 Draft</h2>
+                <h2 className="text-foreground text-sm font-semibold">新建草稿</h2>
                 <p className="text-muted-foreground mt-1 text-xs">
-                  提交与 Admin prebuilt paper create body 一致的 JSON。
+                  提交与预制卷创建结构一致的 JSON。
                 </p>
               </div>
               <Textarea
@@ -463,7 +463,7 @@ export default function AdminPaperLibrary() {
         <Card variant="flat" className="min-w-0">
           <CardHeader>
             <CardTitle className="text-lg">详情与版本</CardTitle>
-            <CardDescription>draft 可编辑；published 版本只能复制为新 draft。</CardDescription>
+            <CardDescription>草稿可编辑；已发布版本只能复制为新草稿。</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {!selectedId ? (
@@ -571,9 +571,9 @@ export default function AdminPaperLibrary() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="easy">Easy</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="hard">Hard</SelectItem>
+                        <SelectItem value="easy">简单</SelectItem>
+                        <SelectItem value="medium">中等</SelectItem>
+                        <SelectItem value="hard">困难</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -635,7 +635,7 @@ export default function AdminPaperLibrary() {
                   <Button
                     variant="secondary"
                     disabled={!selectedCanCopy}
-                    title={selectedCanCopy ? "复制为新 draft 版本" : "Draft 预制卷可直接编辑"}
+                    title={selectedCanCopy ? "复制为新草稿版本" : "草稿预制卷可直接编辑"}
                     loading={lifecycleMutation.isPending && lifecycleMutation.variables === "copy"}
                     onClick={() => runLifecycleAction("copy")}
                   >

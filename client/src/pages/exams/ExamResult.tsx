@@ -69,6 +69,28 @@ function formatQuestionTypeLabel(questionType: string): string {
   return questionType;
 }
 
+function formatPaperStatusLabel(status: string): string {
+  if (status === "draft") return "草稿";
+  if (status === "started") return "已开始";
+  if (status === "completed") return "已完成";
+  if (status === "abandoned") return "已放弃";
+  return status;
+}
+
+function formatAttemptStatusLabel(status: string): string {
+  if (status === "submitted") return "已交卷";
+  if (status === "auto_submitted") return "自动交卷";
+  if (status === "started") return "进行中";
+  return status;
+}
+
+function formatReportStatusLabel(status: string | null | undefined): string {
+  if (!status || status === "pending") return "生成中";
+  if (status === "completed") return "已完成";
+  if (status === "failed") return "生成失败";
+  return status;
+}
+
 function extractPrompt(contentJson: unknown): string {
   if (!contentJson || typeof contentJson !== "object" || Array.isArray(contentJson)) {
     return "题面待补充";
@@ -136,7 +158,7 @@ function ResultHero({ data }: { data: ExamResultPayload }) {
 
           <div className="space-y-3">
             <p className="text-primary/70 font-mono text-xs tracking-[0.28em] uppercase">
-              Round1 Result Protocol
+              Round1 成绩揭晓
             </p>
             <div className="flex flex-wrap items-end gap-4">
               <div className="text-foreground text-6xl font-semibold tracking-tight sm:text-7xl">
@@ -145,8 +167,8 @@ function ResultHero({ data }: { data: ExamResultPayload }) {
               <div className="text-muted-foreground pb-2 text-lg">/ 100</div>
             </div>
             <p className="text-muted-foreground max-w-2xl text-sm leading-6">
-              已提交于 {formatTimestamp(data.attempt.submittedAt)}。当前结果页直接消费 runtime 的
-              grouped grader 聚合、wrongs 报告和题面解析契约，不再依赖 submit 响应临时态。
+              已提交于 {formatTimestamp(data.attempt.submittedAt)}
+              。下面会按题型、错题和知识点展开复盘。
             </p>
           </div>
 
@@ -183,9 +205,9 @@ function ResultHero({ data }: { data: ExamResultPayload }) {
               <p className="text-muted-foreground mt-2 text-xs">可直接跳到下方题卡展开复盘</p>
             </Card>
             <Card variant="stat" className="border-border bg-card/75">
-              <CardDescription>Section 数</CardDescription>
+              <CardDescription>题型数</CardDescription>
               <CardTitle className="mt-2 text-3xl">{sectionEntries.length}</CardTitle>
-              <p className="text-muted-foreground mt-2 text-xs">题型聚合已和 runtime grader 对齐</p>
+              <p className="text-muted-foreground mt-2 text-xs">按本次试卷题型汇总</p>
             </Card>
           </div>
         </div>
@@ -303,25 +325,23 @@ function ResultOverview({ data }: { data: ExamResultPayload }) {
             <Target className="text-primary h-5 w-5" />
             本次构成
           </CardTitle>
-          <CardDescription>
-            按 runtime result payload 直接展示当前这份卷子的结构和状态。
-          </CardDescription>
+          <CardDescription>按本次提交后的试卷结构和结果状态展示。</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <div className="border-border bg-subtle/20 flex items-center justify-between gap-4 rounded-[var(--radius-lg)] border p-4">
             <span className="text-muted-foreground">试卷状态</span>
-            <Badge variant="outline">{data.paper.status}</Badge>
+            <Badge variant="outline">{formatPaperStatusLabel(data.paper.status)}</Badge>
           </div>
           <div className="border-border bg-subtle/20 flex items-center justify-between gap-4 rounded-[var(--radius-lg)] border p-4">
             <span className="text-muted-foreground">提交状态</span>
             <Badge variant={data.attempt.status === "submitted" ? "ac" : "secondary"}>
-              {data.attempt.status}
+              {formatAttemptStatusLabel(data.attempt.status)}
             </Badge>
           </div>
           <div className="border-border bg-subtle/20 flex items-center justify-between gap-4 rounded-[var(--radius-lg)] border p-4">
-            <span className="text-muted-foreground">Report 状态</span>
+            <span className="text-muted-foreground">报告状态</span>
             <Badge variant={data.attempt.reportStatus === "completed" ? "ac" : "outline"}>
-              {data.attempt.reportStatus ?? "pending"}
+              {formatReportStatusLabel(data.attempt.reportStatus)}
             </Badge>
           </div>
           <div className="border-border bg-subtle/20 flex items-center justify-between gap-4 rounded-[var(--radius-lg)] border p-4">
@@ -333,11 +353,10 @@ function ResultOverview({ data }: { data: ExamResultPayload }) {
           <div className="border-border bg-subtle/15 rounded-[var(--radius-lg)] border p-4">
             <div className="text-foreground flex items-center gap-2 text-sm font-medium">
               <Trophy className="text-primary h-4 w-4" />
-              结果页接口说明
+              复盘说明
             </div>
             <p className="text-muted-foreground mt-2 text-sm leading-6">
-              当前页面消费的是 GET /api/v1/exams/:id/result。它已经把 attempts 聚合、ai_report_json
-              和题面解析统一成稳定读模型，后续结果页扩展只需要在这个契约上增量前进。
+              题目解析会在原题卡内展开，便于对照你的答案、正确答案和讲解内容。
             </p>
           </div>
         </CardContent>

@@ -158,7 +158,7 @@ function AttemptSummary({
       <CardContent className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-3">
-            <Badge variant="outline">Active Exam Session</Badge>
+            <Badge variant="outline">考试进行中</Badge>
             <Badge variant={autosaveBadge.variant}>{autosaveBadge.label}</Badge>
             <Badge variant="secondary">{session.paper.examType}</Badge>
             <Badge variant="outline">{formatDifficultyLabel(session.paper.difficulty)}</Badge>
@@ -172,14 +172,13 @@ function AttemptSummary({
 
           <div className="space-y-3">
             <p className="text-primary/70 font-mono text-xs tracking-[0.28em] uppercase">
-              Focus Session
+              专注考试
             </p>
             <div className="text-foreground text-4xl font-semibold tracking-tight sm:text-5xl">
-              题面与答题状态已接通
+              专注作答进行中
             </div>
             <p className="text-muted-foreground max-w-2xl text-sm leading-6">
-              当前页直接消费 runtime session 接口，展示题面、读取既有 answersJson，并通过 autosave
-              接口持续回写答题状态。交卷成功后仍会自动跳转到结果页。
+              系统会定期保存你的作答，提交后进入结果页。若网络短暂波动，请先留意保存状态提示。
             </p>
           </div>
 
@@ -191,8 +190,10 @@ function AttemptSummary({
               </CardTitle>
             </Card>
             <Card variant="stat" className="border-border bg-card/80">
-              <CardDescription>Attempt ID</CardDescription>
-              <CardTitle className="mt-2 text-lg">{session.attempt.id}</CardTitle>
+              <CardDescription>来源</CardDescription>
+              <CardTitle className="mt-2 text-lg">
+                {session.paper.assignmentId ? "班级任务" : "自练模拟"}
+              </CardTitle>
             </Card>
             <Card variant="stat" className="border-border bg-card/80">
               <CardDescription>试卷状态</CardDescription>
@@ -212,16 +213,16 @@ function AttemptSummary({
         <div className="border-border/80 bg-card/75 space-y-4 rounded-[var(--radius-xl)] border p-5 backdrop-blur-sm">
           <div className="text-foreground flex items-center gap-2 text-sm font-medium">
             <Clock3 className="text-primary h-4 w-4" />
-            当前考试会话
+            保存与时间
           </div>
           <div className="text-muted-foreground space-y-3 text-sm">
             <div className="flex items-center justify-between gap-3">
-              <span>GET /exams/:id/session</span>
-              <Badge variant="saved">已接通</Badge>
+              <span>自动保存</span>
+              <Badge variant={autosaveBadge.variant}>{autosaveBadge.label}</Badge>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <span>PATCH /attempts/:id</span>
-              <Badge variant="saved">autosave</Badge>
+              <span>提交保护</span>
+              <Badge variant="saved">以最终结果为准</Badge>
             </div>
             <div className="flex items-center justify-between gap-3">
               <span>最后保存时间</span>
@@ -235,11 +236,11 @@ function AttemptSummary({
 
           <Separator />
 
-          <div>
-            <div className="text-muted-foreground text-xs tracking-wide uppercase">Tab Nonce</div>
-            <div className="border-border bg-subtle/20 text-foreground mt-2 rounded-[var(--radius-md)] border px-3 py-2 font-mono text-sm">
-              {session.attempt.tabNonce}
-            </div>
+          <div className="space-y-2">
+            <div className="text-foreground text-sm font-medium">多标签保护已启用</div>
+            <p className="text-muted-foreground text-sm leading-6">
+              如果同一份试卷在其他标签页保存或提交，本标签会停止覆盖并提示冲突。
+            </p>
           </div>
         </div>
       </CardContent>
@@ -321,10 +322,7 @@ function SessionQuestionCard({
 
         <div className="space-y-2">
           <CardTitle className="text-xl leading-8">{renderable.prompt}</CardTitle>
-          <CardDescription>
-            当前题型会按 runtime grader 的 slot/subQuestion key 结构写回
-            answersJson，不再依赖本地临时 submit payload。
-          </CardDescription>
+          <CardDescription>本题支持逐小题保存；已选答案会随保存状态同步。</CardDescription>
         </div>
       </CardHeader>
 
@@ -860,12 +858,12 @@ export default function ExamSessionPage() {
 
         <div className="flex items-center justify-between gap-4">
           <div className="border-border/80 bg-card/80 text-muted-foreground rounded-full border px-4 py-2 text-xs tracking-[0.24em] uppercase">
-            Exam Runtime
+            专注作答
           </div>
           <div className="text-muted-foreground flex flex-wrap items-center justify-end gap-3 text-xs">
             <div className="flex items-center gap-3">
               <Save className="h-4 w-4" />
-              当前页已切到真实题面读取与 autosave 提交流
+              作答会自动保存，提交前请确认保存状态
             </div>
             <Button type="button" variant="secondary" size="sm" onClick={() => window.print()}>
               <Printer />
@@ -907,7 +905,7 @@ export default function ExamSessionPage() {
               <CardHeader>
                 <CardTitle className="text-xl">答题卡</CardTitle>
                 <CardDescription>
-                  当前按 grader 的 slotNo / subQuestion key 统计。点击题号可快速滚动到对应题面。
+                  当前按题目和小题统计作答进度。点击题号可快速滚动到对应题面。
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">

@@ -92,12 +92,12 @@ function CoachAccessPrompt({
 
 function getClassTone(klass: CoachClassSummary) {
   if (klass.archivedAt) {
-    return { label: "archived", variant: "outline" as const };
+    return { label: "已归档", variant: "outline" as const };
   }
   if (klass.coachRole === "owner") {
-    return { label: "owner", variant: "saved" as const };
+    return { label: "负责人", variant: "saved" as const };
   }
-  return { label: "collaborator", variant: "secondary" as const };
+  return { label: "协作教练", variant: "secondary" as const };
 }
 
 function ClassCard({
@@ -279,7 +279,7 @@ export default function CoachClasses() {
     return (
       <CoachAccessPrompt
         title="登录后管理班级"
-        description="班级、邀请码和 assignment 入口都绑定到受保护的 coach 会话。"
+        description="班级、邀请码和任务入口都绑定到受保护的教练会话。"
         action="login"
       />
     );
@@ -289,7 +289,7 @@ export default function CoachClasses() {
     return (
       <CoachAccessPrompt
         title="当前账号没有教练权限"
-        description="只有 coach 或 admin 可以创建班级、轮换班级码和查看班级报告。"
+        description="只有教练或管理员可以创建班级、轮换班级码和查看班级报告。"
       />
     );
   }
@@ -299,10 +299,10 @@ export default function CoachClasses() {
       <Card variant="hero" className="overflow-hidden">
         <CardHeader className="gap-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <Badge variant="outline">Coach Classes</Badge>
+            <Badge variant="outline">Coach 班级</Badge>
             <CardTitle className="mt-3 text-2xl">班级</CardTitle>
             <CardDescription className="mt-2 max-w-2xl">
-              创建班级、分发班级码，并从同一入口进入 assignment-only 报告。
+              创建班级、分发班级码，并从同一入口进入班级任务报告。
             </CardDescription>
           </div>
           <div className="grid min-w-64 grid-cols-3 gap-3">
@@ -364,7 +364,7 @@ export default function CoachClasses() {
           <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="text-destructive font-medium">班级列表读取失败</div>
-              <div className="text-muted-foreground mt-1 text-sm">请重试当前 coach class API。</div>
+              <div className="text-muted-foreground mt-1 text-sm">请重试读取班级列表。</div>
             </div>
             <Button type="button" variant="secondary" onClick={() => void classesQuery.refetch()}>
               <RotateCcw />
@@ -409,7 +409,7 @@ export default function CoachClasses() {
             <div>
               <div className="text-foreground font-medium">班级任务与报告共用同一权限边界</div>
               <div className="text-muted-foreground mt-1 text-sm">
-                只有参与该班级的 coach/admin 能读取成员、assignment 和报告聚合。
+                只有参与该班级的教练或管理员能读取成员、任务和报告聚合。
               </div>
             </div>
           </div>
