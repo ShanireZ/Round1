@@ -81,6 +81,31 @@ describe("offline bundle workflow summaries", () => {
     });
   });
 
+  it("rejects question bundles when required duplicate checks cannot reach the database", async () => {
+    const loaded = await loadQuestionBundle("scripts/tests/fixtures/question-bundle.sample.json");
+    const result = await validateQuestionBundle(loaded, {
+      requireDuplicateChecks: true,
+    });
+
+    expect(result.duplicateChecksSkipped).toBe(true);
+    expect(result.summary).toMatchObject({
+      totalCount: 1,
+      importedCount: 0,
+      rejectedCount: 1,
+    });
+    expect(result.errors[0]).toMatchObject({
+      code: "DUPLICATE_CHECKS_UNAVAILABLE",
+    });
+  });
+
+  it("requires duplicate checks before applying question bundle imports", async () => {
+    const loaded = await loadQuestionBundle("scripts/tests/fixtures/question-bundle.sample.json");
+
+    await expect(importQuestionBundle(loaded, { apply: true })).rejects.toThrow(
+      "DUPLICATE_CHECKS_UNAVAILABLE",
+    );
+  });
+
   it("uses validation summary for prebuilt paper bundle dry-run results", async () => {
     dbState.available = true;
     const loaded = await loadPrebuiltPaperBundle(

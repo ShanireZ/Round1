@@ -55,6 +55,7 @@ export interface QuestionBundleValidationOptions {
   judgeAttempts?: number;
   judgeItemIndexes?: Set<number>;
   skipDuplicateChecks?: boolean;
+  requireDuplicateChecks?: boolean;
 }
 
 const judgeReviewSchema = z.object({
@@ -186,11 +187,12 @@ function buildJudgePayload(item: QuestionBundleItem): Record<string, unknown> {
 async function callJudgeQuestionBundleItem(
   item: QuestionBundleItem,
   timeoutMs: number,
-  lane?: "backup",
+  options: { lane?: "backup"; allowBackupFallback?: boolean } = {},
 ) {
   return callScriptLlmScene({
     scene: "judge",
-    ...(lane ? { lane } : {}),
+    ...(options.lane ? { lane: options.lane } : {}),
+    allowBackupFallback: options.allowBackupFallback ?? false,
     system: "你是严谨的信息学竞赛题目审核员，只输出 JSON。",
     prompt: `请二次校验下面的离线 question bundle 题目，重点检查答案是否自洽且有唯一正确答案。\n\n${JSON.stringify(
       buildJudgePayload(item),
@@ -237,7 +239,9 @@ async function judgeQuestionBundleItem(
       };
     } catch (primaryError) {
       try {
-        const fallbackResponse = await callJudgeQuestionBundleItem(item, timeoutMs, "backup");
+        const fallbackResponse = await callJudgeQuestionBundleItem(item, timeoutMs, {
+          lane: "backup",
+        });
         const parsed = parseJudgeReview(fallbackResponse.text);
         return {
           approved: parsed.approved,
@@ -345,6 +349,13 @@ export async function validateQuestionBundle(
       canRunDuplicateChecks = true;
     } catch {
       duplicateChecksSkipped = true;
+      if (options.requireDuplicateChecks === true) {
+        errors.push({
+          code: "DUPLICATE_CHECKS_UNAVAILABLE",
+          message: "duplicate checks require a reachable database connection",
+        });
+        loaded.bundle.items.forEach((_item, index) => rejectedItems.add(index));
+      }
     }
   }
 
@@ -537,6 +548,7 @@ export async function importQuestionBundle(
   const validation = await validateQuestionBundle(loaded, {
     runSandbox: false,
     runJudge: false,
+    requireDuplicateChecks: options.apply,
   });
 
   if (validation.errors.length > 0 && options.apply) {

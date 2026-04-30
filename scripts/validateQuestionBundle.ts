@@ -21,6 +21,8 @@ Options:
   --judge-items     Comma-separated zero-based item indexes to judge
   --skip-duplicate-checks
                     Skip DB duplicate checks; useful for post-import asset revalidation
+  --require-duplicate-checks
+                    Fail validation if DB duplicate checks cannot run
   --write-metadata  Persist validation metadata and item checksum manifest when validation passes
   --help            Show this help message
 `);
@@ -41,6 +43,7 @@ async function main() {
   let judgeAttempts = 1;
   let judgeItemIndexes: Set<number> | undefined;
   let skipDuplicateChecks = false;
+  let requireDuplicateChecks = false;
   let writeMetadata = false;
 
   for (let index = 0; index < rest.length; index += 1) {
@@ -64,6 +67,11 @@ async function main() {
 
     if (token === "--skip-duplicate-checks") {
       skipDuplicateChecks = true;
+      continue;
+    }
+
+    if (token === "--require-duplicate-checks") {
+      requireDuplicateChecks = true;
       continue;
     }
 
@@ -116,6 +124,14 @@ async function main() {
     throw new Error(`Unexpected argument: ${token}`);
   }
 
+  if (judgeItemIndexes && !runJudge) {
+    throw new Error("--judge-items requires --judge");
+  }
+
+  if (skipDuplicateChecks && requireDuplicateChecks) {
+    throw new Error("--skip-duplicate-checks cannot be combined with --require-duplicate-checks");
+  }
+
   const loaded = await loadQuestionBundle(bundlePath);
   const result = await validateQuestionBundle(loaded, {
     runSandbox,
@@ -124,6 +140,7 @@ async function main() {
     judgeAttempts,
     judgeItemIndexes,
     skipDuplicateChecks,
+    requireDuplicateChecks,
   });
 
   let updatedChecksum: string | undefined;

@@ -144,15 +144,34 @@ R2_PUBLIC_BASE_URL=
 ```env
 ROUND1_PM2_ENABLE_CONTENT_WORKER=1
 SANDBOX_RUNNER_URL=http://127.0.0.1:4401
-LLM_PROVIDER_DEFAULT=openrouter
-LLM_PROVIDER_BACKUP=
-OPENROUTER_API_KEY=
-OPENROUTER_MODEL=openai/gpt-5.4
+LLM_PROVIDER_DEFAULT=alibaba
+LLM_PROVIDER_BACKUP=deepseek
+ALIBABA_API_KEY=
+ALIBABA_MODEL=qwen3.6-plus
+DEEPSEEK_API_KEY=
+DEEPSEEK_MODEL=deepseek-v4-pro
 LLM_REASONING_DEFAULT=max>xhigh>high>medium>default
 LLM_THINKING_TYPE_DEFAULT=enabled
 LLM_THINKING_BUDGET_DEFAULT=default
 LLM_REASONING_SUMMARY_DEFAULT=auto
 ```
+
+LLM provider 变量面以 `config/llm.ts` 与 `.env.example` 为准。当前 `LLM_PROVIDER_DEFAULT` / `LLM_PROVIDER_BACKUP` 支持以下 provider slug；每个 provider 均按对应前缀配置 `<PREFIX>_API_KEY`、可选 `<PREFIX>_BASE_URL` 与 `<PREFIX>_MODEL`：
+
+| provider slug | env prefix   | 备注                                            |
+| ------------- | ------------ | ----------------------------------------------- |
+| `openai`      | `OPENAI`     | OpenAI 官方接口                                 |
+| `anthropic`   | `ANTHROPIC`  | Anthropic 官方接口                              |
+| `google`      | `GOOGLE`     | Google Gemini 接口                              |
+| `xiaomi`      | `XIAOMI`     | OpenAI-compatible provider path                 |
+| `alibaba`     | `ALIBABA`    | DashScope compatible-mode                       |
+| `moonshotai`  | `MOONSHOTAI` | Moonshot AI / Kimi 接口                         |
+| `openrouter`  | `OPENROUTER` | `OPENROUTER_MODEL` 必须使用 `vendor/model` 格式 |
+| `deepseek`    | `DEEPSEEK`   | DeepSeek 接口                                   |
+| `minimax`     | `MINIMAX`    | MiniMax 接口                                    |
+| `volcengine`  | `VOLCENGINE` | 火山方舟接口                                    |
+| `xai`         | `XAI`        | xAI 接口                                        |
+| `zai`         | `ZAI`        | Z.ai / BigModel 接口                            |
 
 字体当前需要在 `${R2_PUBLIC_BASE_URL}/font/` 下提供 Geist、HarmonyOS、Fraunces 与 Source Han Serif SC。CppLearn OIDC 横幅图片由 CppLearn 提供并上传到 `${R2_PUBLIC_BASE_URL}/logo/cpplearn.jpg`；运行时页面只引用同源 `/logo/cpplearn.jpg`。
 

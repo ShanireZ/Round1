@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 
 const mockEnv = {
@@ -98,6 +100,28 @@ describe("config/llm", () => {
       xai: "XAI_MODEL",
       zai: "ZAI_MODEL",
     });
+  });
+
+  it("keeps .env.example aligned with the supported direct provider env vars", async () => {
+    const { providerApiKeyEnvVars, providerBaseUrlEnvVars, providerModelEnvVars } =
+      await import("../../config/llm.js");
+    const repoRoot = resolve(import.meta.dirname, "..", "..");
+    const envExample = readFileSync(resolve(repoRoot, ".env.example"), "utf8");
+    const expectedEnvVars = [
+      "LLM_PROVIDER_DEFAULT",
+      "LLM_PROVIDER_BACKUP",
+      "LLM_REASONING_DEFAULT",
+      "LLM_REASONING_SUMMARY_DEFAULT",
+      "LLM_THINKING_TYPE_DEFAULT",
+      "LLM_THINKING_BUDGET_DEFAULT",
+      ...Object.values(providerApiKeyEnvVars),
+      ...Object.values(providerBaseUrlEnvVars),
+      ...Object.values(providerModelEnvVars),
+    ];
+
+    for (const envVar of expectedEnvVars) {
+      expect(envExample).toMatch(new RegExp(`^#?\\s*${envVar}=`, "m"));
+    }
   });
 
   it("reads default and backup lane providers from env", async () => {

@@ -6,7 +6,9 @@
 # 重置:  docker compose -f docker-compose.dev.yml down -v
 # 端口仅绑定 127.0.0.1，避免本地数据库/Redis/runner 暴露到局域网。
 # 宿主机端口按 Round1 端口规划使用 4397/4395/4401；容器内仍保留 Postgres/Redis 官方默认端口。
-# 旧 pgdata 若曾挂载到 /var/lib/postgresql，切换数据目录后需 down -v 重建。
+# PostgreSQL 18 镜像要求 volume 挂到 /var/lib/postgresql，由镜像在内部创建版本化
+# data 子目录；旧的 /var/lib/postgresql/data 挂载会导致容器启动失败。
+# 若本地已有旧布局 pgdata，需要备份后重建 volume。
 
 services:
   pg:
@@ -20,7 +22,7 @@ services:
       POSTGRES_USER: round1
       POSTGRES_PASSWORD: round1_dev
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U round1 -d round1"]
       interval: 5s

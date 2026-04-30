@@ -3,12 +3,12 @@
 ## LLM 场景路由
 
 - 当前脚本链路改为 provider-direct，只保留 2 条 provider lane：`.env` 中的 `LLM_PROVIDER_DEFAULT` 与可选的 `LLM_PROVIDER_BACKUP`。
-- lane 值只写 provider slug；内容生产和诊断 override 的统一备选集合为 `xiaomi`、`deepseek`、`alibaba`、`minimax`。
-- 每个 provider 单独配置 `API_KEY`、`BASE_URL`、`MODEL`；`deepseek` 默认 base URL 是 `https://api.deepseek.com`，`xiaomi` 默认 base URL 是 `https://api.xiaomimimo.com/v1`，`alibaba` 默认 base URL 是 `https://dashscope.aliyuncs.com/compatible-mode/v1`，`minimax` 默认 base URL 是 `https://api.minimax.io/v1`。
+- lane 值只写 provider slug；当前 direct provider 集合为 `openai`、`anthropic`、`google`、`xiaomi`、`alibaba`、`moonshotai`、`openrouter`、`deepseek`、`minimax`、`volcengine`、`xai`、`zai`。
+- 每个 provider 单独配置 `<PREFIX>_API_KEY`、可选 `<PREFIX>_BASE_URL`、`<PREFIX>_MODEL`；完整前缀见 `.env.example`，默认 base URL 以 `config/llm.ts` 为准。
 - 脚本默认读取 `.env` 中的 `LLM_PROVIDER_DEFAULT` / `LLM_PROVIDER_BACKUP` provider 链；计划、README 和日常操作命令不应写固定 provider 覆盖参数。
 - 显式 route override 仅保留内部诊断能力，并限制在 `deepseek`、`xiaomi`、`alibaba`、`minimax` 四个 provider 内；日常脚本入口不暴露 provider 覆盖参数。
 - `LLM_REASONING_DEFAULT` 统一承载离散强度型 reasoning 控制；当前已接入支持 effort / thinkingLevel 的 provider 时才会下发。
-- `LLM_THINKING_TYPE_DEFAULT` 承载 enabled/disabled 风格的 thinking 开关；当前已接入 deepseek / xiaomi。
+- `LLM_THINKING_TYPE_DEFAULT` 承载 enabled/disabled 风格的 thinking 开关；当前已接入 deepseek / xiaomi / volcengine / zai，alibaba 会映射到自身的 thinking 控制。
 - `LLM_THINKING_BUDGET_DEFAULT` 承载数值预算风格的 thinking 控制；当前已接入支持预算型 thinking 的 provider 时才会下发。
 - reasoning summary 统一走 `LLM_REASONING_SUMMARY_DEFAULT`，并只在当前 provider / model 支持时下发。
 - `rewritePaperExplanations.ts`、`reviewRealPapers.ts` 等脚本默认复用 `.env` provider 链；日常脚本命令不提供 provider 覆盖入口。
@@ -87,6 +87,8 @@
 - 全量 metadata-only 复核：`npx tsx scripts/reviewRealPapers.ts --dir csp-j --write --chunk-size 1 --metadata-only`
 - 生成阅读程序验收 bundle：`npx tsx scripts/buildAcceptanceQuestionBundle.ts --exam-type GESP-1 --question-type reading_program --primary-kp-code CPP --difficulty easy --count 30 --run-id 2026-04-26-acceptance-gesp-1-easy-v01 --batch-id 2026-04-26-scale-reading`
 - 生成完善程序验收 bundle：`npx tsx scripts/buildAcceptanceQuestionBundle.ts --exam-type GESP-1 --question-type completion_program --primary-kp-code CPP --difficulty easy --count 20 --run-id 2026-04-26-acceptance-gesp-1-easy-v02 --batch-id 2026-04-26-scale-completion`
+- LLM 小批量出题 probe：`npx tsx scripts/generateQuestionBundle.ts --exam-type GESP-1 --question-type single_choice --primary-kp-code CPP --difficulty easy --count 5 --run-id <runId> --artifact-version 1`
+- LLM 小批量判官复核：`npx tsx scripts/validateQuestionBundle.ts papers/<year>/<runId>/question-bundles/<bundle-file>.json --judge --judge-attempts 3 --require-duplicate-checks --write-metadata`
 - 程序题离线 sandbox 校验并写回：`npx tsx scripts/validateQuestionBundle.ts papers/2026/<runId>/question-bundles/<bundle-file>.json --run-sandbox --write --write-metadata`
 - question bundle 守卫验证：`npx tsx scripts/verifyQuestionBundleGuards.ts`
 - 离线产物命名守卫：`npm run verify:offline-artifacts`
@@ -99,7 +101,8 @@
 - `generateQuestionBundle.ts`：真实 LLM 出题入口，bundle meta 记录实际 provider/model。
 - `buildAcceptanceQuestionBundle.ts`：本地确定性验收入口，不调用 LLM，只用于验证 schema、sandbox、导入和守卫流程。
 - `validateQuestionBundle.ts --judge`：LLM 判官入口；出题与判官是分离步骤。只有显式跑过 `--judge` 的 bundle 才算完成 LLM 二次语义校验。
-- 已导入或已整理过的候选资产复核可加 `--skip-duplicate-checks`，避免把自身历史入库记录判为重复；若只需重试少数题，可加 `--judge-items 2,3` 和 `--judge-attempts 3`。
+- 大规模生产前先按 5 题一批递增 `--artifact-version`，每批生成后立即跑 `validateQuestionBundle.ts --judge --require-duplicate-checks --write-metadata`；程序题再加 `--run-sandbox --write`。
+- 已导入或已整理过的候选资产复核可加 `--skip-duplicate-checks`，避免把自身历史入库记录判为重复；正式导入前应使用 `--require-duplicate-checks` 确认 DB 去重实际运行。若只需重试少数题，可加 `--judge-items 2,3` 和 `--judge-attempts 3`。
 
 ## 已合并/删除的旧脚本
 
