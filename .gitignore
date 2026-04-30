@@ -16,7 +16,6 @@ test-results
 certs
 
 # Data
-/data/backups/
 /docs/res/
 /papers
 /artifacts
