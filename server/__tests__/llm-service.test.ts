@@ -563,6 +563,82 @@ describe("server/services/llm", () => {
     );
   });
 
+  it("repairs fenced JSON object text from provider parse failures", async () => {
+    getTaskExecutionChainMock.mockReturnValue([
+      {
+        providerName: "xiaomi",
+        model: "mimo-v2.5-pro",
+        baseURL: "https://api.xiaomimimo.com/v1",
+        lane: "default",
+        pinnedProvider: false,
+      },
+    ]);
+
+    generateObjectMock.mockRejectedValue(
+      Object.assign(new Error("No object generated: could not parse the response"), {
+        name: "AI_NoObjectGeneratedError",
+        text: '```json\n{"ok":true,"stem":"code fence inside string ```cpp\\nint main(){}\\n```"}\n```',
+        finishReason: "stop",
+        response: {
+          id: "resp-xiaomi-object-1",
+          modelId: "mimo-v2.5-pro",
+        },
+        usage: {
+          inputTokens: 11,
+          outputTokens: 7,
+        },
+        reasoningText: "provider reasoning",
+      }),
+    );
+
+    const { llmGenerateObject } = await import("../../server/services/llm/index.js");
+
+    const result = await llmGenerateObject({
+      task: "generate",
+      schema: z.object({
+        ok: z.boolean(),
+        stem: z.string(),
+      }),
+      schemaName: "object-schema",
+      prompt: "return fenced json",
+    });
+
+    expect(result).toEqual({
+      data: {
+        ok: true,
+        stem: "code fence inside string ```cpp\nint main(){}\n```",
+      },
+      provider: "xiaomi",
+      model: "mimo-v2.5-pro",
+      lane: "default",
+      tokensIn: 11,
+      tokensOut: 7,
+      latencyMs: expect.any(Number),
+      finishReason: "stop",
+      responseId: "resp-xiaomi-object-1",
+      reasoningText: "provider reasoning",
+      providerMetadata: undefined,
+    });
+
+    expect(insertValuesMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        provider: "xiaomi",
+        model: "mimo-v2.5-pro",
+        responseModel: "mimo-v2.5-pro",
+        lane: "default",
+        tokensIn: 11,
+        tokensOut: 7,
+        warningsJson: [
+          {
+            type: "object_text_json_repair",
+            sourceError: "AI_NoObjectGeneratedError",
+          },
+        ],
+        errorMessage: undefined,
+      }),
+    );
+  });
+
   it("appends reasoning history to object requests", async () => {
     getTaskExecutionChainMock.mockReturnValue([
       {

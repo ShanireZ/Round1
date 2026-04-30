@@ -35,6 +35,105 @@ function getString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
+function getNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function extractBalancedJsonObject(text: string): string | undefined {
+  let start = -1;
+  let depth = 0;
+  let inString = false;
+  let escaping = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+
+    if (inString) {
+      if (escaping) {
+        escaping = false;
+        continue;
+      }
+
+      if (char === "\\") {
+        escaping = true;
+        continue;
+      }
+
+      if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (char === "{") {
+      if (depth === 0) {
+        start = index;
+      }
+      depth += 1;
+      continue;
+    }
+
+    if (char !== "}" || depth === 0) {
+      continue;
+    }
+
+    depth -= 1;
+    if (depth === 0 && start >= 0) {
+      return text.slice(start, index + 1);
+    }
+  }
+
+  return undefined;
+}
+
+function extractJsonObjectText(rawText: string): string | undefined {
+  const trimmed = rawText.trim();
+  const extracted = extractBalancedJsonObject(trimmed);
+  if (extracted) {
+    return extracted;
+  }
+
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+
+  if (fenced?.[1]) {
+    return extractBalancedJsonObject(fenced[1].trim()) ?? fenced[1].trim();
+  }
+
+  return undefined;
+}
+
+function parseObjectFromProviderErrorText<T>(error: unknown, schema: ZodSchema<T>): T | undefined {
+  const text = getString(asRecord(error)?.text);
+  if (!text) {
+    return undefined;
+  }
+
+  const jsonText = extractJsonObjectText(text);
+  if (!jsonText) {
+    return undefined;
+  }
+
+  try {
+    return schema.parse(JSON.parse(jsonText));
+  } catch {
+    return undefined;
+  }
+}
+
+function resolveUsage(result: { usage?: unknown }): { inputTokens: number; outputTokens: number } {
+  const usage = asRecord(result.usage);
+
+  return {
+    inputTokens: getNumber(usage?.inputTokens) ?? 0,
+    outputTokens: getNumber(usage?.outputTokens) ?? 0,
+  };
+}
+
 function resolveResponseEnvelope(result: { response?: unknown }): JsonRecord | undefined {
   const responseRecord = asRecord(result.response);
   const bodyRecord = asRecord(responseRecord?.body);
@@ -124,6 +223,17 @@ interface LLMExecutionResult<TResult> {
 
 interface LLMExecutionOutcome<TResult> extends LLMExecutionResult<TResult> {
   latencyMs: number;
+}
+
+interface GenerateObjectResponse<T> {
+  object: T;
+  usage?: unknown;
+  finishReason?: unknown;
+  response?: unknown;
+  reasoning?: unknown;
+  reasoningText?: unknown;
+  warnings?: unknown;
+  providerMetadata?: unknown;
 }
 
 function describeReasoningAttempt(attempt: LLMReasoningAttempt): string {
@@ -307,24 +417,61 @@ export async function llmGenerateObject<T>(params: {
     chain,
     hasReasoningHistory: hasReasoningHistory(params.messages),
     execute: async (entry, providerOptions) => {
-      const response = await generateObject({
-        model: createProviderLanguageModel(entry),
-        schema: params.schema,
-        schemaName: params.schemaName,
-        system: params.system,
-        temperature: params.temperature ?? 0.7,
-        ...(conversationMessages ? { messages: conversationMessages } : { prompt: params.prompt }),
-        ...(params.maxTokens ? { maxOutputTokens: params.maxTokens } : {}),
-        ...(providerOptions ? { providerOptions } : {}),
-      });
+      let response: GenerateObjectResponse<T>;
+
+      try {
+        response = (await generateObject({
+          model: createProviderLanguageModel(entry),
+          schema: params.schema,
+          schemaName: params.schemaName,
+          system: params.system,
+          temperature: params.temperature ?? 0.7,
+          ...(conversationMessages
+            ? { messages: conversationMessages }
+            : { prompt: params.prompt }),
+          ...(params.maxTokens ? { maxOutputTokens: params.maxTokens } : {}),
+          ...(providerOptions ? { providerOptions } : {}),
+        })) as GenerateObjectResponse<T>;
+      } catch (error) {
+        const repairedObject = parseObjectFromProviderErrorText(error, params.schema);
+        if (!repairedObject) {
+          throw error;
+        }
+
+        const usage = resolveUsage(error as { usage?: unknown });
+
+        return {
+          payload: repairedObject,
+          provider: entry.providerName,
+          model: entry.model,
+          lane: entry.lane,
+          tokensIn: usage.inputTokens,
+          tokensOut: usage.outputTokens,
+          finishReason: resolveFinishReason(
+            error as { finishReason?: unknown; response?: unknown },
+          ),
+          responseId: resolveResponseId(error as { response?: unknown }),
+          responseModel: resolveResponseModel(error as { response?: unknown }, entry.model),
+          reasoningText: resolveReasoningText(
+            error as { reasoning?: unknown; reasoningText?: unknown },
+          ),
+          warningsJson: [
+            {
+              type: "object_text_json_repair",
+              sourceError: getString(asRecord(error)?.name) ?? "Error",
+            },
+          ],
+          providerMetadataJson: asRecord(error)?.providerMetadata,
+        };
+      }
 
       return {
         payload: response.object,
         provider: entry.providerName,
         model: entry.model,
         lane: entry.lane,
-        tokensIn: response.usage?.inputTokens ?? 0,
-        tokensOut: response.usage?.outputTokens ?? 0,
+        tokensIn: resolveUsage(response).inputTokens,
+        tokensOut: resolveUsage(response).outputTokens,
         finishReason: resolveFinishReason(response),
         responseId: resolveResponseId(response),
         responseModel: resolveResponseModel(response, entry.model),
