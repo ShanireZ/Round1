@@ -251,6 +251,7 @@ Options:
   --llm-json-attempts <n>          JSON parse retries per LLM call (default: 2)
   --shard-index <number>           Zero-based shard index (default: 0)
   --shard-count <number>           Total shard count (default: 1)
+  --only-bundles <list>            Comma/range bundle numbers to process, e.g. 7,19-23
   --overwrite                      Replace existing bundle/report files
   --dry-run                        Exercise the LLM chain without writing files
   --help                           Show this help message
@@ -315,6 +316,10 @@ function parseArgs(argv: string[]) {
     ),
     maxRepairCycles: readNonNegativeInt(args, "max-repair-cycles", DEFAULT_MAX_REPAIR_CYCLES),
     llmJsonAttempts: readPositiveInt(args, "llm-json-attempts", DEFAULT_LLM_JSON_ATTEMPTS),
+    onlyBundleNos:
+      typeof args["only-bundles"] === "string"
+        ? parseBundleNoList(args["only-bundles"])
+        : undefined,
     shardIndex,
     shardCount,
     overwrite: args.overwrite === true,
@@ -338,6 +343,37 @@ function readNonNegativeInt(args: Record<string, ArgValue>, key: string, fallbac
     throw new Error(`--${key} must be a non-negative integer`);
   }
   return value;
+}
+
+function parseBundleNoList(value: string): Set<number> {
+  const bundleNos = new Set<number>();
+  for (const part of value.split(",")) {
+    const token = part.trim();
+    if (!token) {
+      continue;
+    }
+    const range = /^(\d+)-(\d+)$/.exec(token);
+    if (range) {
+      const start = Number.parseInt(range[1]!, 10);
+      const end = Number.parseInt(range[2]!, 10);
+      if (start <= 0 || end < start) {
+        throw new Error(`Invalid --only-bundles range: ${token}`);
+      }
+      for (let bundleNo = start; bundleNo <= end; bundleNo += 1) {
+        bundleNos.add(bundleNo);
+      }
+      continue;
+    }
+    const bundleNo = Number.parseInt(token, 10);
+    if (!Number.isInteger(bundleNo) || bundleNo <= 0 || String(bundleNo) !== token) {
+      throw new Error(`Invalid --only-bundles value: ${token}`);
+    }
+    bundleNos.add(bundleNo);
+  }
+  if (bundleNos.size === 0) {
+    throw new Error("--only-bundles must include at least one bundle number");
+  }
+  return bundleNos;
 }
 
 function hashSeed(seed: string): number {
@@ -387,14 +423,35 @@ function slugify(value: string): string {
     .replace(/^-|-$/g, "");
 }
 
-function makeRunId(combo: Combo, agentLabel: string): string {
+function makeRunId(combo: Combo, agentLabel: string, pipelineLabel: string): string {
   return [
     DEFAULT_DATE,
-    `bulk4000-${agentLabel}-b${pad4(combo.bundleNo)}`,
+    `${pipelineLabel}-${agentLabel}-b${pad4(combo.bundleNo)}`,
     slugify(combo.examType),
     combo.difficulty,
     "v01",
   ].join("-");
+}
+
+function deriveBundlePipelineLabel(batchRunId: string, totalQuestions: number): string {
+  const runTokens = batchRunId
+    .replace(/^\d{4}-\d{2}-\d{2}-/, "")
+    .replace(/-v\d{2}$/, "")
+    .split("-")
+    .filter(Boolean);
+  return runTokens.find((token) => /^bulk\d+$/i.test(token)) ?? `bulk${totalQuestions}`;
+}
+
+function deriveShardReportRunId(batchRunId: string, shardIndex: number, shardCount: number): string {
+  if (shardCount === 1) {
+    return batchRunId;
+  }
+  const suffix = `s${shardIndex + 1}-of-${shardCount}`;
+  const versionMatch = batchRunId.match(/-v\d{2}$/);
+  if (!versionMatch) {
+    return `${batchRunId}-${suffix}`;
+  }
+  return `${batchRunId.slice(0, versionMatch.index)}-${suffix}${versionMatch[0]}`;
 }
 
 function generationLaneFor(bundleNo: number): LLMLane {
@@ -566,6 +623,7 @@ function buildQuestionTypeInstruction(questionType: QuestionType): string {
       '{"stem":"...","options":["A. ...","B. ...","C. ...","D. ..."],"answer":"A|B|C|D","explanation":"...","primaryKpCode":"...","auxiliaryKpCodes":[]}',
       "Make exactly four options and exactly one correct answer.",
       "Prefer questions with a mechanically checkable unique answer: short C++ expression output, data-structure operation result, complexity under fully specified constraints, or exact algorithm trace.",
+      "Use concrete numbers and short traces; avoid purely conceptual wording when a small deterministic calculation can test the same knowledge point.",
       "Avoid broad wording such as best, usually, stable, efficient, suitable, or which algorithm has O(n log n) unless the constraints make exactly one option true.",
       "Avoid option sets where two common algorithms, two equivalent formulas, or two equivalent boolean renderings can both be considered correct.",
     ].join("\n");
@@ -577,7 +635,11 @@ function buildQuestionTypeInstruction(questionType: QuestionType): string {
       '{"stem":"...","cppCode":"complete C++17 program","subQuestions":[{"stem":"...","options":["A. ...","B. ...","C. ...","D. ..."],"answer":"A|B|C|D","explanation":"..."}],"sampleInputs":["..."],"expectedOutputs":["..."],"primaryKpCode":"...","auxiliaryKpCodes":[]}',
       "Each reading_program item must contain exactly five subQuestions.",
       "The C++ code must be deterministic, self-contained, and avoid undefined behavior.",
+      "The C++ code must be complete compilable code. Never leave placeholders, ellipses, TODO comments, marker comments in place of statements, or expressions such as /* compute */.",
+      "Prefer short programs with at most 35 nonblank lines, one input integer or a tiny fixed array, and values small enough to solve by hand.",
+      "Every subQuestion should ask for exact output, final variable value, container size/front/top, or loop count under the given sample input.",
       "The sampleInputs and expectedOutputs must be obtained from the same complete cppCode.",
+      "For each subQuestion explanation, show the key trace steps and the exact reason the chosen option is unique; do not use generic phrases such as according to the template or by formula.",
       "Do not rely on locale, file IO, randomness, wall clock time, recursion depth beyond small examples, implementation-defined signed overflow, or unspecified evaluation order.",
     ].join("\n");
   }
@@ -588,6 +650,8 @@ function buildQuestionTypeInstruction(questionType: QuestionType): string {
     "Use 2 to 5 blanks. Blank ids in answerJson will be derived from this response.",
     "The fullCode must match the chosen blank answers and sample outputs.",
     "Every blank must have exactly one option that compiles and preserves the expected behavior in fullCode.",
+    "Keep fullCode short and fully compilable. Never use placeholders, ellipses, TODO comments, marker comments in place of statements, or expressions such as /* compute */.",
+    "Use tiny inputs and deterministic traces; every explanation must state why the other blank options fail or change the output.",
     "Do not use blanks whose alternatives are stylistic equivalents or multiple syntactically valid answers with the same effect.",
   ].join("\n");
 }
@@ -918,6 +982,7 @@ async function generateBundle(params: {
   kpName: string;
   batchRunId: string;
   agentLabel: string;
+  pipelineLabel: string;
   timeoutMs: number;
   llmJsonAttempts: number;
   generationAttempt: number;
@@ -975,7 +1040,7 @@ async function generateBundle(params: {
     }
   }
 
-  const runId = makeRunId(params.combo, params.agentLabel);
+  const runId = makeRunId(params.combo, params.agentLabel, params.pipelineLabel);
   const timestamp = new Date().toISOString();
   const sourceBatchId = [
     "llm-question-bundle-v1",
@@ -1355,6 +1420,21 @@ function applyRepairResponse(bundle: QuestionBundle, repair: RepairResponse): Qu
   });
 }
 
+function restrictRepairResponse(
+  repair: RepairResponse,
+  allowedItemIndexes: Set<number>,
+): RepairResponse {
+  const items = repair.items.filter((item) => allowedItemIndexes.has(item.itemIndex));
+  if (items.length === 0) {
+    throw new Error(
+      `repair response did not include any requested item indexes: ${[
+        ...allowedItemIndexes,
+      ].join(",")}`,
+    );
+  }
+  return repairResponseSchema.parse({ ...repair, items });
+}
+
 function codeSourceForItem(item: QuestionBundleItem): string | null {
   if (item.type === "reading_program") {
     return item.contentJson.cppCode;
@@ -1370,13 +1450,19 @@ async function normalizeCodeSampleOutputs(bundle: QuestionBundle): Promise<Quest
   let changed = false;
 
   for (const item of bundle.items) {
+    if (item.type === "single_choice") {
+      items.push(item);
+      continue;
+    }
+
     const source = codeSourceForItem(item);
     if (!source) {
       items.push(item);
       continue;
     }
 
-    const sampleInputs = item.contentJson.sampleInputs.length > 0 ? item.contentJson.sampleInputs : [""];
+    const sampleInputs =
+      item.contentJson.sampleInputs.length > 0 ? item.contentJson.sampleInputs : [""];
     const expectedOutputs: string[] = [];
     let canNormalize = true;
 
@@ -1397,7 +1483,7 @@ async function normalizeCodeSampleOutputs(bundle: QuestionBundle): Promise<Quest
     const currentOutputs = item.contentJson.expectedOutputs;
     const outputsDiffer =
       currentOutputs.length !== expectedOutputs.length ||
-      currentOutputs.some((output, index) => output !== expectedOutputs[index]);
+      currentOutputs.some((output: string, index: number) => output !== expectedOutputs[index]);
 
     if (!outputsDiffer) {
       items.push(item);
@@ -1475,8 +1561,12 @@ async function reviewBundle(params: {
           timeoutMs: params.timeoutMs,
           llmJsonAttempts: params.llmJsonAttempts,
         });
-        bundle = applyRepairResponse(bundle, repair.parsed);
-        rewritesApplied += repair.parsed.items.length;
+        const restrictedRepair = restrictRepairResponse(
+          repair.parsed,
+          new Set(syntheticIssues.map((issue) => issue.itemIndex)),
+        );
+        bundle = applyRepairResponse(bundle, restrictedRepair);
+        rewritesApplied += restrictedRepair.items.length;
         repairAttempts.push({
           repairCycle,
           lane: "backup",
@@ -1484,7 +1574,7 @@ async function reviewBundle(params: {
           model: repair.result.model,
           inputTokens: repair.result.inputTokens,
           outputTokens: repair.result.outputTokens,
-          repairedItems: repair.parsed.items.map((item) => item.itemIndex),
+          repairedItems: restrictedRepair.items.map((item) => item.itemIndex),
         });
         continue;
       } catch (error) {
@@ -1587,8 +1677,12 @@ async function reviewBundle(params: {
         timeoutMs: params.timeoutMs,
         llmJsonAttempts: params.llmJsonAttempts,
       });
-      bundle = applyRepairResponse(bundle, repair.parsed);
-      rewritesApplied += repair.parsed.items.length;
+      const restrictedRepair = restrictRepairResponse(
+        repair.parsed,
+        new Set(failedIssues.map((issue) => issue.itemIndex)),
+      );
+      bundle = applyRepairResponse(bundle, restrictedRepair);
+      rewritesApplied += restrictedRepair.items.length;
       repairAttempts.push({
         repairCycle,
         lane: repairLane,
@@ -1596,7 +1690,7 @@ async function reviewBundle(params: {
         model: repair.result.model,
         inputTokens: repair.result.inputTokens,
         outputTokens: repair.result.outputTokens,
-        repairedItems: repair.parsed.items.map((item) => item.itemIndex),
+        repairedItems: restrictedRepair.items.map((item) => item.itemIndex),
       });
     } catch (error) {
       repairAttempts.push({
@@ -1697,9 +1791,10 @@ function buildBundleReport(params: {
 function buildFailedBundleReport(params: {
   combo: Combo;
   agentLabel: string;
+  pipelineLabel: string;
   error: unknown;
 }): BundleReport {
-  const runId = makeRunId(params.combo, params.agentLabel);
+  const runId = makeRunId(params.combo, params.agentLabel, params.pipelineLabel);
   const outputPath = path.resolve(
     process.cwd(),
     defaultQuestionBundleOutputPath({
@@ -1756,6 +1851,7 @@ async function processCombo(params: {
   kpNames: Map<string, string>;
   batchRunId: string;
   agentLabel: string;
+  pipelineLabel: string;
   timeoutMs: number;
   llmJsonAttempts: number;
   maxGenerationAttempts: number;
@@ -1774,6 +1870,7 @@ async function processCombo(params: {
         kpName: params.kpNames.get(params.combo.primaryKpCode) ?? params.combo.primaryKpCode,
         batchRunId: params.batchRunId,
         agentLabel: params.agentLabel,
+        pipelineLabel: params.pipelineLabel,
         timeoutMs: params.timeoutMs,
         llmJsonAttempts: params.llmJsonAttempts,
         generationAttempt,
@@ -1805,6 +1902,9 @@ async function processCombo(params: {
           )}`,
         );
         continue;
+      }
+      if (review.finalVerdict === "fail") {
+        throw new Error(`bundle failed review: ${summarizeFailure(report)}`);
       }
       reserveHashes(review.bundle, params.seenHashes, generated.repoPath);
       if (!params.dryRun) {
@@ -1931,10 +2031,11 @@ async function writeReport(params: {
   const reportPath = path.resolve(
     process.cwd(),
     defaultOfflineReportPath({
-      runId:
-        params.shardCount === 1
-          ? params.batchRunId
-          : `${params.batchRunId}-s${params.shardIndex + 1}-of-${params.shardCount}`,
+      runId: deriveShardReportRunId(
+        params.batchRunId,
+        params.shardIndex,
+        params.shardCount,
+      ),
       reportName: "llm-question-generation-review",
     }),
   );
@@ -1961,11 +2062,14 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const startedAt = new Date().toISOString();
   const combos = chooseCombos(args.totalBundles, args.seed).filter(
-    (_combo, index) => index % args.shardCount === args.shardIndex,
+    (combo, index) =>
+      index % args.shardCount === args.shardIndex &&
+      (!args.onlyBundleNos || args.onlyBundleNos.has(combo.bundleNo)),
   );
   const kpNames = await loadTaxonomyNames();
   const seenHashes = await collectExistingHashes(path.join(process.cwd(), "papers", "2026"));
   const agentLabel = `a${pad2(args.shardIndex + 1)}`;
+  const pipelineLabel = deriveBundlePipelineLabel(args.batchRunId, args.totalQuestions);
 
   console.log(
     `LLM-BULK-START bundles=${combos.length}/${args.totalBundles} questions=${
@@ -1984,6 +2088,7 @@ async function main() {
         kpNames,
         batchRunId: args.batchRunId,
         agentLabel,
+        pipelineLabel,
         timeoutMs: args.timeoutMs,
         llmJsonAttempts: args.llmJsonAttempts,
         maxGenerationAttempts: args.maxGenerationAttempts,
@@ -1997,6 +2102,7 @@ async function main() {
         report: buildFailedBundleReport({
           combo,
           agentLabel,
+          pipelineLabel,
           error,
         }),
       };
