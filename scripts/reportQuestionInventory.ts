@@ -16,6 +16,8 @@ type CountKey = `${ExamType}|${QuestionType}|${Difficulty}|${string}`;
 
 interface InventoryArgs {
   sourceDir: string;
+  manifestPath?: string;
+  excludeManifestPath?: string;
   targetPapers: number;
   write: boolean;
   outDir: string;
@@ -41,7 +43,7 @@ interface DeficitRow {
   deficit: number;
 }
 
-const usage = `Usage: npx tsx scripts/reportQuestionInventory.ts [--source-dir papers/2026] [--target-papers 100] [--write] [--out-dir artifacts/reports/2026] [--out-run-dir artifacts/reports/2026/<run>]`;
+const usage = `Usage: npx tsx scripts/reportQuestionInventory.ts [--source-dir papers/2026] [--manifest bundle-manifest.json] [--exclude-manifest excluded-bundles.json] [--target-papers 100] [--write] [--out-dir artifacts/reports/2026] [--out-run-dir artifacts/reports/2026/<run>]`;
 
 function readArg(args: string[], name: string) {
   const index = args.indexOf(name);
@@ -62,11 +64,26 @@ function parseArgs(argv: string[]): InventoryArgs {
 
   return {
     sourceDir: readArg(argv, "--source-dir") ?? "papers/2026",
+    manifestPath: readArg(argv, "--manifest"),
+    excludeManifestPath: readArg(argv, "--exclude-manifest"),
     targetPapers,
     write: argv.includes("--write"),
     outDir: readArg(argv, "--out-dir") ?? "artifacts/reports/2026",
     outRunDir: readArg(argv, "--out-run-dir"),
   };
+}
+
+function readManifestJsonFiles(manifestPath: string): string[] {
+  const resolved = path.resolve(manifestPath);
+  const parsed = JSON.parse(fs.readFileSync(resolved, "utf8")) as { bundlePaths?: unknown };
+  if (!Array.isArray(parsed.bundlePaths)) {
+    throw new Error(`Unsupported inventory manifest shape: ${manifestPath}`);
+  }
+
+  return parsed.bundlePaths
+    .filter((entry): entry is string => typeof entry === "string")
+    .map((entry) => path.resolve(entry))
+    .sort((left, right) => left.localeCompare(right));
 }
 
 function listJsonFiles(dir: string): string[] {
@@ -149,8 +166,18 @@ function allocateByDifficulty(total: number, distribution: Record<string, number
   return base.map(({ difficulty, count }) => ({ difficulty, count }));
 }
 
-async function readInventoryQuestions(sourceDir: string) {
-  const files = listJsonFiles(path.resolve(sourceDir));
+async function readInventoryQuestions(
+  args: Pick<InventoryArgs, "sourceDir" | "manifestPath" | "excludeManifestPath">,
+) {
+  const sourceFiles = args.manifestPath
+    ? readManifestJsonFiles(args.manifestPath)
+    : listJsonFiles(path.resolve(args.sourceDir));
+  const excludedFiles = new Set(
+    args.excludeManifestPath
+      ? readManifestJsonFiles(args.excludeManifestPath).map((file) => path.normalize(file))
+      : [],
+  );
+  const files = sourceFiles.filter((file) => !excludedFiles.has(path.normalize(file)));
   const questions: InventoryQuestion[] = [];
   const invalidFiles: Array<{ path: string; message: string }> = [];
 
@@ -317,7 +344,7 @@ function buildMarkdownReport(params: {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const inventory = await readInventoryQuestions(args.sourceDir);
+  const inventory = await readInventoryQuestions(args);
   const counts = buildAvailableCounts(inventory.questions);
   const deficits = buildDeficits({
     available: counts.available,
@@ -327,6 +354,8 @@ async function main() {
   const payload = {
     generatedAt,
     sourceDir: args.sourceDir,
+    sourceManifest: args.manifestPath,
+    excludedManifest: args.excludeManifestPath,
     targetPapersPerExamType: args.targetPapers,
     filesFound: inventory.filesFound,
     invalidFiles: inventory.invalidFiles,
