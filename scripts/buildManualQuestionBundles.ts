@@ -29,7 +29,9 @@ interface DraftMeta {
   promptText?: string;
 }
 
-type DraftItem = Omit<QuestionBundleItem, "contentHash" | "sandboxVerified"> & {
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+type DraftItem = DistributiveOmit<QuestionBundleItem, "contentHash" | "sandboxVerified"> & {
   contentHash?: string;
   sandboxVerified?: boolean;
 };
@@ -92,13 +94,15 @@ function buildSourceBatchIds(meta: DraftMeta): string[] {
   }
 
   return [
-    "manual-question-bundle-v1",
-    meta.runId,
-    meta.examType,
-    meta.questionType,
-    meta.primaryKpCode,
-    meta.difficulty,
-  ].join(":");
+    [
+      "manual-question-bundle-v1",
+      meta.runId,
+      meta.examType,
+      meta.questionType,
+      meta.primaryKpCode,
+      meta.difficulty,
+    ].join(":"),
+  ];
 }
 
 function finalizeItem(meta: DraftMeta, item: DraftItem): QuestionBundleItem {
