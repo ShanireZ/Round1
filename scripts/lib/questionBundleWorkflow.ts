@@ -46,6 +46,7 @@ export interface ImportQuestionBundleOptions {
   apply: boolean;
   persistDryRun?: boolean;
   importedBy?: string | null;
+  skipDuplicateChecks?: boolean;
 }
 
 export interface QuestionBundleValidationOptions {
@@ -548,7 +549,8 @@ export async function importQuestionBundle(
   const validation = await validateQuestionBundle(loaded, {
     runSandbox: false,
     runJudge: false,
-    requireDuplicateChecks: options.apply,
+    skipDuplicateChecks: options.skipDuplicateChecks,
+    requireDuplicateChecks: options.apply && options.skipDuplicateChecks !== true,
   });
 
   if (validation.errors.length > 0 && options.apply) {

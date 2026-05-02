@@ -9,7 +9,7 @@ import {
   validateQuestionBundle,
 } from "./lib/questionBundleWorkflow.js";
 
-const usage = `Usage: npx tsx scripts/importQuestionBundles2026.ts [--dir papers/2026] [--manifest report-or-manifest.json[,more.json]] [--apply] [--run-judge] [--judge-rounds 2] [--limit count] [--expected-items count] [--imported-by user-uuid]`;
+const usage = `Usage: npx tsx scripts/importQuestionBundles2026.ts [--dir papers/2026] [--manifest report-or-manifest.json[,more.json]] [--apply] [--run-judge] [--judge-rounds 2] [--limit count] [--expected-items count] [--imported-by user-uuid] [--skip-duplicate-checks]`;
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -139,6 +139,7 @@ async function main() {
   const dir = readArg(args, "--dir") ?? "papers/2026";
   const apply = args.includes("--apply");
   const runJudge = args.includes("--run-judge");
+  const skipDuplicateChecks = args.includes("--skip-duplicate-checks");
   const judgeRoundsRaw = readArg(args, "--judge-rounds");
   const judgeRounds = judgeRoundsRaw ? Number.parseInt(judgeRoundsRaw, 10) : 2;
   const limitRaw = readArg(args, "--limit");
@@ -214,6 +215,7 @@ async function main() {
         apply,
         persistDryRun: !apply,
         importedBy,
+        skipDuplicateChecks,
       });
       if (result.status === "failed") {
         throw new Error("question bundle import returned failed status");
