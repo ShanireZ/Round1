@@ -47,6 +47,29 @@ interface Combo {
   difficulty: Difficulty;
 }
 
+interface InventoryDeficitRow {
+  examType: ExamType;
+  questionType: QuestionType;
+  difficulty: Difficulty;
+  kpGroup: string;
+  required: number;
+  available: number;
+  deficit: number;
+}
+
+interface InventoryAllocationRow extends InventoryDeficitRow {
+  allocatedBundles: number;
+  allocatedQuestions: number;
+  remainingDeficitAfterAllocation: number;
+}
+
+interface InventoryFulfillmentPlan {
+  sourcePath: string;
+  plannedQuestions: number;
+  questionsPerBundle: number;
+  allocatedRows: InventoryAllocationRow[];
+}
+
 interface GeneratedBundle {
   bundle: QuestionBundle;
   combo: Combo;
@@ -147,9 +170,23 @@ const DEFAULT_SEED = "round1-2026-llm-4000-v1";
 const DEFAULT_MAX_CONCURRENCY = 2;
 const DEFAULT_TIMEOUT_MS = 120_000;
 const DEFAULT_MAX_GENERATION_ATTEMPTS = 3;
-const DEFAULT_MAX_REPAIR_CYCLES = 3;
+const DEFAULT_MAX_REPAIR_CYCLES = 6;
 const DEFAULT_LLM_JSON_ATTEMPTS = 2;
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
+
+const inventoryDeficitRowSchema = z.object({
+  examType: z.enum(EXAM_TYPES),
+  questionType: QuestionTypeSchema,
+  difficulty: z.enum(["easy", "medium", "hard"]),
+  kpGroup: z.string().min(1),
+  required: z.number().int().min(0),
+  available: z.number().int().min(0),
+  deficit: z.number().int().min(0),
+});
+
+const inventoryReportSchema = z.object({
+  deficits: z.array(inventoryDeficitRowSchema),
+});
 
 const generatedSingleChoiceSchema = z.object({
   stem: z.string().min(10),
@@ -248,13 +285,16 @@ Options:
   --max-concurrency <number>       Parallel bundle workers (default: 2)
   --timeout-ms <number>            Timeout for each LLM call (default: 120000)
   --max-generation-attempts <n>    Regenerate a failed bundle up to n times (default: 3)
-  --max-repair-cycles <n>          Repair failed review cycles per bundle before regeneration (default: 3)
+  --max-repair-cycles <n>          Repair failed review cycles per bundle before regeneration (default: 6)
   --llm-json-attempts <n>          JSON parse retries per LLM call (default: 2)
+  --inventory-path <path>          Use question-inventory.json deficits as the generation plan
+  --inventory-report-dir <dir>     Write per-shard inventory fulfillment records into this report dir
   --shard-index <number>           Zero-based shard index (default: 0)
   --shard-count <number>           Total shard count (default: 1)
   --only-bundles <list>            Comma/range bundle numbers to process, e.g. 7,19-23
   --overwrite                      Replace existing bundle/report files
   --dry-run                        Exercise the LLM chain without writing files
+  --plan-only                      Print the resolved bundle plan without calling LLMs
   --help                           Show this help message
 `);
 }
@@ -317,6 +357,11 @@ function parseArgs(argv: string[]) {
     ),
     maxRepairCycles: readNonNegativeInt(args, "max-repair-cycles", DEFAULT_MAX_REPAIR_CYCLES),
     llmJsonAttempts: readPositiveInt(args, "llm-json-attempts", DEFAULT_LLM_JSON_ATTEMPTS),
+    inventoryPath: typeof args["inventory-path"] === "string" ? args["inventory-path"] : undefined,
+    inventoryReportDir:
+      typeof args["inventory-report-dir"] === "string"
+        ? args["inventory-report-dir"]
+        : undefined,
     onlyBundleNos:
       typeof args["only-bundles"] === "string"
         ? parseBundleNoList(args["only-bundles"])
@@ -325,6 +370,7 @@ function parseArgs(argv: string[]) {
     shardCount,
     overwrite: args.overwrite === true,
     dryRun: args["dry-run"] === true,
+    planOnly: args["plan-only"] === true,
   };
 }
 
@@ -424,9 +470,19 @@ function slugify(value: string): string {
     .replace(/^-|-$/g, "");
 }
 
-function makeRunId(combo: Combo, agentLabel: string, pipelineLabel: string): string {
+function runDateFromBatchRunId(batchRunId: string): string {
+  const match = /^(\d{4}-\d{2}-\d{2})-/.exec(batchRunId);
+  return match?.[1] ?? DEFAULT_DATE;
+}
+
+function makeRunId(
+  combo: Combo,
+  agentLabel: string,
+  pipelineLabel: string,
+  runDate: string,
+): string {
   return [
-    DEFAULT_DATE,
+    runDate,
     `${pipelineLabel}-${agentLabel}-b${pad4(combo.bundleNo)}`,
     slugify(combo.examType),
     combo.difficulty,
@@ -518,6 +574,68 @@ function chooseCombos(totalBundles: number, seed: string): Combo[] {
   }
 
   return shuffle(selected, rng).map((combo, index) => ({ ...combo, bundleNo: index + 1 }));
+}
+
+async function chooseCombosFromInventory(params: {
+  inventoryPath: string;
+  totalQuestions: number;
+  questionsPerBundle: number;
+}): Promise<{ combos: Combo[]; plan: InventoryFulfillmentPlan }> {
+  const sourcePath = path.resolve(process.cwd(), params.inventoryPath);
+  const parsed = inventoryReportSchema.parse(JSON.parse(await readFile(sourcePath, "utf8")));
+  const selected: Array<Omit<Combo, "bundleNo">> = [];
+  const allocatedRows: InventoryAllocationRow[] = [];
+  let remainingQuestions = params.totalQuestions;
+
+  for (const deficit of parsed.deficits) {
+    if (remainingQuestions <= 0) {
+      break;
+    }
+    if (deficit.deficit < params.questionsPerBundle) {
+      continue;
+    }
+
+    const availableBundles = Math.floor(deficit.deficit / params.questionsPerBundle);
+    const requestedBundles = Math.floor(remainingQuestions / params.questionsPerBundle);
+    const allocatedBundles = Math.min(availableBundles, requestedBundles);
+    if (allocatedBundles <= 0) {
+      continue;
+    }
+
+    const allocatedQuestions = allocatedBundles * params.questionsPerBundle;
+    for (let index = 0; index < allocatedBundles; index += 1) {
+      selected.push({
+        examType: deficit.examType,
+        questionType: deficit.questionType,
+        primaryKpCode: deficit.kpGroup,
+        difficulty: deficit.difficulty,
+      });
+    }
+
+    allocatedRows.push({
+      ...deficit,
+      allocatedBundles,
+      allocatedQuestions,
+      remainingDeficitAfterAllocation: deficit.deficit - allocatedQuestions,
+    });
+    remainingQuestions -= allocatedQuestions;
+  }
+
+  if (remainingQuestions !== 0) {
+    throw new Error(
+      `Inventory deficits cannot satisfy ${params.totalQuestions} questions in n${params.questionsPerBundle} bundles; remaining=${remainingQuestions}`,
+    );
+  }
+
+  return {
+    combos: selected.map((combo, index) => ({ ...combo, bundleNo: index + 1 })),
+    plan: {
+      sourcePath: toRepoPath(sourcePath),
+      plannedQuestions: params.totalQuestions,
+      questionsPerBundle: params.questionsPerBundle,
+      allocatedRows,
+    },
+  };
 }
 
 async function loadTaxonomyNames(): Promise<Map<string, string>> {
@@ -1010,6 +1128,7 @@ async function generateBundle(params: {
   batchRunId: string;
   agentLabel: string;
   pipelineLabel: string;
+  runDate: string;
   timeoutMs: number;
   llmJsonAttempts: number;
   generationAttempt: number;
@@ -1065,7 +1184,7 @@ async function generateBundle(params: {
     }
   }
 
-  const runId = makeRunId(params.combo, params.agentLabel, params.pipelineLabel);
+  const runId = makeRunId(params.combo, params.agentLabel, params.pipelineLabel, params.runDate);
   const timestamp = new Date().toISOString();
   const sourceBatchId = [
     "llm-question-bundle-v1",
@@ -1820,16 +1939,18 @@ function buildFailedBundleReport(params: {
   combo: Combo;
   agentLabel: string;
   pipelineLabel: string;
+  runDate: string;
+  questionsPerBundle: number;
   error: unknown;
 }): BundleReport {
-  const runId = makeRunId(params.combo, params.agentLabel, params.pipelineLabel);
+  const runId = makeRunId(params.combo, params.agentLabel, params.pipelineLabel, params.runDate);
   const outputPath = path.resolve(
     process.cwd(),
     defaultQuestionBundleOutputPath({
       runId,
       questionType: params.combo.questionType,
       kpCode: params.combo.primaryKpCode,
-      count: DEFAULT_QUESTIONS_PER_BUNDLE,
+      count: params.questionsPerBundle,
       versionNo: 1,
     }),
   );
@@ -1885,6 +2006,7 @@ async function processCombo(params: {
   batchRunId: string;
   agentLabel: string;
   pipelineLabel: string;
+  runDate: string;
   timeoutMs: number;
   llmJsonAttempts: number;
   maxGenerationAttempts: number;
@@ -1908,6 +2030,7 @@ async function processCombo(params: {
         batchRunId: params.batchRunId,
         agentLabel: params.agentLabel,
         pipelineLabel: params.pipelineLabel,
+        runDate: params.runDate,
         timeoutMs: params.timeoutMs,
         llmJsonAttempts: params.llmJsonAttempts,
         generationAttempt,
@@ -2000,6 +2123,46 @@ function summarizeDistribution(reports: BundleReport[]) {
   return counts;
 }
 
+function summarizeInventoryDeltas(reports: BundleReport[]) {
+  const counts = new Map<string, InventoryDeficitRow & { generated: number; passed: number }>();
+
+  for (const report of reports) {
+    const key = [
+      report.examType,
+      report.questionType,
+      report.difficulty,
+      report.primaryKpCode,
+    ].join("|");
+    const current =
+      counts.get(key) ??
+      ({
+        examType: report.examType,
+        questionType: report.questionType,
+        difficulty: report.difficulty,
+        kpGroup: report.primaryKpCode,
+        required: 0,
+        available: 0,
+        deficit: 0,
+        generated: 0,
+        passed: 0,
+      } satisfies InventoryDeficitRow & { generated: number; passed: number });
+
+    current.generated += report.itemCount;
+    if (report.finalVerdict === "pass") {
+      current.passed += report.itemCount;
+    }
+    counts.set(key, current);
+  }
+
+  return [...counts.values()].sort(
+    (left, right) =>
+      left.examType.localeCompare(right.examType) ||
+      left.questionType.localeCompare(right.questionType) ||
+      left.difficulty.localeCompare(right.difficulty) ||
+      left.kpGroup.localeCompare(right.kpGroup),
+  );
+}
+
 function summarizeFailure(report: BundleReport): string {
   const validation = report.validationErrors.map((error) => error.code);
   const review = report.reviewAttempts.flatMap((attempt) =>
@@ -2016,6 +2179,7 @@ async function writeReport(params: {
   reports: BundleReport[];
   totalQuestions: number;
   questionsPerBundle: number;
+  inventoryPlan?: InventoryFulfillmentPlan;
   shardIndex: number;
   shardCount: number;
   startedAt: string;
@@ -2058,6 +2222,21 @@ async function writeReport(params: {
       reviewStatusEvidence:
         summary.failedBundles === 0 ? "two_round_llm_reviewed" : "llm_chain_failed",
     },
+    inventoryFulfillment: params.inventoryPlan
+      ? {
+          sourceInventoryPath: params.inventoryPlan.sourcePath,
+          plannedQuestions: params.inventoryPlan.plannedQuestions,
+          plannedRows: params.inventoryPlan.allocatedRows,
+          currentShardGeneratedQuestions: params.reports.reduce(
+            (sum, report) => sum + report.itemCount,
+            0,
+          ),
+          currentShardPassedQuestions: params.reports
+            .filter((report) => report.finalVerdict === "pass")
+            .reduce((sum, report) => sum + report.itemCount, 0),
+          currentShardDeltas: summarizeInventoryDeltas(params.reports),
+        }
+      : undefined,
     summary,
     distribution: summarizeDistribution(params.reports),
     bundles: params.reports,
@@ -2086,12 +2265,76 @@ async function writeReport(params: {
   if (summary.failedBundles > 0) {
     process.exitCode = 1;
   }
+  return params.dryRun ? null : toRepoPath(reportPath);
+}
+
+async function writeInventoryFulfillmentProgress(params: {
+  inventoryReportDir: string;
+  batchRunId: string;
+  inventoryPlan: InventoryFulfillmentPlan;
+  reports: BundleReport[];
+  generationReportPath: string | null;
+  shardIndex: number;
+  shardCount: number;
+  dryRun: boolean;
+}) {
+  if (params.dryRun) {
+    return;
+  }
+
+  const passedBundles = params.reports.filter((report) => report.finalVerdict === "pass");
+  const payload = {
+    meta: {
+      batchRunId: params.batchRunId,
+      reportType: "inventory_fulfillment_progress_2026",
+      generatedAt: new Date().toISOString(),
+      sourceInventoryPath: params.inventoryPlan.sourcePath,
+      generationReportPath: params.generationReportPath,
+      shardIndex: params.shardIndex,
+      shardCount: params.shardCount,
+    },
+    plan: params.inventoryPlan,
+    summary: {
+      generatedBundles: params.reports.length,
+      passedBundles: passedBundles.length,
+      failedBundles: params.reports.length - passedBundles.length,
+      passedQuestions: passedBundles.reduce((sum, report) => sum + report.itemCount, 0),
+    },
+    deltas: summarizeInventoryDeltas(params.reports),
+    bundlePaths: passedBundles.map((report) => report.path),
+    failedBundles: params.reports
+      .filter((report) => report.finalVerdict === "fail")
+      .map((report) => ({
+        path: report.path,
+        runId: report.runId,
+        errors: report.validationErrors,
+      })),
+  };
+  const fileName = [
+    "question-inventory-fill",
+    slugify(params.batchRunId),
+    `s${params.shardIndex + 1}-of-${params.shardCount}`,
+    "progress.json",
+  ].join("__");
+  const reportPath = path.resolve(process.cwd(), params.inventoryReportDir, fileName);
+  await mkdir(path.dirname(reportPath), { recursive: true });
+  await writeFile(reportPath, `${JSON.stringify(payload, null, 2)}\n`, {
+    encoding: "utf8",
+    flag: "w",
+  });
 }
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const startedAt = new Date().toISOString();
-  const combos = chooseCombos(args.totalBundles, args.seed).filter(
+  const selection = args.inventoryPath
+    ? await chooseCombosFromInventory({
+        inventoryPath: args.inventoryPath,
+        totalQuestions: args.totalQuestions,
+        questionsPerBundle: args.questionsPerBundle,
+      })
+    : { combos: chooseCombos(args.totalBundles, args.seed), plan: undefined };
+  const combos = selection.combos.filter(
     (combo, index) =>
       index % args.shardCount === args.shardIndex &&
       (!args.onlyBundleNos || args.onlyBundleNos.has(combo.bundleNo)),
@@ -2100,13 +2343,42 @@ async function main() {
   const seenHashes = await collectExistingHashes(path.join(process.cwd(), "papers", "2026"));
   const agentLabel = `a${pad2(args.shardIndex + 1)}`;
   const pipelineLabel = deriveBundlePipelineLabel(args.batchRunId, args.totalQuestions);
+  const runDate = runDateFromBatchRunId(args.batchRunId);
+
+  if (args.planOnly) {
+    const distribution: Record<string, number> = {};
+    for (const combo of combos) {
+      const key = [
+        combo.examType,
+        combo.questionType,
+        combo.difficulty,
+        combo.primaryKpCode,
+      ].join("|");
+      distribution[key] = (distribution[key] ?? 0) + args.questionsPerBundle;
+    }
+    console.log(
+      `LLM-BULK-PLAN ${JSON.stringify({
+        batchRunId: args.batchRunId,
+        inventoryPath: args.inventoryPath ?? null,
+        totalBundles: selection.combos.length,
+        shardBundles: combos.length,
+        shardQuestions: combos.length * args.questionsPerBundle,
+        questionsPerBundle: args.questionsPerBundle,
+        shardIndex: args.shardIndex,
+        shardCount: args.shardCount,
+        inventoryPlan: selection.plan ?? null,
+        distribution,
+      })}`,
+    );
+    return;
+  }
 
   console.log(
-    `LLM-BULK-START bundles=${combos.length}/${args.totalBundles} questions=${
+    `LLM-BULK-START bundles=${combos.length}/${selection.combos.length} questions=${
       combos.length * args.questionsPerBundle
     } default=${env.LLM_PROVIDER_DEFAULT} backup=${env.LLM_PROVIDER_BACKUP} concurrency=${
       args.maxConcurrency
-    } shard=${args.shardIndex}/${args.shardCount}`,
+    } shard=${args.shardIndex}/${args.shardCount} inventory=${args.inventoryPath ?? "none"}`,
   );
 
   const results = await runPool(combos, args.maxConcurrency, async (combo) => {
@@ -2119,6 +2391,7 @@ async function main() {
         batchRunId: args.batchRunId,
         agentLabel,
         pipelineLabel,
+        runDate,
         timeoutMs: args.timeoutMs,
         llmJsonAttempts: args.llmJsonAttempts,
         maxGenerationAttempts: args.maxGenerationAttempts,
@@ -2133,6 +2406,8 @@ async function main() {
           combo,
           agentLabel,
           pipelineLabel,
+          runDate,
+          questionsPerBundle: args.questionsPerBundle,
           error,
         }),
       };
@@ -2145,17 +2420,31 @@ async function main() {
     return result;
   });
 
-  await writeReport({
+  const generationReportPath = await writeReport({
     batchRunId: args.batchRunId,
     reports: results.map((result) => result.report),
     totalQuestions: args.totalQuestions,
     questionsPerBundle: args.questionsPerBundle,
+    inventoryPlan: selection.plan,
     shardIndex: args.shardIndex,
     shardCount: args.shardCount,
     startedAt,
     overwrite: args.overwrite,
     dryRun: args.dryRun,
   });
+
+  if (args.inventoryReportDir && selection.plan) {
+    await writeInventoryFulfillmentProgress({
+      inventoryReportDir: args.inventoryReportDir,
+      batchRunId: args.batchRunId,
+      inventoryPlan: selection.plan,
+      reports: results.map((result) => result.report),
+      generationReportPath,
+      shardIndex: args.shardIndex,
+      shardCount: args.shardCount,
+      dryRun: args.dryRun,
+    });
+  }
 }
 
 main().catch((error) => {

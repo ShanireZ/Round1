@@ -9,7 +9,7 @@ import {
   validateQuestionBundle,
 } from "./lib/questionBundleWorkflow.js";
 
-const usage = `Usage: npx tsx scripts/importQuestionBundles2026.ts [--dir papers/2026] [--apply] [--run-judge] [--judge-rounds 2] [--limit count]`;
+const usage = `Usage: npx tsx scripts/importQuestionBundles2026.ts [--dir papers/2026] [--manifest report-or-manifest.json[,more.json]] [--apply] [--run-judge] [--judge-rounds 2] [--limit count] [--expected-items count]`;
 
 function readArg(args: string[], name: string) {
   const index = args.indexOf(name);
@@ -39,6 +39,45 @@ function listJsonFiles(dir: string): string[] {
   return files.sort((left, right) => left.localeCompare(right));
 }
 
+function readManifestPaths(manifestPath: string): string[] {
+  const parsed = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as {
+    bundlePaths?: unknown;
+    bundles?: unknown;
+  };
+
+  if (Array.isArray(parsed.bundlePaths)) {
+    return parsed.bundlePaths.filter((entry): entry is string => typeof entry === "string");
+  }
+
+  if (Array.isArray(parsed.bundles)) {
+    return parsed.bundles
+      .filter((entry): entry is { path: string; finalVerdict?: string } => {
+        if (typeof entry !== "object" || entry === null) {
+          return false;
+        }
+        const maybeEntry = entry as { path?: unknown; finalVerdict?: unknown };
+        return (
+          typeof maybeEntry.path === "string" &&
+          (maybeEntry.finalVerdict === undefined || maybeEntry.finalVerdict === "pass")
+        );
+      })
+      .map((entry) => entry.path);
+  }
+
+  throw new Error(`Unsupported manifest shape: ${manifestPath}`);
+}
+
+function listManifestFiles(manifestArg: string): string[] {
+  const files = manifestArg
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .flatMap((manifestPath) => readManifestPaths(manifestPath))
+    .map((entry) => path.resolve(entry));
+
+  return [...new Set(files)].sort((left, right) => left.localeCompare(right));
+}
+
 async function main() {
   const args = process.argv.slice(2);
   if (args.includes("--help")) {
@@ -53,6 +92,9 @@ async function main() {
   const judgeRounds = judgeRoundsRaw ? Number.parseInt(judgeRoundsRaw, 10) : 2;
   const limitRaw = readArg(args, "--limit");
   const limit = limitRaw ? Number.parseInt(limitRaw, 10) : undefined;
+  const expectedItemsRaw = readArg(args, "--expected-items");
+  const expectedItems = expectedItemsRaw ? Number.parseInt(expectedItemsRaw, 10) : undefined;
+  const manifest = readArg(args, "--manifest");
 
   if (!Number.isInteger(judgeRounds) || judgeRounds <= 0) {
     throw new Error("--judge-rounds must be a positive integer");
@@ -60,8 +102,14 @@ async function main() {
   if (limit !== undefined && (!Number.isInteger(limit) || limit <= 0)) {
     throw new Error("--limit must be a positive integer");
   }
+  if (expectedItems !== undefined && (!Number.isInteger(expectedItems) || expectedItems <= 0)) {
+    throw new Error("--expected-items must be a positive integer");
+  }
 
-  const files = listJsonFiles(path.resolve(dir)).slice(0, limit);
+  const files = (manifest ? listManifestFiles(manifest) : listJsonFiles(path.resolve(dir))).slice(
+    0,
+    limit,
+  );
   const summary = {
     filesFound: files.length,
     validated: 0,
@@ -70,11 +118,13 @@ async function main() {
     failed: 0,
     judgeRoundsCompleted: 0,
   };
+  let seenItems = 0;
 
   for (const file of files) {
     const repoPath = path.relative(process.cwd(), file).replaceAll(path.sep, "/");
     try {
       const loaded = await loadQuestionBundle(file);
+      seenItems += loaded.bundle.items.length;
 
       if (runJudge) {
         for (let round = 1; round <= judgeRounds; round += 1) {
@@ -111,6 +161,12 @@ async function main() {
       summary.failed += 1;
       console.error(`FAIL ${repoPath}: ${error instanceof Error ? error.message : String(error)}`);
     }
+  }
+
+  if (expectedItems !== undefined && seenItems !== expectedItems) {
+    summary.failed += 1;
+    console.error(`FAIL expected ${expectedItems} items from manifest, found ${seenItems}`);
+    process.exitCode = 1;
   }
 
   console.log(JSON.stringify(summary, null, 2));

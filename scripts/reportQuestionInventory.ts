@@ -19,6 +19,7 @@ interface InventoryArgs {
   targetPapers: number;
   write: boolean;
   outDir: string;
+  outRunDir?: string;
 }
 
 interface InventoryQuestion {
@@ -40,7 +41,7 @@ interface DeficitRow {
   deficit: number;
 }
 
-const usage = `Usage: npx tsx scripts/reportQuestionInventory.ts [--source-dir papers/2026] [--target-papers 100] [--write] [--out-dir artifacts/reports/2026]`;
+const usage = `Usage: npx tsx scripts/reportQuestionInventory.ts [--source-dir papers/2026] [--target-papers 100] [--write] [--out-dir artifacts/reports/2026] [--out-run-dir artifacts/reports/2026/<run>]`;
 
 function readArg(args: string[], name: string) {
   const index = args.indexOf(name);
@@ -64,6 +65,7 @@ function parseArgs(argv: string[]): InventoryArgs {
     targetPapers,
     write: argv.includes("--write"),
     outDir: readArg(argv, "--out-dir") ?? "artifacts/reports/2026",
+    outRunDir: readArg(argv, "--out-run-dir"),
   };
 }
 
@@ -355,7 +357,7 @@ async function main() {
   console.log(markdown);
 
   if (args.write) {
-    const runDir = path.join(args.outDir, generatedAt.replace(/[:.]/g, "-"));
+    const runDir = args.outRunDir ?? path.join(args.outDir, generatedAt.replace(/[:.]/g, "-"));
     await mkdir(runDir, { recursive: true });
     await writeFile(
       path.join(runDir, "question-inventory.json"),
