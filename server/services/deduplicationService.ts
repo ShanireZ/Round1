@@ -9,6 +9,7 @@ import { logger } from "../logger.js";
 
 /** Jaccard 相似度阈值 — ≥0.85 视为重复 */
 const JACCARD_THRESHOLD = 0.85;
+const SALIENT_JACCARD_THRESHOLD = 0.65;
 
 /**
  * content_hash 规范化规则：
@@ -41,7 +42,7 @@ export async function isDuplicateByHash(contentHash: string): Promise<boolean> {
 /**
  * Jaccard 相似度 — 基于 n-gram (n=3) 集合交并比
  */
-function jaccardSimilarity(a: string, b: string): number {
+export function jaccardSimilarity(a: string, b: string): number {
   const ngramsA = toNGrams(a, 3);
   const ngramsB = toNGrams(b, 3);
 
@@ -66,13 +67,92 @@ function toNGrams(text: string, n: number): Set<string> {
   return grams;
 }
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
+}
+
+function readString(record: Record<string, unknown>, key: string) {
+  const value = record[key];
+  return typeof value === "string" ? value : "";
+}
+
+function readStringArray(record: Record<string, unknown>, key: string) {
+  const value = record[key];
+  return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
+}
+
+function readRecordArray(record: Record<string, unknown>, key: string) {
+  const value = record[key];
+  return Array.isArray(value)
+    ? value
+        .filter((entry) => typeof entry === "object" && entry !== null)
+        .map((entry) => entry as Record<string, unknown>)
+    : [];
+}
+
+export function buildQuestionSimilarityText(questionType: string, contentJson: unknown): string {
+  const content = asRecord(contentJson);
+
+  if (questionType === "single_choice") {
+    return [readString(content, "stem"), ...readStringArray(content, "options")].join("\n");
+  }
+
+  if (questionType === "reading_program") {
+    return [
+      readString(content, "cppCode"),
+      ...readRecordArray(content, "subQuestions").flatMap((subQuestion) => [
+        readString(subQuestion, "stem"),
+        ...readStringArray(subQuestion, "options"),
+      ]),
+      ...readStringArray(content, "sampleInputs"),
+      ...readStringArray(content, "expectedOutputs"),
+    ].join("\n");
+  }
+
+  return [
+    readString(content, "cppCode"),
+    readString(content, "fullCode"),
+    ...readRecordArray(content, "blanks").flatMap((blank) => [
+      readString(blank, "id"),
+      ...readStringArray(blank, "options"),
+    ]),
+    ...readStringArray(content, "sampleInputs"),
+    ...readStringArray(content, "expectedOutputs"),
+  ].join("\n");
+}
+
+const COMMON_SIMILARITY_PATTERNS = [
+  /#include\s*<[^>]+>/gi,
+  /\busing\s+namespace\s+std\s*;?/gi,
+  /\bint\s+main\s*\(\s*\)\s*\{?/gi,
+  /\breturn\s+0\s*;?/gi,
+  /\b(?:int|long|long long|double|float|char|bool|string|void|auto|const)\b/gi,
+  /\b(?:cin|cout|endl|std|vector|stack|queue|priority_queue|map|set|pair)\b/gi,
+  /\b(?:for|while|if|else|switch|case|break|continue)\b/gi,
+  /\b(?:ans|sum|cnt|res|tmp|temp|flag|num|arr|a|b|c|d|i|j|k|n|m|x|y|z)\b/gi,
+  /阅读|下面|以下|程序|代码|回答|问题|下列|选项|正确|错误|输入|输出|结果/g,
+  /循环|执行|次数|变量|影响|复杂度|时间复杂度|空间复杂度/g,
+  /入栈|出栈|栈|入队|出队|队列|计算机|理论|知识/g,
+  /BLANK\d+/gi,
+  /[{}()[\];,.:+\-*/%<>=!&|^~"'`\\]/g,
+];
+
+export function buildQuestionSalientText(similarityText: string): string {
+  let result = similarityText;
+  for (const pattern of COMMON_SIMILARITY_PATTERNS) {
+    result = result.replace(pattern, " ");
+  }
+
+  return result.replace(/\s+/g, " ").trim();
+}
+
 /**
  * Jaccard 近似去重 — 与同类型同知识点的已有题目比较
  *
  * @returns 如果发现近似重复，返回重复题目的 ID；否则返回 null
  */
 export async function findJaccardDuplicate(params: {
-  stem: string;
+  contentJson: unknown;
   questionType: string;
   primaryKpId: number;
 }): Promise<string | null> {
@@ -85,15 +165,25 @@ export async function findJaccardDuplicate(params: {
     .from(questions)
     .where(
       and(eq(questions.type, params.questionType), eq(questions.primaryKpId, params.primaryKpId)),
-    );
+  );
+
+  const candidateText = buildQuestionSimilarityText(params.questionType, params.contentJson);
+  const candidateSalientText = buildQuestionSalientText(candidateText);
 
   for (const candidate of candidates) {
-    const existingStem = ((candidate.contentJson as Record<string, unknown>)?.stem as string) ?? "";
-    const similarity = jaccardSimilarity(params.stem, existingStem);
+    const existingText = buildQuestionSimilarityText(params.questionType, candidate.contentJson);
+    const existingSalientText = buildQuestionSalientText(existingText);
+    const similarity = jaccardSimilarity(candidateText, existingText);
+    const salientSimilarity = jaccardSimilarity(candidateSalientText, existingSalientText);
 
-    if (similarity >= JACCARD_THRESHOLD) {
+    if (similarity >= JACCARD_THRESHOLD && salientSimilarity >= SALIENT_JACCARD_THRESHOLD) {
       logger.info(
-        { newStem: params.stem.slice(0, 50), existingId: candidate.id, similarity },
+        {
+          newText: candidateText.slice(0, 50),
+          existingId: candidate.id,
+          similarity,
+          salientSimilarity,
+        },
         "Jaccard duplicate detected",
       );
       return candidate.id;

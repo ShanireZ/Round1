@@ -204,7 +204,7 @@ export async function processGenerationJob(job: Job<GenerationJobData>) {
   }
 
   const jaccardDup = await findJaccardDuplicate({
-    stem,
+    contentJson,
     questionType,
     primaryKpId,
   });

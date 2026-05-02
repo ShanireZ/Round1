@@ -105,6 +105,7 @@ export async function importManualQuestions(params: {
 
         const optionsStr = parsed.options?.join("") ?? parsed.cppCode ?? "";
         const contentHash = computeContentHash(parsed.stem, optionsStr);
+        const contentJson = parsed;
 
         if (await isDuplicateByHash(contentHash)) {
           result.rejected.push({ index: i, reason: "duplicate_hash" });
@@ -112,7 +113,7 @@ export async function importManualQuestions(params: {
         }
 
         const jaccardDup = await findJaccardDuplicate({
-          stem: parsed.stem,
+          contentJson,
           questionType: params.questionType,
           primaryKpId: params.primaryKpId,
         });
@@ -122,7 +123,6 @@ export async function importManualQuestions(params: {
           continue;
         }
 
-        const contentJson = parsed;
         const answerJson = buildAnswerJson(params.questionType, parsed);
         const explanationJson = buildExplanationJson(params.questionType, parsed);
         const needsSandbox = params.questionType !== "single_choice";

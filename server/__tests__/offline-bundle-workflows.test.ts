@@ -9,6 +9,9 @@ const { dbState, queuedResults, mockDb, checkDbConnectionMock } = vi.hoisted(() 
       from() {
         return query;
       },
+      innerJoin() {
+        return query;
+      },
       where() {
         return query;
       },

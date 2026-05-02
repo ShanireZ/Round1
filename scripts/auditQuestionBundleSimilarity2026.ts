@@ -6,11 +6,15 @@ import {
   type QuestionBundleItem,
   type QuestionType,
 } from "./lib/bundleTypes.js";
+import {
+  buildQuestionSalientText,
+  buildQuestionSimilarityText,
+} from "../server/services/deduplicationService.js";
 
 const DEFAULT_THRESHOLD = 0.85;
 const NGRAM_SIZE = 3;
 
-const usage = `Usage: npx tsx scripts/auditQuestionBundleSimilarity2026.ts (--manifest <manifest.json> | --dir papers/2026) [--threshold 0.85] [--out-dir <dir>] [--same-kp-only] [--max-pairs <count>] [--preview-chars 120]`;
+const usage = `Usage: npx tsx scripts/auditQuestionBundleSimilarity2026.ts (--manifest <manifest.json> | --dir papers/2026) [--threshold 0.85] [--out-dir <dir>] [--cross-kp] [--max-pairs <count>] [--preview-chars 120]`;
 
 interface AuditArgs {
   manifestPath?: string;
@@ -33,12 +37,17 @@ interface AuditRecord {
   examTypes: string[];
   contentHash: string;
   stem: string;
-  normalizedStem: string;
+  similarityText: string;
+  salientText: string;
+  normalizedSimilarityText: string;
   grams: Set<string>;
+  salientGrams: Set<string>;
 }
 
 interface AuditPair {
   similarity: number;
+  salientSimilarity: number;
+  recommendation: PairRecommendation;
   questionType: QuestionType;
   samePrimaryKp: boolean;
   sameDifficulty: boolean;
@@ -57,12 +66,19 @@ interface AuditPairSide {
   examTypes: string[];
   contentHash: string;
   stemPreview: string;
+  similarityTextPreview: string;
+  salientTextPreview: string;
 }
 
 interface ExactDuplicateGroup {
   contentHash: string;
   occurrences: AuditPairSide[];
 }
+
+type PairRecommendation =
+  | "auto_delete_candidate"
+  | "manual_review_candidate"
+  | "ignore_likely_false_positive";
 
 function readArg(args: string[], name: string) {
   const index = args.indexOf(name);
@@ -82,6 +98,9 @@ function parseArgs(argv: string[]): AuditArgs {
   }
   if (manifestPath && sourceDir) {
     throw new Error("--manifest and --dir are mutually exclusive");
+  }
+  if (argv.includes("--same-kp-only") && argv.includes("--cross-kp")) {
+    throw new Error("--same-kp-only and --cross-kp are mutually exclusive");
   }
 
   const thresholdRaw = readArg(argv, "--threshold");
@@ -107,7 +126,7 @@ function parseArgs(argv: string[]): AuditArgs {
     sourceDir,
     threshold,
     outDir: readArg(argv, "--out-dir"),
-    sameKpOnly: argv.includes("--same-kp-only"),
+    sameKpOnly: !argv.includes("--cross-kp"),
     maxPairs,
     previewChars,
   };
@@ -126,8 +145,8 @@ function slugify(value: string) {
     .replace(/^-|-$/g, "");
 }
 
-function normalizeStem(stem: string) {
-  return stem.replace(/\s+/g, "").toLowerCase();
+function normalizeSimilarityText(text: string) {
+  return text.replace(/\s+/g, "").toLowerCase();
 }
 
 function ngrams(text: string, n: number) {
@@ -138,9 +157,32 @@ function ngrams(text: string, n: number) {
   return grams;
 }
 
+function jaccardFromSets(left: Set<string>, right: Set<string>) {
+  if (left.size === 0 && right.size === 0) {
+    return 1;
+  }
+
+  let intersection = 0;
+  for (const gram of left) {
+    if (right.has(gram)) {
+      intersection += 1;
+    }
+  }
+
+  const union = left.size + right.size - intersection;
+  return union === 0 ? 0 : intersection / union;
+}
+
 function preview(value: string, maxChars: number) {
   const normalized = value.replace(/\s+/g, " ").trim();
-  return normalized.length <= maxChars ? normalized : `${normalized.slice(0, maxChars - 1)}…`;
+  return normalized.length <= maxChars ? normalized : `${normalized.slice(0, maxChars - 3)}...`;
+}
+
+function classifyPair(similarity: number, salientSimilarity: number): PairRecommendation {
+  if (salientSimilarity < 0.65) {
+    return "ignore_likely_false_positive";
+  }
+  return similarity >= 0.9 ? "auto_delete_candidate" : "manual_review_candidate";
 }
 
 function readManifestBundlePaths(manifestPath: string): string[] {
@@ -219,6 +261,8 @@ function pairSide(record: AuditRecord, previewChars: number): AuditPairSide {
     examTypes: record.examTypes,
     contentHash: record.contentHash,
     stemPreview: preview(record.stem, previewChars),
+    similarityTextPreview: preview(record.similarityText, previewChars),
+    salientTextPreview: preview(record.salientText, previewChars),
   };
 }
 
@@ -229,7 +273,9 @@ function loadAuditRecords(bundleFiles: string[]): AuditRecord[] {
     const repoPath = toRepoPath(bundleFile);
     const bundle = QuestionBundleSchema.parse(JSON.parse(fs.readFileSync(bundleFile, "utf8")));
     bundle.items.forEach((item: QuestionBundleItem, itemIndex: number) => {
-      const normalizedStem = normalizeStem(item.contentJson.stem);
+      const similarityText = buildQuestionSimilarityText(item.type, item.contentJson);
+      const salientText = buildQuestionSalientText(similarityText);
+      const normalizedSimilarityText = normalizeSimilarityText(similarityText);
       records.push({
         id: `${repoPath}#${itemIndex}`,
         sourcePath: repoPath,
@@ -241,8 +287,11 @@ function loadAuditRecords(bundleFiles: string[]): AuditRecord[] {
         examTypes: [...item.examTypes].sort(),
         contentHash: item.contentHash,
         stem: item.contentJson.stem,
-        normalizedStem,
-        grams: ngrams(normalizedStem, NGRAM_SIZE),
+        similarityText,
+        salientText,
+        normalizedSimilarityText,
+        grams: ngrams(normalizedSimilarityText, NGRAM_SIZE),
+        salientGrams: ngrams(normalizeSimilarityText(salientText), NGRAM_SIZE),
       });
     });
   }
@@ -296,8 +345,11 @@ function auditGroup(records: AuditRecord[], args: AuditArgs) {
         previous.grams.size === 0 && current.grams.size === 0 ? 1 : union === 0 ? 0 : intersection / union;
 
       if (similarity >= args.threshold) {
+        const salientSimilarity = jaccardFromSets(previous.salientGrams, current.salientGrams);
         pairs.push({
           similarity,
+          salientSimilarity,
+          recommendation: classifyPair(similarity, salientSimilarity),
           questionType: current.questionType,
           samePrimaryKp: previous.primaryKpCode === current.primaryKpCode,
           sameDifficulty: previous.difficulty === current.difficulty,
@@ -348,6 +400,7 @@ function summarizePairs(pairs: AuditPair[]) {
   const byQuestionType: Record<string, number> = {};
   const bySamePrimaryKp: Record<string, number> = {};
   const bySimilarityBand: Record<string, number> = {};
+  const byRecommendation: Record<string, number> = {};
 
   for (const pair of pairs) {
     byQuestionType[pair.questionType] = (byQuestionType[pair.questionType] ?? 0) + 1;
@@ -362,14 +415,16 @@ function summarizePairs(pairs: AuditPair[]) {
             ? "0.90-0.95"
             : "threshold-0.90";
     bySimilarityBand[band] = (bySimilarityBand[band] ?? 0) + 1;
+    byRecommendation[pair.recommendation] = (byRecommendation[pair.recommendation] ?? 0) + 1;
   }
 
-  return { byQuestionType, bySamePrimaryKp, bySimilarityBand };
+  return { byQuestionType, bySamePrimaryKp, bySimilarityBand, byRecommendation };
 }
 
 function comparePairs(left: AuditPair, right: AuditPair) {
   return (
     right.similarity - left.similarity ||
+    right.salientSimilarity - left.salientSimilarity ||
     left.questionType.localeCompare(right.questionType) ||
     left.left.id.localeCompare(right.left.id) ||
     left.right.id.localeCompare(right.right.id)
@@ -390,6 +445,8 @@ function tsvEscape(value: string | number | boolean | string[]) {
 function renderHighSimilarityPairsTsv(pairs: AuditPair[]) {
   const headers = [
     "similarity",
+    "salientSimilarity",
+    "recommendation",
     "questionType",
     "samePrimaryKp",
     "sameDifficulty",
@@ -412,6 +469,10 @@ function renderHighSimilarityPairsTsv(pairs: AuditPair[]) {
     "rightExamTypes",
     "rightContentHash",
     "rightStemPreview",
+    "leftSimilarityTextPreview",
+    "rightSimilarityTextPreview",
+    "leftSalientTextPreview",
+    "rightSalientTextPreview",
   ];
 
   const lines = [headers.join("\t")];
@@ -419,6 +480,8 @@ function renderHighSimilarityPairsTsv(pairs: AuditPair[]) {
     lines.push(
       [
         pair.similarity.toFixed(6),
+        pair.salientSimilarity.toFixed(6),
+        pair.recommendation,
         pair.questionType,
         pair.samePrimaryKp,
         pair.sameDifficulty,
@@ -441,6 +504,10 @@ function renderHighSimilarityPairsTsv(pairs: AuditPair[]) {
         pair.right.examTypes,
         pair.right.contentHash,
         pair.right.stemPreview,
+        pair.left.similarityTextPreview,
+        pair.right.similarityTextPreview,
+        pair.left.salientTextPreview,
+        pair.right.salientTextPreview,
       ]
         .map(tsvEscape)
         .join("\t"),
@@ -468,6 +535,7 @@ function renderMarkdown(params: {
     `- Generated at: ${params.generatedAt}`,
     `- Source: ${params.sourceLabel}`,
     `- Threshold: ${params.threshold}`,
+    `- Similarity basis: single_choice uses stem+options; code questions use code/subquestions/blanks/sample IO, not boilerplate stem`,
     `- Bundle files: ${params.totalFiles}`,
     `- Items: ${params.totalItems}`,
     `- Candidate pairs scored: ${params.candidatePairsScored}`,
@@ -484,20 +552,22 @@ function renderMarkdown(params: {
   }
 
   lines.push(
-    "| similarity | type | same KP | left | right | left stem | right stem |",
-    "| ---: | --- | --- | --- | --- | --- | --- |",
+    "| similarity | salient similarity | recommendation | type | same KP | left | right | left effective text | right effective text |",
+    "| ---: | ---: | --- | --- | --- | --- | --- | --- | --- |",
   );
 
   for (const pair of params.pairs.slice(0, params.maxRows)) {
     lines.push(
       [
         pair.similarity.toFixed(4),
+        pair.salientSimilarity.toFixed(4),
+        pair.recommendation,
         pair.questionType,
         pair.samePrimaryKp ? "yes" : "no",
         `${pair.left.sourcePath}#${pair.left.itemIndex}`,
         `${pair.right.sourcePath}#${pair.right.itemIndex}`,
-        markdownEscape(pair.left.stemPreview),
-        markdownEscape(pair.right.stemPreview),
+        markdownEscape(pair.left.similarityTextPreview),
+        markdownEscape(pair.right.similarityTextPreview),
       ].join(" | ").replace(/^/, "| ").replace(/$/, " |"),
     );
   }
@@ -557,7 +627,19 @@ async function main() {
   const jsonPath = path.join(outDir, `${baseName}.json`);
   const markdownPath = path.join(outDir, `${baseName}.md`);
   const highSimilarityPairsPath = path.join(outDir, `${baseName}__high-similarity-pairs.tsv`);
+  const autoDeleteCandidatesPath = path.join(outDir, `${baseName}__auto-delete-candidates.tsv`);
+  const manualReviewCandidatesPath = path.join(outDir, `${baseName}__manual-review-candidates.tsv`);
+  const ignoredFalsePositivesPath = path.join(outDir, `${baseName}__ignored-likely-false-positive.tsv`);
   const exactDuplicateGroups = findExactDuplicates(records, args.previewChars);
+  const autoDeleteCandidates = truncatedPairs.filter(
+    (pair) => pair.recommendation === "auto_delete_candidate",
+  );
+  const manualReviewCandidates = truncatedPairs.filter(
+    (pair) => pair.recommendation === "manual_review_candidate",
+  );
+  const ignoredFalsePositives = truncatedPairs.filter(
+    (pair) => pair.recommendation === "ignore_likely_false_positive",
+  );
   const summary = {
     generatedAt,
     reportType: "question_similarity_audit_2026",
@@ -572,11 +654,17 @@ async function main() {
       threshold: args.threshold,
       ngramSize: NGRAM_SIZE,
       comparisonScope: args.sameKpOnly ? "same question type and primary KP" : "same question type",
+      crossKpFuzzyAudit: !args.sameKpOnly,
+      similarityBasis:
+        "single_choice: stem+options; reading_program: cppCode+subQuestions+sample IO; completion_program: cppCode+fullCode+blanks+sample IO",
       candidatePairsScored,
       highSimilarityPairs: pairs.length,
       pairsTruncated: truncatedPairs.length < pairs.length,
       emittedPairs: truncatedPairs.length,
       exactDuplicateGroups: exactDuplicateGroups.length,
+      autoDeleteCandidates: autoDeleteCandidates.length,
+      manualReviewCandidates: manualReviewCandidates.length,
+      ignoredLikelyFalsePositives: ignoredFalsePositives.length,
       ...summarizePairs(pairs),
     },
     exactDuplicateGroups,
@@ -585,6 +673,9 @@ async function main() {
 
   fs.writeFileSync(jsonPath, `${JSON.stringify(summary, null, 2)}\n`);
   fs.writeFileSync(highSimilarityPairsPath, renderHighSimilarityPairsTsv(truncatedPairs));
+  fs.writeFileSync(autoDeleteCandidatesPath, renderHighSimilarityPairsTsv(autoDeleteCandidates));
+  fs.writeFileSync(manualReviewCandidatesPath, renderHighSimilarityPairsTsv(manualReviewCandidates));
+  fs.writeFileSync(ignoredFalsePositivesPath, renderHighSimilarityPairsTsv(ignoredFalsePositives));
   fs.writeFileSync(
     markdownPath,
     renderMarkdown({
@@ -607,12 +698,18 @@ async function main() {
         jsonPath: toRepoPath(jsonPath),
         markdownPath: toRepoPath(markdownPath),
         highSimilarityPairsPath: toRepoPath(highSimilarityPairsPath),
+        autoDeleteCandidatesPath: toRepoPath(autoDeleteCandidatesPath),
+        manualReviewCandidatesPath: toRepoPath(manualReviewCandidatesPath),
+        ignoredFalsePositivesPath: toRepoPath(ignoredFalsePositivesPath),
         bundleFiles: bundleFiles.length,
         items: records.length,
         candidatePairsScored,
         highSimilarityPairs: pairs.length,
         emittedPairs: truncatedPairs.length,
         exactDuplicateGroups: exactDuplicateGroups.length,
+        autoDeleteCandidates: autoDeleteCandidates.length,
+        manualReviewCandidates: manualReviewCandidates.length,
+        ignoredLikelyFalsePositives: ignoredFalsePositives.length,
       },
       null,
       2,

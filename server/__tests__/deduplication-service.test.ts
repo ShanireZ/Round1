@@ -56,7 +56,7 @@ describe("server/services/deduplicationService", () => {
     const { findJaccardDuplicate } = await import("../services/deduplicationService.js");
 
     const result = await findJaccardDuplicate({
-      stem: "1+1=?",
+      contentJson: { stem: "1+1=?" },
       questionType: "single_choice",
       primaryKpId: 101,
     });

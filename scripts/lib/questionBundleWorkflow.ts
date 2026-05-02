@@ -11,7 +11,11 @@ import { knowledgePoints } from "../../server/db/schema/knowledgePoints.js";
 import { questionExamTypes } from "../../server/db/schema/questionExamTypes.js";
 import { questionKpTags } from "../../server/db/schema/questionKpTags.js";
 import { questions } from "../../server/db/schema/questions.js";
-import { computeContentHash } from "../../server/services/deduplicationService.js";
+import {
+  buildQuestionSimilarityText,
+  computeContentHash,
+  jaccardSimilarity,
+} from "../../server/services/deduplicationService.js";
 import { verifyCpp } from "../../server/services/sandbox/cppRunner.js";
 import {
   type ImportError,
@@ -77,6 +81,8 @@ function summarizeQuestionForHash(item: QuestionBundleItem): string {
 
   return item.contentJson.fullCode;
 }
+
+const DUPLICATE_JACCARD_THRESHOLD = 0.85;
 
 function hasBlueprintCoverage(item: QuestionBundleItem): boolean {
   return item.examTypes.every((examType) => {
@@ -274,44 +280,25 @@ async function checkDuplicateByHash(contentHash: string): Promise<boolean> {
 }
 
 async function checkDuplicateByJaccard(item: QuestionBundleItem): Promise<boolean> {
-  const stem = item.contentJson.stem;
+  const similarityText = buildQuestionSimilarityText(item.type, item.contentJson);
   const candidates = await db
     .select({
       id: questions.id,
       contentJson: questions.contentJson,
     })
     .from(questions)
-    .where(and(eq(questions.type, item.type), ne(questions.status, "archived")));
-
-  const normalizedStem = stem.replace(/\s+/g, "").toLowerCase();
-  const grams = new Set<string>();
-  for (let index = 0; index <= normalizedStem.length - 3; index += 1) {
-    grams.add(normalizedStem.slice(index, index + 3));
-  }
+    .innerJoin(knowledgePoints, eq(questions.primaryKpId, knowledgePoints.id))
+    .where(
+      and(
+        eq(questions.type, item.type),
+        eq(knowledgePoints.code, item.primaryKpCode),
+        ne(questions.status, "archived"),
+      ),
+    );
 
   for (const candidate of candidates) {
-    const candidateStem = String((candidate.contentJson as Record<string, unknown>)?.stem ?? "")
-      .replace(/\s+/g, "")
-      .toLowerCase();
-    const candidateGrams = new Set<string>();
-    for (let index = 0; index <= candidateStem.length - 3; index += 1) {
-      candidateGrams.add(candidateStem.slice(index, index + 3));
-    }
-
-    if (grams.size === 0 && candidateGrams.size === 0) {
-      return true;
-    }
-
-    let intersection = 0;
-    for (const gram of grams) {
-      if (candidateGrams.has(gram)) {
-        intersection += 1;
-      }
-    }
-
-    const union = grams.size + candidateGrams.size - intersection;
-    const similarity = union === 0 ? 0 : intersection / union;
-    if (similarity >= 0.85) {
+    const candidateSimilarityText = buildQuestionSimilarityText(item.type, candidate.contentJson);
+    if (jaccardSimilarity(similarityText, candidateSimilarityText) >= DUPLICATE_JACCARD_THRESHOLD) {
       return true;
     }
   }
