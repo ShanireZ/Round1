@@ -656,6 +656,24 @@ function buildQuestionTypeInstruction(questionType: QuestionType): string {
   ].join("\n");
 }
 
+function buildComboSpecificInstruction(combo: Combo): string {
+  if (combo.questionType === "reading_program" && combo.primaryKpCode === "DS") {
+    return [
+      "For this DS reading_program bundle, prefer one small simulation theme per item: stack, queue, deque, priority_queue, set/map, or adjacency list traversal.",
+      "Keep each program traceable with 5 to 10 operations and small integer values; avoid custom templates, graph algorithms with many branches, and hidden invariants.",
+      "Make the five subQuestions ask directly about exact printed output, final container size, front/top/min/max value, or number of executed operations.",
+      "In every explanation, list the concrete container state transitions needed to prove the answer.",
+    ].join("\n");
+  }
+  if (combo.questionType === "completion_program" && combo.primaryKpCode === "DS") {
+    return [
+      "For this DS completion_program bundle, use small container simulations with obvious invariants.",
+      "Each blank should choose one operation or condition; avoid multiple blanks that can compensate for each other.",
+    ].join("\n");
+  }
+  return "";
+}
+
 function buildGenerationPrompt(params: {
   combo: Combo;
   count: number;
@@ -684,6 +702,7 @@ function buildGenerationPrompt(params: {
     "If a question depends on C++ boolean-to-integer conversion, make the context explicit, such as asking for the output of cout << (...).",
     "For medium difficulty, require 1-2 reasoning steps. For hard difficulty, require a nontrivial trace or combined concept.",
     "Keep primaryKpCode exactly equal to the requested code. auxiliaryKpCodes may be empty.",
+    buildComboSpecificInstruction(params.combo),
     buildQuestionTypeInstruction(params.combo.questionType),
   ].join("\n");
 }
