@@ -380,6 +380,76 @@ function markdownEscape(value: string) {
   return value.replace(/\|/g, "\\|").replace(/\r?\n/g, " ");
 }
 
+function tsvEscape(value: string | number | boolean | string[]) {
+  return String(Array.isArray(value) ? value.join(",") : value)
+    .replace(/\t/g, " ")
+    .replace(/\r?\n/g, " ")
+    .trim();
+}
+
+function renderHighSimilarityPairsTsv(pairs: AuditPair[]) {
+  const headers = [
+    "similarity",
+    "questionType",
+    "samePrimaryKp",
+    "sameDifficulty",
+    "sharedExamTypes",
+    "leftId",
+    "leftSourcePath",
+    "leftItemIndex",
+    "leftBundleRunId",
+    "leftDifficulty",
+    "leftPrimaryKpCode",
+    "leftExamTypes",
+    "leftContentHash",
+    "leftStemPreview",
+    "rightId",
+    "rightSourcePath",
+    "rightItemIndex",
+    "rightBundleRunId",
+    "rightDifficulty",
+    "rightPrimaryKpCode",
+    "rightExamTypes",
+    "rightContentHash",
+    "rightStemPreview",
+  ];
+
+  const lines = [headers.join("\t")];
+  for (const pair of pairs) {
+    lines.push(
+      [
+        pair.similarity.toFixed(6),
+        pair.questionType,
+        pair.samePrimaryKp,
+        pair.sameDifficulty,
+        pair.sharedExamTypes,
+        pair.left.id,
+        pair.left.sourcePath,
+        pair.left.itemIndex,
+        pair.left.bundleRunId,
+        pair.left.difficulty,
+        pair.left.primaryKpCode,
+        pair.left.examTypes,
+        pair.left.contentHash,
+        pair.left.stemPreview,
+        pair.right.id,
+        pair.right.sourcePath,
+        pair.right.itemIndex,
+        pair.right.bundleRunId,
+        pair.right.difficulty,
+        pair.right.primaryKpCode,
+        pair.right.examTypes,
+        pair.right.contentHash,
+        pair.right.stemPreview,
+      ]
+        .map(tsvEscape)
+        .join("\t"),
+    );
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
 function renderMarkdown(params: {
   generatedAt: string;
   sourceLabel: string;
@@ -486,6 +556,7 @@ async function main() {
   const baseName = `${slugify(path.basename(sourceLabel, ".json")) || "question-bundles"}__similarity-audit`;
   const jsonPath = path.join(outDir, `${baseName}.json`);
   const markdownPath = path.join(outDir, `${baseName}.md`);
+  const highSimilarityPairsPath = path.join(outDir, `${baseName}__high-similarity-pairs.tsv`);
   const exactDuplicateGroups = findExactDuplicates(records, args.previewChars);
   const summary = {
     generatedAt,
@@ -513,6 +584,7 @@ async function main() {
   };
 
   fs.writeFileSync(jsonPath, `${JSON.stringify(summary, null, 2)}\n`);
+  fs.writeFileSync(highSimilarityPairsPath, renderHighSimilarityPairsTsv(truncatedPairs));
   fs.writeFileSync(
     markdownPath,
     renderMarkdown({
@@ -534,6 +606,7 @@ async function main() {
       {
         jsonPath: toRepoPath(jsonPath),
         markdownPath: toRepoPath(markdownPath),
+        highSimilarityPairsPath: toRepoPath(highSimilarityPairsPath),
         bundleFiles: bundleFiles.length,
         items: records.length,
         candidatePairsScored,
