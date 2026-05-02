@@ -132,6 +132,10 @@ function realPaperMetadataPredicate() {
   )`;
 }
 
+function simulatedPrebuiltPaperPredicate() {
+  return sql`NOT ${realPaperMetadataPredicate()}`;
+}
+
 function buildAnswersJsonPatchExpression(patches: AutosaveAnswerPatch[]) {
   let expression = sql`coalesce(${attempts.answersJson}, '{}'::jsonb)`;
 
@@ -332,11 +336,12 @@ async function selectPublishedPrebuiltPaper(userId: string, examType: string, di
     .from(prebuiltPapers)
     .where(
       and(
-        eq(prebuiltPapers.status, "published"),
-        eq(prebuiltPapers.examType, examType),
-        eq(prebuiltPapers.difficulty, difficulty),
-      ),
-    )
+              eq(prebuiltPapers.status, "published"),
+              eq(prebuiltPapers.examType, examType),
+              eq(prebuiltPapers.difficulty, difficulty),
+              simulatedPrebuiltPaperPredicate(),
+            ),
+          )
     .orderBy(desc(prebuiltPapers.publishedAt), desc(prebuiltPapers.createdAt));
 
   return candidates.find((candidate) => !recentPrebuiltPaperIds.has(candidate.id)) ?? candidates[0];
@@ -353,7 +358,7 @@ examsRouter.get(
           difficulty: prebuiltPapers.difficulty,
         })
         .from(prebuiltPapers)
-        .where(eq(prebuiltPapers.status, "published"))
+        .where(and(eq(prebuiltPapers.status, "published"), simulatedPrebuiltPaperPredicate()))
         .orderBy(prebuiltPapers.examType, prebuiltPapers.difficulty);
 
       const counter = new Map<string, { examType: string; difficulty: string; count: number }>();

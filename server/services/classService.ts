@@ -2,6 +2,7 @@ import { randomInt } from "node:crypto";
 import { and, asc, desc, eq, gt, isNull, ne, sql } from "drizzle-orm";
 import { env } from "../../config/env.js";
 import { db } from "../db.js";
+import { simulatedPrebuiltPaperPredicate } from "../db/prebuiltPaperPredicates.js";
 import {
   assignmentProgress,
   assignments,
@@ -370,7 +371,7 @@ export async function listCoachPrebuiltPapers() {
       publishedAt: prebuiltPapers.publishedAt,
     })
     .from(prebuiltPapers)
-    .where(eq(prebuiltPapers.status, "published"))
+    .where(and(eq(prebuiltPapers.status, "published"), simulatedPrebuiltPaperPredicate()))
     .orderBy(desc(prebuiltPapers.publishedAt), desc(prebuiltPapers.createdAt));
 }
 
@@ -1063,7 +1064,7 @@ export async function createAssignment(actor: ActorContext, params: AssignmentCr
       status: prebuiltPapers.status,
     })
     .from(prebuiltPapers)
-    .where(eq(prebuiltPapers.id, params.prebuiltPaperId))
+    .where(and(eq(prebuiltPapers.id, params.prebuiltPaperId), simulatedPrebuiltPaperPredicate()))
     .limit(1);
 
   if (!paper || paper.status !== "published") {

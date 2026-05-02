@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, ne } from "drizzle-orm";
 
 import { blueprintSpecs, type BlueprintSection } from "../../config/blueprint.js";
 import { db, checkDbConnection } from "../../server/db.js";
@@ -186,6 +186,7 @@ export async function buildPrebuiltPaperBundle(
           .where(
             and(
               eq(questions.status, "published"),
+              ne(questions.source, "real_paper"),
               eq(questions.type, section.questionType),
               eq(questions.primaryKpId, kpId),
               eq(questionExamTypes.examType, args.examType),
