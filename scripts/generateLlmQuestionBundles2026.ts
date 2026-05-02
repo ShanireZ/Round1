@@ -295,6 +295,7 @@ Options:
   --shard-count <number>           Total shard count (default: 1)
   --only-bundles <list>            Comma/range bundle numbers to process, e.g. 7,19-23
   --overwrite                      Replace existing bundle/report files
+  --skip-existing                  Reuse existing bundle files as passed when resuming an interrupted run
   --dry-run                        Exercise the LLM chain without writing files
   --plan-only                      Print the resolved bundle plan without calling LLMs
   --help                           Show this help message
@@ -373,6 +374,7 @@ function parseArgs(argv: string[]) {
     shardIndex,
     shardCount,
     overwrite: args.overwrite === true,
+    skipExisting: args["skip-existing"] === true,
     dryRun: args["dry-run"] === true,
     planOnly: args["plan-only"] === true,
   };
@@ -2019,11 +2021,62 @@ async function processCombo(params: {
   maxGenerationAttempts: number;
   maxRepairCycles: number;
   overwrite: boolean;
+  skipExisting: boolean;
   dryRun: boolean;
   dbDuplicateChecks: boolean;
   seenHashes: Set<string>;
 }): Promise<ProcessResult> {
   let lastError: unknown;
+  const existingRunId = makeRunId(
+    params.combo,
+    params.agentLabel,
+    params.pipelineLabel,
+    params.runDate,
+  );
+  const existingOutputPath = path.resolve(
+    process.cwd(),
+    defaultQuestionBundleOutputPath({
+      runId: existingRunId,
+      questionType: params.combo.questionType,
+      kpCode: params.combo.primaryKpCode,
+      count: params.questionsPerBundle,
+      versionNo: 1,
+    }),
+  );
+
+  if (!params.dryRun && params.skipExisting && (await fileExists(existingOutputPath))) {
+    const raw = await readFile(existingOutputPath, "utf8");
+    const bundle = QuestionBundleSchema.parse(JSON.parse(raw));
+    return {
+      bundle,
+      report: {
+        path: toRepoPath(existingOutputPath),
+        runId: bundle.meta.runId,
+        examType: params.combo.examType,
+        questionType: params.combo.questionType,
+        primaryKpCode: params.combo.primaryKpCode,
+        difficulty: params.combo.difficulty,
+        itemCount: bundle.items.length,
+        generationLane: generationLaneFor(params.combo.bundleNo),
+        generationProvider: bundle.meta.provider,
+        generationModel: bundle.meta.model,
+        finalVerdict: "pass",
+        formalBundleStatus: "llm_chain_passed",
+        questionStatusIfImported: "draft",
+        questionLifecycleStatusAfterReview: "reviewed",
+        currentQuestionBundleImportDefaultStatus: "draft",
+        reviewStatusEvidence: "two_round_llm_reviewed",
+        importedToDatabase: false,
+        prebuiltPapersBuilt: false,
+        published: false,
+        rewritesApplied: 0,
+        validationErrors: [],
+        reviewAttempts: [],
+        repairAttempts: [],
+        checksum: computeChecksum(raw),
+      },
+    };
+  }
 
   for (
     let generationAttempt = 1;
@@ -2406,6 +2459,7 @@ async function main() {
         maxGenerationAttempts: args.maxGenerationAttempts,
         maxRepairCycles: args.maxRepairCycles,
         overwrite: args.overwrite,
+        skipExisting: args.skipExisting,
         dryRun: args.dryRun,
         dbDuplicateChecks: args.dbDuplicateChecks,
         seenHashes,
