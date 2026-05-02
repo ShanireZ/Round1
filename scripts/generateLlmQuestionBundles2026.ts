@@ -275,7 +275,7 @@ type RepairResponse = z.infer<typeof repairResponseSchema>;
 function printHelp() {
   console.log(`Usage: tsx scripts/generateLlmQuestionBundles2026.ts [options]
 
-Generate LLM-reviewed 2026 question bundles, three questions per JSON.
+Generate LLM-reviewed 2026 question bundles.
 
 Options:
   --total <number>                 Total questions to generate (default: 4000)
@@ -289,6 +289,8 @@ Options:
   --llm-json-attempts <n>          JSON parse retries per LLM call (default: 2)
   --inventory-path <path>          Use question-inventory.json deficits as the generation plan
   --inventory-report-dir <dir>     Write per-shard inventory fulfillment records into this report dir
+  --db-duplicate-checks            Check generated items against the current database during review/repair
+  --agent-label <label>            Override bundle run id agent label (default: a01, a02, ...)
   --shard-index <number>           Zero-based shard index (default: 0)
   --shard-count <number>           Total shard count (default: 1)
   --only-bundles <list>            Comma/range bundle numbers to process, e.g. 7,19-23
@@ -362,6 +364,8 @@ function parseArgs(argv: string[]) {
       typeof args["inventory-report-dir"] === "string"
         ? args["inventory-report-dir"]
         : undefined,
+    dbDuplicateChecks: args["db-duplicate-checks"] === true,
+    agentLabel: typeof args["agent-label"] === "string" ? slugify(args["agent-label"]) : undefined,
     onlyBundleNos:
       typeof args["only-bundles"] === "string"
         ? parseBundleNoList(args["only-bundles"])
@@ -833,12 +837,7 @@ function normalizeGeneratedQuestion(
   payload: Record<string, unknown>,
   combo: Combo,
 ): QuestionBundleItem {
-  const auxiliaryKpCodes = Array.isArray(payload.auxiliaryKpCodes)
-    ? payload.auxiliaryKpCodes
-        .filter((value): value is string => typeof value === "string")
-        .filter((code) => code !== combo.primaryKpCode)
-        .slice(0, 3)
-    : [];
+  const auxiliaryKpCodes: string[] = [];
 
   if (combo.questionType === "single_choice") {
     const contentJson = {
@@ -1246,7 +1245,11 @@ async function generateBundle(params: {
   };
 }
 
-async function validateAndFinalizeBundle(bundle: QuestionBundle, sourcePath: string) {
+async function validateAndFinalizeBundle(
+  bundle: QuestionBundle,
+  sourcePath: string,
+  options: { dbDuplicateChecks: boolean },
+) {
   const raw = `${JSON.stringify(bundle, null, 2)}\n`;
   const loaded = {
     bundle,
@@ -1257,7 +1260,8 @@ async function validateAndFinalizeBundle(bundle: QuestionBundle, sourcePath: str
   };
   const validation = await validateQuestionBundle(loaded, {
     runSandbox: true,
-    skipDuplicateChecks: true,
+    skipDuplicateChecks: !options.dbDuplicateChecks,
+    requireDuplicateChecks: options.dbDuplicateChecks,
   });
   if (validation.errors.length > 0) {
     return { bundle, validationErrors: validation.errors };
@@ -1671,6 +1675,7 @@ async function reviewBundle(params: {
   maxRepairCycles: number;
   timeoutMs: number;
   llmJsonAttempts: number;
+  dbDuplicateChecks: boolean;
 }): Promise<{
   bundle: QuestionBundle;
   finalVerdict: "pass" | "fail";
@@ -1687,7 +1692,9 @@ async function reviewBundle(params: {
 
   for (let repairCycle = 0; repairCycle <= params.maxRepairCycles; repairCycle += 1) {
     bundle = await normalizeCodeSampleOutputs(bundle);
-    const validation = await validateAndFinalizeBundle(bundle, params.generated.outputPath);
+    const validation = await validateAndFinalizeBundle(bundle, params.generated.outputPath, {
+      dbDuplicateChecks: params.dbDuplicateChecks,
+    });
     bundle = validation.bundle;
     validationErrors = validation.validationErrors;
     if (validationErrors.length > 0) {
@@ -2013,6 +2020,7 @@ async function processCombo(params: {
   maxRepairCycles: number;
   overwrite: boolean;
   dryRun: boolean;
+  dbDuplicateChecks: boolean;
   seenHashes: Set<string>;
 }): Promise<ProcessResult> {
   let lastError: unknown;
@@ -2044,6 +2052,7 @@ async function processCombo(params: {
         maxRepairCycles: params.maxRepairCycles,
         timeoutMs: params.timeoutMs,
         llmJsonAttempts: params.llmJsonAttempts,
+        dbDuplicateChecks: params.dbDuplicateChecks,
       });
       const report = buildBundleReport({
         generated,
@@ -2341,7 +2350,7 @@ async function main() {
   );
   const kpNames = await loadTaxonomyNames();
   const seenHashes = await collectExistingHashes(path.join(process.cwd(), "papers", "2026"));
-  const agentLabel = `a${pad2(args.shardIndex + 1)}`;
+  const agentLabel = args.agentLabel ?? `a${pad2(args.shardIndex + 1)}`;
   const pipelineLabel = deriveBundlePipelineLabel(args.batchRunId, args.totalQuestions);
   const runDate = runDateFromBatchRunId(args.batchRunId);
 
@@ -2398,6 +2407,7 @@ async function main() {
         maxRepairCycles: args.maxRepairCycles,
         overwrite: args.overwrite,
         dryRun: args.dryRun,
+        dbDuplicateChecks: args.dbDuplicateChecks,
         seenHashes,
       });
     } catch (error) {

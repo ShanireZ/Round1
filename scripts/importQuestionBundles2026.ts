@@ -9,7 +9,9 @@ import {
   validateQuestionBundle,
 } from "./lib/questionBundleWorkflow.js";
 
-const usage = `Usage: npx tsx scripts/importQuestionBundles2026.ts [--dir papers/2026] [--manifest report-or-manifest.json[,more.json]] [--apply] [--run-judge] [--judge-rounds 2] [--limit count] [--expected-items count]`;
+const usage = `Usage: npx tsx scripts/importQuestionBundles2026.ts [--dir papers/2026] [--manifest report-or-manifest.json[,more.json]] [--apply] [--run-judge] [--judge-rounds 2] [--limit count] [--expected-items count] [--imported-by user-uuid]`;
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function readArg(args: string[], name: string) {
   const index = args.indexOf(name);
@@ -78,6 +80,31 @@ function listManifestFiles(manifestArg: string): string[] {
   return [...new Set(files)].sort((left, right) => left.localeCompare(right));
 }
 
+function describeUnknown(value: unknown): string {
+  if (value instanceof Error) {
+    const maybeCause = (value as Error & { cause?: unknown }).cause;
+    return maybeCause === undefined
+      ? value.message
+      : `${value.message}; cause: ${describeUnknown(maybeCause)}`;
+  }
+
+  if (typeof value === "object" && value !== null) {
+    const details = value as Record<string, unknown>;
+    const fields = ["message", "code", "detail", "hint", "constraint", "table", "column"]
+      .map((key) => {
+        const field = details[key];
+        return field === undefined ? undefined : `${key}=${String(field)}`;
+      })
+      .filter((field): field is string => field !== undefined);
+
+    if (fields.length > 0) {
+      return fields.join(", ");
+    }
+  }
+
+  return String(value);
+}
+
 async function preflightContentHashes(files: string[]) {
   const seen = new Map<string, string>();
   const duplicateErrors: string[] = [];
@@ -119,6 +146,7 @@ async function main() {
   const expectedItemsRaw = readArg(args, "--expected-items");
   const expectedItems = expectedItemsRaw ? Number.parseInt(expectedItemsRaw, 10) : undefined;
   const manifest = readArg(args, "--manifest");
+  const importedBy = readArg(args, "--imported-by") ?? null;
 
   if (!Number.isInteger(judgeRounds) || judgeRounds <= 0) {
     throw new Error("--judge-rounds must be a positive integer");
@@ -128,6 +156,9 @@ async function main() {
   }
   if (expectedItems !== undefined && (!Number.isInteger(expectedItems) || expectedItems <= 0)) {
     throw new Error("--expected-items must be a positive integer");
+  }
+  if (importedBy !== null && !UUID_PATTERN.test(importedBy)) {
+    throw new Error("--imported-by must be a valid user UUID");
   }
 
   const files = (manifest ? listManifestFiles(manifest) : listJsonFiles(path.resolve(dir))).slice(
@@ -182,8 +213,11 @@ async function main() {
       const result = await importQuestionBundle(loaded, {
         apply,
         persistDryRun: !apply,
-        importedBy: "scripts/importQuestionBundles2026.ts",
+        importedBy,
       });
+      if (result.status === "failed") {
+        throw new Error("question bundle import returned failed status");
+      }
 
       summary.validated += 1;
       if (apply && result.status === "applied") {
@@ -194,13 +228,16 @@ async function main() {
       console.log(`OK ${repoPath}`);
     } catch (error) {
       summary.failed += 1;
-      console.error(`FAIL ${repoPath}: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(`FAIL ${repoPath}: ${describeUnknown(error)}`);
     }
   }
 
   if (expectedItems !== undefined && preflight.itemCount !== expectedItems) {
     summary.failed += 1;
     console.error(`FAIL expected ${expectedItems} items from manifest, found ${preflight.itemCount}`);
+    process.exitCode = 1;
+  }
+  if (summary.failed > 0) {
     process.exitCode = 1;
   }
 
