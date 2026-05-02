@@ -10,8 +10,11 @@ import { questionExamTypes } from "../../server/db/schema/questionExamTypes.js";
 import { questionKpTags } from "../../server/db/schema/questionKpTags.js";
 import { questionReviews } from "../../server/db/schema/questionReviews.js";
 import { questions } from "../../server/db/schema/questions.js";
-import { computeContentHash, isDuplicateByHash } from "../../server/services/deduplicationService.js";
-import { judgeRealPaperQuestion } from "./realPaperAiReview.js";
+import {
+  computeContentHash,
+  isDuplicateByHash,
+} from "../../server/services/deduplicationService.js";
+import { judgeRealPaperQuestion, type RealPaperAiReviewOutcome } from "./realPaperAiReview.js";
 
 export const realPaperQuestionSchema = z.object({
   questionType: z.enum(["single_choice", "reading_program", "completion_program"]),
@@ -60,6 +63,7 @@ export type RealPaperQuestion = z.infer<typeof realPaperQuestionSchema>;
 export interface RealPaperIngestOptions {
   dir: string;
   skipAiReview?: boolean;
+  reviewRounds?: number;
   timeoutMs?: number;
   limit?: number;
   logger?: Pick<Console, "log" | "error">;
@@ -73,6 +77,23 @@ export interface RealPaperIngestSummary {
   pendingCreated: number;
   aiReviewed: number;
   promotedToReviewed: number;
+  reviewRoundsCompleted: number;
+}
+
+interface CombinedRealPaperAiReviewOutcome extends Omit<
+  RealPaperAiReviewOutcome,
+  "officialAnswerDiff"
+> {
+  officialAnswerDiff:
+    | RealPaperAiReviewOutcome["officialAnswerDiff"]
+    | {
+        rounds: Array<{
+          round: number;
+          officialAnswerDiff: RealPaperAiReviewOutcome["officialAnswerDiff"];
+          answersMatch: boolean;
+        }>;
+      }
+    | null;
 }
 
 function buildAnswerJson(question: RealPaperQuestion) {
@@ -112,16 +133,116 @@ function buildDedupSource(question: RealPaperQuestion): string {
   return question.cppCode ?? question.fullCode ?? "";
 }
 
+function listJsonFiles(dir: string): string[] {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  const files: string[] = [];
+
+  for (const entry of entries) {
+    const entryPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...listJsonFiles(entryPath));
+      continue;
+    }
+
+    if (entry.isFile() && entry.name.endsWith(".json")) {
+      files.push(entryPath);
+    }
+  }
+
+  return files.sort((left, right) => left.localeCompare(right));
+}
+
+function buildRealPaperTags(parsed: z.infer<typeof realPaperSchema>): string[] {
+  return [...new Set(["真题", String(parsed.year), parsed.examType])];
+}
+
+function buildTaggedContentJson(params: {
+  parsed: z.infer<typeof realPaperSchema>;
+  question: RealPaperQuestion;
+  sourceFile: string;
+}) {
+  const sourceValue = params.parsed.source.trim();
+  const sourceIsUrl = /^https?:\/\//i.test(sourceValue);
+
+  return {
+    ...params.question,
+    sourceType: "real_paper",
+    sourceExamType: params.parsed.examType,
+    sourceYear: params.parsed.year,
+    sourceFile: params.sourceFile,
+    sourceLabel: sourceIsUrl ? null : sourceValue,
+    sourceUrl: sourceIsUrl ? sourceValue : null,
+    tags: buildRealPaperTags(params.parsed),
+  };
+}
+
+function combineAiReviewRounds(
+  rounds: RealPaperAiReviewOutcome[],
+): CombinedRealPaperAiReviewOutcome {
+  const allAnswersMatch = rounds.every((round) => round.answersMatch);
+  const allReviewed = rounds.every((round) => round.questionStatus === "reviewed");
+  const confidence =
+    rounds.length === 0 ? 0 : Math.min(...rounds.map((round) => round.aiConfidence));
+  const officialAnswerDiffs = rounds
+    .map((round, index) => ({
+      round: index + 1,
+      officialAnswerDiff: round.officialAnswerDiff,
+      answersMatch: round.answersMatch,
+    }))
+    .filter((round) => round.officialAnswerDiff !== null || !round.answersMatch);
+  const reviewerNotes = rounds
+    .map((round, index) => {
+      const note = round.reviewerNotes?.trim();
+      return note ? `round ${index + 1}: ${note}` : null;
+    })
+    .filter((note): note is string => note !== null)
+    .join("\n");
+
+  return {
+    reviewStatus: "ai_reviewed",
+    aiConfidence: confidence,
+    questionStatus: allAnswersMatch && allReviewed ? "reviewed" : "draft",
+    answersMatch: allAnswersMatch,
+    officialAnswerDiff:
+      officialAnswerDiffs.length > 0
+        ? {
+            rounds: officialAnswerDiffs,
+          }
+        : null,
+    reviewerNotes: reviewerNotes.length > 0 ? reviewerNotes : null,
+  };
+}
+
+async function judgeRealPaperQuestionInRounds(params: {
+  question: RealPaperQuestion;
+  timeoutMs: number;
+  reviewRounds: number;
+}) {
+  const rounds: RealPaperAiReviewOutcome[] = [];
+
+  for (let round = 1; round <= params.reviewRounds; round += 1) {
+    rounds.push(
+      await judgeRealPaperQuestion({
+        question: params.question,
+        timeoutMs: params.timeoutMs,
+      }),
+    );
+  }
+
+  return combineAiReviewRounds(rounds);
+}
+
 export async function ingestRealPapers(options: RealPaperIngestOptions) {
   const logger = options.logger ?? console;
   const timeoutMs = options.timeoutMs ?? 60_000;
+  const reviewRounds = options.reviewRounds ?? 2;
   const resolvedDir = path.resolve(options.dir);
 
   if (!fs.existsSync(resolvedDir)) {
     throw new Error(`Directory not found: ${resolvedDir}`);
   }
 
-  const files = fs.readdirSync(resolvedDir).filter((file) => file.endsWith(".json"));
+  const files = listJsonFiles(resolvedDir);
   logger.log(`📂 Found ${files.length} paper files in ${resolvedDir}\n`);
 
   const summary: RealPaperIngestSummary = {
@@ -132,6 +253,7 @@ export async function ingestRealPapers(options: RealPaperIngestOptions) {
     pendingCreated: 0,
     aiReviewed: 0,
     promotedToReviewed: 0,
+    reviewRoundsCompleted: 0,
   };
 
   let processedQuestions = 0;
@@ -141,8 +263,9 @@ export async function ingestRealPapers(options: RealPaperIngestOptions) {
       break;
     }
 
-    const filePath = path.join(resolvedDir, file);
-    logger.log(`📄 Processing ${file}...`);
+    const filePath = file;
+    const sourceFile = path.relative(resolvedDir, filePath).replaceAll(path.sep, "/");
+    logger.log(`📄 Processing ${sourceFile}...`);
 
     try {
       const rawData = fs.readFileSync(filePath, "utf-8");
@@ -188,7 +311,7 @@ export async function ingestRealPapers(options: RealPaperIngestOptions) {
               type: question.questionType,
               difficulty: question.difficulty,
               primaryKpId: kpRows[0]!.id,
-              contentJson: question,
+              contentJson: buildTaggedContentJson({ parsed, question, sourceFile }),
               answerJson: buildAnswerJson(question),
               explanationJson: buildExplanationJson(question),
               contentHash,
@@ -229,9 +352,10 @@ export async function ingestRealPapers(options: RealPaperIngestOptions) {
 
           if (!options.skipAiReview) {
             try {
-              const aiReview = await judgeRealPaperQuestion({
+              const aiReview = await judgeRealPaperQuestionInRounds({
                 question,
                 timeoutMs,
+                reviewRounds,
               });
 
               await db.transaction(async (tx) => {
@@ -258,6 +382,7 @@ export async function ingestRealPapers(options: RealPaperIngestOptions) {
               });
 
               summary.aiReviewed += 1;
+              summary.reviewRoundsCompleted += reviewRounds;
               if (aiReview.questionStatus === "reviewed") {
                 summary.promotedToReviewed += 1;
               }

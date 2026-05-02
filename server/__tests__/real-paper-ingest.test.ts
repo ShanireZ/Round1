@@ -148,12 +148,25 @@ describe("scripts/lib/realPaperIngest", () => {
       pendingCreated: 1,
       aiReviewed: 0,
       promotedToReviewed: 0,
+      reviewRoundsCompleted: 0,
       errors: 0,
     });
     expect(insertCalls.map((call) => call.values)).toContainEqual({
-        questionId: "question-1",
-        reviewStatus: "pending",
+      questionId: "question-1",
+      reviewStatus: "pending",
     });
+    expect(insertCalls.map((call) => call.values)).toContainEqual(
+      expect.objectContaining({
+        contentJson: expect.objectContaining({
+          sourceType: "real_paper",
+          sourceExamType: "CSP-J",
+          sourceYear: 2026,
+          sourceFile: "sample.json",
+          tags: ["真题", "2026", "CSP-J"],
+        }),
+        source: "real_paper",
+      }),
+    );
     expect(judgeRealPaperQuestionMock).not.toHaveBeenCalled();
   });
 
@@ -180,13 +193,15 @@ describe("scripts/lib/realPaperIngest", () => {
       pendingCreated: 1,
       aiReviewed: 1,
       promotedToReviewed: 1,
+      reviewRoundsCompleted: 2,
       errors: 0,
     });
+    expect(judgeRealPaperQuestionMock).toHaveBeenCalledTimes(2);
     expect(updateCalls.map((call) => call.values)).toContainEqual(
       expect.objectContaining({
         reviewStatus: "ai_reviewed",
         aiConfidence: 0.95,
-        reviewerNotes: "confirmed by judge",
+        reviewerNotes: "round 1: confirmed by judge\nround 2: confirmed by judge",
         reviewedAt: expect.any(Date),
       }),
     );

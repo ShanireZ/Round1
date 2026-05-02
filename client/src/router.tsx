@@ -28,6 +28,7 @@ const CoachClassDetail = lazy(() => import("./pages/coach/CoachClassDetail"));
 const CoachClasses = lazy(() => import("./pages/coach/CoachClasses"));
 const CoachReport = lazy(() => import("./pages/coach/CoachReport"));
 const ExamNewPage = lazy(() => import("./pages/exams/ExamNew"));
+const RealPapersPage = lazy(() => import("./pages/exams/RealPapers"));
 const ExamSessionPage = lazy(() => import("./pages/exams/ExamSession"));
 const ExamResultPage = lazy(() => import("./pages/exams/ExamResult"));
 const UIGallery = lazy(() => import("./pages/dev/UIGallery"));
@@ -75,6 +76,7 @@ export function AppRouter() {
         <Route element={<AppShell />}>
           <Route path="/dashboard" element={studentPage(<Dashboard />)} />
           <Route path="/exams/new" element={studentPage(<ExamNewPage />)} />
+          <Route path="/exams/real-papers" element={studentPage(<RealPapersPage />)} />
           <Route path="/exams/:id/result" element={studentPage(<ExamResultPage />)} />
           <Route path="/account/class" element={studentPage(<AccountClassPage />)} />
           <Route path="/account/security" element={studentPage(<AccountSecurityPage />)} />

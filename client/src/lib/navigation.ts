@@ -3,6 +3,7 @@ import {
   BarChart3,
   BookOpen,
   ClipboardList,
+  History,
   Home,
   Palette,
   Settings,
@@ -27,6 +28,12 @@ export interface NavSection {
 export const primaryNavItems: NavItem[] = [
   { to: "/dashboard", label: "首页", description: "最近考试与能力摘要", icon: Home },
   { to: "/exams/new", label: "出卷考试", description: "选择预制卷并开始模拟", icon: ClipboardList },
+  {
+    to: "/exams/real-papers",
+    label: "历届真题",
+    description: "按考试类型重做真题卷",
+    icon: History,
+  },
   { to: "/account/class", label: "我的班级", description: "班级邀请与任务入口", icon: Users },
   {
     to: "/account/security",

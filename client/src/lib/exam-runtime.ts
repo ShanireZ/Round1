@@ -35,6 +35,19 @@ export type ExamCatalogItem = {
   count: number;
 };
 
+export type RealPaperCatalogItem = {
+  id: string;
+  title: string;
+  examType: string;
+  difficulty: string;
+  year: string | null;
+  sourceLabel: string | null;
+  sourceUrl: string | null;
+  tags: string[];
+  questionCount: number;
+  publishedAt: string | null;
+};
+
 export type DraftExamPaper = {
   id: string;
   prebuiltPaperId: string | null;
@@ -235,6 +248,18 @@ export async function fetchExamCatalog(): Promise<{ items: ExamCatalogItem[] }> 
   return readApiPayload<{ items: ExamCatalogItem[] }>(response);
 }
 
+export async function fetchRealPaperCatalog(): Promise<{ items: RealPaperCatalogItem[] }> {
+  const response = await fetch("/api/v1/exams/real-papers/catalog", {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return readApiPayload<{ items: RealPaperCatalogItem[] }>(response);
+}
+
 export async function fetchActiveDraftExam(): Promise<DraftExamPaper | null> {
   const response = await fetch("/api/v1/exams/active-draft", {
     method: "GET",
@@ -253,6 +278,17 @@ export async function createExamDraft(payload: CreateExamDraftPayload): Promise<
     credentials: "include",
     headers: await buildMutationHeaders(),
     body: JSON.stringify(payload),
+  });
+
+  return readApiPayload<DraftExamPaper>(response);
+}
+
+export async function createRealPaperDraft(prebuiltPaperId: string): Promise<DraftExamPaper> {
+  const response = await fetch(`/api/v1/exams/real-papers/${prebuiltPaperId}/drafts`, {
+    method: "POST",
+    credentials: "include",
+    headers: await buildMutationHeaders(),
+    body: JSON.stringify({}),
   });
 
   return readApiPayload<DraftExamPaper>(response);

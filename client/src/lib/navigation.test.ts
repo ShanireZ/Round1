@@ -37,6 +37,7 @@ describe("admin information architecture", () => {
     expect(primaryRoutes).toEqual([
       "/dashboard",
       "/exams/new",
+      "/exams/real-papers",
       "/account/class",
       "/account/security",
     ]);

@@ -26,6 +26,8 @@
     "migrate:up": "tsx scripts/migrate.ts up",
     "migrate:down": "tsx scripts/migrate.ts down",
     "migrate:status": "tsx scripts/migrate.ts status",
+    "import:questions:2026": "tsx scripts/importQuestionBundles2026.ts",
+    "inventory:questions": "tsx scripts/reportQuestionInventory.ts",
     "migrate:rehearse:paper-slot-points-failure": "tsx scripts/rehearsePaperSlotPointsMigrationFailure.ts",
     "verify:offline-artifacts": "tsx scripts/verifyOfflineArtifactNames.ts",
     "verify:ui-tokens": "tsx scripts/verifyUiTokenUsage.ts",

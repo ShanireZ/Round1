@@ -108,6 +108,7 @@ interface BundleReport {
   questionType: QuestionType;
   primaryKpCode: string;
   difficulty: Difficulty;
+  itemCount: number;
   generationLane: LLMLane;
   generationProvider: string;
   generationModel: string;
@@ -139,14 +140,14 @@ interface TaxonomyNode {
 }
 
 const DEFAULT_TOTAL_QUESTIONS = 4000;
-const DEFAULT_QUESTIONS_PER_BUNDLE = 5;
+const DEFAULT_QUESTIONS_PER_BUNDLE = 3;
 const DEFAULT_DATE = "2026-05-01";
 const DEFAULT_BATCH_RUN_ID = `${DEFAULT_DATE}-bulk4000-mixed-all-v01`;
 const DEFAULT_SEED = "round1-2026-llm-4000-v1";
 const DEFAULT_MAX_CONCURRENCY = 2;
 const DEFAULT_TIMEOUT_MS = 120_000;
 const DEFAULT_MAX_GENERATION_ATTEMPTS = 3;
-const DEFAULT_MAX_REPAIR_CYCLES = 2;
+const DEFAULT_MAX_REPAIR_CYCLES = 3;
 const DEFAULT_LLM_JSON_ATTEMPTS = 2;
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 
@@ -237,17 +238,17 @@ type RepairResponse = z.infer<typeof repairResponseSchema>;
 function printHelp() {
   console.log(`Usage: tsx scripts/generateLlmQuestionBundles2026.ts [options]
 
-Generate LLM-reviewed 2026 question bundles, five questions per JSON.
+Generate LLM-reviewed 2026 question bundles, three questions per JSON.
 
 Options:
   --total <number>                 Total questions to generate (default: 4000)
-  --per-bundle <number>            Questions per bundle JSON (default: 5)
+  --per-bundle <number>            Questions per bundle JSON (default: 3)
   --batch-run-id <id>              Batch report run id (default: ${DEFAULT_BATCH_RUN_ID})
   --seed <text>                    Deterministic distribution seed (default: ${DEFAULT_SEED})
   --max-concurrency <number>       Parallel bundle workers (default: 2)
   --timeout-ms <number>            Timeout for each LLM call (default: 120000)
   --max-generation-attempts <n>    Regenerate a failed bundle up to n times (default: 3)
-  --max-repair-cycles <n>          Repair failed review cycles per bundle (default: 2)
+  --max-repair-cycles <n>          Repair failed review cycles per bundle before regeneration (default: 3)
   --llm-json-attempts <n>          JSON parse retries per LLM call (default: 2)
   --shard-index <number>           Zero-based shard index (default: 0)
   --shard-count <number>           Total shard count (default: 1)
@@ -442,7 +443,11 @@ function deriveBundlePipelineLabel(batchRunId: string, totalQuestions: number): 
   return runTokens.find((token) => /^bulk\d+$/i.test(token)) ?? `bulk${totalQuestions}`;
 }
 
-function deriveShardReportRunId(batchRunId: string, shardIndex: number, shardCount: number): string {
+function deriveShardReportRunId(
+  batchRunId: string,
+  shardIndex: number,
+  shardCount: number,
+): string {
   if (shardCount === 1) {
     return batchRunId;
   }
@@ -458,10 +463,7 @@ function generationLaneFor(bundleNo: number): LLMLane {
   return bundleNo % 2 === 1 ? "default" : "backup";
 }
 
-function weightedDifficulty(
-  distribution: Record<string, number>,
-  rng: () => number,
-): Difficulty {
+function weightedDifficulty(distribution: Record<string, number>, rng: () => number): Difficulty {
   const weights = DIFFICULTIES.map((difficulty) => ({
     difficulty,
     weight: Math.max(distribution[difficulty] ?? 0, 0),
@@ -600,7 +602,9 @@ function firstFourOptions(value: unknown): string[] {
 }
 
 function normalizeAnswerChoice(value: unknown): string {
-  const raw = String(value ?? "").trim().toUpperCase();
+  const raw = String(value ?? "")
+    .trim()
+    .toUpperCase();
   const exact = raw.match(/^[A-D]$/);
   if (exact) {
     return exact[0];
@@ -839,7 +843,9 @@ function normalizeGeneratedQuestion(
 }
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
-  return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : undefined;
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : undefined;
 }
 
 function stringFrom(value: unknown): string | undefined {
@@ -850,7 +856,9 @@ function resolveResponseId(response: unknown): string | undefined {
   const responseRecord = asRecord(response);
   const bodyRecord = asRecord(responseRecord?.body);
   const nestedResponse = asRecord(bodyRecord?.response);
-  return stringFrom(nestedResponse?.id) ?? stringFrom(bodyRecord?.id) ?? stringFrom(responseRecord?.id);
+  return (
+    stringFrom(nestedResponse?.id) ?? stringFrom(bodyRecord?.id) ?? stringFrom(responseRecord?.id)
+  );
 }
 
 function isReasoningOptionError(error: unknown): boolean {
@@ -1053,9 +1061,7 @@ async function generateBundle(params: {
     items.push(...(await generateItems(params.questionsPerBundle, params.generationAttempt)));
   } else {
     for (let itemIndex = 0; itemIndex < params.questionsPerBundle; itemIndex += 1) {
-      items.push(
-        ...(await generateItems(1, params.generationAttempt * 100 + itemIndex + 1)),
-      );
+      items.push(...(await generateItems(1, params.generationAttempt * 100 + itemIndex + 1)));
     }
   }
 
@@ -1365,7 +1371,10 @@ function extractReviewIssues(
   return issues.filter((issue) => issue.severity !== "minor");
 }
 
-function buildRepairPrompt(bundle: QuestionBundle, issues: Array<AuditIssue & { itemIndex: number }>) {
+function buildRepairPrompt(
+  bundle: QuestionBundle,
+  issues: Array<AuditIssue & { itemIndex: number }>,
+) {
   const indexes = [...new Set(issues.map((issue) => issue.itemIndex))].sort((a, b) => a - b);
   return [
     "Repair only the failed items in this question bundle.",
@@ -1446,9 +1455,9 @@ function restrictRepairResponse(
   const items = repair.items.filter((item) => allowedItemIndexes.has(item.itemIndex));
   if (items.length === 0) {
     throw new Error(
-      `repair response did not include any requested item indexes: ${[
-        ...allowedItemIndexes,
-      ].join(",")}`,
+      `repair response did not include any requested item indexes: ${[...allowedItemIndexes].join(
+        ",",
+      )}`,
     );
   }
   return repairResponseSchema.parse({ ...repair, items });
@@ -1785,12 +1794,12 @@ function buildBundleReport(params: {
     questionType: params.generated.combo.questionType,
     primaryKpCode: params.generated.combo.primaryKpCode,
     difficulty: params.generated.combo.difficulty,
+    itemCount: params.bundle.items.length,
     generationLane: params.generated.generation.lane,
     generationProvider: params.generated.generation.providerName,
     generationModel: params.generated.generation.model,
     finalVerdict: params.finalVerdict,
-    formalBundleStatus:
-      params.finalVerdict === "pass" ? "llm_chain_passed" : "llm_chain_failed",
+    formalBundleStatus: params.finalVerdict === "pass" ? "llm_chain_passed" : "llm_chain_failed",
     questionStatusIfImported: "draft",
     questionLifecycleStatusAfterReview: params.finalVerdict === "pass" ? "reviewed" : "draft",
     currentQuestionBundleImportDefaultStatus: "draft",
@@ -1831,6 +1840,7 @@ function buildFailedBundleReport(params: {
     questionType: params.combo.questionType,
     primaryKpCode: params.combo.primaryKpCode,
     difficulty: params.combo.difficulty,
+    itemCount: 0,
     generationLane: generationLaneFor(params.combo.bundleNo),
     generationProvider: "unavailable",
     generationModel: "unavailable",
@@ -1856,7 +1866,11 @@ function buildFailedBundleReport(params: {
   };
 }
 
-async function writeBundleOutput(generated: GeneratedBundle, bundle: QuestionBundle, overwrite: boolean) {
+async function writeBundleOutput(
+  generated: GeneratedBundle,
+  bundle: QuestionBundle,
+  overwrite: boolean,
+) {
   await mkdir(path.dirname(generated.outputPath), { recursive: true });
   await writeFile(generated.outputPath, `${JSON.stringify(bundle, null, 2)}\n`, {
     encoding: "utf8",
@@ -1881,7 +1895,11 @@ async function processCombo(params: {
 }): Promise<ProcessResult> {
   let lastError: unknown;
 
-  for (let generationAttempt = 1; generationAttempt <= params.maxGenerationAttempts; generationAttempt += 1) {
+  for (
+    let generationAttempt = 1;
+    generationAttempt <= params.maxGenerationAttempts;
+    generationAttempt += 1
+  ) {
     try {
       const generated = await generateBundle({
         combo: params.combo,
@@ -1959,16 +1977,14 @@ async function runPool<T, R>(
     }
   }
 
-  await Promise.all(
-    Array.from({ length: Math.min(concurrency, items.length) }, () => runWorker()),
-  );
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => runWorker()));
   return results;
 }
 
 function summarizeDistribution(reports: BundleReport[]) {
   const counts: Record<string, number> = {};
   for (const report of reports) {
-    const itemCount = 5;
+    const itemCount = report.itemCount;
     for (const [key, value] of Object.entries({
       examType: report.examType,
       questionType: report.questionType,
@@ -2024,7 +2040,8 @@ async function writeReport(params: {
       questionsPerBundle: params.questionsPerBundle,
       defaultProvider: env.LLM_PROVIDER_DEFAULT,
       backupProvider: env.LLM_PROVIDER_BACKUP,
-      generationLanePolicy: "odd bundleNo uses LLM_PROVIDER_DEFAULT; even bundleNo uses LLM_PROVIDER_BACKUP",
+      generationLanePolicy:
+        "odd bundleNo uses LLM_PROVIDER_DEFAULT; even bundleNo uses LLM_PROVIDER_BACKUP",
       reviewLanePolicy: "round 1 uses LLM_PROVIDER_BACKUP; round 2 uses LLM_PROVIDER_DEFAULT",
       shardIndex: params.shardIndex,
       shardCount: params.shardCount,
@@ -2035,11 +2052,9 @@ async function writeReport(params: {
       prebuiltPapersBuilt: false,
       published: false,
       questionStatusIfImported: "draft",
-      questionLifecycleStatusAfterReview:
-        summary.failedBundles === 0 ? "reviewed" : "draft",
+      questionLifecycleStatusAfterReview: summary.failedBundles === 0 ? "reviewed" : "draft",
       currentQuestionBundleImportDefaultStatus: "draft",
-      formalBundleStatus:
-        summary.failedBundles === 0 ? "llm_chain_passed" : "llm_chain_failed",
+      formalBundleStatus: summary.failedBundles === 0 ? "llm_chain_passed" : "llm_chain_failed",
       reviewStatusEvidence:
         summary.failedBundles === 0 ? "two_round_llm_reviewed" : "llm_chain_failed",
     },
@@ -2050,11 +2065,7 @@ async function writeReport(params: {
   const reportPath = path.resolve(
     process.cwd(),
     defaultOfflineReportPath({
-      runId: deriveShardReportRunId(
-        params.batchRunId,
-        params.shardIndex,
-        params.shardCount,
-      ),
+      runId: deriveShardReportRunId(params.batchRunId, params.shardIndex, params.shardCount),
       reportName: "llm-question-generation-review",
     }),
   );
@@ -2148,6 +2159,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(error instanceof Error ? error.stack ?? error.message : String(error));
+  console.error(error instanceof Error ? (error.stack ?? error.message) : String(error));
   process.exit(1);
 });

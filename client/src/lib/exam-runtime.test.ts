@@ -5,9 +5,11 @@ import {
   autosaveExamAttempt,
   clearCachedCsrfTokenForTests,
   createExamDraft,
+  createRealPaperDraft,
   fetchActiveAttempt,
   fetchActiveDraftExam,
   fetchExamCatalog,
+  fetchRealPaperCatalog,
   fetchExamSession,
   sendKeepaliveAutosave,
   startExamAttempt,
@@ -129,6 +131,40 @@ describe("exam runtime client", () => {
     expect(result.items[0]?.count).toBe(2);
   });
 
+  it("fetches the published real paper catalog", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: {
+          items: [
+            {
+              id: "real-pp-1",
+              title: "CSP-J 2026 真题",
+              examType: "CSP-J",
+              difficulty: "medium",
+              year: "2026",
+              sourceLabel: "official",
+              sourceUrl: null,
+              tags: ["真题", "2026"],
+              questionCount: 32,
+              publishedAt: "2026-05-02T00:00:00.000Z",
+            },
+          ],
+        },
+      }),
+    });
+
+    const result = await fetchRealPaperCatalog();
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/v1/exams/real-papers/catalog", {
+      method: "GET",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
+    expect(result.items[0]?.year).toBe("2026");
+  });
+
   it("fetches an active draft before creating a new one", async () => {
     fetchMock.mockResolvedValue({
       ok: true,
@@ -185,6 +221,39 @@ describe("exam runtime client", () => {
       body: JSON.stringify({ examType: "CSP-J", difficulty: "medium" }),
     });
     expect(result.id).toBe("paper-1");
+  });
+
+  it("creates a draft from a real paper using the CSRF-protected endpoint", async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: { csrfToken: "csrf-1" },
+      }),
+    });
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: {
+          id: "paper-real-1",
+          prebuiltPaperId: "real-pp-1",
+          examType: "CSP-J",
+          difficulty: "medium",
+          status: "draft",
+        },
+      }),
+    });
+
+    const result = await createRealPaperDraft("real-pp-1");
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/v1/exams/real-papers/real-pp-1/drafts", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": "csrf-1" },
+      body: JSON.stringify({}),
+    });
+    expect(result.prebuiltPaperId).toBe("real-pp-1");
   });
 
   it("autosaves attempt answers with the current tab nonce", async () => {

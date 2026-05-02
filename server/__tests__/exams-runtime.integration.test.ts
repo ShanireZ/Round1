@@ -17,6 +17,9 @@ const { queuedResults, mockDb, scheduleAttemptAutoSubmitMock, cancelAttemptAutoS
         innerJoin() {
           return query;
         },
+        leftJoin() {
+          return query;
+        },
         where() {
           return query;
         },
@@ -138,6 +141,45 @@ describe("Phase 11 exams/attempts runtime routes", () => {
     ]);
   });
 
+  it("lists published real papers separately from simulated prebuilt papers", async () => {
+    queuedResults.push([
+      {
+        id: "real-pp-1",
+        title: "CSP-J 2026 真题",
+        examType: "CSP-J",
+        difficulty: "medium",
+        metadataJson: {
+          paperKind: "real_paper",
+          year: 2026,
+          sourceLabel: "official-sample",
+          tags: ["真题", "2026", "CSP-J"],
+        },
+        publishedAt: new Date("2026-05-02T00:00:00.000Z"),
+        createdAt: new Date("2026-05-01T00:00:00.000Z"),
+        questionCount: 32,
+      },
+    ]);
+
+    const app = createTestApp();
+    const res = await supertest(app).get("/api/v1/exams/real-papers/catalog");
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.items).toEqual([
+      {
+        id: "real-pp-1",
+        title: "CSP-J 2026 真题",
+        examType: "CSP-J",
+        difficulty: "medium",
+        year: "2026",
+        sourceLabel: "official-sample",
+        sourceUrl: null,
+        tags: ["真题", "2026", "CSP-J"],
+        questionCount: 32,
+        publishedAt: "2026-05-02T00:00:00.000Z",
+      },
+    ]);
+  });
+
   it("returns the user's active draft paper without exposing online replacement semantics", async () => {
     queuedResults.push([
       {
@@ -243,6 +285,51 @@ describe("Phase 11 exams/attempts runtime routes", () => {
         currentQuestionId: "q-1",
       },
     ]);
+  });
+
+  it("creates reusable real paper drafts by cloning a published real paper", async () => {
+    queuedResults.push([]);
+    queuedResults.push([
+      {
+        id: "real-pp-1",
+        examType: "CSP-J",
+        difficulty: "medium",
+        blueprintVersion: 1,
+      },
+    ]);
+    queuedResults.push([
+      {
+        id: "paper-real-1",
+        prebuiltPaperId: "real-pp-1",
+        examType: "CSP-J",
+        difficulty: "medium",
+        status: "draft",
+        blueprintVersion: 1,
+      },
+    ]);
+    queuedResults.push([
+      {
+        slotNo: 1,
+        questionId: "q-real-1",
+        questionType: "single_choice",
+        primaryKpId: 101,
+        difficulty: "medium",
+        points: 2,
+      },
+    ]);
+    queuedResults.push([]);
+
+    const app = createTestApp();
+    const res = await supertest(app).post("/api/v1/exams/real-papers/real-pp-1/drafts").send({});
+
+    expect(res.status).toBe(201);
+    expect(res.body.data).toMatchObject({
+      id: "paper-real-1",
+      prebuiltPaperId: "real-pp-1",
+      examType: "CSP-J",
+      difficulty: "medium",
+      status: "draft",
+    });
   });
 
   it("returns an existing matching draft instead of cloning a new one", async () => {

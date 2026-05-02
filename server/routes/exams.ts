@@ -72,6 +72,13 @@ type DraftPaperSummary = {
   status: string;
 };
 
+type SelectedPrebuiltPaper = {
+  id: string;
+  examType: string;
+  difficulty: string;
+  blueprintVersion: number;
+};
+
 function parsePositiveInt(value: unknown, defaultValue: number): number {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed < 1) {
@@ -91,6 +98,38 @@ function normalizeNullableRecord(value: unknown): Record<string, unknown> | null
 
 function normalizeRecord(value: unknown): Record<string, unknown> {
   return normalizeNullableRecord(value) ?? {};
+}
+
+function metadataString(value: Record<string, unknown>, keys: string[]): string | null {
+  for (const key of keys) {
+    const entry = value[key];
+    if (typeof entry === "string" && entry.trim().length > 0) {
+      return entry.trim();
+    }
+    if (typeof entry === "number" && Number.isFinite(entry)) {
+      return String(entry);
+    }
+  }
+
+  return null;
+}
+
+function metadataTags(value: Record<string, unknown>): string[] {
+  const tags = value.tags;
+  if (!Array.isArray(tags)) {
+    return [];
+  }
+
+  return tags.filter((entry): entry is string => typeof entry === "string" && entry.length > 0);
+}
+
+function realPaperMetadataPredicate() {
+  return sql`(
+    ${prebuiltPapers.metadataJson}->>'paperKind' = 'real_paper'
+    OR ${prebuiltPapers.metadataJson}->>'sourceType' = 'real_paper'
+    OR ${prebuiltPapers.metadataJson}->>'source' = 'real_paper'
+    OR (${prebuiltPapers.metadataJson}->'tags') ? '真题'
+  )`;
 }
 
 function buildAnswersJsonPatchExpression(patches: AutosaveAnswerPatch[]) {
@@ -148,6 +187,112 @@ async function findExistingDraft(
     .limit(1);
 
   return draft;
+}
+
+async function findExistingDraftForPrebuilt(
+  userId: string,
+  prebuiltPaperId: string,
+): Promise<DraftPaperSummary | undefined> {
+  const [draft] = await db
+    .select({
+      id: papers.id,
+      prebuiltPaperId: papers.prebuiltPaperId,
+      examType: papers.examType,
+      difficulty: papers.difficulty,
+      status: papers.status,
+    })
+    .from(papers)
+    .where(
+      and(
+        eq(papers.userId, userId),
+        eq(papers.status, "draft"),
+        eq(papers.prebuiltPaperId, prebuiltPaperId),
+        isNull(papers.assignmentId),
+      ),
+    )
+    .orderBy(desc(papers.createdAt))
+    .limit(1);
+
+  return draft;
+}
+
+async function clonePrebuiltPaperToDraft(params: {
+  userId: string;
+  selected: SelectedPrebuiltPaper;
+  assignmentId?: string;
+}) {
+  return db.transaction(async (tx) => {
+    const [created] = await tx
+      .insert(papers)
+      .values({
+        userId: params.userId,
+        assignmentId: params.assignmentId,
+        prebuiltPaperId: params.selected.id,
+        examType: params.selected.examType,
+        blueprintVersion: params.selected.blueprintVersion,
+        seed: randomUUID(),
+        difficulty: params.selected.difficulty,
+        createdFrom: params.assignmentId ? "assignment" : "self_practice",
+        status: "draft",
+      })
+      .returning({
+        id: papers.id,
+        prebuiltPaperId: papers.prebuiltPaperId,
+        examType: papers.examType,
+        difficulty: papers.difficulty,
+        status: papers.status,
+        blueprintVersion: papers.blueprintVersion,
+      });
+
+    if (!created) {
+      throw new Error("Failed to create draft paper");
+    }
+
+    const slots = await tx
+      .select({
+        slotNo: prebuiltPaperSlots.slotNo,
+        questionId: prebuiltPaperSlots.questionId,
+        questionType: prebuiltPaperSlots.questionType,
+        primaryKpId: prebuiltPaperSlots.primaryKpId,
+        difficulty: prebuiltPaperSlots.difficulty,
+        points: prebuiltPaperSlots.points,
+      })
+      .from(prebuiltPaperSlots)
+      .where(eq(prebuiltPaperSlots.prebuiltPaperId, params.selected.id))
+      .orderBy(prebuiltPaperSlots.slotNo);
+
+    if (slots.length > 0) {
+      await tx.insert(paperQuestionSlots).values(
+        slots.map((slot) => ({
+          paperId: created.id,
+          slotNo: slot.slotNo,
+          questionType: slot.questionType,
+          primaryKpId: slot.primaryKpId,
+          difficulty: slot.difficulty,
+          points: slot.points,
+          currentQuestionId: slot.questionId,
+        })),
+      );
+    }
+
+    if (params.assignmentId) {
+      await tx
+        .update(assignmentProgress)
+        .set({
+          paperId: created.id,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(assignmentProgress.assignmentId, params.assignmentId),
+            eq(assignmentProgress.userId, params.userId),
+            eq(assignmentProgress.status, "pending"),
+          ),
+        );
+    }
+
+    return created;
+  });
 }
 
 async function selectPublishedPrebuiltPaper(userId: string, examType: string, difficulty: string) {
@@ -227,6 +372,113 @@ examsRouter.get(
       }
 
       res.ok({ items: Array.from(counter.values()) });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+examsRouter.get(
+  "/exams/real-papers/catalog",
+  requireAuth,
+  async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      const rows = await db
+        .select({
+          id: prebuiltPapers.id,
+          title: prebuiltPapers.title,
+          examType: prebuiltPapers.examType,
+          difficulty: prebuiltPapers.difficulty,
+          metadataJson: prebuiltPapers.metadataJson,
+          publishedAt: prebuiltPapers.publishedAt,
+          createdAt: prebuiltPapers.createdAt,
+          questionCount: sql<number>`count(${prebuiltPaperSlots.questionId})::int`,
+        })
+        .from(prebuiltPapers)
+        .leftJoin(prebuiltPaperSlots, eq(prebuiltPaperSlots.prebuiltPaperId, prebuiltPapers.id))
+        .where(and(eq(prebuiltPapers.status, "published"), realPaperMetadataPredicate()))
+        .groupBy(
+          prebuiltPapers.id,
+          prebuiltPapers.title,
+          prebuiltPapers.examType,
+          prebuiltPapers.difficulty,
+          prebuiltPapers.metadataJson,
+          prebuiltPapers.publishedAt,
+          prebuiltPapers.createdAt,
+        )
+        .orderBy(
+          prebuiltPapers.examType,
+          desc(prebuiltPapers.publishedAt),
+          desc(prebuiltPapers.createdAt),
+        );
+
+      const items = rows.map((row) => {
+        const metadata = normalizeRecord(row.metadataJson);
+        return {
+          id: row.id,
+          title: row.title,
+          examType: row.examType,
+          difficulty: row.difficulty,
+          year: metadataString(metadata, ["sourceYear", "year", "yearTag"]),
+          sourceLabel: metadataString(metadata, ["sourceLabel", "sourceFile", "source"]),
+          sourceUrl: metadataString(metadata, ["sourceUrl", "officialUrl"]),
+          tags: metadataTags(metadata),
+          questionCount: Number(row.questionCount ?? 0),
+          publishedAt: row.publishedAt?.toISOString() ?? null,
+        };
+      });
+
+      res.ok({ items });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+examsRouter.post(
+  "/exams/real-papers/:prebuiltPaperId/drafts",
+  requireAuth,
+  validate(StartAttemptBodySchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.session.userId!;
+      const prebuiltPaperId = req.params.prebuiltPaperId;
+
+      if (typeof prebuiltPaperId !== "string" || prebuiltPaperId.length === 0) {
+        res.fail("ROUND1_VALIDATION_ERROR", "缺少真题卷 ID", 400);
+        return;
+      }
+
+      const existingDraft = await findExistingDraftForPrebuilt(userId, prebuiltPaperId);
+      if (existingDraft) {
+        res.ok(existingDraft);
+        return;
+      }
+
+      const [selected] = await db
+        .select({
+          id: prebuiltPapers.id,
+          examType: prebuiltPapers.examType,
+          difficulty: prebuiltPapers.difficulty,
+          blueprintVersion: prebuiltPapers.blueprintVersion,
+        })
+        .from(prebuiltPapers)
+        .where(
+          and(
+            eq(prebuiltPapers.id, prebuiltPaperId),
+            eq(prebuiltPapers.status, "published"),
+            realPaperMetadataPredicate(),
+          ),
+        )
+        .limit(1);
+
+      if (!selected) {
+        res.fail("ROUND1_REAL_PAPER_UNAVAILABLE", "当前真题卷不可用", 404);
+        return;
+      }
+
+      const createdDraft = await clonePrebuiltPaperToDraft({ userId, selected });
+      res.ok(createdDraft, 201);
     } catch (err) {
       next(err);
     }
@@ -322,77 +574,10 @@ examsRouter.post(
         return;
       }
 
-      const createdDraft = await db.transaction(async (tx) => {
-        const [created] = await tx
-          .insert(papers)
-          .values({
-            userId,
-            assignmentId: body.assignmentId,
-            prebuiltPaperId: selected.id,
-            examType: selected.examType,
-            blueprintVersion: selected.blueprintVersion,
-            seed: randomUUID(),
-            difficulty: selected.difficulty,
-            createdFrom: body.assignmentId ? "assignment" : "self_practice",
-            status: "draft",
-          })
-          .returning({
-            id: papers.id,
-            prebuiltPaperId: papers.prebuiltPaperId,
-            examType: papers.examType,
-            difficulty: papers.difficulty,
-            status: papers.status,
-            blueprintVersion: papers.blueprintVersion,
-          });
-
-        if (!created) {
-          throw new Error("Failed to create draft paper");
-        }
-
-        const slots = await tx
-          .select({
-            slotNo: prebuiltPaperSlots.slotNo,
-            questionId: prebuiltPaperSlots.questionId,
-            questionType: prebuiltPaperSlots.questionType,
-            primaryKpId: prebuiltPaperSlots.primaryKpId,
-            difficulty: prebuiltPaperSlots.difficulty,
-            points: prebuiltPaperSlots.points,
-          })
-          .from(prebuiltPaperSlots)
-          .where(eq(prebuiltPaperSlots.prebuiltPaperId, selected.id))
-          .orderBy(prebuiltPaperSlots.slotNo);
-
-        if (slots.length > 0) {
-          await tx.insert(paperQuestionSlots).values(
-            slots.map((slot) => ({
-              paperId: created.id,
-              slotNo: slot.slotNo,
-              questionType: slot.questionType,
-              primaryKpId: slot.primaryKpId,
-              difficulty: slot.difficulty,
-              points: slot.points,
-              currentQuestionId: slot.questionId,
-            })),
-          );
-        }
-
-        if (body.assignmentId) {
-          await tx
-            .update(assignmentProgress)
-            .set({
-              paperId: created.id,
-              updatedAt: new Date(),
-            })
-            .where(
-              and(
-                eq(assignmentProgress.assignmentId, body.assignmentId),
-                eq(assignmentProgress.userId, userId),
-                eq(assignmentProgress.status, "pending"),
-              ),
-            );
-        }
-
-        return created;
+      const createdDraft = await clonePrebuiltPaperToDraft({
+        userId,
+        selected,
+        assignmentId: body.assignmentId,
       });
 
       res.ok(createdDraft, 201);
