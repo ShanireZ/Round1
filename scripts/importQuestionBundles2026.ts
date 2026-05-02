@@ -78,6 +78,30 @@ function listManifestFiles(manifestArg: string): string[] {
   return [...new Set(files)].sort((left, right) => left.localeCompare(right));
 }
 
+async function preflightContentHashes(files: string[]) {
+  const seen = new Map<string, string>();
+  const duplicateErrors: string[] = [];
+  let itemCount = 0;
+
+  for (const file of files) {
+    const loaded = await loadQuestionBundle(file);
+    const repoPath = path.relative(process.cwd(), file).replaceAll(path.sep, "/");
+
+    loaded.bundle.items.forEach((item, itemIndex) => {
+      itemCount += 1;
+      const location = `${repoPath}#${itemIndex}`;
+      const existing = seen.get(item.contentHash);
+      if (existing) {
+        duplicateErrors.push(`duplicate contentHash ${item.contentHash}: ${existing} and ${location}`);
+        return;
+      }
+      seen.set(item.contentHash, location);
+    });
+  }
+
+  return { itemCount, duplicateErrors };
+}
+
 async function main() {
   const args = process.argv.slice(2);
   if (args.includes("--help")) {
@@ -117,14 +141,25 @@ async function main() {
     dryRun: 0,
     failed: 0,
     judgeRoundsCompleted: 0,
+    duplicateContentHashes: 0,
   };
-  let seenItems = 0;
+
+  const preflight = await preflightContentHashes(files);
+  summary.duplicateContentHashes = preflight.duplicateErrors.length;
+  if (preflight.duplicateErrors.length > 0) {
+    summary.failed += preflight.duplicateErrors.length;
+    for (const error of preflight.duplicateErrors) {
+      console.error(`FAIL ${error}`);
+    }
+    console.log(JSON.stringify(summary, null, 2));
+    process.exitCode = 1;
+    return;
+  }
 
   for (const file of files) {
     const repoPath = path.relative(process.cwd(), file).replaceAll(path.sep, "/");
     try {
       const loaded = await loadQuestionBundle(file);
-      seenItems += loaded.bundle.items.length;
 
       if (runJudge) {
         for (let round = 1; round <= judgeRounds; round += 1) {
@@ -163,9 +198,9 @@ async function main() {
     }
   }
 
-  if (expectedItems !== undefined && seenItems !== expectedItems) {
+  if (expectedItems !== undefined && preflight.itemCount !== expectedItems) {
     summary.failed += 1;
-    console.error(`FAIL expected ${expectedItems} items from manifest, found ${seenItems}`);
+    console.error(`FAIL expected ${expectedItems} items from manifest, found ${preflight.itemCount}`);
     process.exitCode = 1;
   }
 
