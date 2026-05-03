@@ -8,6 +8,7 @@ import {
   type ExamType,
 } from "./lib/bundleTypes.js";
 import { defaultPrebuiltPaperBundleOutputPath, formatOfflineRunId } from "./lib/paperPaths.js";
+import { parsePositiveInteger } from "./lib/scriptCli.js";
 
 interface BuildPrebuiltPaperBundleCliArgs {
   examType: ExamType;
@@ -33,15 +34,6 @@ Options:
   --output <path>            Explicit output override. Defaults to the persistent runId prebuilt-paper-bundle path.
   --help                     Show this help message
 `);
-}
-
-function parsePositiveInteger(value: string | undefined, fallback: number, label: string): number {
-  const parsed = Number.parseInt(value ?? String(fallback), 10);
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new Error(`--${label} must be a positive integer`);
-  }
-
-  return parsed;
 }
 
 function parseArgs(argv: string[]): BuildPrebuiltPaperBundleCliArgs {

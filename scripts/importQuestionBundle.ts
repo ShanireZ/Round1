@@ -1,3 +1,4 @@
+import { parseApplyMode } from "./lib/scriptCli.js";
 import { importQuestionBundle, loadQuestionBundle } from "./lib/questionBundleWorkflow.js";
 
 function printHelp() {
@@ -19,17 +20,11 @@ async function main() {
     return;
   }
 
-  const flags = new Set(argv.slice(1));
-  const isDryRun = flags.has("--dry-run");
-  const isApply = flags.has("--apply");
-
-  if (isDryRun === isApply) {
-    throw new Error("Exactly one of --dry-run or --apply is required");
-  }
+  const { apply } = parseApplyMode(new Set(argv.slice(1)));
 
   const loaded = await loadQuestionBundle(bundlePath);
   const result = await importQuestionBundle(loaded, {
-    apply: isApply,
+    apply,
   });
 
   console.log(

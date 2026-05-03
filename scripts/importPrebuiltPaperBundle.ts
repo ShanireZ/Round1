@@ -1,3 +1,4 @@
+import { parseApplyMode } from "./lib/scriptCli.js";
 import {
   importPrebuiltPaperBundle,
   loadPrebuiltPaperBundle,
@@ -22,16 +23,10 @@ async function main() {
     return;
   }
 
-  const flags = new Set(argv.slice(1));
-  const isDryRun = flags.has("--dry-run");
-  const isApply = flags.has("--apply");
-
-  if (isDryRun === isApply) {
-    throw new Error("Exactly one of --dry-run or --apply is required");
-  }
+  const { apply } = parseApplyMode(new Set(argv.slice(1)));
 
   const loaded = await loadPrebuiltPaperBundle(bundlePath);
-  const result = await importPrebuiltPaperBundle(loaded, { apply: isApply });
+  const result = await importPrebuiltPaperBundle(loaded, { apply });
 
   console.log(
     JSON.stringify(

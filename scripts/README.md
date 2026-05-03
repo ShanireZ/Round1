@@ -1,5 +1,11 @@
 # Scripts Guide
 
+## 稳定入口
+
+- `questionBundle.ts`：question bundle 相关稳定入口，统一覆盖 `generate-llm`、`generate-acceptance`、`build-manual`、`validate`、`import`、`import-batch`、`batch-generate-local`、`batch-generate-llm`、`batch-review-llm`、`report-remaining-manifest`。
+- `prebuiltPaperBundle.ts`：prebuilt paper bundle 相关稳定入口，统一覆盖 `build`、`validate`、`import`。
+- `generateQuestionBundle.ts`、`buildAcceptanceQuestionBundle.ts`、`buildManualQuestionBundles.ts`、`validateQuestionBundle.ts`、`importQuestionBundle.ts`、`importQuestionBundles2026.ts`、`buildPrebuiltPaperBundle.ts`、`validatePrebuiltPaperBundle.ts`、`importPrebuiltPaperBundle.ts` 继续保留为内部实现脚本，不再作为推荐对外入口。
+
 ## LLM 场景路由
 
 - 当前脚本链路改为 provider-direct，只保留 2 条 provider lane：`.env` 中的 `LLM_PROVIDER_DEFAULT` 与可选的 `LLM_PROVIDER_BACKUP`。
@@ -28,7 +34,6 @@
 - buildPrebuiltPaperBundle.ts：基于已发布题库和蓝图构建 prebuilt paper bundle；支持 `--run-id`、`--artifact-version`、`--blueprint-version` 与 `--output` 显式覆盖。默认输出到 `artifacts/prebuilt-papers/<year>/<runId>/<runId>__prebuilt-paper-bundle__blueprint-v<blueprintVersion>__n<count>__vNN.json`，bundle meta 记录 builder provider/model、prompt hash、source batch、source timestamp 与 overlap score。
 - validatePrebuiltPaperBundle.ts：校验 prebuilt paper bundle 的题量、分值、题目引用和题目发布状态；`--write-metadata` 会写回 validator 版本、校验时间与 item checksum 清单。
 - importPrebuiltPaperBundle.ts：导入 prebuilt paper bundle，支持 `--dry-run` 与 `--apply`，并写入 `import_batches`。
-- generate-offline-questions.ts / build-paper-packs.ts / validate-import-artifacts.ts：运营命名薄封装，分别转发到 `generateQuestionBundle.ts`、`buildPrebuiltPaperBundle.ts` 和对应 bundle 类型的 validator，不复制底层业务逻辑。
 - importManualQuestions.ts：导入管理员手工生成的题目 JSON；使用 `filePath + --question-type + --exam-type + --primary-kp-id` 指定批次元数据，并将批次审计写入 `import_batches.manual_question_import`。
 - updateAnswersInDB.ts：用 `papers/real-papers` 中的答案回写数据库中的同题记录。
 
@@ -86,11 +91,11 @@
 - 元数据回归：`npx tsx scripts/auditRealPapers.ts metadata --dir csp-j,csp-s`
 - explanation 定点重写：`npx tsx scripts/rewritePaperExplanations.ts --dir csp-s --file 2025.json --start-q 16 --end-q 18 --write --chunk-size 1 --timeout 180000`
 - 全量 metadata-only 复核：`npx tsx scripts/reviewRealPapers.ts --dir csp-j --write --chunk-size 1 --metadata-only`
-- 生成阅读程序验收 bundle：`npx tsx scripts/buildAcceptanceQuestionBundle.ts --exam-type GESP-1 --question-type reading_program --primary-kp-code CPP --difficulty easy --count 30 --run-id 2026-04-26-acceptance-gesp-1-easy-v01 --batch-id 2026-04-26-scale-reading`
-- 生成完善程序验收 bundle：`npx tsx scripts/buildAcceptanceQuestionBundle.ts --exam-type GESP-1 --question-type completion_program --primary-kp-code CPP --difficulty easy --count 20 --run-id 2026-04-26-acceptance-gesp-1-easy-v02 --batch-id 2026-04-26-scale-completion`
-- LLM 小批量出题 probe：`npx tsx scripts/generateQuestionBundle.ts --exam-type GESP-1 --question-type single_choice --primary-kp-code CPP --difficulty easy --count 5 --run-id <runId> --artifact-version 1`
-- LLM 小批量判官复核：`npx tsx scripts/validateQuestionBundle.ts papers/<year>/<runId>/question-bundles/<bundle-file>.json --judge --judge-attempts 3 --require-duplicate-checks --write-metadata`
-- 程序题离线 sandbox 校验并写回：`npx tsx scripts/validateQuestionBundle.ts papers/2026/<runId>/question-bundles/<bundle-file>.json --run-sandbox --write --write-metadata`
+- 生成阅读程序验收 bundle：`npx tsx scripts/questionBundle.ts generate-acceptance --exam-type GESP-1 --question-type reading_program --primary-kp-code CPP --difficulty easy --count 30 --run-id 2026-04-26-acceptance-gesp-1-easy-v01 --batch-id 2026-04-26-scale-reading`
+- 生成完善程序验收 bundle：`npx tsx scripts/questionBundle.ts generate-acceptance --exam-type GESP-1 --question-type completion_program --primary-kp-code CPP --difficulty easy --count 20 --run-id 2026-04-26-acceptance-gesp-1-easy-v02 --batch-id 2026-04-26-scale-completion`
+- LLM 小批量出题 probe：`npx tsx scripts/questionBundle.ts generate-llm --exam-type GESP-1 --question-type single_choice --primary-kp-code CPP --difficulty easy --count 5 --run-id <runId> --artifact-version 1`
+- LLM 小批量判官复核：`npx tsx scripts/questionBundle.ts validate papers/<year>/<runId>/question-bundles/<bundle-file>.json --judge --judge-attempts 3 --require-duplicate-checks --write-metadata`
+- 程序题离线 sandbox 校验并写回：`npx tsx scripts/questionBundle.ts validate papers/2026/<runId>/question-bundles/<bundle-file>.json --run-sandbox --write --write-metadata`
 - question bundle 守卫验证：`npx tsx scripts/verifyQuestionBundleGuards.ts`
 - 离线产物命名守卫：`npm run verify:offline-artifacts`
 - 首个管理员 dry-run：`ROUND1_INITIAL_ADMIN_PASSWORD='<临时强密码>' npm run init:admin -- --dry-run`
@@ -109,4 +114,5 @@
 
 - list-all-luogu.mjs、list-luogu-exams*.mjs、debug-luogu-answer*.mjs、check-gesp-202603\*.mjs 已合并到 exploreLuogu.mjs。
 - verifyAnswers.ts、debug-check-code.ts、audit-code.ts 已合并到 auditRealPapers.ts。
+- generate-offline-questions.ts、build-paper-packs.ts、validate-import-artifacts.ts 已删除，统一由 `questionBundle.ts` / `prebuiltPaperBundle.ts` 稳定入口承接。
 - debug-2020mock.mjs、debug-2021.mjs、debug-images.mjs、debug-raw-2019.mjs 属于历史一次性诊断脚本，已移除。

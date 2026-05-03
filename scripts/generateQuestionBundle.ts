@@ -3,6 +3,7 @@ import path from "node:path";
 
 import { z } from "zod";
 
+import { parsePositiveInteger } from "./lib/scriptCli.js";
 import { defaultQuestionBundleOutputPath, formatOfflineRunId } from "./lib/paperPaths.js";
 import {
   DifficultySchema,
@@ -92,15 +93,6 @@ Options:
   --output <path>            Explicit output override. Defaults to the persistent runId question-bundle path.
   --help                     Show this help message
 `);
-}
-
-function parsePositiveInteger(value: string | undefined, fallback: number, label: string): number {
-  const parsed = Number.parseInt(value ?? String(fallback), 10);
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new Error(`--${label} must be a positive integer`);
-  }
-
-  return parsed;
 }
 
 function parseArgs(argv: string[]): GenerateArgs {

@@ -14,6 +14,7 @@ import {
   type QuestionType,
 } from "./lib/bundleTypes.js";
 import { defaultQuestionBundleOutputPath, formatOfflineRunId } from "./lib/paperPaths.js";
+import { parsePositiveInteger } from "./lib/scriptCli.js";
 import { computeContentHash } from "../server/services/deduplicationService.js";
 
 interface Args {
@@ -46,15 +47,6 @@ Options:
   --batch-id <id>            Stable batch id (default: timestamp)
   --help                     Show this help message
 `);
-}
-
-function parsePositiveInteger(value: string | undefined, fallback: number, label: string): number {
-  const parsed = Number.parseInt(value ?? String(fallback), 10);
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new Error(`--${label} must be a positive integer`);
-  }
-
-  return parsed;
 }
 
 function parseArgs(argv: string[]): Args {

@@ -8,15 +8,11 @@ import {
   loadQuestionBundle,
   validateQuestionBundle,
 } from "./lib/questionBundleWorkflow.js";
+import { parsePositiveInteger, readNamedArg, toRepoPath } from "./lib/scriptCli.js";
 
 const usage = `Usage: npx tsx scripts/importQuestionBundles2026.ts [--dir papers/2026] [--manifest report-or-manifest.json[,more.json]] [--apply] [--run-judge] [--judge-rounds 2] [--limit count] [--expected-items count] [--imported-by user-uuid] [--skip-duplicate-checks]`;
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function readArg(args: string[], name: string) {
-  const index = args.indexOf(name);
-  return index >= 0 ? args[index + 1] : undefined;
-}
 
 function listJsonFiles(dir: string): string[] {
   if (!fs.existsSync(dir)) {
@@ -119,7 +115,9 @@ async function preflightContentHashes(files: string[]) {
       const location = `${repoPath}#${itemIndex}`;
       const existing = seen.get(item.contentHash);
       if (existing) {
-        duplicateErrors.push(`duplicate contentHash ${item.contentHash}: ${existing} and ${location}`);
+        duplicateErrors.push(
+          `duplicate contentHash ${item.contentHash}: ${existing} and ${location}`,
+        );
         return;
       }
       seen.set(item.contentHash, location);
@@ -136,28 +134,21 @@ async function main() {
     return;
   }
 
-  const dir = readArg(args, "--dir") ?? "papers/2026";
+  const dir = readNamedArg(args, "--dir") ?? "papers/2026";
   const apply = args.includes("--apply");
   const runJudge = args.includes("--run-judge");
   const skipDuplicateChecks = args.includes("--skip-duplicate-checks");
-  const judgeRoundsRaw = readArg(args, "--judge-rounds");
-  const judgeRounds = judgeRoundsRaw ? Number.parseInt(judgeRoundsRaw, 10) : 2;
-  const limitRaw = readArg(args, "--limit");
-  const limit = limitRaw ? Number.parseInt(limitRaw, 10) : undefined;
-  const expectedItemsRaw = readArg(args, "--expected-items");
-  const expectedItems = expectedItemsRaw ? Number.parseInt(expectedItemsRaw, 10) : undefined;
-  const manifest = readArg(args, "--manifest");
-  const importedBy = readArg(args, "--imported-by") ?? null;
+  const judgeRounds = parsePositiveInteger(readNamedArg(args, "--judge-rounds"), 2, "judge-rounds");
+  const limitRaw = readNamedArg(args, "--limit");
+  const limit = limitRaw === undefined ? undefined : parsePositiveInteger(limitRaw, 1, "limit");
+  const expectedItemsRaw = readNamedArg(args, "--expected-items");
+  const expectedItems =
+    expectedItemsRaw === undefined
+      ? undefined
+      : parsePositiveInteger(expectedItemsRaw, 1, "expected-items");
+  const manifest = readNamedArg(args, "--manifest");
+  const importedBy = readNamedArg(args, "--imported-by") ?? null;
 
-  if (!Number.isInteger(judgeRounds) || judgeRounds <= 0) {
-    throw new Error("--judge-rounds must be a positive integer");
-  }
-  if (limit !== undefined && (!Number.isInteger(limit) || limit <= 0)) {
-    throw new Error("--limit must be a positive integer");
-  }
-  if (expectedItems !== undefined && (!Number.isInteger(expectedItems) || expectedItems <= 0)) {
-    throw new Error("--expected-items must be a positive integer");
-  }
   if (importedBy !== null && !UUID_PATTERN.test(importedBy)) {
     throw new Error("--imported-by must be a valid user UUID");
   }
@@ -189,7 +180,7 @@ async function main() {
   }
 
   for (const file of files) {
-    const repoPath = path.relative(process.cwd(), file).replaceAll(path.sep, "/");
+    const repoPath = toRepoPath(path.relative(process.cwd(), file));
     try {
       const loaded = await loadQuestionBundle(file);
 
@@ -236,7 +227,9 @@ async function main() {
 
   if (expectedItems !== undefined && preflight.itemCount !== expectedItems) {
     summary.failed += 1;
-    console.error(`FAIL expected ${expectedItems} items from manifest, found ${preflight.itemCount}`);
+    console.error(
+      `FAIL expected ${expectedItems} items from manifest, found ${preflight.itemCount}`,
+    );
     process.exitCode = 1;
   }
   if (summary.failed > 0) {
