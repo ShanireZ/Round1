@@ -120,6 +120,12 @@
 - question bundle: `<runId>__question-bundle__<question-type>__<kp-code>__n<count>__vNN.json`
 - prebuilt paper bundle: `<runId>__prebuilt-paper-bundle__blueprint-v<blueprintVersion>__n<count>__vNN.json`
 
+`papers/` has three stable sections:
+
+- `papers/real-papers/`: official historical paper source JSON, imported as real-paper sets and excluded from generated simulated-question targets.
+- `papers/<year>/`: generated question bundles for that simulated library year.
+- `papers/_inventory/`: generated paper inventory metadata from `scripts/reportPapersInventory.ts`; it is not an importable bundle area.
+
 ## 路径变更规则
 
 移动或重命名文件时必须同步：

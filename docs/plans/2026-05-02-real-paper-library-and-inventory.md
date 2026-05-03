@@ -42,3 +42,4 @@ This keeps historical real papers distinct from simulated prebuilt papers, while
 - `scripts/reportQuestionInventory.ts` reads `papers/2026` recursively, counts by exam type, question type, difficulty, and knowledge-point group, then compares counts with blueprint quotas.
 - `npm run inventory:questions -- --write` writes the current JSON and Markdown inventory to `artifacts/reports/2026/state`.
 - Use `--out-run-dir artifacts/reports/2026/runs/<runId>` only when a point-in-time inventory snapshot also needs to be attached to a specific run.
+- `scripts/reportPapersInventory.ts` maintains the broader `papers/` section inventory. Run `npm run inventory:papers -- --write` after changing `papers/real-papers` or any `papers/<year>` generated-bundle section. It writes root and per-section statistics to `papers/_inventory`.

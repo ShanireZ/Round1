@@ -22,6 +22,7 @@ generate / judge / cpp-runner / build prebuilt paper -> JSON bundle -> validate 
 - prebuilt paper bundle：可导入预制卷资产，放入 `artifacts/prebuilt-papers/`。
 - report：校验摘要、judge 摘要、导入导出记录，放入 `artifacts/reports/`。
 - tmp：probe、草稿、调试 JSON，放入 `artifacts/tmp/`。
+- papers inventory：`papers/` 内部统计元数据，放入 `papers/_inventory/`，不得混入可导入 question bundle。
 
 ## runId
 
@@ -83,10 +84,13 @@ artifacts/reports/<year>/audits/<topic>/
 artifacts/reports/<year>/cleanups/<topic>/
 artifacts/reports/<year>/runs/<runId>/
 artifacts/tmp/<year>/<runId>/
+papers/_inventory/
+papers/_inventory/sections/
 ```
 
 - `artifacts/tmp/**` 可清理。
 - `papers/**`、`artifacts/prebuilt-papers/**`、`artifacts/reports/**` 作为审计输入保留。
+- `papers/_inventory/**` 是由 `scripts/reportPapersInventory.ts` 生成的统计元数据；更新纸面文件后运行 `npm run inventory:papers -- --write` 刷新。
 - `latest.json`、`paper-packs.json`、`probe*.json` 只能作为本地临时 alias，不得进入可导入/可审计目录。
 
 ## 元数据
@@ -214,6 +218,7 @@ Admin UI 需要能展示错误报告并支持修复重试。
 | 路径 | 保留策略 |
 | --- | --- |
 | `papers/**` | 保留，审计输入 |
+| `papers/_inventory/**` | 保留，统计元数据，可由 inventory 脚本重建 |
 | `artifacts/prebuilt-papers/**` | 保留，审计输入 |
 | `artifacts/reports/**` | 保留，审计/复盘 |
 | `artifacts/tmp/**` | 可清理 |
