@@ -20,7 +20,23 @@ assert.equal(
 );
 assert.equal(
   resolveCommand(questionBundleCommands, "import-batch").scriptPath,
-  "commands/importQuestionBundles2026.ts",
+  "commands/importQuestionBundlesBatch.ts",
+);
+assert.equal(
+  resolveCommand(questionBundleCommands, "batch-generate-local").scriptPath,
+  "commands/buildQuestionBundlesBatch.ts",
+);
+assert.equal(
+  resolveCommand(questionBundleCommands, "batch-generate-llm").scriptPath,
+  "commands/generateLlmQuestionBundlesBatch.ts",
+);
+assert.equal(
+  resolveCommand(questionBundleCommands, "batch-review-llm").scriptPath,
+  "commands/llmReviewQuestionBundlesBatch.ts",
+);
+assert.equal(
+  resolveCommand(questionBundleCommands, "report-remaining-manifest").scriptPath,
+  "commands/buildRemainingQuestionBundleImportManifest.ts",
 );
 assert.equal(
   resolveCommand(questionBundleCommands, "validate").scriptPath,

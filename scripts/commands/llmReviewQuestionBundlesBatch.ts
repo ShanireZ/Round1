@@ -38,7 +38,7 @@ const DEFAULT_MAX_REPAIR_ATTEMPTS = 3;
 const DEFAULT_MAX_CONCURRENCY = 2;
 
 function printHelp() {
-  console.log(`Usage: tsx scripts/commands/llmReviewBulkQuestionBundles2026.ts [options]
+  console.log(`Usage: tsx scripts/commands/llmReviewQuestionBundlesBatch.ts [options]
 
 Run LLM review and repair passes for generated question bundles.
 

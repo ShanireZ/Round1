@@ -23,17 +23,17 @@ Cloudflare / DNS / WAF
 
 本手册按以下仓库真源编写：
 
-| 主题            | 真源                                                  |
-| --------------- | ----------------------------------------------------- |
-| Node/npm 基线   | `package.json`、`standard/14-deployment-ops.md`       |
-| 环境变量 schema | `config/env.ts`                                       |
-| `.env` 生成     | `scripts/initEnv.ts`、`.env.example`                  |
-| PM2 进程        | `ecosystem.config.cjs`                                |
-| Caddy 模板      | `Caddyfile.example`                                   |
-| 健康检查        | `scripts/healthcheck.ts`                              |
-| DB 迁移         | `scripts/migrate.ts`、`server/db/migrations/`         |
-| 首个管理员      | `scripts/initAdmin.ts`                                |
-| 端口暴露        | `docs/plans/2026-04-28-port-map-and-exposure-plan.md` |
+| 主题            | 真源                                                      |
+| --------------- | --------------------------------------------------------- |
+| Node/npm 基线   | `package.json`、`standard/14-deployment-ops.md`           |
+| 环境变量 schema | `config/env.ts`                                           |
+| `.env` 生成     | `scripts/maintenance.ts init-env`、`.env.example`         |
+| PM2 进程        | `ecosystem.config.cjs`                                    |
+| Caddy 模板      | `Caddyfile.example`                                       |
+| 健康检查        | `scripts/maintenance.ts healthcheck`                      |
+| DB 迁移         | `scripts/maintenance.ts migrate`、`server/db/migrations/` |
+| 首个管理员      | `scripts/maintenance.ts init-admin`                       |
+| 端口暴露        | `docs/plans/2026-04-28-port-map-and-exposure-plan.md`     |
 
 Context7 已核对当前 Caddyfile 与 PM2 文档：Caddy 支持 `root` + `file_server` 托管静态文件、`try_files {path} /index.html` 支持 SPA 回退、matcher + `reverse_proxy` 只代理 `/api/*`；PM2 支持 ecosystem 文件、cluster 模式、`env_production` 与 `pm2 reload ecosystem.config.cjs --env production`。Round1 的最终命令仍以本仓库脚本为准。
 
@@ -285,8 +285,8 @@ npm run migrate:status
 初始化基础数据：
 
 ```bash
-npx tsx scripts/seedBlueprint.ts
-npx tsx scripts/bootstrapKnowledgePoints.ts
+npx tsx scripts/maintenance.ts seed-blueprint
+npx tsx scripts/maintenance.ts bootstrap-knowledge-points
 ```
 
 导入离线内容产物时必须先 dry-run，再 apply：
@@ -458,5 +458,5 @@ npm run migrate:down
 - `npm run healthcheck -- --help` 可列出 API、frontend、external、offline、PM2 检查参数。
 - `npm run init:admin -- --help` 可列出首个管理员引导参数。
 - 根 `package.json` 没有 `npm run build`；首次部署必须使用 `npm run build:client` 和 `npm run build:server`。
-- `scripts/migrate.ts` 支持 `up`、`down`、`status`；不要使用旧文档里的 `--down` 参数。
+- `scripts/maintenance.ts migrate` 支持 `up`、`down`、`status`；不要使用旧文档里的 `--down` 参数。
 - 当前迁移文件名前缀已收口为严格递增；历史数据库中旧 `schema_migrations.name` 通过迁移 alias 兼容，不会在已有库重跑旧迁移。

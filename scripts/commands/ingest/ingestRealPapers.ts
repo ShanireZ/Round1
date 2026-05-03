@@ -2,7 +2,7 @@
  * 历年真题导入入口
  *
  * 用法：
- *   npx tsx scripts/ingestRealPapers.ts --dir papers/real-papers [--review-rounds 2] [--limit 10]
+ *   npx tsx scripts/ingest.ts ingest-real-papers --dir papers/real-papers [--review-rounds 2] [--limit 10]
  *
  * 导入流程：
  * 1. 解析 JSON → Zod 校验

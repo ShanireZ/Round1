@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pool } from "../../server/db.js";
 
-const usage = `Usage: npx tsx scripts/commands/buildRemainingQuestionBundleImportManifest2026.ts (--manifest <manifest.json> | --dir <question-bundle-dir>) [--out <remaining-manifest.json>]`;
+const usage = `Usage: npx tsx scripts/commands/buildRemainingQuestionBundleImportManifest.ts (--manifest <manifest.json> | --dir <question-bundle-dir>) [--out <remaining-manifest.json>]`;
 
 function readArg(args: string[], name: string) {
   const index = args.indexOf(name);

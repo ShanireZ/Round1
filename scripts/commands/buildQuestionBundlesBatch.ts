@@ -58,7 +58,7 @@ const LETTERS: Letter[] = ["A", "B", "C", "D"];
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 
 function printHelp() {
-  console.log(`Usage: tsx scripts/commands/generateBulkQuestionBundles2026.ts [options]
+  console.log(`Usage: tsx scripts/commands/buildQuestionBundlesBatch.ts [options]
 
 Generate 1000 reviewed offline question bundle items, grouped as 5 questions per JSON.
 

@@ -640,9 +640,9 @@ async function main() {
   if (!dryRun && successCount > 0) {
     console.log(`\n📂 Output: ${baseDir}/`);
     console.log(`\n💡 Next: review JSONs then run:`);
-    console.log(`   npx tsx scripts/ingestRealPapers.ts --dir papers/real-papers/csp-j`);
-    console.log(`   npx tsx scripts/ingestRealPapers.ts --dir papers/real-papers/csp-s`);
-    console.log(`   npx tsx scripts/ingestRealPapers.ts --dir papers/real-papers/gesp`);
+    console.log(`   npx tsx scripts/ingest.ts ingest-real-papers --dir papers/real-papers/csp-j`);
+    console.log(`   npx tsx scripts/ingest.ts ingest-real-papers --dir papers/real-papers/csp-s`);
+    console.log(`   npx tsx scripts/ingest.ts ingest-real-papers --dir papers/real-papers/gesp`);
   }
 }
 

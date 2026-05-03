@@ -1,7 +1,7 @@
 /**
  * 蓝图初始化 — 将 config/blueprint.ts 中的蓝图定义写入 blueprints 表
  *
- * 用法：npx tsx scripts/seedBlueprint.ts [--force]
+ * 用法：npx tsx scripts/maintenance.ts seed-blueprint [--force]
  *
  * --force: 即使当前版本已存在也重新写入
  */

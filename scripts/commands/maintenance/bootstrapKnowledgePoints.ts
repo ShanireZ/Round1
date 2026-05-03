@@ -1,7 +1,7 @@
 /**
  * 知识点树 Bootstrap — 从 taxonomy.json 导入知识点到 knowledge_points 表
  *
- * 用法：npx tsx scripts/bootstrapKnowledgePoints.ts [--dry-run]
+ * 用法：npx tsx scripts/maintenance.ts bootstrap-knowledge-points [--dry-run]
  *
  * 数据来源：prompts/taxonomy.json（基于 NOI 大纲 2025 + GESP C++ 大纲 + 初赛讲义 综合归纳）
  */

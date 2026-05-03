@@ -679,4 +679,4 @@ GESP（CCF 编程能力等级认证）共 8 级，每季度举办一次（3/6/9/
 ### 9.3 注意事项
 - 部分真题官方答案存在错误，导入时需逐题确认（参见 step-03 AI 辅助审核流程）
 - 讲义答案图片中的解析可作为 Few-shot 示例用于 LLM 出题 prompt
-- 知识点编码仅为建议，最终以 `scripts/bootstrapKnowledgePoints.ts` 生成并人工 review 后的结果为准
+- 知识点编码仅为建议，最终以 `scripts/maintenance.ts bootstrap-knowledge-points` 生成并人工 review 后的结果为准

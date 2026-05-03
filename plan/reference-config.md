@@ -82,10 +82,10 @@ Round1/
 │       ├─ pages/                  → Login / Register / AuthCallback / ForgotPassword / AccountSecurity / Dashboard / ExamNew / Exam / ExamResult / JoinClass / Coach* / Admin
 │       ├─ components/ / hooks/ / api/
 ├─ scripts/
-│   ├─ generateQuestionBundle.ts / validateQuestionBundle.ts / importQuestionBundle.ts
-│   ├─ buildPrebuiltPaperBundle.ts / validatePrebuiltPaperBundle.ts / importPrebuiltPaperBundle.ts
-│   ├─ auditRealPapers / reviewRealPapers / rewritePaperExplanations / ingestRealPapers / importManualQuestions / updateAnswersInDB / bootstrapKnowledgePoints / seedBlueprint / dev-setup / migrate / db-stats / initAdmin / healthcheck
-│   └─ workers/contentWorker.ts    → 离线内容环境 worker 入口
+│   ├─ questionBundle.ts / prebuiltPaperBundle.ts   → 离线 bundle 对外稳定入口
+│   ├─ collect.ts / ingest.ts / review.ts / audit.ts / maintenance.ts
+│   ├─ commands/                                   → 具体脚本实现
+│   └─ workers/contentWorker.ts                    → 离线内容环境 worker 入口
 ```
 
 ---

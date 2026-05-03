@@ -160,7 +160,7 @@ stateful 与 ops/security 不应在没有观察窗口的情况下临近无人值
 
 ## 健康检查
 
-仓库内提供统一 `scripts/healthcheck.ts`，部署验证应优先使用该脚本，再配合必要的人工业务验收。脚本必须覆盖并明确区分：
+仓库内提供统一 `scripts/maintenance.ts healthcheck` 稳定入口，部署验证应优先使用该脚本，再配合必要的人工业务验收。脚本必须覆盖并明确区分：
 
 - API readiness，并从 `/api/v1/health` 汇总 DB / Redis 状态。
 - 前端静态文件可访问，需通过 `ROUND1_HEALTHCHECK_FRONTEND_URL` 或 `--frontend-url` 显式开启。

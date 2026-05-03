@@ -275,7 +275,7 @@ type AuditResponse = z.infer<typeof auditResponseSchema>;
 type RepairResponse = z.infer<typeof repairResponseSchema>;
 
 function printHelp() {
-  console.log(`Usage: tsx scripts/commands/generateLlmQuestionBundles2026.ts [options]
+  console.log(`Usage: tsx scripts/commands/generateLlmQuestionBundlesBatch.ts [options]
 
 Generate LLM-reviewed 2026 question bundles.
 

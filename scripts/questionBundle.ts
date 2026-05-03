@@ -36,27 +36,27 @@ export const questionBundleCommands: StableScriptCommand[] = [
   },
   {
     name: "import-batch",
-    scriptPath: "commands/importQuestionBundles2026.ts",
+    scriptPath: "commands/importQuestionBundlesBatch.ts",
     summary: "按目录或 manifest 批量导入 question bundle",
   },
   {
     name: "batch-generate-local",
-    scriptPath: "commands/generateBulkQuestionBundles2026.ts",
+    scriptPath: "commands/buildQuestionBundlesBatch.ts",
     summary: "本地确定性批量生成 question bundle",
   },
   {
     name: "batch-generate-llm",
-    scriptPath: "commands/generateLlmQuestionBundles2026.ts",
+    scriptPath: "commands/generateLlmQuestionBundlesBatch.ts",
     summary: "批量生成 LLM question bundle",
   },
   {
     name: "batch-review-llm",
-    scriptPath: "commands/llmReviewBulkQuestionBundles2026.ts",
+    scriptPath: "commands/llmReviewQuestionBundlesBatch.ts",
     summary: "批量执行 LLM 复核",
   },
   {
     name: "report-remaining-manifest",
-    scriptPath: "commands/buildRemainingQuestionBundleImportManifest2026.ts",
+    scriptPath: "commands/buildRemainingQuestionBundleImportManifest.ts",
     summary: "生成剩余未导入 bundle 清单",
   },
 ];
