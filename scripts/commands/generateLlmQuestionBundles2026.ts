@@ -4,9 +4,9 @@ import path from "node:path";
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
 
-import { blueprintSpecs } from "../config/blueprint.js";
-import { env } from "../config/env.js";
-import { EXAM_TYPES, type ExamType } from "../config/examTypes.js";
+import { blueprintSpecs } from "../../config/blueprint.js";
+import { env } from "../../config/env.js";
+import { EXAM_TYPES, type ExamType } from "../../config/examTypes.js";
 import {
   createProviderLanguageModel,
   getSceneExecutionChain,
@@ -14,9 +14,9 @@ import {
   type LLMProviderName,
   type LLMScene,
   type ProviderReasoningOptions,
-} from "../config/llm.js";
-import { computeContentHash } from "../server/services/deduplicationService.js";
-import { runCpp } from "../server/services/sandbox/cppRunner.js";
+} from "../../config/llm.js";
+import { computeContentHash } from "../../server/services/deduplicationService.js";
+import { runCpp } from "../../server/services/sandbox/cppRunner.js";
 import {
   BUNDLE_SCHEMA_VERSION,
   QuestionBundleItemSchema,
@@ -30,10 +30,10 @@ import {
   type QuestionBundle,
   type QuestionBundleItem,
   type QuestionType,
-} from "./lib/bundleTypes.js";
-import { defaultOfflineReportPath, defaultQuestionBundleOutputPath } from "./lib/paperPaths.js";
-import { extractJsonObject } from "./lib/modelJson.js";
-import { validateQuestionBundle } from "./lib/questionBundleWorkflow.js";
+} from "../lib/bundleTypes.js";
+import { defaultOfflineReportPath, defaultQuestionBundleOutputPath } from "../lib/paperPaths.js";
+import { extractJsonObject } from "../lib/modelJson.js";
+import { validateQuestionBundle } from "../lib/questionBundleWorkflow.js";
 
 (globalThis as typeof globalThis & { AI_SDK_LOG_WARNINGS?: boolean }).AI_SDK_LOG_WARNINGS = false;
 
@@ -273,7 +273,7 @@ type AuditResponse = z.infer<typeof auditResponseSchema>;
 type RepairResponse = z.infer<typeof repairResponseSchema>;
 
 function printHelp() {
-  console.log(`Usage: tsx scripts/generateLlmQuestionBundles2026.ts [options]
+  console.log(`Usage: tsx scripts/commands/generateLlmQuestionBundles2026.ts [options]
 
 Generate LLM-reviewed 2026 question bundles.
 
@@ -362,9 +362,7 @@ function parseArgs(argv: string[]) {
     llmJsonAttempts: readPositiveInt(args, "llm-json-attempts", DEFAULT_LLM_JSON_ATTEMPTS),
     inventoryPath: typeof args["inventory-path"] === "string" ? args["inventory-path"] : undefined,
     inventoryReportDir:
-      typeof args["inventory-report-dir"] === "string"
-        ? args["inventory-report-dir"]
-        : undefined,
+      typeof args["inventory-report-dir"] === "string" ? args["inventory-report-dir"] : undefined,
     dbDuplicateChecks: args["db-duplicate-checks"] === true,
     agentLabel: typeof args["agent-label"] === "string" ? slugify(args["agent-label"]) : undefined,
     onlyBundleNos:
@@ -2410,12 +2408,9 @@ async function main() {
   if (args.planOnly) {
     const distribution: Record<string, number> = {};
     for (const combo of combos) {
-      const key = [
-        combo.examType,
-        combo.questionType,
-        combo.difficulty,
-        combo.primaryKpCode,
-      ].join("|");
+      const key = [combo.examType, combo.questionType, combo.difficulty, combo.primaryKpCode].join(
+        "|",
+      );
       distribution[key] = (distribution[key] ?? 0) + args.questionsPerBundle;
     }
     console.log(

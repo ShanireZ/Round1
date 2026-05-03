@@ -2,15 +2,16 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { pool } from "../server/db.js";
+import { pool } from "../../server/db.js";
 import {
   importQuestionBundle,
   loadQuestionBundle,
   validateQuestionBundle,
-} from "./lib/questionBundleWorkflow.js";
-import { parsePositiveInteger, readNamedArg, toRepoPath } from "./lib/scriptCli.js";
+} from "../lib/questionBundleWorkflow.js";
+import { parsePositiveInteger, readNamedArg, toRepoPath } from "../lib/scriptCli.js";
 
 const usage = `Usage: npx tsx scripts/importQuestionBundles2026.ts [--dir papers/2026] [--manifest report-or-manifest.json[,more.json]] [--apply] [--run-judge] [--judge-rounds 2] [--limit count] [--expected-items count] [--imported-by user-uuid] [--skip-duplicate-checks]`;
+const usage = `Usage: npx tsx scripts/commands/importQuestionBundles2026.ts [--dir papers/2026] [--manifest report-or-manifest.json[,more.json]] [--apply] [--run-judge] [--judge-rounds 2] [--limit count] [--expected-items count] [--imported-by user-uuid] [--skip-duplicate-checks]`;
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 

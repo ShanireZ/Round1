@@ -30,7 +30,9 @@
 | `config/`                    | 跨 server/scripts 共享配置真源                      |
 | `scripts/`                   | 离线内容生产、导入、迁移、验证、运营脚本            |
 | `plan/`                      | 长期方案、reference、阶段计划                       |
+| `docs/`                      | 当前文档入口、专题运维说明、问题汇总与日期化计划    |
 | `docs/plans/`                | 日期化执行计划、收口记录、临时推进记录              |
+| `docs/_inventory/`           | 文档盘点元数据，由 `reportDocsInventory.ts` 生成     |
 | `papers/`                    | 持久化 question bundle 审计输入                     |
 | `artifacts/prebuilt-papers/` | 持久化 prebuilt paper bundle                        |
 | `artifacts/reports/`         | 校验报告、judge 摘要、导入记录导出                  |

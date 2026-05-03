@@ -11,6 +11,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { scoreOrDash } from "@/lib/coach";
 
+/* eslint-disable react-refresh/only-export-components -- This catalog intentionally colocates component implementations with exported registry metadata. */
+
 export const ROUND1_A2UI_CATALOG_ID = "round1://a2ui/catalog/design-system/v1";
 
 const DataBindingSchema = z.object({ path: z.string() });

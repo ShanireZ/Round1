@@ -16,15 +16,15 @@ assert.throws(
 
 assert.equal(
   resolveCommand(questionBundleCommands, "generate-llm").scriptPath,
-  "generateQuestionBundle.ts",
+  "commands/generateQuestionBundle.ts",
 );
 assert.equal(
   resolveCommand(questionBundleCommands, "import-batch").scriptPath,
-  "importQuestionBundles2026.ts",
+  "commands/importQuestionBundles2026.ts",
 );
 assert.equal(
   resolveCommand(prebuiltPaperBundleCommands, "build").scriptPath,
-  "buildPrebuiltPaperBundle.ts",
+  "commands/buildPrebuiltPaperBundle.ts",
 );
 
 assert.throws(

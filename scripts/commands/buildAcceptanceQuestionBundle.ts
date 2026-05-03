@@ -12,10 +12,10 @@ import {
   type ExamType,
   type QuestionBundleItem,
   type QuestionType,
-} from "./lib/bundleTypes.js";
-import { defaultQuestionBundleOutputPath, formatOfflineRunId } from "./lib/paperPaths.js";
-import { parsePositiveInteger } from "./lib/scriptCli.js";
-import { computeContentHash } from "../server/services/deduplicationService.js";
+} from "../lib/bundleTypes.js";
+import { defaultQuestionBundleOutputPath, formatOfflineRunId } from "../lib/paperPaths.js";
+import { parsePositiveInteger } from "../lib/scriptCli.js";
+import { computeContentHash } from "../../server/services/deduplicationService.js";
 
 interface Args {
   examType: ExamType;
@@ -31,7 +31,7 @@ interface Args {
 }
 
 function printHelp() {
-  console.log(`Usage: tsx scripts/buildAcceptanceQuestionBundle.ts --exam-type <type> --question-type <type> --primary-kp-code <code> --difficulty <level> [options]
+  console.log(`Usage: tsx scripts/commands/buildAcceptanceQuestionBundle.ts --exam-type <type> --question-type <type> --primary-kp-code <code> --difficulty <level> [options]
 
 Build a deterministic offline acceptance question bundle for scaled sandbox/import checks.
 

@@ -306,7 +306,7 @@ async function checkPm2Apps(
   const command = process.platform === "win32" ? "pm2.cmd" : "pm2";
   try {
     const { stdout } = await execFileAsync(command, ["jlist"], { timeout: timeoutMs });
-    const output = typeof stdout === "string" ? stdout : stdout.toString("utf8");
+    const output = stdout;
     const apps = JSON.parse(output) as Array<{ name?: string; pm2_env?: { status?: string } }>;
     const missingOrDown = requiredApps.filter((name) => {
       const app = apps.find((item) => item.name === name);

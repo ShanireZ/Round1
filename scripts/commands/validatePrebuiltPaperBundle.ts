@@ -4,14 +4,14 @@ import {
   buildBundleIntegrity,
   buildValidationMetadata,
   computeChecksum,
-} from "./lib/bundleTypes.js";
+} from "../lib/bundleTypes.js";
 import {
   loadPrebuiltPaperBundle,
   validatePrebuiltPaperBundle,
-} from "./lib/prebuiltPaperBundleWorkflow.js";
+} from "../lib/prebuiltPaperBundleWorkflow.js";
 
 function printHelp() {
-  console.log(`Usage: tsx scripts/validatePrebuiltPaperBundle.ts <bundle-path> [options]
+  console.log(`Usage: tsx scripts/commands/validatePrebuiltPaperBundle.ts <bundle-path> [options]
 
 Validate a prebuilt paper bundle JSON file against the offline bundle contract.
 

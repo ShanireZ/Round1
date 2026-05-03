@@ -31,6 +31,7 @@
     "import:questions:2026": "tsx scripts/questionBundle.ts import-batch",
     "inventory:questions": "tsx scripts/reportQuestionInventory.ts",
     "inventory:papers": "tsx scripts/reportPapersInventory.ts",
+    "inventory:docs": "tsx scripts/reportDocsInventory.ts",
     "migrate:rehearse:paper-slot-points-failure": "tsx scripts/rehearsePaperSlotPointsMigrationFailure.ts",
     "verify:offline-artifacts": "tsx scripts/verifyOfflineArtifactNames.ts",
     "verify:ui-tokens": "tsx scripts/verifyUiTokenUsage.ts",

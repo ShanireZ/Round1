@@ -4,11 +4,11 @@ import {
   buildBundleIntegrity,
   buildValidationMetadata,
   computeChecksum,
-} from "./lib/bundleTypes.js";
-import { loadQuestionBundle, validateQuestionBundle } from "./lib/questionBundleWorkflow.js";
+} from "../lib/bundleTypes.js";
+import { loadQuestionBundle, validateQuestionBundle } from "../lib/questionBundleWorkflow.js";
 
 function printHelp() {
-  console.log(`Usage: tsx scripts/validateQuestionBundle.ts <bundle-path> [options]
+  console.log(`Usage: tsx scripts/commands/validateQuestionBundle.ts <bundle-path> [options]
 
 Validate a question bundle JSON file against the offline bundle contract.
 
@@ -172,7 +172,9 @@ async function main() {
         updatedChecksum,
         duplicateChecksSkipped: result.duplicateChecksSkipped,
         judgeChecksSkipped: result.judgeChecksSkipped,
-        judgeItemIndexes: judgeItemIndexes ? [...judgeItemIndexes].sort((a, b) => a - b) : undefined,
+        judgeItemIndexes: judgeItemIndexes
+          ? [...judgeItemIndexes].sort((a, b) => a - b)
+          : undefined,
         sandboxVerifiedItemIndexes: result.sandboxVerifiedItemIndexes,
         summary: result.summary,
       },

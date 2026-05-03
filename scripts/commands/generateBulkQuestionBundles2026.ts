@@ -1,9 +1,9 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { blueprintSpecs } from "../config/blueprint.js";
-import { EXAM_TYPES, type ExamType } from "../config/examTypes.js";
-import { computeContentHash } from "../server/services/deduplicationService.js";
+import { blueprintSpecs } from "../../config/blueprint.js";
+import { EXAM_TYPES, type ExamType } from "../../config/examTypes.js";
+import { computeContentHash } from "../../server/services/deduplicationService.js";
 import {
   BUNDLE_SCHEMA_VERSION,
   buildBundleIntegrity,
@@ -15,9 +15,9 @@ import {
   type QuestionBundle,
   type QuestionBundleItem,
   type QuestionType,
-} from "./lib/bundleTypes.js";
-import { defaultOfflineReportPath, defaultQuestionBundleOutputPath } from "./lib/paperPaths.js";
-import { validateQuestionBundle } from "./lib/questionBundleWorkflow.js";
+} from "../lib/bundleTypes.js";
+import { defaultOfflineReportPath, defaultQuestionBundleOutputPath } from "../lib/paperPaths.js";
+import { validateQuestionBundle } from "../lib/questionBundleWorkflow.js";
 
 type Letter = "A" | "B" | "C" | "D";
 
@@ -58,7 +58,7 @@ const LETTERS: Letter[] = ["A", "B", "C", "D"];
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 
 function printHelp() {
-  console.log(`Usage: tsx scripts/generateBulkQuestionBundles2026.ts [options]
+  console.log(`Usage: tsx scripts/commands/generateBulkQuestionBundles2026.ts [options]
 
 Generate 1000 reviewed offline question bundle items, grouped as 5 questions per JSON.
 
@@ -255,10 +255,7 @@ function chooseCombos(totalBundles: number, seed: string): Combo[] {
   return shuffle(selected, rng).map((combo, index) => ({ ...combo, bundleNo: index + 1 }));
 }
 
-function weightedDifficulty(
-  distribution: Record<string, number>,
-  rng: () => number,
-): Difficulty {
+function weightedDifficulty(distribution: Record<string, number>, rng: () => number): Difficulty {
   const weights = DIFFICULTIES.map((difficulty) => ({
     difficulty,
     weight: Math.max(distribution[difficulty] ?? 0, 0),
@@ -290,15 +287,13 @@ function withLabels(values: string[]): string[] {
 function makeOptions(correct: string | number, distractors: Array<string | number>, slot: number) {
   const correctText = String(correct);
   const seen = new Set([correctText]);
-  const cleanDistractors = distractors
-    .map(String)
-    .filter((value) => {
-      if (seen.has(value)) {
-        return false;
-      }
-      seen.add(value);
-      return true;
-    });
+  const cleanDistractors = distractors.map(String).filter((value) => {
+    if (seen.has(value)) {
+      return false;
+    }
+    seen.add(value);
+    return true;
+  });
 
   let filler = 1;
   while (cleanDistractors.length < 3) {

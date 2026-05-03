@@ -6,9 +6,9 @@ import {
   ExamTypeSchema,
   type Difficulty,
   type ExamType,
-} from "./lib/bundleTypes.js";
-import { defaultPrebuiltPaperBundleOutputPath, formatOfflineRunId } from "./lib/paperPaths.js";
-import { parsePositiveInteger } from "./lib/scriptCli.js";
+} from "../lib/bundleTypes.js";
+import { defaultPrebuiltPaperBundleOutputPath, formatOfflineRunId } from "../lib/paperPaths.js";
+import { parsePositiveInteger } from "../lib/scriptCli.js";
 
 interface BuildPrebuiltPaperBundleCliArgs {
   examType: ExamType;
@@ -22,7 +22,7 @@ interface BuildPrebuiltPaperBundleCliArgs {
 }
 
 function printHelp() {
-  console.log(`Usage: tsx scripts/buildPrebuiltPaperBundle.ts --exam-type <type> --difficulty <level> [options]
+  console.log(`Usage: tsx scripts/commands/buildPrebuiltPaperBundle.ts --exam-type <type> --difficulty <level> [options]
 
 Options:
   --exam-type <type>         Exam type, e.g. CSP-J
@@ -110,7 +110,7 @@ async function main() {
     throw new Error("--count must be a positive integer");
   }
 
-  const { buildPrebuiltPaperBundle } = await import("./lib/prebuiltPaperBundleWorkflow.js");
+  const { buildPrebuiltPaperBundle } = await import("../lib/prebuiltPaperBundleWorkflow.js");
   const bundle = await buildPrebuiltPaperBundle(args);
   const outputPath = path.resolve(process.cwd(), args.output);
   await mkdir(path.dirname(outputPath), { recursive: true });

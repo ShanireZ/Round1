@@ -1,7 +1,7 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { computeContentHash } from "../server/services/deduplicationService.js";
+import { computeContentHash } from "../../server/services/deduplicationService.js";
 import {
   BUNDLE_SCHEMA_VERSION,
   QuestionBundleItemSchema,
@@ -11,8 +11,8 @@ import {
   type QuestionBundleItem,
   type QuestionType,
   computeChecksum,
-} from "./lib/bundleTypes.js";
-import { defaultQuestionBundleOutputPath } from "./lib/paperPaths.js";
+} from "../lib/bundleTypes.js";
+import { defaultQuestionBundleOutputPath } from "../lib/paperPaths.js";
 
 interface DraftMeta {
   runId: string;
@@ -42,7 +42,7 @@ interface DraftBundle {
 }
 
 function printHelp() {
-  console.log(`Usage: tsx scripts/buildManualQuestionBundles.ts --draft-dir <dir>
+  console.log(`Usage: tsx scripts/commands/buildManualQuestionBundles.ts --draft-dir <dir>
 
 Build final question bundle JSON files from manual draft bundles.
 

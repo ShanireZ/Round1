@@ -10,6 +10,16 @@ const ADMIN_USERNAME = "elder";
 const ADMIN_DISPLAY_NAME = "elder";
 const PASSWORD_ENV = "ROUND1_INITIAL_ADMIN_PASSWORD";
 
+function readRequiredEnv(name: string, errorMessage: string): string {
+  const value = process.env[name];
+  if (!value) {
+    console.error(errorMessage);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 function findNearestEnvFile(startDir: string): string {
   let current = startDir;
 
@@ -56,17 +66,12 @@ const rotate = args.has("--rotate");
 
 dotenv.config({ path: findNearestEnvFile(path.resolve(import.meta.dirname, "..")) });
 
-const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl) {
-  console.error("DATABASE_URL is not set.");
-  process.exit(1);
-}
+const databaseUrl = readRequiredEnv("DATABASE_URL", "DATABASE_URL is not set.");
 
-const initialPassword = process.env[PASSWORD_ENV];
-if (!initialPassword) {
-  console.error(`${PASSWORD_ENV} is required and must not be committed to the repository.`);
-  process.exit(1);
-}
+const initialPassword = readRequiredEnv(
+  PASSWORD_ENV,
+  `${PASSWORD_ENV} is required and must not be committed to the repository.`,
+);
 
 const passwordStrength = validatePasswordStrength({
   password: initialPassword,
@@ -142,9 +147,7 @@ async function main(): Promise<void> {
 
     if (dryRun) {
       const action = elderRow ? "promote/update existing elder" : "create elder";
-      console.log(
-        `DRY RUN: would ${action} with role=admin and passwordChangeRequired=true.`,
-      );
+      console.log(`DRY RUN: would ${action} with role=admin and passwordChangeRequired=true.`);
       await client.query("ROLLBACK");
       return;
     }

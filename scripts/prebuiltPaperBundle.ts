@@ -9,17 +9,17 @@ import {
 export const prebuiltPaperBundleCommands: StableScriptCommand[] = [
   {
     name: "build",
-    scriptPath: "buildPrebuiltPaperBundle.ts",
+    scriptPath: "commands/buildPrebuiltPaperBundle.ts",
     summary: "构建 prebuilt paper bundle",
   },
   {
     name: "validate",
-    scriptPath: "validatePrebuiltPaperBundle.ts",
+    scriptPath: "commands/validatePrebuiltPaperBundle.ts",
     summary: "校验 prebuilt paper bundle",
   },
   {
     name: "import",
-    scriptPath: "importPrebuiltPaperBundle.ts",
+    scriptPath: "commands/importPrebuiltPaperBundle.ts",
     summary: "导入 prebuilt paper bundle",
   },
 ];

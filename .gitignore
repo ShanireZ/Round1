@@ -10,13 +10,13 @@ test-results
 
 # Environment
 .env
-.env.local
+.env.production
+Caddyfile
 
 # Certificates
 certs
 
 # Data
-/docs/res/
 /papers
 /artifacts
 
@@ -33,10 +33,6 @@ Thumbs.db
 *.log
 logs/
 
-# Script artifacts
-scripts/.tmp/
-/temp
-
 # Agents
 /.agents
 /.claude
@@ -44,3 +40,4 @@ scripts/.tmp/
 /.commandcode
 /.gemini
 /.worktrees
+/.serena

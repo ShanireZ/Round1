@@ -3,8 +3,8 @@ import path from "node:path";
 
 import { z } from "zod";
 
-import { parsePositiveInteger } from "./lib/scriptCli.js";
-import { defaultQuestionBundleOutputPath, formatOfflineRunId } from "./lib/paperPaths.js";
+import { parsePositiveInteger } from "../lib/scriptCli.js";
+import { defaultQuestionBundleOutputPath, formatOfflineRunId } from "../lib/paperPaths.js";
 import {
   DifficultySchema,
   ExamTypeSchema,
@@ -13,7 +13,7 @@ import {
   QuestionTypeSchema,
   BUNDLE_SCHEMA_VERSION,
   computeChecksum,
-} from "./lib/bundleTypes.js";
+} from "../lib/bundleTypes.js";
 
 type ComputeContentHash = (stem: string, codeOrOptions: string) => string;
 
@@ -80,7 +80,7 @@ interface GenerateArgs {
 }
 
 function printHelp() {
-  console.log(`Usage: tsx scripts/generateQuestionBundle.ts --exam-type <type> --question-type <type> --primary-kp-code <code> --difficulty <level> [options]
+  console.log(`Usage: tsx scripts/commands/generateQuestionBundle.ts --exam-type <type> --question-type <type> --primary-kp-code <code> --difficulty <level> [options]
 
 Options:
   --exam-type <type>         Exam type, e.g. CSP-J
@@ -355,10 +355,10 @@ async function main() {
   const [{ eq }, { db }, { knowledgePoints }, { computeContentHash }, { llmGenerateObject }] =
     await Promise.all([
       import("drizzle-orm"),
-      import("../server/db.js"),
-      import("../server/db/schema/knowledgePoints.js"),
-      import("../server/services/deduplicationService.js"),
-      import("../server/services/llm/index.js"),
+      import("../../server/db.js"),
+      import("../../server/db/schema/knowledgePoints.js"),
+      import("../../server/services/deduplicationService.js"),
+      import("../../server/services/llm/index.js"),
     ]);
 
   const promptTemplate = await readFile(

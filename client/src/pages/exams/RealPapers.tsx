@@ -175,7 +175,7 @@ export default function RealPapers() {
     queryFn: fetchRealPaperCatalog,
   });
 
-  const items = catalogQuery.data?.items ?? [];
+  const items = useMemo(() => catalogQuery.data?.items ?? [], [catalogQuery.data?.items]);
   const examTypes = useMemo(
     () => sortExamTypes([...new Set(items.map((item) => item.examType))]),
     [items],

@@ -4,7 +4,7 @@
 
 ## 适用范围
 
-- 面向 Round1 全仓库：`server/`、`client/`、`config/`、`scripts/`、`plan/`、`docs/plans/`、`papers/`、`artifacts/`。
+- 面向 Round1 全仓库：`server/`、`client/`、`config/`、`scripts/`、`plan/`、`docs/`、`docs/plans/`、`papers/`、`artifacts/`。
 - 适用于人类开发者、AI coding agent、内容生产 agent、代码审查者、运维执行者。
 - 新功能、修复、重构、文档、离线内容产物、部署演练均必须对照本目录。
 

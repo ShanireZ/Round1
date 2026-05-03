@@ -9,52 +9,52 @@ import {
 export const questionBundleCommands: StableScriptCommand[] = [
   {
     name: "generate-llm",
-    scriptPath: "generateQuestionBundle.ts",
+    scriptPath: "commands/generateQuestionBundle.ts",
     summary: "使用 LLM 生成单个 question bundle",
   },
   {
     name: "generate-acceptance",
-    scriptPath: "buildAcceptanceQuestionBundle.ts",
+    scriptPath: "commands/buildAcceptanceQuestionBundle.ts",
     summary: "生成确定性 acceptance question bundle",
   },
   {
     name: "build-manual",
-    scriptPath: "buildManualQuestionBundles.ts",
+    scriptPath: "commands/buildManualQuestionBundles.ts",
     summary: "把人工草稿构建为正式 question bundle",
   },
   {
     name: "validate",
-    scriptPath: "validateQuestionBundle.ts",
+    scriptPath: "commands/validateQuestionBundle.ts",
     summary: "校验 question bundle 产物",
   },
   {
     name: "import",
-    scriptPath: "importQuestionBundle.ts",
+    scriptPath: "commands/importQuestionBundle.ts",
     summary: "导入单个 question bundle",
   },
   {
     name: "import-batch",
-    scriptPath: "importQuestionBundles2026.ts",
+    scriptPath: "commands/importQuestionBundles2026.ts",
     summary: "按目录或 manifest 批量导入 question bundle",
   },
   {
     name: "batch-generate-local",
-    scriptPath: "generateBulkQuestionBundles2026.ts",
+    scriptPath: "commands/generateBulkQuestionBundles2026.ts",
     summary: "本地确定性批量生成 question bundle",
   },
   {
     name: "batch-generate-llm",
-    scriptPath: "generateLlmQuestionBundles2026.ts",
+    scriptPath: "commands/generateLlmQuestionBundles2026.ts",
     summary: "批量生成 LLM question bundle",
   },
   {
     name: "batch-review-llm",
-    scriptPath: "llmReviewBulkQuestionBundles2026.ts",
+    scriptPath: "commands/llmReviewBulkQuestionBundles2026.ts",
     summary: "批量执行 LLM 复核",
   },
   {
     name: "report-remaining-manifest",
-    scriptPath: "buildRemainingQuestionBundleImportManifest2026.ts",
+    scriptPath: "commands/buildRemainingQuestionBundleImportManifest2026.ts",
     summary: "生成剩余未导入 bundle 清单",
   },
 ];

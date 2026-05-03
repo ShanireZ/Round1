@@ -1,9 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { pool } from "../server/db.js";
+import { pool } from "../../server/db.js";
 
 const usage = `Usage: npx tsx scripts/buildRemainingQuestionBundleImportManifest2026.ts (--manifest <manifest.json> | --dir <question-bundle-dir>) [--out <remaining-manifest.json>]`;
+const usage = `Usage: npx tsx scripts/commands/buildRemainingQuestionBundleImportManifest2026.ts (--manifest <manifest.json> | --dir <question-bundle-dir>) [--out <remaining-manifest.json>]`;
 
 function readArg(args: string[], name: string) {
   const index = args.indexOf(name);
@@ -119,7 +120,9 @@ async function main() {
   let remainingItems = 0;
 
   for (const row of bundleRows) {
-    const existingItems = row.contentHashes.filter((contentHash) => existing.has(contentHash)).length;
+    const existingItems = row.contentHashes.filter((contentHash) =>
+      existing.has(contentHash),
+    ).length;
     if (existingItems === 0) {
       remainingBundlePaths.push(row.path);
       remainingItems += row.itemCount;

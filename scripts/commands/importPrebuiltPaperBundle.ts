@@ -1,12 +1,15 @@
-import { parseApplyMode } from "./lib/scriptCli.js";
-import { importQuestionBundle, loadQuestionBundle } from "./lib/questionBundleWorkflow.js";
+import { parseApplyMode } from "../lib/scriptCli.js";
+import {
+  importPrebuiltPaperBundle,
+  loadPrebuiltPaperBundle,
+} from "../lib/prebuiltPaperBundleWorkflow.js";
 
 function printHelp() {
-  console.log(`Usage: tsx scripts/importQuestionBundle.ts <bundle-path> (--dry-run | --apply)
+  console.log(`Usage: tsx scripts/commands/importPrebuiltPaperBundle.ts <bundle-path> (--dry-run | --apply)
 
 Options:
   --dry-run   Validate and optionally persist an import batch summary only
-  --apply     Import questions into the database and record an applied batch
+  --apply     Import prebuilt papers into the database and record an applied batch
   --help      Show this help message
 `);
 }
@@ -22,10 +25,8 @@ async function main() {
 
   const { apply } = parseApplyMode(new Set(argv.slice(1)));
 
-  const loaded = await loadQuestionBundle(bundlePath);
-  const result = await importQuestionBundle(loaded, {
-    apply,
-  });
+  const loaded = await loadPrebuiltPaperBundle(bundlePath);
+  const result = await importPrebuiltPaperBundle(loaded, { apply });
 
   console.log(
     JSON.stringify(

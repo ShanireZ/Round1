@@ -1,3 +1,4 @@
+  console.log(`Usage: tsx scripts/commands/llmReviewBulkQuestionBundles2026.ts [options]
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { generateText } from "ai";
@@ -10,9 +11,9 @@ import {
   type LLMProviderName,
   type LLMScene,
   type ProviderReasoningOptions,
-} from "../config/llm.js";
-import { env } from "../config/env.js";
-import { computeContentHash } from "../server/services/deduplicationService.js";
+} from "../../config/llm.js";
+import { env } from "../../config/env.js";
+import { computeContentHash } from "../../server/services/deduplicationService.js";
 import {
   type QuestionBundle,
   type QuestionBundleItem,
@@ -20,9 +21,9 @@ import {
   QuestionBundleSchema,
   buildBundleIntegrity,
   buildValidationMetadata,
-} from "./lib/bundleTypes.js";
-import { extractJsonObject } from "./lib/modelJson.js";
-import { loadQuestionBundle, validateQuestionBundle } from "./lib/questionBundleWorkflow.js";
+} from "../lib/bundleTypes.js";
+import { extractJsonObject } from "../lib/modelJson.js";
+import { loadQuestionBundle, validateQuestionBundle } from "../lib/questionBundleWorkflow.js";
 
 type ArgValue = boolean | string;
 
@@ -234,7 +235,9 @@ function oppositeLane(lane: LLMLane): LLMLane {
 }
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
-  return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : undefined;
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : undefined;
 }
 
 function stringFrom(value: unknown): string | undefined {
@@ -245,7 +248,9 @@ function resolveResponseId(response: unknown): string | undefined {
   const responseRecord = asRecord(response);
   const bodyRecord = asRecord(responseRecord?.body);
   const nestedResponse = asRecord(bodyRecord?.response);
-  return stringFrom(nestedResponse?.id) ?? stringFrom(bodyRecord?.id) ?? stringFrom(responseRecord?.id);
+  return (
+    stringFrom(nestedResponse?.id) ?? stringFrom(bodyRecord?.id) ?? stringFrom(responseRecord?.id)
+  );
 }
 
 function isReasoningOptionError(error: unknown): boolean {
@@ -404,7 +409,10 @@ function buildAuditPayload(bundle: QuestionBundle) {
   };
 }
 
-function buildAuditPrompt(bundle: QuestionBundle, previousIssues: Array<AuditIssue & { itemIndex: number }>) {
+function buildAuditPrompt(
+  bundle: QuestionBundle,
+  previousIssues: Array<AuditIssue & { itemIndex: number }>,
+) {
   const instructions = [
     "Audit this information-olympiad question bundle.",
     "Solve every item independently. Do not assume the supplied answer is correct.",
@@ -490,7 +498,8 @@ function extractReviewIssues(
         itemIndex: item.itemIndex,
         code: "LLM_ITEM_FAILED_WITH_NON_BLOCKING_ISSUES",
         severity: "minor",
-        message: "LLM marked the item as fail, but only non-blocking calibration issues were reported.",
+        message:
+          "LLM marked the item as fail, but only non-blocking calibration issues were reported.",
       });
     }
     issues.push(...itemIssues);
@@ -553,7 +562,9 @@ function normalizeAuditIssue(
   }
 
   if (
-    /(difficulty|too easy|too simple|too simplistic|trivial|beginner|metadata|repetitive|similar)/.test(combined) &&
+    /(difficulty|too easy|too simple|too simplistic|trivial|beginner|metadata|repetitive|similar)/.test(
+      combined,
+    ) &&
     !/(wrong answer|answer error|ambiguous|invalid|impossible|not uniquely|duplicate option|malformed)/.test(
       combined,
     )
@@ -692,7 +703,10 @@ async function validateBundleFile(filePath: string) {
   }
 }
 
-async function reviewBundleFile(entry: FileEntry, params: { maxRepairAttempts: number; timeoutMs: number; write: boolean }) {
+async function reviewBundleFile(
+  entry: FileEntry,
+  params: { maxRepairAttempts: number; timeoutMs: number; write: boolean },
+) {
   const raw = await readFile(entry.absolutePath, "utf8");
   let bundle = QuestionBundleSchema.parse(JSON.parse(raw));
   const reviewAttempts: ReviewAttemptReport[] = [];
@@ -757,7 +771,14 @@ async function reviewBundleFile(entry: FileEntry, params: { maxRepairAttempts: n
     if (chainPassed) {
       return {
         bundle,
-        report: buildBundleReport(entry, bundle, "pass", rewritesApplied, reviewAttempts, repairAttempts),
+        report: buildBundleReport(
+          entry,
+          bundle,
+          "pass",
+          rewritesApplied,
+          reviewAttempts,
+          repairAttempts,
+        ),
       };
     }
 
@@ -803,7 +824,14 @@ async function reviewBundleFile(entry: FileEntry, params: { maxRepairAttempts: n
 
   return {
     bundle,
-    report: buildBundleReport(entry, bundle, "fail", rewritesApplied, reviewAttempts, repairAttempts),
+    report: buildBundleReport(
+      entry,
+      bundle,
+      "fail",
+      rewritesApplied,
+      reviewAttempts,
+      repairAttempts,
+    ),
   };
 }
 
@@ -848,9 +876,7 @@ async function runPool<T, R>(
     }
   }
 
-  await Promise.all(
-    Array.from({ length: Math.min(concurrency, items.length) }, () => runWorker()),
-  );
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => runWorker()));
   return results;
 }
 
@@ -915,24 +941,31 @@ async function main() {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       const loaded = await loadQuestionBundle(entry.absolutePath);
-      const report = buildBundleReport(entry, loaded.bundle, "fail", 0, [
-        {
-          attempt: 0,
-          phase: "audit",
-          lane: laneFor(entry.ordinal, 0),
-          verdict: "error",
-          issueCount: 1,
-          issues: [
-            {
-              itemIndex: 0,
-              code: "LLM_CHAIN_UNHANDLED_ERROR",
-              severity: "blocker",
-              message,
-            },
-          ],
-          error: message,
-        },
-      ], []);
+      const report = buildBundleReport(
+        entry,
+        loaded.bundle,
+        "fail",
+        0,
+        [
+          {
+            attempt: 0,
+            phase: "audit",
+            lane: laneFor(entry.ordinal, 0),
+            verdict: "error",
+            issueCount: 1,
+            issues: [
+              {
+                itemIndex: 0,
+                code: "LLM_CHAIN_UNHANDLED_ERROR",
+                severity: "blocker",
+                message,
+              },
+            ],
+            error: message,
+          },
+        ],
+        [],
+      );
       console.log(`LLM-CHAIN-BUNDLE ${entry.repoPath} verdict=fail error=${message}`);
       return report;
     }
@@ -942,14 +975,8 @@ async function main() {
     totalBundles: bundleReports.length,
     passedBundles: bundleReports.filter((entry) => entry.finalVerdict === "pass").length,
     failedBundles: bundleReports.filter((entry) => entry.finalVerdict === "fail").length,
-    totalReviewAttempts: bundleReports.reduce(
-      (sum, entry) => sum + entry.reviewAttempts.length,
-      0,
-    ),
-    totalRepairAttempts: bundleReports.reduce(
-      (sum, entry) => sum + entry.repairAttempts.length,
-      0,
-    ),
+    totalReviewAttempts: bundleReports.reduce((sum, entry) => sum + entry.reviewAttempts.length, 0),
+    totalRepairAttempts: bundleReports.reduce((sum, entry) => sum + entry.repairAttempts.length, 0),
     totalRewritesApplied: bundleReports.reduce((sum, entry) => sum + entry.rewritesApplied, 0),
   };
 
@@ -973,8 +1000,7 @@ async function main() {
       timeoutMs,
     },
     status: {
-      formalBundleStatus:
-        summary.failedBundles === 0 ? "llm_chain_passed" : "llm_chain_failed",
+      formalBundleStatus: summary.failedBundles === 0 ? "llm_chain_passed" : "llm_chain_failed",
       questionStatusIfImported: "draft",
       reviewStatusEvidence:
         summary.failedBundles === 0 ? "llm_chain_ai_reviewed" : "llm_chain_failed",
@@ -999,6 +1025,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(error instanceof Error ? error.stack ?? error.message : String(error));
+  console.error(error instanceof Error ? (error.stack ?? error.message) : String(error));
   process.exit(1);
 });

@@ -5,6 +5,7 @@
 - `questionBundle.ts`：question bundle 相关稳定入口，统一覆盖 `generate-llm`、`generate-acceptance`、`build-manual`、`validate`、`import`、`import-batch`、`batch-generate-local`、`batch-generate-llm`、`batch-review-llm`、`report-remaining-manifest`。
 - `prebuiltPaperBundle.ts`：prebuilt paper bundle 相关稳定入口，统一覆盖 `build`、`validate`、`import`。
 - `generateQuestionBundle.ts`、`buildAcceptanceQuestionBundle.ts`、`buildManualQuestionBundles.ts`、`validateQuestionBundle.ts`、`importQuestionBundle.ts`、`importQuestionBundles2026.ts`、`buildPrebuiltPaperBundle.ts`、`validatePrebuiltPaperBundle.ts`、`importPrebuiltPaperBundle.ts` 继续保留为内部实现脚本，不再作为推荐对外入口。
+- `commands/generateQuestionBundle.ts`、`commands/buildAcceptanceQuestionBundle.ts`、`commands/buildManualQuestionBundles.ts`、`commands/validateQuestionBundle.ts`、`commands/importQuestionBundle.ts`、`commands/importQuestionBundles2026.ts`、`commands/buildPrebuiltPaperBundle.ts`、`commands/validatePrebuiltPaperBundle.ts`、`commands/importPrebuiltPaperBundle.ts` 继续保留为内部实现脚本，不再作为推荐对外入口。
 
 ## LLM 场景路由
 
@@ -47,6 +48,7 @@
 - reviewRealPapers.ts：逐题 LLM 复核脚本，统一复核 `questionType`、`difficulty`、知识点标签与 explanation；支持 `--metadata-only`、`--write`，并将低置信度或 stem/code 可疑项输出到 `scripts/.tmp/paper-review-report-*.json`。
 - verifyLlmTasks.ts：用合成 prompt 实跑 `generate` / `judge` 两类 LLM 任务，并回查 `llm_provider_logs` 是否记录 tokens、cost estimate、latency 与受控失败信息。
 - verifyQuestionBundleGuards.ts：构造临时候选题，验证规则去重可用 `DUPLICATE_JACCARD` 拦截近似题，并验证 LLM 判官可用 `JUDGE_REJECTED` 拦截答案不一致题。
+- reportDocsInventory.ts: scans `docs/`, counts plan files, status headers, open task markers, and writes the generated docs inventory to `docs/_inventory`; run it with `npm run inventory:docs -- --write` after documentation changes.
 - reportPapersInventory.ts: scans `papers/real-papers` and every `papers/<year>` generated-bundle section, then writes root and per-section statistics to `papers/_inventory`; run it with `npm run inventory:papers -- --write` after paper-file changes.
 - verifyOfflineArtifactNames.ts：检查正式离线产物是否使用 runId 持久化命名，并校验 bundle JSON meta 与文件名一致；拒绝 `paper-packs.json`、`artifacts/llm-step3/probe*.json` 以及所有 `papers/<year>/*.json` 旧布局，但允许 `papers/_inventory` 作为统计元数据目录。
 - verifyUiTokenUsage.ts：检查 `client/src` 的 TS/TSX 与非 token CSS 是否重新引入原始 hex/rgb/hsl 颜色字面量；颜色应落到 design token、语义 Tailwind class 或共享 CSS utility。
@@ -97,6 +99,7 @@
 - LLM 小批量判官复核：`npx tsx scripts/questionBundle.ts validate papers/<year>/<runId>/question-bundles/<bundle-file>.json --judge --judge-attempts 3 --require-duplicate-checks --write-metadata`
 - 程序题离线 sandbox 校验并写回：`npx tsx scripts/questionBundle.ts validate papers/2026/<runId>/question-bundles/<bundle-file>.json --run-sandbox --write --write-metadata`
 - question bundle 守卫验证：`npx tsx scripts/verifyQuestionBundleGuards.ts`
+- 文档盘点刷新：`npm run inventory:docs -- --write`
 - 离线产物命名守卫：`npm run verify:offline-artifacts`
 - 首个管理员 dry-run：`ROUND1_INITIAL_ADMIN_PASSWORD='<临时强密码>' npm run init:admin -- --dry-run`
 - 生产健康检查：`npm run healthcheck -- --api-url https://round1.example.com/api/v1/health --frontend-url https://round1.example.com --pm2`

@@ -80,7 +80,7 @@ async function loadMigrations(): Promise<Migration[]> {
     migrations.push({
       name: mod.name || file.replace(/\.[tj]s$/, ""),
       aliases: Array.isArray(mod.aliases)
-        ? mod.aliases.filter((alias): alias is string => typeof alias === "string")
+        ? mod.aliases.filter((alias: unknown): alias is string => typeof alias === "string")
         : [],
       up: mod.up,
       down: mod.down,

@@ -1,5 +1,7 @@
 # Reports Artifact Layout
 
+Status: current policy
+
 `artifacts/reports` stores audit evidence and long-lived content state. Keep it
 structured by lifecycle, not by whatever command happened to produce a file.
 

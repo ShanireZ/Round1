@@ -1,5 +1,7 @@
 # Papers Layout
 
+Status: current policy
+
 `papers/` is split into durable content sections and generated inventory metadata.
 
 ## Canonical Layout
