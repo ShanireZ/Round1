@@ -15,7 +15,7 @@ import {
 const DEFAULT_THRESHOLD = 0.85;
 const NGRAM_SIZE = 3;
 
-const usage = `Usage: npx tsx scripts/auditQuestionBundleSimilarity2026.ts (--manifest <manifest.json> | --dir papers/2026) [--threshold 0.85] [--out-dir <dir>] [--cross-kp] [--max-pairs <count>] [--preview-chars 120]`;
+const usage = `Usage: npx tsx scripts/auditQuestionBundleSimilarity2026.ts (--manifest <manifest.json> | --dir papers/2026) [--threshold 0.85] [--out-dir <dir>] [--cross-kp] [--max-pairs <count>] [--preview-chars 120] [--reviewed-keep-verdict-dir <dir>]`;
 
 interface AuditArgs {
   manifestPath?: string;
@@ -25,6 +25,7 @@ interface AuditArgs {
   sameKpOnly: boolean;
   maxPairs?: number;
   previewChars: number;
+  reviewedKeepVerdictDirs: string[];
 }
 
 interface AuditRecord {
@@ -79,11 +80,37 @@ interface ExactDuplicateGroup {
 type PairRecommendation =
   | "auto_delete_candidate"
   | "manual_review_candidate"
-  | "ignore_likely_false_positive";
+  | "ignore_likely_false_positive"
+  | "ignore_reviewed_keep_false_positive";
+
+interface SimilarityReviewDecision {
+  verdict?: string;
+  keepItemIds?: unknown;
+  deleteItemIds?: unknown;
+}
+
+interface SimilarityReviewVerdictFile {
+  decisions?: unknown;
+}
 
 function readArg(args: string[], name: string) {
   const index = args.indexOf(name);
   return index >= 0 ? args[index + 1] : undefined;
+}
+
+function readArgs(args: string[], name: string) {
+  const values: string[] = [];
+  for (let index = 0; index < args.length; index += 1) {
+    if (args[index] === name) {
+      const value = args[index + 1];
+      if (!value) {
+        throw new Error(`${name} requires a value`);
+      }
+      values.push(value);
+      index += 1;
+    }
+  }
+  return values;
 }
 
 function parseArgs(argv: string[]): AuditArgs {
@@ -130,6 +157,7 @@ function parseArgs(argv: string[]): AuditArgs {
     sameKpOnly: !argv.includes("--cross-kp"),
     maxPairs,
     previewChars,
+    reviewedKeepVerdictDirs: readArgs(argv, "--reviewed-keep-verdict-dir"),
   };
 }
 
@@ -453,6 +481,84 @@ function comparePairs(left: AuditPair, right: AuditPair) {
   );
 }
 
+function pairKey(leftId: string, rightId: string) {
+  return leftId < rightId ? `${leftId}\u0000${rightId}` : `${rightId}\u0000${leftId}`;
+}
+
+function listVerdictFiles(verdictDir: string) {
+  if (!fs.existsSync(verdictDir)) {
+    throw new Error(`Reviewed-keep verdict dir does not exist: ${verdictDir}`);
+  }
+
+  return fs
+    .readdirSync(verdictDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".verdict.json"))
+    .map((entry) => path.join(verdictDir, entry.name))
+    .sort((left, right) => left.localeCompare(right));
+}
+
+function addReviewedKeepPairsFromItemIds(reviewedKeepPairKeys: Set<string>, itemIds: string[]) {
+  const uniqueItemIds = [...new Set(itemIds)].sort((left, right) => left.localeCompare(right));
+  for (let leftIndex = 0; leftIndex < uniqueItemIds.length; leftIndex += 1) {
+    for (let rightIndex = leftIndex + 1; rightIndex < uniqueItemIds.length; rightIndex += 1) {
+      reviewedKeepPairKeys.add(pairKey(uniqueItemIds[leftIndex]!, uniqueItemIds[rightIndex]!));
+    }
+  }
+}
+
+function loadReviewedKeepPairKeys(verdictDirs: string[]) {
+  const reviewedKeepPairKeys = new Set<string>();
+  const files: string[] = [];
+
+  for (const verdictDir of verdictDirs) {
+    const absoluteVerdictDir = path.resolve(process.cwd(), verdictDir);
+    for (const verdictFile of listVerdictFiles(absoluteVerdictDir)) {
+      files.push(toRepoPath(verdictFile));
+      const parsed = JSON.parse(fs.readFileSync(verdictFile, "utf8")) as SimilarityReviewVerdictFile;
+      if (!Array.isArray(parsed.decisions)) {
+        continue;
+      }
+
+      for (const decision of parsed.decisions as SimilarityReviewDecision[]) {
+        const keepItemIds = Array.isArray(decision.keepItemIds)
+          ? decision.keepItemIds.filter((itemId): itemId is string => typeof itemId === "string")
+          : [];
+        if (decision.verdict === "all_keep") {
+          addReviewedKeepPairsFromItemIds(reviewedKeepPairKeys, keepItemIds);
+          continue;
+        }
+        if (decision.verdict === "delete_some" && keepItemIds.length > 1) {
+          addReviewedKeepPairsFromItemIds(reviewedKeepPairKeys, keepItemIds);
+        }
+      }
+    }
+  }
+
+  return { reviewedKeepPairKeys, files };
+}
+
+function applyReviewedKeepVerdicts(
+  pairs: AuditPair[],
+  reviewedKeepPairKeys: Set<string>,
+): AuditPair[] {
+  if (reviewedKeepPairKeys.size === 0) {
+    return pairs;
+  }
+
+  return pairs.map((pair) => {
+    if (!reviewedKeepPairKeys.has(pairKey(pair.left.id, pair.right.id))) {
+      return pair;
+    }
+    if (pair.recommendation === "ignore_likely_false_positive") {
+      return pair;
+    }
+    return {
+      ...pair,
+      recommendation: "ignore_reviewed_keep_false_positive" as const,
+    };
+  });
+}
+
 function markdownEscape(value: string) {
   return value.replace(/\|/g, "\\|").replace(/\r?\n/g, " ");
 }
@@ -635,9 +741,6 @@ async function main() {
     pairs = pairs.concat(result.pairs);
   }
 
-  pairs.sort(comparePairs);
-  const truncatedPairs =
-    args.maxPairs !== undefined && pairs.length > args.maxPairs ? pairs.slice(0, args.maxPairs) : pairs;
   const generatedAt = new Date().toISOString();
   const outDir = defaultOutDir(args);
   fs.mkdirSync(outDir, { recursive: true });
@@ -652,6 +755,15 @@ async function main() {
   const autoDeleteCandidatesPath = path.join(outDir, `${baseName}__auto-delete-candidates.tsv`);
   const manualReviewCandidatesPath = path.join(outDir, `${baseName}__manual-review-candidates.tsv`);
   const ignoredFalsePositivesPath = path.join(outDir, `${baseName}__ignored-likely-false-positive.tsv`);
+  const reviewedKeepFalsePositivesPath = path.join(
+    outDir,
+    `${baseName}__reviewed-keep-false-positive.tsv`,
+  );
+  const reviewedKeepVerdicts = loadReviewedKeepPairKeys(args.reviewedKeepVerdictDirs);
+  pairs = applyReviewedKeepVerdicts(pairs, reviewedKeepVerdicts.reviewedKeepPairKeys);
+  pairs.sort(comparePairs);
+  const truncatedPairs =
+    args.maxPairs !== undefined && pairs.length > args.maxPairs ? pairs.slice(0, args.maxPairs) : pairs;
   const exactDuplicateGroups = findExactDuplicates(records, args.previewChars);
   const autoDeleteCandidates = truncatedPairs.filter(
     (pair) => pair.recommendation === "auto_delete_candidate",
@@ -661,6 +773,9 @@ async function main() {
   );
   const ignoredFalsePositives = truncatedPairs.filter(
     (pair) => pair.recommendation === "ignore_likely_false_positive",
+  );
+  const reviewedKeepFalsePositives = truncatedPairs.filter(
+    (pair) => pair.recommendation === "ignore_reviewed_keep_false_positive",
   );
   const summary = {
     generatedAt,
@@ -687,6 +802,8 @@ async function main() {
       autoDeleteCandidates: autoDeleteCandidates.length,
       manualReviewCandidates: manualReviewCandidates.length,
       ignoredLikelyFalsePositives: ignoredFalsePositives.length,
+      ignoredReviewedKeepFalsePositives: reviewedKeepFalsePositives.length,
+      reviewedKeepVerdictFiles: reviewedKeepVerdicts.files,
       ...summarizePairs(pairs),
     },
     exactDuplicateGroups,
@@ -698,6 +815,10 @@ async function main() {
   fs.writeFileSync(autoDeleteCandidatesPath, renderHighSimilarityPairsTsv(autoDeleteCandidates));
   fs.writeFileSync(manualReviewCandidatesPath, renderHighSimilarityPairsTsv(manualReviewCandidates));
   fs.writeFileSync(ignoredFalsePositivesPath, renderHighSimilarityPairsTsv(ignoredFalsePositives));
+  fs.writeFileSync(
+    reviewedKeepFalsePositivesPath,
+    renderHighSimilarityPairsTsv(reviewedKeepFalsePositives),
+  );
   fs.writeFileSync(
     markdownPath,
     renderMarkdown({
@@ -723,6 +844,7 @@ async function main() {
         autoDeleteCandidatesPath: toRepoPath(autoDeleteCandidatesPath),
         manualReviewCandidatesPath: toRepoPath(manualReviewCandidatesPath),
         ignoredFalsePositivesPath: toRepoPath(ignoredFalsePositivesPath),
+        reviewedKeepFalsePositivesPath: toRepoPath(reviewedKeepFalsePositivesPath),
         bundleFiles: bundleFiles.length,
         items: records.length,
         candidatePairsScored,
@@ -732,6 +854,7 @@ async function main() {
         autoDeleteCandidates: autoDeleteCandidates.length,
         manualReviewCandidates: manualReviewCandidates.length,
         ignoredLikelyFalsePositives: ignoredFalsePositives.length,
+        ignoredReviewedKeepFalsePositives: reviewedKeepFalsePositives.length,
       },
       null,
       2,
