@@ -116,7 +116,7 @@
 - `questionBundle.ts generate-llm`：真实 LLM 出题入口，bundle meta 记录实际 provider/model。
 - `questionBundle.ts generate-acceptance`：本地确定性验收入口，不调用 LLM，只用于验证 schema、sandbox、导入和守卫流程。
 - `questionBundle.ts validate --judge`：LLM 判官入口；出题与判官是分离步骤。只有显式跑过 `--judge` 的 bundle 才算完成 LLM 二次语义校验。
-- 大规模生产前先按 5 题一批递增 `--artifact-version`，每批生成后立即跑 `validateQuestionBundle.ts --judge --require-duplicate-checks --write-metadata`；程序题再加 `--run-sandbox --write`。
+- 大规模生产前先按 5 题一批递增 `--artifact-version`，每批生成后立即跑 `questionBundle.ts validate --judge --require-duplicate-checks --write-metadata`；程序题再加 `--run-sandbox --write`。
 - 已导入或已整理过的候选资产复核可加 `--skip-duplicate-checks`，避免把自身历史入库记录判为重复；正式导入前应使用 `--require-duplicate-checks` 确认 DB 去重实际运行。若只需重试少数题，可加 `--judge-items 2,3` 和 `--judge-attempts 3`。
 
 ## 已合并/删除的旧脚本

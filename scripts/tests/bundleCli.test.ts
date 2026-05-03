@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-import { parseApplyMode } from "../lib/scriptCli.js";
+import { parseApplyMode, parseBundleType } from "../lib/scriptCli.js";
 import { resolveCommand } from "../lib/stableScriptEntry.js";
 import { prebuiltPaperBundleCommands } from "../prebuiltPaperBundle.js";
 import { questionBundleCommands } from "../questionBundle.js";
@@ -23,8 +23,34 @@ assert.equal(
   "commands/importQuestionBundles2026.ts",
 );
 assert.equal(
+  resolveCommand(questionBundleCommands, "validate").scriptPath,
+  "commands/validateBundle.ts",
+);
+assert.equal(
+  resolveCommand(questionBundleCommands, "import").scriptPath,
+  "commands/importBundle.ts",
+);
+assert.equal(
   resolveCommand(prebuiltPaperBundleCommands, "build").scriptPath,
   "commands/buildPrebuiltPaperBundle.ts",
+);
+assert.equal(
+  resolveCommand(prebuiltPaperBundleCommands, "validate").scriptPath,
+  "commands/validateBundle.ts",
+);
+assert.equal(
+  resolveCommand(prebuiltPaperBundleCommands, "import").scriptPath,
+  "commands/importBundle.ts",
+);
+
+assert.equal(parseBundleType('{"meta":{"bundleType":"question_bundle"}}'), "question_bundle");
+assert.equal(
+  parseBundleType('{"meta":{"bundleType":"prebuilt_paper_bundle"}}'),
+  "prebuilt_paper_bundle",
+);
+assert.throws(
+  () => parseBundleType('{"meta":{"bundleType":"manual_question_import"}}'),
+  /unsupported meta\.bundleType/,
 );
 
 assert.throws(

@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { generateText } from "ai";
 import { z } from "zod";
@@ -21,6 +21,11 @@ import {
   buildBundleIntegrity,
   buildValidationMetadata,
 } from "../lib/bundleTypes.js";
+import {
+  listGeneratedBundleFiles,
+  type BatchFileEntry,
+  writeBatchJsonReport,
+} from "../lib/batchWorkflow.js";
 import { extractJsonObject } from "../lib/modelJson.js";
 import { loadQuestionBundle, validateQuestionBundle } from "../lib/questionBundleWorkflow.js";
 
@@ -133,11 +138,7 @@ interface BundleReport {
   reviewStatusEvidence: "llm_chain_ai_reviewed" | "llm_chain_failed";
 }
 
-interface FileEntry {
-  absolutePath: string;
-  repoPath: string;
-  ordinal: number;
-}
+type FileEntry = BatchFileEntry;
 
 interface DirectLlmResult {
   providerName: LLMProviderName;
@@ -194,61 +195,6 @@ function readIntArg(
     throw new Error(`Invalid --${key}: ${String(raw)}`);
   }
   return value;
-}
-
-async function collectFiles(root: string): Promise<string[]> {
-  const entries = await readdir(root, { withFileTypes: true });
-  const nested = await Promise.all(
-    entries.map(async (entry) => {
-      const child = path.join(root, entry.name);
-      if (entry.isDirectory()) {
-        return collectFiles(child);
-      }
-      if (entry.isFile()) {
-        return [child];
-      }
-      return [];
-    }),
-  );
-
-  return nested.flat();
-}
-
-function toRepoPath(filePath: string) {
-  return path.relative(process.cwd(), filePath).split(path.sep).join("/");
-}
-
-async function listGeneratedBundleFiles(params: {
-  year: string;
-  prefix: string;
-  shardIndex: number;
-  shardCount: number;
-  limit: number | undefined;
-  runIds: Set<string> | undefined;
-}): Promise<FileEntry[]> {
-  const root = path.join(process.cwd(), "papers", params.year);
-  const files = (await collectFiles(root))
-    .filter((file) => file.endsWith(".json"))
-    .filter((file) => path.basename(path.dirname(path.dirname(file))).startsWith(params.prefix))
-    .sort((a, b) => a.localeCompare(b));
-
-  const selected = files
-    .map((absolutePath, ordinal) => ({
-      absolutePath,
-      repoPath: toRepoPath(absolutePath),
-      ordinal,
-    }))
-    .filter((entry) => {
-      if (!params.runIds) {
-        return true;
-      }
-
-      const runId = path.basename(path.dirname(path.dirname(entry.absolutePath)));
-      return params.runIds.has(runId);
-    })
-    .filter((entry) => entry.ordinal % params.shardCount === params.shardIndex);
-
-  return typeof params.limit === "number" ? selected.slice(0, params.limit) : selected;
 }
 
 function laneFor(ordinal: number, attempt: number): LLMLane {
@@ -943,7 +889,7 @@ async function main() {
   const timeoutMs = readIntArg(args, "timeout-ms", DEFAULT_TIMEOUT_MS, (value) => value > 0);
   const write = args.write === true;
   const files = await listGeneratedBundleFiles({
-    year,
+    rootDir: path.join(process.cwd(), "papers", year),
     prefix,
     shardIndex,
     shardCount,
@@ -1040,9 +986,12 @@ async function main() {
     reportDir,
     `${reportRunId}__report__llm-chain-review__shard-${shardIndex + 1}-of-${shardCount}.json`,
   );
-  await mkdir(reportDir, { recursive: true });
-  await writeFile(reportPath, JSON.stringify(report, null, 2) + "\n", "utf8");
-  console.log(`LLM-CHAIN-DONE ${safeJson({ ...summary, reportPath: toRepoPath(reportPath) })}`);
+  const reportRepoPath = await writeBatchJsonReport({
+    reportPath,
+    payload: report,
+    overwrite: true,
+  });
+  console.log(`LLM-CHAIN-DONE ${safeJson({ ...summary, reportPath: reportRepoPath })}`);
 
   if (summary.failedBundles > 0) {
     process.exitCode = 1;

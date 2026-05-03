@@ -292,11 +292,11 @@ npx tsx scripts/bootstrapKnowledgePoints.ts
 导入离线内容产物时必须先 dry-run，再 apply：
 
 ```bash
-npx tsx scripts/importQuestionBundle.ts <question-bundle.json> --dry-run
-npx tsx scripts/importQuestionBundle.ts <question-bundle.json> --apply
+npx tsx scripts/questionBundle.ts import <question-bundle.json> --dry-run
+npx tsx scripts/questionBundle.ts import <question-bundle.json> --apply
 
-npx tsx scripts/importPrebuiltPaperBundle.ts <prebuilt-paper-bundle.json> --dry-run
-npx tsx scripts/importPrebuiltPaperBundle.ts <prebuilt-paper-bundle.json> --apply
+npx tsx scripts/prebuiltPaperBundle.ts import <prebuilt-paper-bundle.json> --dry-run
+npx tsx scripts/prebuiltPaperBundle.ts import <prebuilt-paper-bundle.json> --apply
 ```
 
 生产导入前必须确认 bundle 已在离线内容环境完成 sandbox / judge / checksum / 人工复核。生产 runtime 不重新运行 `cpp-runner`。

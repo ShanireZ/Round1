@@ -1,7 +1,9 @@
 import { pathToFileURL } from "node:url";
 
 import {
+  renderStableCommandHelp,
   renderStableScriptHelp,
+  resolveCommand,
   runStableScriptCommand,
   type StableScriptCommand,
 } from "./lib/stableScriptEntry.js";
@@ -24,12 +26,12 @@ export const questionBundleCommands: StableScriptCommand[] = [
   },
   {
     name: "validate",
-    scriptPath: "commands/validateQuestionBundle.ts",
+    scriptPath: "commands/validateBundle.ts",
     summary: "校验 question bundle 产物",
   },
   {
     name: "import",
-    scriptPath: "commands/importQuestionBundle.ts",
+    scriptPath: "commands/importBundle.ts",
     summary: "导入单个 question bundle",
   },
   {
@@ -85,11 +87,12 @@ export async function runQuestionBundleCli(argv: readonly string[]) {
       return;
     }
 
-    await runStableScriptCommand({
-      commands: questionBundleCommands,
-      commandName: targetCommand,
-      args: ["--help"],
-    });
+    console.log(
+      renderStableCommandHelp({
+        entryName: "questionBundle.ts",
+        command: resolveCommand(questionBundleCommands, targetCommand),
+      }),
+    );
     return;
   }
 

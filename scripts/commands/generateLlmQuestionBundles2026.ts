@@ -31,9 +31,11 @@ import {
   type QuestionBundleItem,
   type QuestionType,
 } from "../lib/bundleTypes.js";
+import { writeBatchJsonReport } from "../lib/batchWorkflow.js";
 import { defaultOfflineReportPath, defaultQuestionBundleOutputPath } from "../lib/paperPaths.js";
 import { extractJsonObject } from "../lib/modelJson.js";
 import { validateQuestionBundle } from "../lib/questionBundleWorkflow.js";
+import { toDisplayRepoPath } from "../lib/scriptCli.js";
 
 (globalThis as typeof globalThis & { AI_SDK_LOG_WARNINGS?: boolean }).AI_SDK_LOG_WARNINGS = false;
 
@@ -1875,7 +1877,7 @@ async function reviewBundle(params: {
 }
 
 function toRepoPath(filePath: string) {
-  return path.relative(process.cwd(), filePath).split(path.sep).join("/");
+  return toDisplayRepoPath(filePath);
 }
 
 async function fileExists(filePath: string): Promise<boolean> {
@@ -2308,24 +2310,27 @@ async function writeReport(params: {
       reportName: "llm-question-generation-review",
     }),
   );
+  const reportRepoPath = params.dryRun
+    ? null
+    : await writeBatchJsonReport({
+        reportPath,
+        payload: report,
+        overwrite: params.overwrite,
+      });
   if (!params.dryRun) {
-    await mkdir(path.dirname(reportPath), { recursive: true });
-    await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, {
-      encoding: "utf8",
-      flag: params.overwrite ? "w" : "wx",
-    });
+    // report already written above when not in dry-run mode
   }
   console.log(
     `LLM-BULK-DONE ${JSON.stringify({
       ...summary,
-      reportPath: params.dryRun ? null : toRepoPath(reportPath),
+      reportPath: reportRepoPath,
       dryRun: params.dryRun,
     })}`,
   );
   if (summary.failedBundles > 0) {
     process.exitCode = 1;
   }
-  return params.dryRun ? null : toRepoPath(reportPath);
+  return reportRepoPath;
 }
 
 async function writeInventoryFulfillmentProgress(params: {
@@ -2377,10 +2382,10 @@ async function writeInventoryFulfillmentProgress(params: {
     "progress.json",
   ].join("__");
   const reportPath = path.resolve(process.cwd(), params.inventoryReportDir, fileName);
-  await mkdir(path.dirname(reportPath), { recursive: true });
-  await writeFile(reportPath, `${JSON.stringify(payload, null, 2)}\n`, {
-    encoding: "utf8",
-    flag: "w",
+  await writeBatchJsonReport({
+    reportPath,
+    payload,
+    overwrite: true,
   });
 }
 

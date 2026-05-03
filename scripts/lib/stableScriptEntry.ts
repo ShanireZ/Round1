@@ -34,6 +34,17 @@ export function renderStableScriptHelp(params: {
   return `Usage: tsx scripts/${params.entryName} <command> [...args]\n\n${params.summary}\n\nCommands:\n${commandLines}\n`;
 }
 
+export function renderStableCommandHelp(params: {
+  entryName: string;
+  command: StableScriptCommand;
+}) {
+  return renderStableScriptHelp({
+    entryName: params.entryName,
+    summary: `Stable help for ${params.command.name}. Implementation: scripts/${params.command.scriptPath}`,
+    commands: [params.command],
+  });
+}
+
 export async function runStableScriptCommand(params: {
   commands: readonly StableScriptCommand[];
   commandName: string;

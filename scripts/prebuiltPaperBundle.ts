@@ -1,7 +1,9 @@
 import { pathToFileURL } from "node:url";
 
 import {
+  renderStableCommandHelp,
   renderStableScriptHelp,
+  resolveCommand,
   runStableScriptCommand,
   type StableScriptCommand,
 } from "./lib/stableScriptEntry.js";
@@ -14,12 +16,12 @@ export const prebuiltPaperBundleCommands: StableScriptCommand[] = [
   },
   {
     name: "validate",
-    scriptPath: "commands/validatePrebuiltPaperBundle.ts",
+    scriptPath: "commands/validateBundle.ts",
     summary: "校验 prebuilt paper bundle",
   },
   {
     name: "import",
-    scriptPath: "commands/importPrebuiltPaperBundle.ts",
+    scriptPath: "commands/importBundle.ts",
     summary: "导入 prebuilt paper bundle",
   },
 ];
@@ -49,11 +51,12 @@ export async function runPrebuiltPaperBundleCli(argv: readonly string[]) {
       return;
     }
 
-    await runStableScriptCommand({
-      commands: prebuiltPaperBundleCommands,
-      commandName: targetCommand,
-      args: ["--help"],
-    });
+    console.log(
+      renderStableCommandHelp({
+        entryName: "prebuiltPaperBundle.ts",
+        command: resolveCommand(prebuiltPaperBundleCommands, targetCommand),
+      }),
+    );
     return;
   }
 

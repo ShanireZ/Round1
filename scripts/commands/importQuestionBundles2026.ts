@@ -1,105 +1,27 @@
-import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { pool } from "../../server/db.js";
 import {
+  describeUnknownError,
+  listJsonFilesRecursively,
+  listManifestBundleFiles,
+} from "../lib/batchWorkflow.js";
+import {
   importQuestionBundle,
   loadQuestionBundle,
   validateQuestionBundle,
 } from "../lib/questionBundleWorkflow.js";
-import { parsePositiveInteger, readNamedArg, toRepoPath } from "../lib/scriptCli.js";
+import {
+  parsePositiveInteger,
+  printJsonOutput,
+  readNamedArg,
+  toDisplayRepoPath,
+} from "../lib/scriptCli.js";
 
 const usage = `Usage: npx tsx scripts/commands/importQuestionBundles2026.ts [--dir papers/2026] [--manifest report-or-manifest.json[,more.json]] [--apply] [--run-judge] [--judge-rounds 2] [--limit count] [--expected-items count] [--imported-by user-uuid] [--skip-duplicate-checks]`;
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function listJsonFiles(dir: string): string[] {
-  if (!fs.existsSync(dir)) {
-    return [];
-  }
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  const files: string[] = [];
-
-  for (const entry of entries) {
-    const entryPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...listJsonFiles(entryPath));
-      continue;
-    }
-
-    if (entry.isFile() && entry.name.endsWith(".json")) {
-      files.push(entryPath);
-    }
-  }
-
-  return files.sort((left, right) => left.localeCompare(right));
-}
-
-function readManifestPaths(manifestPath: string): string[] {
-  const parsed = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as {
-    bundlePaths?: unknown;
-    bundles?: unknown;
-  };
-
-  if (Array.isArray(parsed.bundlePaths)) {
-    return parsed.bundlePaths.filter((entry): entry is string => typeof entry === "string");
-  }
-
-  if (Array.isArray(parsed.bundles)) {
-    return parsed.bundles
-      .filter((entry): entry is { path: string; finalVerdict?: string } => {
-        if (typeof entry !== "object" || entry === null) {
-          return false;
-        }
-        const maybeEntry = entry as { path?: unknown; finalVerdict?: unknown };
-        return (
-          typeof maybeEntry.path === "string" &&
-          (maybeEntry.finalVerdict === undefined || maybeEntry.finalVerdict === "pass")
-        );
-      })
-      .map((entry) => entry.path);
-  }
-
-  throw new Error(`Unsupported manifest shape: ${manifestPath}`);
-}
-
-function listManifestFiles(manifestArg: string): string[] {
-  const files = manifestArg
-    .split(",")
-    .map((entry) => entry.trim())
-    .filter(Boolean)
-    .flatMap((manifestPath) => readManifestPaths(manifestPath))
-    .map((entry) => path.resolve(entry));
-
-  return [...new Set(files)].sort((left, right) => left.localeCompare(right));
-}
-
-function describeUnknown(value: unknown): string {
-  if (value instanceof Error) {
-    const maybeCause = (value as Error & { cause?: unknown }).cause;
-    return maybeCause === undefined
-      ? value.message
-      : `${value.message}; cause: ${describeUnknown(maybeCause)}`;
-  }
-
-  if (typeof value === "object" && value !== null) {
-    const details = value as Record<string, unknown>;
-    const fields = ["message", "code", "detail", "hint", "constraint", "table", "column"]
-      .map((key) => {
-        const field = details[key];
-        return field === undefined ? undefined : `${key}=${String(field)}`;
-      })
-      .filter((field): field is string => field !== undefined);
-
-    if (fields.length > 0) {
-      return fields.join(", ");
-    }
-  }
-
-  return String(value);
-}
 
 async function preflightContentHashes(files: string[]) {
   const seen = new Map<string, string>();
@@ -108,7 +30,7 @@ async function preflightContentHashes(files: string[]) {
 
   for (const file of files) {
     const loaded = await loadQuestionBundle(file);
-    const repoPath = path.relative(process.cwd(), file).replaceAll(path.sep, "/");
+    const repoPath = toDisplayRepoPath(file);
 
     loaded.bundle.items.forEach((item, itemIndex) => {
       itemCount += 1;
@@ -153,10 +75,9 @@ async function main() {
     throw new Error("--imported-by must be a valid user UUID");
   }
 
-  const files = (manifest ? listManifestFiles(manifest) : listJsonFiles(path.resolve(dir))).slice(
-    0,
-    limit,
-  );
+  const files = (
+    manifest ? listManifestBundleFiles(manifest) : listJsonFilesRecursively(path.resolve(dir))
+  ).slice(0, limit);
   const summary = {
     filesFound: files.length,
     validated: 0,
@@ -174,13 +95,13 @@ async function main() {
     for (const error of preflight.duplicateErrors) {
       console.error(`FAIL ${error}`);
     }
-    console.log(JSON.stringify(summary, null, 2));
+    printJsonOutput(summary);
     process.exitCode = 1;
     return;
   }
 
   for (const file of files) {
-    const repoPath = toRepoPath(path.relative(process.cwd(), file));
+    const repoPath = toDisplayRepoPath(file);
     try {
       const loaded = await loadQuestionBundle(file);
 
@@ -221,7 +142,7 @@ async function main() {
       console.log(`OK ${repoPath}`);
     } catch (error) {
       summary.failed += 1;
-      console.error(`FAIL ${repoPath}: ${describeUnknown(error)}`);
+      console.error(`FAIL ${repoPath}: ${describeUnknownError(error)}`);
     }
   }
 
@@ -236,7 +157,7 @@ async function main() {
     process.exitCode = 1;
   }
 
-  console.log(JSON.stringify(summary, null, 2));
+  printJsonOutput(summary);
 }
 
 const isEntrypoint =
