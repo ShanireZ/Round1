@@ -74,6 +74,24 @@ export function listManifestBundleFiles(manifestArg: string): string[] {
   return [...new Set(files)].sort((left, right) => left.localeCompare(right));
 }
 
+export function listManifestBundleEntries(params: {
+  manifestArg: string;
+  shardIndex: number;
+  shardCount: number;
+  limit: number | undefined;
+}): BatchFileEntry[] {
+  const selected = listManifestBundleFiles(params.manifestArg)
+    .map((absolutePath, ordinal) => ({
+      absolutePath,
+      repoPath: toDisplayRepoPath(absolutePath),
+      ordinal,
+      runId: path.basename(path.dirname(path.dirname(absolutePath))),
+    }))
+    .filter((entry) => entry.ordinal % params.shardCount === params.shardIndex);
+
+  return typeof params.limit === "number" ? selected.slice(0, params.limit) : selected;
+}
+
 export function describeUnknownError(value: unknown): string {
   if (value instanceof Error) {
     const maybeCause = (value as Error & { cause?: unknown }).cause;

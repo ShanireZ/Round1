@@ -39,6 +39,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
+    "test:scripts": "tsx scripts/tests/bundleCli.test.ts && tsx scripts/tests/externalLlmDisclosure.test.ts && tsx scripts/tests/scriptConversation.test.ts && tsx scripts/tests/scriptLlmClient.test.ts",
     "client:test": "vitest run -c client/vitest.config.ts",
     "test:watch": "vitest",
     "test:e2e": "playwright test"

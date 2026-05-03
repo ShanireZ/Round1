@@ -22,10 +22,12 @@ import {
   buildValidationMetadata,
 } from "../lib/bundleTypes.js";
 import {
+  listManifestBundleEntries,
   listGeneratedBundleFiles,
   type BatchFileEntry,
   writeBatchJsonReport,
 } from "../lib/batchWorkflow.js";
+import { assertExternalLlmAllowed } from "../lib/externalLlmDisclosure.js";
 import { extractJsonObject } from "../lib/modelJson.js";
 import { loadQuestionBundle, validateQuestionBundle } from "../lib/questionBundleWorkflow.js";
 
@@ -50,9 +52,12 @@ Options:
   --shard-count <number>           Total shard count (default: 1)
   --limit <number>                 Limit matched bundle files
   --run-ids <list>                 Comma-separated run ids to review
+  --manifest <manifest.json[,..]>   Review bundle paths listed in manifest(s)
   --max-repair-attempts <number>   Max repair attempts per bundle (default: ${DEFAULT_MAX_REPAIR_ATTEMPTS})
   --max-concurrency <number>       Parallel review workers (default: ${DEFAULT_MAX_CONCURRENCY})
   --timeout-ms <number>            Timeout per LLM call (default: ${DEFAULT_TIMEOUT_MS})
+  --allow-external-llm             Required acknowledgement before sending bundle content to LLM providers
+  --external-llm-purpose <text>     Purpose recorded in the review report
   --write                          Persist repaired bundles and report output
   --help                           Show this help message
 `);
@@ -855,6 +860,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const year = typeof args.year === "string" ? args.year : "2026";
   const prefix = typeof args.prefix === "string" ? args.prefix : DEFAULT_BULK_PREFIX;
+  const manifest = typeof args.manifest === "string" ? args.manifest : undefined;
   const reportRunId =
     typeof args["report-run-id"] === "string" ? args["report-run-id"] : DEFAULT_REPORT_RUN_ID;
   const shardIndex = readIntArg(args, "shard-index", 0, (value) => value >= 0);
@@ -888,18 +894,43 @@ async function main() {
   );
   const timeoutMs = readIntArg(args, "timeout-ms", DEFAULT_TIMEOUT_MS, (value) => value > 0);
   const write = args.write === true;
-  const files = await listGeneratedBundleFiles({
-    rootDir: path.join(process.cwd(), "papers", year),
-    prefix,
-    shardIndex,
-    shardCount,
-    limit,
-    runIds,
+  const externalLlmDisclosure = assertExternalLlmAllowed({
+    allowExternalLlm: args["allow-external-llm"] === true,
+    operation: "bulk question-bundle LLM review and repair",
+    purpose:
+      typeof args["external-llm-purpose"] === "string"
+        ? args["external-llm-purpose"]
+        : undefined,
+    dataCategories: [
+      "question stems",
+      "answer options",
+      "C++ source code",
+      "answers",
+      "explanations",
+      "question metadata",
+    ],
   });
+  const files = manifest
+    ? listManifestBundleEntries({
+        manifestArg: manifest,
+        shardIndex,
+        shardCount,
+        limit,
+      })
+    : await listGeneratedBundleFiles({
+        rootDir: path.join(process.cwd(), "papers", year),
+        prefix,
+        shardIndex,
+        shardCount,
+        limit,
+        runIds,
+      });
   const startedAt = new Date().toISOString();
 
   console.log(
-    `LLM-CHAIN-START shard=${shardIndex}/${shardCount} files=${files.length} default=${env.LLM_PROVIDER_DEFAULT} backup=${env.LLM_PROVIDER_BACKUP} write=${write}`,
+    `LLM-CHAIN-START shard=${shardIndex}/${shardCount} files=${files.length} source=${
+      manifest ? "manifest" : "papers"
+    } default=${env.LLM_PROVIDER_DEFAULT} backup=${env.LLM_PROVIDER_BACKUP} write=${write}`,
   );
 
   const bundleReports = await runPool(files, maxConcurrency, async (entry) => {
@@ -959,11 +990,13 @@ async function main() {
       finishedAt: new Date().toISOString(),
       generatedLocally: true,
       outputRoot: `papers/${year}`,
+      manifest,
       importedToDatabase: false,
       prebuiltPapersBuilt: false,
       published: false,
       defaultProvider: env.LLM_PROVIDER_DEFAULT,
       backupProvider: env.LLM_PROVIDER_BACKUP,
+      externalLlmDisclosure,
       shardIndex,
       shardCount,
       runIds: runIds ? [...runIds] : undefined,

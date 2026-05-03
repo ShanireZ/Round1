@@ -32,6 +32,7 @@ import {
   type QuestionType,
 } from "../lib/bundleTypes.js";
 import { writeBatchJsonReport } from "../lib/batchWorkflow.js";
+import { assertExternalLlmAllowed, type ExternalLlmDisclosure } from "../lib/externalLlmDisclosure.js";
 import { defaultOfflineReportPath, defaultQuestionBundleOutputPath } from "../lib/paperPaths.js";
 import { extractJsonObject } from "../lib/modelJson.js";
 import { validateQuestionBundle } from "../lib/questionBundleWorkflow.js";
@@ -172,7 +173,7 @@ const DEFAULT_SEED = "round1-2026-llm-4000-v1";
 const DEFAULT_MAX_CONCURRENCY = 2;
 const DEFAULT_TIMEOUT_MS = 120_000;
 const DEFAULT_MAX_GENERATION_ATTEMPTS = 3;
-const DEFAULT_MAX_REPAIR_CYCLES = 6;
+const DEFAULT_MAX_REPAIR_CYCLES = 3;
 const DEFAULT_LLM_JSON_ATTEMPTS = 2;
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 
@@ -287,7 +288,7 @@ Options:
   --max-concurrency <number>       Parallel bundle workers (default: 2)
   --timeout-ms <number>            Timeout for each LLM call (default: 120000)
   --max-generation-attempts <n>    Regenerate a failed bundle up to n times (default: 3)
-  --max-repair-cycles <n>          Repair failed review cycles per bundle before regeneration (default: 6)
+  --max-repair-cycles <n>          Repair failed review cycles per bundle before regeneration (default: 3)
   --llm-json-attempts <n>          JSON parse retries per LLM call (default: 2)
   --inventory-path <path>          Use question-inventory.json deficits as the generation plan
   --inventory-report-dir <dir>     Write per-shard inventory fulfillment records into this report dir
@@ -300,6 +301,8 @@ Options:
   --skip-existing                  Reuse existing bundle files as passed when resuming an interrupted run
   --dry-run                        Exercise the LLM chain without writing files
   --plan-only                      Print the resolved bundle plan without calling LLMs
+  --allow-external-llm             Required acknowledgement before sending bundle content to LLM providers
+  --external-llm-purpose <text>     Purpose recorded in the generation report
   --help                           Show this help message
 `);
 }
@@ -377,6 +380,11 @@ function parseArgs(argv: string[]) {
     skipExisting: args["skip-existing"] === true,
     dryRun: args["dry-run"] === true,
     planOnly: args["plan-only"] === true,
+    allowExternalLlm: args["allow-external-llm"] === true,
+    externalLlmPurpose:
+      typeof args["external-llm-purpose"] === "string"
+        ? args["external-llm-purpose"]
+        : undefined,
   };
 }
 
@@ -2247,6 +2255,7 @@ async function writeReport(params: {
   startedAt: string;
   overwrite: boolean;
   dryRun: boolean;
+  externalLlmDisclosure: ExternalLlmDisclosure | null;
 }) {
   const summary = {
     totalBundles: params.reports.length,
@@ -2266,6 +2275,7 @@ async function writeReport(params: {
       questionsPerBundle: params.questionsPerBundle,
       defaultProvider: env.LLM_PROVIDER_DEFAULT,
       backupProvider: env.LLM_PROVIDER_BACKUP,
+      externalLlmDisclosure: params.externalLlmDisclosure,
       generationLanePolicy:
         "odd bundleNo uses LLM_PROVIDER_DEFAULT; even bundleNo uses LLM_PROVIDER_BACKUP",
       reviewLanePolicy: "round 1 uses LLM_PROVIDER_BACKUP; round 2 uses LLM_PROVIDER_DEFAULT",
@@ -2435,6 +2445,22 @@ async function main() {
     return;
   }
 
+  const externalLlmDisclosure = assertExternalLlmAllowed({
+    allowExternalLlm: args.allowExternalLlm,
+    operation: "bulk question-bundle LLM generation, review, repair, and fallback regeneration",
+    purpose: args.externalLlmPurpose,
+    dataCategories: [
+      "question generation prompts",
+      "question stems",
+      "answer options",
+      "C++ source code",
+      "answers",
+      "explanations",
+      "question metadata",
+      "validation and review issues",
+    ],
+  });
+
   console.log(
     `LLM-BULK-START bundles=${combos.length}/${selection.combos.length} questions=${
       combos.length * args.questionsPerBundle
@@ -2495,6 +2521,7 @@ async function main() {
     startedAt,
     overwrite: args.overwrite,
     dryRun: args.dryRun,
+    externalLlmDisclosure,
   });
 
   if (args.inventoryReportDir && selection.plan) {

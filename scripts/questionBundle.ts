@@ -55,6 +55,11 @@ export const questionBundleCommands: StableScriptCommand[] = [
     summary: "批量执行 LLM 复核",
   },
   {
+    name: "export-imported-snapshots",
+    scriptPath: "commands/exportImportedQuestionBundleSnapshots.ts",
+    summary: "Export imported DB questions into reviewable question bundle snapshots",
+  },
+  {
     name: "report-remaining-manifest",
     scriptPath: "commands/buildRemainingQuestionBundleImportManifest.ts",
     summary: "生成剩余未导入 bundle 清单",

@@ -35,6 +35,10 @@ assert.equal(
   "commands/llmReviewQuestionBundlesBatch.ts",
 );
 assert.equal(
+  resolveCommand(questionBundleCommands, "export-imported-snapshots").scriptPath,
+  "commands/exportImportedQuestionBundleSnapshots.ts",
+);
+assert.equal(
   resolveCommand(questionBundleCommands, "report-remaining-manifest").scriptPath,
   "commands/buildRemainingQuestionBundleImportManifest.ts",
 );
