@@ -146,6 +146,67 @@ export function buildQuestionSalientText(similarityText: string): string {
   return result.replace(/\s+/g, " ").trim();
 }
 
+const PARAMETERIZED_CODE_TEMPLATE_PATTERNS: Array<{
+  questionTypes: string[];
+  patterns: RegExp[];
+  minMatches: number;
+}> = [
+  {
+    questionTypes: ["reading_program", "completion_program"],
+    patterns: [/\bqueue\s*</i, /\.push\s*\(/i, /\.pop\s*\(/i, /\.front\s*\(/i, /\.size\s*\(/i],
+    minMatches: 3,
+  },
+  {
+    questionTypes: ["reading_program", "completion_program"],
+    patterns: [/\bstack\s*</i, /\.push\s*\(/i, /\.pop\s*\(/i, /\.top\s*\(/i, /\(\s*'\('\s*\)|\(\s*'\)'\s*\)/i],
+    minMatches: 3,
+  },
+  {
+    questionTypes: ["reading_program", "completion_program"],
+    patterns: [/\bans\s*=\s*0\b/i, /\bfor\s*\(/i, /%\s*(?:\d+|[a-z_][a-z0-9_]*)/i],
+    minMatches: 3,
+  },
+  {
+    questionTypes: ["reading_program", "completion_program"],
+    patterns: [/\bmid\b/i, /\bl\s*<=\s*r\b/i, /\bmid\s*-\s*1\b/i, /\bmid\s*\+\s*1\b/i],
+    minMatches: 3,
+  },
+  {
+    questionTypes: ["single_choice"],
+    patterns: [/二分|有序数组|binary/i, /比较|comparison/i, /长度|length/i],
+    minMatches: 2,
+  },
+  {
+    questionTypes: ["single_choice"],
+    patterns: [/排序|sort/i, /复杂度|complexity|O\s*\(/i, /log/i],
+    minMatches: 2,
+  },
+];
+
+function templatePatternMatches(text: string, patterns: RegExp[]) {
+  return patterns.reduce((count, pattern) => count + (pattern.test(text) ? 1 : 0), 0);
+}
+
+export function isLikelyParameterizedTemplateSimilarity(
+  questionType: string,
+  leftText: string,
+  rightText: string,
+): boolean {
+  for (const template of PARAMETERIZED_CODE_TEMPLATE_PATTERNS) {
+    if (!template.questionTypes.includes(questionType)) {
+      continue;
+    }
+
+    const leftMatches = templatePatternMatches(leftText, template.patterns);
+    const rightMatches = templatePatternMatches(rightText, template.patterns);
+    if (leftMatches >= template.minMatches && rightMatches >= template.minMatches) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 /**
  * Jaccard 近似去重 — 与同类型同知识点的已有题目比较
  *
@@ -176,7 +237,11 @@ export async function findJaccardDuplicate(params: {
     const similarity = jaccardSimilarity(candidateText, existingText);
     const salientSimilarity = jaccardSimilarity(candidateSalientText, existingSalientText);
 
-    if (similarity >= JACCARD_THRESHOLD && salientSimilarity >= SALIENT_JACCARD_THRESHOLD) {
+    if (
+      similarity >= JACCARD_THRESHOLD &&
+      salientSimilarity >= SALIENT_JACCARD_THRESHOLD &&
+      !isLikelyParameterizedTemplateSimilarity(params.questionType, candidateText, existingText)
+    ) {
       logger.info(
         {
           newText: candidateText.slice(0, 50),

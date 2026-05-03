@@ -64,4 +64,48 @@ describe("server/services/deduplicationService", () => {
     expect(result).toBe("question-1");
     expect(neMock).not.toHaveBeenCalled();
   });
+
+  it("does not treat parameterized queue templates as fuzzy duplicates", async () => {
+    const makeQueueContent = (offset: number) => ({
+      cppCode: `
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+  int n;
+  cin >> n;
+  queue<int> q;
+  for (int i = 1; i <= n; ++i) q.push(i + ${offset});
+  if (n % 2 == 0) q.pop();
+  cout << q.front() << " " << q.size() << '\\n';
+  return 0;
+}
+`,
+      subQuestions: [
+        {
+          stem: "What is printed when n is 5?",
+          options: ["A. 5 5", "B. 6 5", "C. 7 4", "D. 8 4"],
+        },
+      ],
+      sampleInputs: ["5\n"],
+      expectedOutputs: [`${1 + offset} 5\n`],
+    });
+
+    whereMock.mockResolvedValue([
+      {
+        id: "queue-template-1",
+        contentJson: makeQueueContent(2),
+      },
+    ]);
+
+    const { findJaccardDuplicate } = await import("../services/deduplicationService.js");
+
+    const result = await findJaccardDuplicate({
+      contentJson: makeQueueContent(5),
+      questionType: "reading_program",
+      primaryKpId: 101,
+    });
+
+    expect(result).toBeNull();
+    expect(infoMock).not.toHaveBeenCalled();
+  });
 });

@@ -9,6 +9,7 @@ import {
 import {
   buildQuestionSalientText,
   buildQuestionSimilarityText,
+  isLikelyParameterizedTemplateSimilarity,
 } from "../server/services/deduplicationService.js";
 
 const DEFAULT_THRESHOLD = 0.85;
@@ -178,11 +179,26 @@ function preview(value: string, maxChars: number) {
   return normalized.length <= maxChars ? normalized : `${normalized.slice(0, maxChars - 3)}...`;
 }
 
-function classifyPair(similarity: number, salientSimilarity: number): PairRecommendation {
-  if (salientSimilarity < 0.65) {
+function classifyPair(params: {
+  questionType: QuestionType;
+  similarity: number;
+  salientSimilarity: number;
+  leftText: string;
+  rightText: string;
+}): PairRecommendation {
+  if (
+    isLikelyParameterizedTemplateSimilarity(
+      params.questionType,
+      params.leftText,
+      params.rightText,
+    )
+  ) {
     return "ignore_likely_false_positive";
   }
-  return similarity >= 0.9 ? "auto_delete_candidate" : "manual_review_candidate";
+  if (params.salientSimilarity < 0.65) {
+    return "ignore_likely_false_positive";
+  }
+  return params.similarity >= 0.9 ? "auto_delete_candidate" : "manual_review_candidate";
 }
 
 function readManifestBundlePaths(manifestPath: string): string[] {
@@ -349,7 +365,13 @@ function auditGroup(records: AuditRecord[], args: AuditArgs) {
         pairs.push({
           similarity,
           salientSimilarity,
-          recommendation: classifyPair(similarity, salientSimilarity),
+          recommendation: classifyPair({
+            questionType: current.questionType,
+            similarity,
+            salientSimilarity,
+            leftText: previous.similarityText,
+            rightText: current.similarityText,
+          }),
           questionType: current.questionType,
           samePrimaryKp: previous.primaryKpCode === current.primaryKpCode,
           sameDifficulty: previous.difficulty === current.difficulty,
