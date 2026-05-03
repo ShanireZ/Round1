@@ -302,6 +302,7 @@ Options:
   --dry-run                        Exercise the LLM chain without writing files
   --plan-only                      Print the resolved bundle plan without calling LLMs
   --allow-external-llm             Required acknowledgement before sending bundle content to LLM providers
+  --external-llm-consent <path>     Consent JSON that allowlists provider/data transfer
   --external-llm-purpose <text>     Purpose recorded in the generation report
   --help                           Show this help message
 `);
@@ -384,6 +385,10 @@ function parseArgs(argv: string[]) {
     externalLlmPurpose:
       typeof args["external-llm-purpose"] === "string"
         ? args["external-llm-purpose"]
+        : undefined,
+    externalLlmConsent:
+      typeof args["external-llm-consent"] === "string"
+        ? args["external-llm-consent"]
         : undefined,
   };
 }
@@ -531,6 +536,34 @@ function deriveShardReportRunId(
 
 function generationLaneFor(bundleNo: number): LLMLane {
   return bundleNo % 2 === 1 ? "default" : "backup";
+}
+
+function collectPlannedExternalLlmTargets() {
+  const scenes: LLMScene[] = ["generate", "judge"];
+  const lanes: LLMLane[] = ["default", "backup"];
+  const providers = new Set<string>();
+  const baseUrls = new Set<string>();
+
+  for (const scene of scenes) {
+    for (const lane of lanes) {
+      for (const entry of getSceneExecutionChain(
+        scene,
+        {
+          lane,
+          includeBackupFallback: false,
+        },
+        env,
+      )) {
+        providers.add(entry.providerName);
+        baseUrls.add(entry.baseURL);
+      }
+    }
+  }
+
+  return {
+    providers: [...providers].sort((left, right) => left.localeCompare(right)),
+    baseUrls: [...baseUrls].sort((left, right) => left.localeCompare(right)),
+  };
 }
 
 function weightedDifficulty(distribution: Record<string, number>, rng: () => number): Difficulty {
@@ -887,7 +920,10 @@ function normalizeGeneratedQuestion(
       stem: String(payload.stem ?? ""),
       cppCode: String(payload.cppCode ?? ""),
       subQuestions,
-      sampleInputs: Array.isArray(payload.sampleInputs) ? payload.sampleInputs.map(String) : [],
+      sampleInputs:
+        Array.isArray(payload.sampleInputs) && payload.sampleInputs.length > 0
+          ? payload.sampleInputs.map(String)
+          : [""],
       expectedOutputs: Array.isArray(payload.expectedOutputs)
         ? payload.expectedOutputs.map(String)
         : [],
@@ -936,7 +972,10 @@ function normalizeGeneratedQuestion(
     cppCode: String(payload.cppCode ?? ""),
     blanks,
     fullCode: String(payload.fullCode ?? ""),
-    sampleInputs: Array.isArray(payload.sampleInputs) ? payload.sampleInputs.map(String) : [],
+    sampleInputs:
+      Array.isArray(payload.sampleInputs) && payload.sampleInputs.length > 0
+        ? payload.sampleInputs.map(String)
+        : [""],
     expectedOutputs: Array.isArray(payload.expectedOutputs)
       ? payload.expectedOutputs.map(String)
       : [],
@@ -2445,10 +2484,14 @@ async function main() {
     return;
   }
 
+  const plannedTargets = collectPlannedExternalLlmTargets();
   const externalLlmDisclosure = assertExternalLlmAllowed({
     allowExternalLlm: args.allowExternalLlm,
     operation: "bulk question-bundle LLM generation, review, repair, and fallback regeneration",
     purpose: args.externalLlmPurpose,
+    consentPath: args.externalLlmConsent,
+    plannedProviders: plannedTargets.providers,
+    plannedBaseUrls: plannedTargets.baseUrls,
     dataCategories: [
       "question generation prompts",
       "question stems",

@@ -57,6 +57,7 @@ Options:
   --max-concurrency <number>       Parallel review workers (default: ${DEFAULT_MAX_CONCURRENCY})
   --timeout-ms <number>            Timeout per LLM call (default: ${DEFAULT_TIMEOUT_MS})
   --allow-external-llm             Required acknowledgement before sending bundle content to LLM providers
+  --external-llm-consent <path>     Consent JSON that allowlists provider/data transfer
   --external-llm-purpose <text>     Purpose recorded in the review report
   --write                          Persist repaired bundles and report output
   --help                           Show this help message
@@ -208,6 +209,34 @@ function laneFor(ordinal: number, attempt: number): LLMLane {
 
 function oppositeLane(lane: LLMLane): LLMLane {
   return lane === "default" ? "backup" : "default";
+}
+
+function collectPlannedExternalLlmTargets() {
+  const scenes: LLMScene[] = ["judge", "generate"];
+  const lanes: LLMLane[] = ["default", "backup"];
+  const providers = new Set<string>();
+  const baseUrls = new Set<string>();
+
+  for (const scene of scenes) {
+    for (const lane of lanes) {
+      for (const entry of getSceneExecutionChain(
+        scene,
+        {
+          lane,
+          includeBackupFallback: false,
+        },
+        env,
+      )) {
+        providers.add(entry.providerName);
+        baseUrls.add(entry.baseURL);
+      }
+    }
+  }
+
+  return {
+    providers: [...providers].sort((left, right) => left.localeCompare(right)),
+    baseUrls: [...baseUrls].sort((left, right) => left.localeCompare(right)),
+  };
 }
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
@@ -894,6 +923,7 @@ async function main() {
   );
   const timeoutMs = readIntArg(args, "timeout-ms", DEFAULT_TIMEOUT_MS, (value) => value > 0);
   const write = args.write === true;
+  const plannedTargets = collectPlannedExternalLlmTargets();
   const externalLlmDisclosure = assertExternalLlmAllowed({
     allowExternalLlm: args["allow-external-llm"] === true,
     operation: "bulk question-bundle LLM review and repair",
@@ -901,6 +931,12 @@ async function main() {
       typeof args["external-llm-purpose"] === "string"
         ? args["external-llm-purpose"]
         : undefined,
+    consentPath:
+      typeof args["external-llm-consent"] === "string"
+        ? args["external-llm-consent"]
+        : undefined,
+    plannedProviders: plannedTargets.providers,
+    plannedBaseUrls: plannedTargets.baseUrls,
     dataCategories: [
       "question stems",
       "answer options",
