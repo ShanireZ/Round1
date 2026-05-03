@@ -32,7 +32,10 @@ import {
   type QuestionType,
 } from "../lib/bundleTypes.js";
 import { writeBatchJsonReport } from "../lib/batchWorkflow.js";
-import { assertExternalLlmAllowed, type ExternalLlmDisclosure } from "../lib/externalLlmDisclosure.js";
+import {
+  assertExternalLlmAllowed,
+  type ExternalLlmDisclosure,
+} from "../lib/externalLlmDisclosure.js";
 import { defaultOfflineReportPath, defaultQuestionBundleOutputPath } from "../lib/paperPaths.js";
 import { extractJsonObject } from "../lib/modelJson.js";
 import { validateQuestionBundle } from "../lib/questionBundleWorkflow.js";
@@ -383,13 +386,9 @@ function parseArgs(argv: string[]) {
     planOnly: args["plan-only"] === true,
     allowExternalLlm: args["allow-external-llm"] === true,
     externalLlmPurpose:
-      typeof args["external-llm-purpose"] === "string"
-        ? args["external-llm-purpose"]
-        : undefined,
+      typeof args["external-llm-purpose"] === "string" ? args["external-llm-purpose"] : undefined,
     externalLlmConsent:
-      typeof args["external-llm-consent"] === "string"
-        ? args["external-llm-consent"]
-        : undefined,
+      typeof args["external-llm-consent"] === "string" ? args["external-llm-consent"] : undefined,
   };
 }
 
