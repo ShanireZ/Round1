@@ -217,8 +217,8 @@ const generatedReadingProgramSchema = z.object({
     )
     .min(1)
     .max(5),
-  sampleInputs: z.array(z.string()).min(1),
-  expectedOutputs: z.array(z.string()).min(1),
+  sampleInputs: z.array(z.string()).default([]),
+  expectedOutputs: z.array(z.string()).default([]),
   primaryKpCode: z.string().min(1),
   auxiliaryKpCodes: z.array(z.string().min(1)).max(3).default([]),
 });
@@ -238,8 +238,8 @@ const generatedCompletionProgramSchema = z.object({
     .min(1)
     .max(5),
   fullCode: z.string().min(30),
-  sampleInputs: z.array(z.string()).min(1),
-  expectedOutputs: z.array(z.string()).min(1),
+  sampleInputs: z.array(z.string()).default([]),
+  expectedOutputs: z.array(z.string()).default([]),
   primaryKpCode: z.string().min(1),
   auxiliaryKpCodes: z.array(z.string().min(1)).max(3).default([]),
 });
