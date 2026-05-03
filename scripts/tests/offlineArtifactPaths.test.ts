@@ -50,7 +50,7 @@ assert.equal(
 
 assert.equal(
   normalized(defaultOfflineReportPath({ runId, reportName: "judge-summary" })),
-  "artifacts/reports/2026/2026-04-27-step3-llm-csp-j-medium-v01/2026-04-27-step3-llm-csp-j-medium-v01__report__judge-summary.json",
+  "artifacts/reports/2026/runs/2026-04-27-step3-llm-csp-j-medium-v01/2026-04-27-step3-llm-csp-j-medium-v01__report__judge-summary.json",
 );
 
 assert.equal(

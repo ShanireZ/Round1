@@ -43,7 +43,7 @@ interface DeficitRow {
   deficit: number;
 }
 
-const usage = `Usage: npx tsx scripts/reportQuestionInventory.ts [--source-dir papers/2026] [--manifest bundle-manifest.json] [--exclude-manifest excluded-bundles.json] [--target-papers 100] [--write] [--out-dir artifacts/reports/2026] [--out-run-dir artifacts/reports/2026/<run>]`;
+const usage = `Usage: npx tsx scripts/reportQuestionInventory.ts [--source-dir papers/2026] [--manifest bundle-manifest.json] [--exclude-manifest excluded-bundles.json] [--target-papers 100] [--write] [--out-dir artifacts/reports/2026/state] [--out-run-dir artifacts/reports/2026/runs/<run>]`;
 
 function readArg(args: string[], name: string) {
   const index = args.indexOf(name);
@@ -68,7 +68,7 @@ function parseArgs(argv: string[]): InventoryArgs {
     excludeManifestPath: readArg(argv, "--exclude-manifest"),
     targetPapers,
     write: argv.includes("--write"),
-    outDir: readArg(argv, "--out-dir") ?? "artifacts/reports/2026",
+    outDir: readArg(argv, "--out-dir") ?? "artifacts/reports/2026/state",
     outRunDir: readArg(argv, "--out-run-dir"),
   };
 }
@@ -386,15 +386,28 @@ async function main() {
   console.log(markdown);
 
   if (args.write) {
-    const runDir = args.outRunDir ?? path.join(args.outDir, generatedAt.replace(/[:.]/g, "-"));
-    await mkdir(runDir, { recursive: true });
+    await mkdir(args.outDir, { recursive: true });
     await writeFile(
-      path.join(runDir, "question-inventory.json"),
+      path.join(args.outDir, "question-inventory.json"),
       `${JSON.stringify(payload, null, 2)}\n`,
     );
-    await writeFile(path.join(runDir, "question-inventory.md"), markdown);
+    await writeFile(path.join(args.outDir, "question-inventory.md"), markdown);
+
+    const writtenDirs = [args.outDir];
+    if (args.outRunDir) {
+      await mkdir(args.outRunDir, { recursive: true });
+      await writeFile(
+        path.join(args.outRunDir, "question-inventory.json"),
+        `${JSON.stringify(payload, null, 2)}\n`,
+      );
+      await writeFile(path.join(args.outRunDir, "question-inventory.md"), markdown);
+      writtenDirs.push(args.outRunDir);
+    }
+
     console.log(
-      `Report written to ${path.relative(process.cwd(), runDir).replaceAll(path.sep, "/")}`,
+      `Report written to ${writtenDirs
+        .map((dir) => path.relative(process.cwd(), dir).replaceAll(path.sep, "/"))
+        .join(", ")}`,
     );
   }
 }

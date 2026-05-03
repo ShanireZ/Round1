@@ -94,7 +94,7 @@ function parseArgs(argv: string[]): Args {
   const sourceDir = readArg(argv, "--source-dir") ?? "papers/2026";
   const reportDir =
     readArg(argv, "--report-dir") ??
-    path.resolve(process.cwd(), "artifacts/reports/2026/similarity-cleanup");
+    path.resolve(process.cwd(), "artifacts/reports/2026/cleanups/similarity");
 
   return {
     verdictDir,

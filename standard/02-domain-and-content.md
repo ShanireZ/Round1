@@ -190,7 +190,7 @@ coach 创建班级
 - 发布到哪些 exam_type/difficulty。
 - 出现质量回归时如何定位到 runId、bundle、import batch 和 reviewer。
 
-记录位置优先使用 `artifacts/reports/<year>/<runId>/`、`import_batches`、`question_reviews` 和对应 `docs/plans/*followup*`。
+记录位置优先使用 `artifacts/reports/<year>/runs/<runId>/`、`import_batches`、`question_reviews` 和对应 `docs/plans/*followup*`。
 
 ## 后续扩展边界
 

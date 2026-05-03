@@ -3,7 +3,7 @@ const path = require("node:path");
 
 const reportDir = path.resolve(
   process.cwd(),
-  "artifacts/reports/2026/2026-05-02T02-05-46-784Z",
+  "artifacts/reports/2026/runs/2026-05-02T02-05-46-784Z",
 );
 const manifestPath = process.argv[2]
   ? path.resolve(process.cwd(), process.argv[2])

@@ -24,7 +24,7 @@
 - 持久化内容产物采用 `runId` 组织，格式为 `YYYY-MM-DD-<pipeline>-<exam-type-slug>-<difficulty>-vNN`，例如 `2026-04-27-step3-llm-csp-j-medium-v01`
 - question bundle 标准产物统一放入 `papers/<year>/<runId>/question-bundles/<runId>__question-bundle__<question-type>__<kp-code>__n<count>__vNN.json`
 - prebuilt paper bundle 标准产物统一放入 `artifacts/prebuilt-papers/<year>/<runId>/<runId>__prebuilt-paper-bundle__blueprint-v<blueprintVersion>__n<count>__vNN.json`
-- LLM probe、草稿输出、调试 JSON 等非导入产物必须放入 `artifacts/tmp/<year>/<runId>/`；校验摘要、二次 judge 摘要和导入记录导出放入 `artifacts/reports/<year>/<runId>/`
+- LLM probe、草稿输出、调试 JSON 等非导入产物必须放入 `artifacts/tmp/<year>/<runId>/`；校验摘要、二次 judge 摘要和导入记录导出放入 `artifacts/reports/<year>/runs/<runId>/`
 - 禁止把 `paper-packs.json`、`latest.json`、`probe3-single.json` 这类无 runId 的名称作为持久化/可导入资产；它们只能作为本地临时 alias 或 legacy 文件存在
 - 详细迁移和脚本实现计划见 `docs/plans/2026-04-27-offline-artifact-naming-convention.md`
 - 如后续需要对外脚本别名，可增加薄封装 `generate-offline-questions.ts` / `build-paper-packs.ts` / `validate-import-artifacts.ts`，但不复制底层业务实现

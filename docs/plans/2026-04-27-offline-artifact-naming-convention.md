@@ -98,14 +98,14 @@ artifacts/prebuilt-papers/2026/2026-04-27-step3-llm-csp-j-medium-v01/
 非导入产物必须与正式 bundle 分开：
 
 ```text
-artifacts/reports/<year>/<runId>/
+artifacts/reports/<year>/runs/<runId>/
 artifacts/tmp/<year>/<runId>/
 ```
 
 规则：
 
 - LLM probe、草稿输出、调试 JSON 放 `artifacts/tmp/<year>/<runId>/`。
-- 校验摘要、二次 judge 摘要、导入记录导出放 `artifacts/reports/<year>/<runId>/`。
+- 校验摘要、二次 judge 摘要、导入记录导出放 `artifacts/reports/<year>/runs/<runId>/`。
 - `artifacts/tmp/**` 可清理；`papers/**`、`artifacts/prebuilt-papers/**`、`artifacts/reports/**` 作为审计输入保留。
 
 ## Task 1: Update Path Helpers

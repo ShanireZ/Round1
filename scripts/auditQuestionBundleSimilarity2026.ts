@@ -715,7 +715,8 @@ function defaultOutDir(args: AuditArgs) {
   if (args.manifestPath) {
     return path.dirname(path.resolve(process.cwd(), args.manifestPath));
   }
-  return path.resolve(process.cwd(), "artifacts/reports/2026");
+  const thresholdSlug = `threshold-${String(Math.round(args.threshold * 100)).padStart(3, "0")}`;
+  return path.resolve(process.cwd(), "artifacts/reports/2026/audits/similarity", thresholdSlug);
 }
 
 async function main() {

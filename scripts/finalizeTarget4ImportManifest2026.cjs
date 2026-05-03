@@ -3,7 +3,7 @@ const path = require("node:path");
 
 const reportDir = path.resolve(
   process.cwd(),
-  "artifacts/reports/2026/2026-05-02T02-05-46-784Z",
+  "artifacts/reports/2026/runs/2026-05-02T02-05-46-784Z",
 );
 const papers2026Dir = path.resolve(process.cwd(), "papers/2026");
 const baseManifestPath = path.join(reportDir, "target4-generated-question-bundles-manifest.dedupe-base.json");

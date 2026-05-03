@@ -143,6 +143,7 @@ export function defaultOfflineReportPath(parts: OfflineReportPathParts): string 
     "artifacts",
     "reports",
     yearFromRunId(parts.runId),
+    "runs",
     parts.runId,
     `${parts.runId}__report__${reportName}.json`,
   );

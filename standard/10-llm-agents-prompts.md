@@ -140,7 +140,7 @@ LLM 相关变更至少评估：
 - 官方答案 mismatch。
 - 人工抽样问题数。
 
-规模化内容生产报告应进入 `artifacts/reports/<year>/<runId>/`。
+规模化内容生产报告应进入 `artifacts/reports/<year>/runs/<runId>/`。
 
 质量评估不能只看通过率。一个高通过率批次如果重复率高、解析空泛、难度偏移或知识点分布失衡，也不能直接发布。
 

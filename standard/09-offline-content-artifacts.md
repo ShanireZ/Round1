@@ -78,7 +78,10 @@ artifacts/prebuilt-papers/<year>/<runId>/
 ## 临时与报告
 
 ```text
-artifacts/reports/<year>/<runId>/
+artifacts/reports/<year>/state/
+artifacts/reports/<year>/audits/<topic>/
+artifacts/reports/<year>/cleanups/<topic>/
+artifacts/reports/<year>/runs/<runId>/
 artifacts/tmp/<year>/<runId>/
 ```
 

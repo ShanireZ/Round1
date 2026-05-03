@@ -1,12 +1,10 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const reportDir = path.resolve(
-  process.cwd(),
-  "artifacts/reports/2026/2026-05-02T02-05-46-784Z",
-);
+const reportRoot = path.resolve(process.cwd(), "artifacts/reports/2026");
+const reportDir = path.join(reportRoot, "runs/2026-05-02T02-05-46-784Z");
 const replacementInventoryPath = path.join(reportDir, "target4-dedupe-replacement-inventory.json");
-const currentInventoryPath = path.join(reportDir, "question-inventory.json");
+const currentInventoryPath = path.join(reportRoot, "state/question-inventory.json");
 const outputPath = path.join(reportDir, "target4-final-fill-inventory.json");
 
 const targetExamTypes = new Set(["GESP-1", "GESP-2", "CSP-J", "CSP-S"]);
