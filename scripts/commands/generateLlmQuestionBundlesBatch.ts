@@ -825,6 +825,30 @@ function buildQuestionTypeInstruction(questionType: QuestionType): string {
 }
 
 function buildComboSpecificInstruction(combo: Combo): string {
+  if (combo.questionType === "reading_program" && combo.primaryKpCode === "ALG") {
+    return [
+      "For this ALG reading_program bundle, prefer one small deterministic trace theme per item: prefix sums, difference updates, binary search boundary movement, greedy selection on a tiny array, or short DP state transitions.",
+      "Keep each program hand-traceable with at most 8 key state changes and very small integers; avoid problems where two interpretations of the algorithm idea could make two options defensible.",
+      "Make every subQuestion ask for an exact numeric/string result from a concrete step: printed output, final index, array value, DP entry, or chosen count.",
+      "Use four mutually exclusive concrete options for every subQuestion, and in every explanation list the decisive trace states that eliminate the other three options.",
+    ].join("\n");
+  }
+  if (combo.questionType === "completion_program" && combo.primaryKpCode === "ALG") {
+    return [
+      "For this ALG completion_program bundle, prefer short deterministic themes such as prefix sums, two pointers, binary-search boundary updates, monotone greedy scans, or tiny DP transitions.",
+      "Each blank must control exactly one concrete expression, operator, condition, or index update, and blanks must not be able to compensate for each other.",
+      "Every blank marker must appear exactly once in cppCode, and fullCode must be the direct filled-in result of choosing the declared answers.",
+      "Make every wrong option either fail the target output on the sample input or clearly break the algorithm trace; avoid stylistic or equivalent alternatives.",
+    ].join("\n");
+  }
+  if (combo.questionType === "completion_program" && combo.primaryKpCode === "MATH") {
+    return [
+      "For this MATH completion_program bundle, use short deterministic integer-math themes such as gcd/lcm, modular counting, arithmetic progressions, prefix arithmetic, or simple combinational formulas with small inputs.",
+      "Each blank must choose exactly one formula fragment, operator, comparison, or boundary value; blanks must not overlap in responsibility or allow multiple equivalent completions.",
+      "All blank options must be pairwise non-equivalent under the stated constraints, numerically distinct when applicable, and free of undefined behavior such as division by zero or signed overflow.",
+      "Make sample input and expected output derive directly from fullCode, and ensure every wrong option changes the result or breaks correctness in an explainable way.",
+    ].join("\n");
+  }
   if (combo.questionType === "reading_program" && combo.primaryKpCode === "DS") {
     return [
       "For this DS reading_program bundle, prefer one small simulation theme per item: stack, queue, deque, priority_queue, set/map, or adjacency list traversal.",
