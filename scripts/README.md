@@ -4,7 +4,6 @@
 
 - `questionBundle.ts`：question bundle 相关稳定入口，统一覆盖 `generate-llm`、`generate-acceptance`、`build-manual`、`validate`、`import`、`import-batch`、`batch-generate-local`、`batch-generate-llm`、`batch-review-llm`、`report-remaining-manifest`。
 - `prebuiltPaperBundle.ts`：prebuilt paper bundle 相关稳定入口，统一覆盖 `build`、`validate`、`import`。
-- `generateQuestionBundle.ts`、`buildAcceptanceQuestionBundle.ts`、`buildManualQuestionBundles.ts`、`validateQuestionBundle.ts`、`importQuestionBundle.ts`、`importQuestionBundles2026.ts`、`buildPrebuiltPaperBundle.ts`、`validatePrebuiltPaperBundle.ts`、`importPrebuiltPaperBundle.ts` 继续保留为内部实现脚本，不再作为推荐对外入口。
 - `commands/generateQuestionBundle.ts`、`commands/buildAcceptanceQuestionBundle.ts`、`commands/buildManualQuestionBundles.ts`、`commands/validateQuestionBundle.ts`、`commands/importQuestionBundle.ts`、`commands/importQuestionBundles2026.ts`、`commands/buildPrebuiltPaperBundle.ts`、`commands/validatePrebuiltPaperBundle.ts`、`commands/importPrebuiltPaperBundle.ts` 继续保留为内部实现脚本，不再作为推荐对外入口。
 
 ## LLM 场景路由

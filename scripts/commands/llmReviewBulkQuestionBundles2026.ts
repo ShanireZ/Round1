@@ -1,4 +1,3 @@
-  console.log(`Usage: tsx scripts/commands/llmReviewBulkQuestionBundles2026.ts [options]
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { generateText } from "ai";
@@ -32,6 +31,27 @@ const DEFAULT_REPORT_RUN_ID = "2026-05-01-bulk1000-llm-chain-review-v01";
 const DEFAULT_TIMEOUT_MS = 90_000;
 const DEFAULT_MAX_REPAIR_ATTEMPTS = 3;
 const DEFAULT_MAX_CONCURRENCY = 2;
+
+function printHelp() {
+  console.log(`Usage: tsx scripts/commands/llmReviewBulkQuestionBundles2026.ts [options]
+
+Run LLM review and repair passes for generated question bundles.
+
+Options:
+  --year <year>                    Papers year root (default: 2026)
+  --prefix <prefix>                Run id prefix filter (default: ${DEFAULT_BULK_PREFIX})
+  --report-run-id <id>             Report run id (default: ${DEFAULT_REPORT_RUN_ID})
+  --shard-index <number>           Zero-based shard index (default: 0)
+  --shard-count <number>           Total shard count (default: 1)
+  --limit <number>                 Limit matched bundle files
+  --run-ids <list>                 Comma-separated run ids to review
+  --max-repair-attempts <number>   Max repair attempts per bundle (default: ${DEFAULT_MAX_REPAIR_ATTEMPTS})
+  --max-concurrency <number>       Parallel review workers (default: ${DEFAULT_MAX_CONCURRENCY})
+  --timeout-ms <number>            Timeout per LLM call (default: ${DEFAULT_TIMEOUT_MS})
+  --write                          Persist repaired bundles and report output
+  --help                           Show this help message
+`);
+}
 
 const issueSchema = z.object({
   code: z.string().min(1),
@@ -129,6 +149,11 @@ interface DirectLlmResult {
 }
 
 function parseArgs(argv: string[]) {
+  if (argv.includes("--help") || argv.includes("-h")) {
+    printHelp();
+    process.exit(0);
+  }
+
   const args: Record<string, ArgValue> = {};
 
   for (let index = 0; index < argv.length; index++) {
