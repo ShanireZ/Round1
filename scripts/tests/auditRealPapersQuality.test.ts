@@ -4,7 +4,7 @@ import {
   collectQuestionQualityIssues,
   isWeakExplanationText,
   type PaperQualityIssueType,
-} from "../auditRealPapers.js";
+} from "../commands/audit/auditRealPapers.js";
 import type { PaperQuestion } from "../lib/paperFiles.js";
 
 function issueTypes(question: PaperQuestion): PaperQualityIssueType[] {

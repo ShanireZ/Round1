@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 
-import { createPaperAuditFilter, matchesPaperAuditFilter } from "../auditRealPapers.js";
+import {
+  createPaperAuditFilter,
+  matchesPaperAuditFilter,
+} from "../commands/audit/auditRealPapers.js";
 import { listPaperFiles, loadPaper } from "../lib/paperFiles.js";
 
 function getPaper(key: string) {

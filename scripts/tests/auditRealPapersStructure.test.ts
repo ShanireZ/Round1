@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   collectQuestionStructureIssues,
   type PaperStructureIssueType,
-} from "../auditRealPapers.js";
+} from "../commands/audit/auditRealPapers.js";
 import type { PaperQuestion } from "../lib/paperFiles.js";
 
 function structureIssueTypes(question: PaperQuestion): PaperStructureIssueType[] {

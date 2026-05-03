@@ -4,7 +4,12 @@
 
 - `questionBundle.ts`：question bundle 相关稳定入口，统一覆盖 `generate-llm`、`generate-acceptance`、`build-manual`、`validate`、`import`、`import-batch`、`batch-generate-local`、`batch-generate-llm`、`batch-review-llm`、`report-remaining-manifest`。
 - `prebuiltPaperBundle.ts`：prebuilt paper bundle 相关稳定入口，统一覆盖 `build`、`validate`、`import`。
-- `commands/generateQuestionBundle.ts`、`commands/buildAcceptanceQuestionBundle.ts`、`commands/buildManualQuestionBundles.ts`、`commands/validateQuestionBundle.ts`、`commands/importQuestionBundle.ts`、`commands/importQuestionBundles2026.ts`、`commands/buildPrebuiltPaperBundle.ts`、`commands/validatePrebuiltPaperBundle.ts`、`commands/importPrebuiltPaperBundle.ts` 继续保留为内部实现脚本，不再作为推荐对外入口。
+- `collect.ts`：采集类稳定入口，统一覆盖 `scrape-luogu`、`fill-luogu-answers`、`explore-luogu`。
+- `ingest.ts`：导入类稳定入口，统一覆盖 `ingest-real-papers`、`import-manual-questions`、`update-answers-db`。
+- `review.ts`：评审类稳定入口，统一覆盖 `review-real-papers`、`rewrite-paper-explanations`、`backfill-explanations`。
+- `audit.ts`：审计类稳定入口，统一覆盖 `audit-real-papers`、`audit-question-bundle-similarity`、`apply-similarity-review-deletions`、`build-similarity-review-shards`、`report-*`、`verify-*`。
+- `maintenance.ts`：维护类稳定入口，统一覆盖 `clean-build-output`、`dev-setup`、`init-env`、`init-admin`、`healthcheck`、`migrate`、`bootstrap-knowledge-points`、`seed-blueprint` 以及 2026 maintenance utilities。
+- `commands/**` 下脚本继续保留为内部实现，不再作为推荐对外入口。
 
 ## LLM 场景路由
 
@@ -17,53 +22,55 @@
 - `LLM_THINKING_TYPE_DEFAULT` 承载 enabled/disabled 风格的 thinking 开关；当前已接入 deepseek / xiaomi / volcengine / zai，alibaba 会映射到自身的 thinking 控制。
 - `LLM_THINKING_BUDGET_DEFAULT` 承载数值预算风格的 thinking 控制；当前已接入支持预算型 thinking 的 provider 时才会下发。
 - reasoning summary 统一走 `LLM_REASONING_SUMMARY_DEFAULT`，并只在当前 provider / model 支持时下发。
-- `rewritePaperExplanations.ts`、`reviewRealPapers.ts` 等脚本默认复用 `.env` provider 链；日常脚本命令不提供 provider 覆盖入口。
+- `review.ts rewrite-paper-explanations`、`review.ts review-real-papers` 等脚本默认复用 `.env` provider 链；日常脚本命令不提供 provider 覆盖入口。
 
 ## 采集类
 
-- scrapeLuogu.ts：从洛谷有题抓取 CSP 与 GESP 试卷，输出到 `papers/real-papers`。
-- fillAnswersFromLuogu.ts：对已有题库文件回填官方答案。
-- exploreLuogu.mjs：统一替代旧的 list/debug/check 系列脚本，支持列出试卷、检查某份试卷结构、批量检查 ID 可用性。
+- `collect.ts scrape-luogu`：从洛谷有题抓取 CSP 与 GESP 试卷，输出到 `papers/real-papers`。
+- `collect.ts fill-luogu-answers`：对已有题库文件回填官方答案。
+- `collect.ts explore-luogu`：统一替代旧的 list/debug/check 系列脚本，支持列出试卷、检查某份试卷结构、批量检查 ID 可用性。
 
 ## 导入类
 
-- ingestRealPapers.ts：把 `papers/real-papers` 下的 JSON 题库导入数据库，创建 `question_reviews`，默认走离线 `judge` 场景把记录推进到 `ai_reviewed`；支持 `--skip-ai-review`、`--limit`、`--timeout`。人工确认/拒绝通过 Admin `POST /admin/questions/:id/confirm` 与 `POST /admin/questions/:id/reject` 推进到 `confirmed` / `rejected`。
-- buildAcceptanceQuestionBundle.ts：生成确定性的首批规模化验收 question bundle，用于离线 sandbox、导入与验收基线；支持 `--exam-type`、`--question-type`、`--primary-kp-code`、`--difficulty`、`--count`、`--run-id`、`--artifact-version`、`--batch-id`、`--output`。默认输出到 `papers/<year>/<runId>/question-bundles/<runId>__question-bundle__<question-type>__<kp-code>__n<count>__vNN.json`。该脚本不调用 LLM，bundle meta 使用 `local-deterministic` / `acceptance-question-template-v1` 标识本地模板来源。
-- validateQuestionBundle.ts：校验 question bundle 结构、蓝图映射、答案字段、去重与程序题 sandbox；`--run-sandbox` 会实际编译运行程序题，`--write` 会在全部通过后写回 `sandboxVerified=true`，`--write-metadata` 会写回 validator 版本、校验时间与 item checksum 清单，`--judge` 会调用 LLM 判官二次校验答案自洽性。
-- importQuestionBundle.ts：导入 question bundle，支持 `--dry-run` 与 `--apply`，并写入 `import_batches`。
-- buildPrebuiltPaperBundle.ts：基于已发布题库和蓝图构建 prebuilt paper bundle；支持 `--run-id`、`--artifact-version`、`--blueprint-version` 与 `--output` 显式覆盖。默认输出到 `artifacts/prebuilt-papers/<year>/<runId>/<runId>__prebuilt-paper-bundle__blueprint-v<blueprintVersion>__n<count>__vNN.json`，bundle meta 记录 builder provider/model、prompt hash、source batch、source timestamp 与 overlap score。
-- validatePrebuiltPaperBundle.ts：校验 prebuilt paper bundle 的题量、分值、题目引用和题目发布状态；`--write-metadata` 会写回 validator 版本、校验时间与 item checksum 清单。
-- importPrebuiltPaperBundle.ts：导入 prebuilt paper bundle，支持 `--dry-run` 与 `--apply`，并写入 `import_batches`。
-- importManualQuestions.ts：导入管理员手工生成的题目 JSON；使用 `filePath + --question-type + --exam-type + --primary-kp-id` 指定批次元数据，并将批次审计写入 `import_batches.manual_question_import`。
-- updateAnswersInDB.ts：用 `papers/real-papers` 中的答案回写数据库中的同题记录。
+- `ingest.ts ingest-real-papers`：把 `papers/real-papers` 下的 JSON 题库导入数据库，创建 `question_reviews`，默认走离线 `judge` 场景把记录推进到 `ai_reviewed`；支持 `--skip-ai-review`、`--limit`、`--timeout`。人工确认/拒绝通过 Admin `POST /admin/questions/:id/confirm` 与 `POST /admin/questions/:id/reject` 推进到 `confirmed` / `rejected`。
+- `questionBundle.ts generate-acceptance`：生成确定性的首批规模化验收 question bundle，用于离线 sandbox、导入与验收基线；支持 `--exam-type`、`--question-type`、`--primary-kp-code`、`--difficulty`、`--count`、`--run-id`、`--artifact-version`、`--batch-id`、`--output`。默认输出到 `papers/<year>/<runId>/question-bundles/<runId>__question-bundle__<question-type>__<kp-code>__n<count>__vNN.json`。该脚本不调用 LLM，bundle meta 使用 `local-deterministic` / `acceptance-question-template-v1` 标识本地模板来源。
+- `questionBundle.ts validate`：校验 question bundle 结构、蓝图映射、答案字段、去重与程序题 sandbox；`--run-sandbox` 会实际编译运行程序题，`--write` 会在全部通过后写回 `sandboxVerified=true`，`--write-metadata` 会写回 validator 版本、校验时间与 item checksum 清单，`--judge` 会调用 LLM 判官二次校验答案自洽性。
+- `questionBundle.ts import`：导入 question bundle，支持 `--dry-run` 与 `--apply`，并写入 `import_batches`。
+- `prebuiltPaperBundle.ts build`：基于已发布题库和蓝图构建 prebuilt paper bundle；支持 `--run-id`、`--artifact-version`、`--blueprint-version` 与 `--output` 显式覆盖。默认输出到 `artifacts/prebuilt-papers/<year>/<runId>/<runId>__prebuilt-paper-bundle__blueprint-v<blueprintVersion>__n<count>__vNN.json`，bundle meta 记录 builder provider/model、prompt hash、source batch、source timestamp 与 overlap score。
+- `prebuiltPaperBundle.ts validate`：校验 prebuilt paper bundle 的题量、分值、题目引用和题目发布状态；`--write-metadata` 会写回 validator 版本、校验时间与 item checksum 清单。
+- `prebuiltPaperBundle.ts import`：导入 prebuilt paper bundle，支持 `--dry-run` 与 `--apply`，并写入 `import_batches`。
+- `ingest.ts import-manual-questions`：导入管理员手工生成的题目 JSON；使用 `filePath + --question-type + --exam-type + --primary-kp-id` 指定批次元数据，并将批次审计写入 `import_batches.manual_question_import`。
+- `ingest.ts update-answers-db`：用 `papers/real-papers` 中的答案回写数据库中的同题记录。
 
 ## 审计与回填类
 
-- auditRealPapers.ts：统一替代 verifyAnswers.ts、debug-check-code.ts、audit-code.ts，支持答案覆盖率、官方答案比对、explanation 覆盖率、代码字段完整性检查，并支持 `--dir`、`--year` 过滤目标批次；官方答案比对会把 A-D 选项字母按大小写无关处理。
-- auditRealPapers.ts `quality` 模式：额外检查缺失/占位题面、代码中的全角标点、过弱或模板化 explanation，适合真题人工审校前后的批量回归。
-- auditRealPapers.ts `metadata` 模式：检查 `questionType`、`difficulty`、`primaryKpCode`、`auxiliaryKpCodes` 的合法性、结构匹配、重复和冲突。
-- backfillExplanations.ts：为 explanation 为空的题目批量补基础解析文本。
-- rewritePaperExplanations.ts： explanation 专用重写脚本，调用共享 LLM 主体，只负责提供 prompt、schema 和目标范围；支持 `--scene`、`--start-q`、`--end-q`、`--chunk-size`。
-- reviewRealPapers.ts：逐题 LLM 复核脚本，统一复核 `questionType`、`difficulty`、知识点标签与 explanation；支持 `--metadata-only`、`--write`，并将低置信度或 stem/code 可疑项输出到 `scripts/.tmp/paper-review-report-*.json`。
-- verifyLlmTasks.ts：用合成 prompt 实跑 `generate` / `judge` 两类 LLM 任务，并回查 `llm_provider_logs` 是否记录 tokens、cost estimate、latency 与受控失败信息。
-- verifyQuestionBundleGuards.ts：构造临时候选题，验证规则去重可用 `DUPLICATE_JACCARD` 拦截近似题，并验证 LLM 判官可用 `JUDGE_REJECTED` 拦截答案不一致题。
-- reportDocsInventory.ts: scans `docs/`, counts plan files, status headers, open task markers, and writes the generated docs inventory to `docs/_inventory`; run it with `npm run inventory:docs -- --write` after documentation changes.
-- reportPapersInventory.ts: scans `papers/real-papers` and every `papers/<year>` generated-bundle section, then writes root and per-section statistics to `papers/_inventory`; run it with `npm run inventory:papers -- --write` after paper-file changes.
-- verifyOfflineArtifactNames.ts：检查正式离线产物是否使用 runId 持久化命名，并校验 bundle JSON meta 与文件名一致；拒绝 `paper-packs.json`、`artifacts/llm-step3/probe*.json` 以及所有 `papers/<year>/*.json` 旧布局，但允许 `papers/_inventory` 作为统计元数据目录。
-- verifyUiTokenUsage.ts：检查 `client/src` 的 TS/TSX 与非 token CSS 是否重新引入原始 hex/rgb/hsl 颜色字面量；颜色应落到 design token、语义 Tailwind class 或共享 CSS utility。
+- `audit.ts audit-real-papers`：统一替代 verifyAnswers.ts、debug-check-code.ts、audit-code.ts，支持答案覆盖率、官方答案比对、explanation 覆盖率、代码字段完整性检查，并支持 `--dir`、`--year` 过滤目标批次；官方答案比对会把 A-D 选项字母按大小写无关处理。
+- `audit.ts audit-real-papers quality`：额外检查缺失/占位题面、代码中的全角标点、过弱或模板化 explanation，适合真题人工审校前后的批量回归。
+- `audit.ts audit-real-papers metadata`：检查 `questionType`、`difficulty`、`primaryKpCode`、`auxiliaryKpCodes` 的合法性、结构匹配、重复和冲突。
+- `review.ts backfill-explanations`：为 explanation 为空的题目批量补基础解析文本。
+- `review.ts rewrite-paper-explanations`：explanation 专用重写脚本，调用共享 LLM 主体，只负责提供 prompt、schema 和目标范围；支持 `--scene`、`--start-q`、`--end-q`、`--chunk-size`。
+- `review.ts review-real-papers`：逐题 LLM 复核脚本，统一复核 `questionType`、`difficulty`、知识点标签与 explanation；支持 `--metadata-only`、`--write`，并将低置信度或 stem/code 可疑项输出到 `scripts/.tmp/paper-review-report-*.json`。
+- `audit.ts verify-llm-tasks`：用合成 prompt 实跑 `generate` / `judge` 两类 LLM 任务，并回查 `llm_provider_logs` 是否记录 tokens、cost estimate、latency 与受控失败信息。
+- `audit.ts verify-question-bundle-guards`：构造临时候选题，验证规则去重可用 `DUPLICATE_JACCARD` 拦截近似题，并验证 LLM 判官可用 `JUDGE_REJECTED` 拦截答案不一致题。
+- `audit.ts report-docs-inventory`：扫描 `docs/` 并在需要时写回 `docs/_inventory`；文档改动后可用 `npm run inventory:docs -- --write`。
+- `audit.ts report-papers-inventory`：扫描 `papers/real-papers` 与 `papers/<year>` 生成物，并在需要时写回 `papers/_inventory`；题库改动后可用 `npm run inventory:papers -- --write`。
+- `audit.ts report-question-inventory`：生成 2026 question bundle 覆盖率与配额盘点报告。
+- `audit.ts verify-offline-artifacts`：检查正式离线产物是否使用 runId 持久化命名，并校验 bundle JSON meta 与文件名一致；拒绝 `paper-packs.json`、`artifacts/llm-step3/probe*.json` 以及所有 `papers/<year>/*.json` 旧布局，但允许 `papers/_inventory` 作为统计元数据目录。
+- `audit.ts verify-ui-tokens`：检查 `client/src` 的 TS/TSX 与非 token CSS 是否重新引入原始 hex/rgb/hsl 颜色字面量；颜色应落到 design token、语义 Tailwind class 或共享 CSS utility。
 - tests/verifyExamMappings.ts：校验共享考试映射是否包含关键批次。
 
 ## 初始化与维护类
 
-- migrate.ts：数据库迁移管理，支持 up/down/status。
-- dev-setup.ts：本地 HTTPS 开发环境初始化。
-- initEnv.ts：生成最小 `.env` 骨架并自动生成高熵 `SESSION_SECRET` / `TOTP_ENCRYPTION_KEK`；默认值继续由 `config/env.ts` 承接，支持 `--profile local|production-runtime|offline-content`、`--print` 与 `--force`。
+- `maintenance.ts migrate`：数据库迁移管理，支持 up/down/status。
+- `maintenance.ts dev-setup`：本地 HTTPS 开发环境初始化。
+- `maintenance.ts init-env`：生成最小 `.env` 骨架并自动生成高熵 `SESSION_SECRET` / `TOTP_ENCRYPTION_KEK`；默认值继续由 `config/env.ts` 承接，支持 `--profile local|production-runtime|offline-content`、`--print` 与 `--force`。
 - workers/contentWorker.ts：离线内容 worker 入口，仅运行 generation / sandbox verify，不属于生产运行时入口。
-- bootstrapKnowledgePoints.ts：初始化知识点树。
-- seedBlueprint.ts：初始化蓝图配置。
-- initAdmin.ts：首个管理员引导脚本，固定用户名 `elder`，读取 `ROUND1_INITIAL_ADMIN_PASSWORD`，写入 admin 角色与 `password_change_required=true`；支持 `--dry-run` 与 `--rotate`。
-- healthcheck.ts：统一健康检查脚本，默认检查 API readiness，可选检查前端静态资源、外部配置、离线 runner、离线 contentWorker 与 PM2 进程；contentWorker 需用 `--expect-content-worker` 单独声明，避免混入生产 runtime health。
-- db-stats.cjs：查看题库与数据表统计。
+- `maintenance.ts bootstrap-knowledge-points`：初始化知识点树。
+- `maintenance.ts seed-blueprint`：初始化蓝图配置。
+- `maintenance.ts init-admin`：首个管理员引导脚本，固定用户名 `elder`，读取 `ROUND1_INITIAL_ADMIN_PASSWORD`，写入 admin 角色与 `password_change_required=true`；支持 `--dry-run` 与 `--rotate`。
+- `maintenance.ts healthcheck`：统一健康检查脚本，默认检查 API readiness，可选检查前端静态资源、外部配置、离线 runner、离线 contentWorker 与 PM2 进程；contentWorker 需用 `--expect-content-worker` 单独声明，避免混入生产 runtime health。
+- `maintenance.ts clean-build-output`：清理构建输出目录。
+- `maintenance.ts db-stats`：查看题库与数据表统计。
 
 ## 共享库
 
@@ -88,16 +95,16 @@
 - 生成本地 `.env` 预览：`npm run env:init -- --profile local --print`
 - 生成生产运行时 `.env` 预览：`npm run env:init -- --profile production-runtime --print`
 - 生成离线内容环境 `.env` 文件：`npm run env:init -- --profile offline-content --path .env.offline --force`
-- explanation 质量回归：`npx tsx scripts/auditRealPapers.ts quality --dir csp-s`
-- 元数据回归：`npx tsx scripts/auditRealPapers.ts metadata --dir csp-j,csp-s`
-- explanation 定点重写：`npx tsx scripts/rewritePaperExplanations.ts --dir csp-s --file 2025.json --start-q 16 --end-q 18 --write --chunk-size 1 --timeout 180000`
-- 全量 metadata-only 复核：`npx tsx scripts/reviewRealPapers.ts --dir csp-j --write --chunk-size 1 --metadata-only`
+- explanation 质量回归：`npx tsx scripts/audit.ts audit-real-papers quality --dir csp-s`
+- 元数据回归：`npx tsx scripts/audit.ts audit-real-papers metadata --dir csp-j,csp-s`
+- explanation 定点重写：`npx tsx scripts/review.ts rewrite-paper-explanations --dir csp-s --file 2025.json --start-q 16 --end-q 18 --write --chunk-size 1 --timeout 180000`
+- 全量 metadata-only 复核：`npx tsx scripts/review.ts review-real-papers --dir csp-j --write --chunk-size 1 --metadata-only`
 - 生成阅读程序验收 bundle：`npx tsx scripts/questionBundle.ts generate-acceptance --exam-type GESP-1 --question-type reading_program --primary-kp-code CPP --difficulty easy --count 30 --run-id 2026-04-26-acceptance-gesp-1-easy-v01 --batch-id 2026-04-26-scale-reading`
 - 生成完善程序验收 bundle：`npx tsx scripts/questionBundle.ts generate-acceptance --exam-type GESP-1 --question-type completion_program --primary-kp-code CPP --difficulty easy --count 20 --run-id 2026-04-26-acceptance-gesp-1-easy-v02 --batch-id 2026-04-26-scale-completion`
 - LLM 小批量出题 probe：`npx tsx scripts/questionBundle.ts generate-llm --exam-type GESP-1 --question-type single_choice --primary-kp-code CPP --difficulty easy --count 5 --run-id <runId> --artifact-version 1`
 - LLM 小批量判官复核：`npx tsx scripts/questionBundle.ts validate papers/<year>/<runId>/question-bundles/<bundle-file>.json --judge --judge-attempts 3 --require-duplicate-checks --write-metadata`
 - 程序题离线 sandbox 校验并写回：`npx tsx scripts/questionBundle.ts validate papers/2026/<runId>/question-bundles/<bundle-file>.json --run-sandbox --write --write-metadata`
-- question bundle 守卫验证：`npx tsx scripts/verifyQuestionBundleGuards.ts`
+- question bundle 守卫验证：`npx tsx scripts/audit.ts verify-question-bundle-guards`
 - 文档盘点刷新：`npm run inventory:docs -- --write`
 - 离线产物命名守卫：`npm run verify:offline-artifacts`
 - 首个管理员 dry-run：`ROUND1_INITIAL_ADMIN_PASSWORD='<临时强密码>' npm run init:admin -- --dry-run`
@@ -106,15 +113,15 @@
 
 ## Question bundle 来源口径
 
-- `generateQuestionBundle.ts`：真实 LLM 出题入口，bundle meta 记录实际 provider/model。
-- `buildAcceptanceQuestionBundle.ts`：本地确定性验收入口，不调用 LLM，只用于验证 schema、sandbox、导入和守卫流程。
-- `validateQuestionBundle.ts --judge`：LLM 判官入口；出题与判官是分离步骤。只有显式跑过 `--judge` 的 bundle 才算完成 LLM 二次语义校验。
+- `questionBundle.ts generate-llm`：真实 LLM 出题入口，bundle meta 记录实际 provider/model。
+- `questionBundle.ts generate-acceptance`：本地确定性验收入口，不调用 LLM，只用于验证 schema、sandbox、导入和守卫流程。
+- `questionBundle.ts validate --judge`：LLM 判官入口；出题与判官是分离步骤。只有显式跑过 `--judge` 的 bundle 才算完成 LLM 二次语义校验。
 - 大规模生产前先按 5 题一批递增 `--artifact-version`，每批生成后立即跑 `validateQuestionBundle.ts --judge --require-duplicate-checks --write-metadata`；程序题再加 `--run-sandbox --write`。
 - 已导入或已整理过的候选资产复核可加 `--skip-duplicate-checks`，避免把自身历史入库记录判为重复；正式导入前应使用 `--require-duplicate-checks` 确认 DB 去重实际运行。若只需重试少数题，可加 `--judge-items 2,3` 和 `--judge-attempts 3`。
 
 ## 已合并/删除的旧脚本
 
-- list-all-luogu.mjs、list-luogu-exams*.mjs、debug-luogu-answer*.mjs、check-gesp-202603\*.mjs 已合并到 exploreLuogu.mjs。
-- verifyAnswers.ts、debug-check-code.ts、audit-code.ts 已合并到 auditRealPapers.ts。
+- list-all-luogu.mjs、list-luogu-exams*.mjs、debug-luogu-answer*.mjs、check-gesp-202603\*.mjs 已合并到 `collect.ts explore-luogu`。
+- verifyAnswers.ts、debug-check-code.ts、audit-code.ts 已合并到 `audit.ts audit-real-papers`。
 - generate-offline-questions.ts、build-paper-packs.ts、validate-import-artifacts.ts 已删除，统一由 `questionBundle.ts` / `prebuiltPaperBundle.ts` 稳定入口承接。
 - debug-2020mock.mjs、debug-2021.mjs、debug-images.mjs、debug-raw-2019.mjs 属于历史一次性诊断脚本，已移除。

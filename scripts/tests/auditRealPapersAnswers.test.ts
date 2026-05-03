@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 
-import { getAnswerSlots, normalizeAnswerSlotForComparison } from "../auditRealPapers.js";
+import {
+  getAnswerSlots,
+  normalizeAnswerSlotForComparison,
+} from "../commands/audit/auditRealPapers.js";
 import type { PaperQuestion } from "../lib/paperFiles.js";
 
 function answers(question: PaperQuestion): string[] {

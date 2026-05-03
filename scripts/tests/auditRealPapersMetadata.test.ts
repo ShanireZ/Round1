@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 
-import { collectQuestionMetadataIssues, type PaperMetadataIssueType } from "../auditRealPapers.js";
+import {
+  collectQuestionMetadataIssues,
+  type PaperMetadataIssueType,
+} from "../commands/audit/auditRealPapers.js";
 import type { PaperQuestion } from "../lib/paperFiles.js";
 
 function metadataIssueTypes(question: PaperQuestion): PaperMetadataIssueType[] {
