@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { generateText } from "ai";
 import { z } from "zod";
@@ -30,6 +30,7 @@ import {
 import { assertExternalLlmAllowed } from "../lib/externalLlmDisclosure.js";
 import { extractJsonObject } from "../lib/modelJson.js";
 import { loadQuestionBundle, validateQuestionBundle } from "../lib/questionBundleWorkflow.js";
+import { formatJsonOutput, toDisplayRepoPath } from "../lib/scriptCli.js";
 
 type ArgValue = boolean | string;
 
@@ -59,6 +60,7 @@ Options:
   --allow-external-llm             Required acknowledgement before sending bundle content to LLM providers
   --external-llm-consent <path>     Consent JSON that allowlists provider/data transfer
   --external-llm-purpose <text>     Purpose recorded in the review report
+  --status-dir <dir>                Persist per-bundle status JSON as each bundle finishes
   --write                          Persist repaired bundles and report output
   --help                           Show this help message
 `);
@@ -388,6 +390,124 @@ function validateCorrectedItem(
 
 function safeJson(value: unknown) {
   return JSON.stringify(value, null, 2);
+}
+
+function sanitizeStatusFileSegment(value: string) {
+  const sanitized = value
+    .replaceAll("\\", "/")
+    .replace(/[^a-zA-Z0-9._-]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return (sanitized || "bundle").slice(-180);
+}
+
+function createIncrementalStatusWriter(params: {
+  statusDir: string;
+  reportRunId: string;
+  startedAt: string;
+  shardIndex: number;
+  shardCount: number;
+}) {
+  const absoluteStatusDir = path.resolve(process.cwd(), params.statusDir);
+  const statusDirRepoPath = toDisplayRepoPath(absoluteStatusDir);
+  const indexPath = path.join(absoluteStatusDir, "index.json");
+  const entries: Array<{
+    ordinal: number;
+    bundlePath: string;
+    statusPath: string;
+    finalVerdict: BundleReport["finalVerdict"];
+    formalBundleStatus: BundleReport["formalBundleStatus"];
+    reviewStatusEvidence: BundleReport["reviewStatusEvidence"];
+    updatedAt: string;
+  }> = [];
+  let writeChain: Promise<void> = Promise.resolve();
+
+  async function write(entry: FileEntry, report: BundleReport) {
+    const updatedAt = new Date().toISOString();
+    const fileName = `${String(entry.ordinal).padStart(5, "0")}__${sanitizeStatusFileSegment(
+      entry.repoPath,
+    )}__status.json`;
+    const statusPath = path.join(absoluteStatusDir, fileName);
+    const statusRepoPath = toDisplayRepoPath(statusPath);
+
+    const payload = {
+      meta: {
+        runId: params.reportRunId,
+        reportType: "question_bundle_llm_chain_review_incremental_status",
+        startedAt: params.startedAt,
+        updatedAt,
+        shardIndex: params.shardIndex,
+        shardCount: params.shardCount,
+      },
+      bundle: {
+        ordinal: entry.ordinal,
+        path: entry.repoPath,
+        absolutePath: entry.absolutePath,
+      },
+      status: {
+        finalVerdict: report.finalVerdict,
+        formalBundleStatus: report.formalBundleStatus,
+        questionStatusIfImported: report.questionStatusIfImported,
+        reviewStatusEvidence: report.reviewStatusEvidence,
+      },
+      report,
+    };
+
+    writeChain = writeChain.then(async () => {
+      await mkdir(absoluteStatusDir, { recursive: true });
+      await writeFile(statusPath, formatJsonOutput(payload), "utf8");
+
+      const existingIndex = entries.findIndex((indexEntry) => indexEntry.ordinal === entry.ordinal);
+      const indexEntry = {
+        ordinal: entry.ordinal,
+        bundlePath: entry.repoPath,
+        statusPath: statusRepoPath,
+        finalVerdict: report.finalVerdict,
+        formalBundleStatus: report.formalBundleStatus,
+        reviewStatusEvidence: report.reviewStatusEvidence,
+        updatedAt,
+      };
+      if (existingIndex >= 0) {
+        entries[existingIndex] = indexEntry;
+      } else {
+        entries.push(indexEntry);
+      }
+      entries.sort((left, right) => left.ordinal - right.ordinal);
+
+      await writeFile(
+        indexPath,
+        formatJsonOutput({
+          meta: {
+            runId: params.reportRunId,
+            reportType: "question_bundle_llm_chain_review_incremental_status_index",
+            startedAt: params.startedAt,
+            updatedAt,
+            shardIndex: params.shardIndex,
+            shardCount: params.shardCount,
+            statusDir: statusDirRepoPath,
+          },
+          summary: {
+            totalBundlesPersisted: entries.length,
+            passedBundles: entries.filter((indexEntry) => indexEntry.finalVerdict === "pass")
+              .length,
+            failedBundles: entries.filter((indexEntry) => indexEntry.finalVerdict === "fail")
+              .length,
+          },
+          bundles: entries,
+        }),
+        "utf8",
+      );
+    });
+
+    await writeChain;
+  }
+
+  return {
+    statusDirRepoPath,
+    write,
+    flush: async () => {
+      await writeChain;
+    },
+  };
 }
 
 function buildAuditPayload(bundle: QuestionBundle) {
@@ -928,13 +1048,9 @@ async function main() {
     allowExternalLlm: args["allow-external-llm"] === true,
     operation: "bulk question-bundle LLM review and repair",
     purpose:
-      typeof args["external-llm-purpose"] === "string"
-        ? args["external-llm-purpose"]
-        : undefined,
+      typeof args["external-llm-purpose"] === "string" ? args["external-llm-purpose"] : undefined,
     consentPath:
-      typeof args["external-llm-consent"] === "string"
-        ? args["external-llm-consent"]
-        : undefined,
+      typeof args["external-llm-consent"] === "string" ? args["external-llm-consent"] : undefined,
     plannedProviders: plannedTargets.providers,
     plannedBaseUrls: plannedTargets.baseUrls,
     dataCategories: [
@@ -962,16 +1078,28 @@ async function main() {
         runIds,
       });
   const startedAt = new Date().toISOString();
+  const statusDir =
+    typeof args["status-dir"] === "string"
+      ? args["status-dir"]
+      : path.join("artifacts", "reports", year, reportRunId, "bundle-status");
+  const incrementalStatusWriter = createIncrementalStatusWriter({
+    statusDir,
+    reportRunId,
+    startedAt,
+    shardIndex,
+    shardCount,
+  });
 
   console.log(
     `LLM-CHAIN-START shard=${shardIndex}/${shardCount} files=${files.length} source=${
       manifest ? "manifest" : "papers"
-    } default=${env.LLM_PROVIDER_DEFAULT} backup=${env.LLM_PROVIDER_BACKUP} write=${write}`,
+    } default=${env.LLM_PROVIDER_DEFAULT} backup=${env.LLM_PROVIDER_BACKUP} write=${write} statusDir=${incrementalStatusWriter.statusDirRepoPath}`,
   );
 
   const bundleReports = await runPool(files, maxConcurrency, async (entry) => {
     try {
       const result = await reviewBundleFile(entry, { maxRepairAttempts, timeoutMs, write });
+      await incrementalStatusWriter.write(entry, result.report);
       console.log(
         `LLM-CHAIN-BUNDLE ${entry.repoPath} verdict=${result.report.finalVerdict} rewrites=${result.report.rewritesApplied} attempts=${result.report.reviewAttempts.length}`,
       );
@@ -1004,10 +1132,12 @@ async function main() {
         ],
         [],
       );
+      await incrementalStatusWriter.write(entry, report);
       console.log(`LLM-CHAIN-BUNDLE ${entry.repoPath} verdict=fail error=${message}`);
       return report;
     }
   });
+  await incrementalStatusWriter.flush();
 
   const summary = {
     totalBundles: bundleReports.length,
@@ -1038,6 +1168,7 @@ async function main() {
       runIds: runIds ? [...runIds] : undefined,
       write,
       timeoutMs,
+      incrementalStatusDir: incrementalStatusWriter.statusDirRepoPath,
     },
     status: {
       formalBundleStatus: summary.failedBundles === 0 ? "llm_chain_passed" : "llm_chain_failed",
