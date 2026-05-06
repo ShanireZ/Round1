@@ -61,6 +61,17 @@ function addPath(target, value) {
   }
 }
 
+function bundlePathFromValue(value) {
+  if (typeof value === "string") return value;
+  if (!value || typeof value !== "object") return undefined;
+  return value.path ?? value.bundlePath ?? value.sourceBundlePath;
+}
+
+function normalizeBundlePath(value) {
+  const bundlePath = bundlePathFromValue(value);
+  return isQuestionBundlePath(bundlePath) ? bundlePath.replaceAll("\\", "/") : undefined;
+}
+
 function pathHasTargetExam(bundlePath) {
   try {
     const bundle = readJson(bundlePath);
@@ -73,6 +84,15 @@ function pathHasTargetExam(bundlePath) {
   } catch {
     return false;
   }
+}
+
+function pathHasTargetExamHint(bundlePath) {
+  const normalized = bundlePath.replaceAll("\\", "/").toLowerCase();
+  return [...TARGET_EXAMS].some((exam) => normalized.includes(exam.toLowerCase()));
+}
+
+function pathHasTargetExamOrHint(bundlePath) {
+  return fs.existsSync(bundlePath) ? pathHasTargetExam(bundlePath) : pathHasTargetExamHint(bundlePath);
 }
 
 function collectReportPaths() {
@@ -165,8 +185,96 @@ function collectReportPaths() {
     passedPaths: targetPassed,
     failedPaths: targetFailed,
     supersededPaths: targetSuperseded,
+    rawPassedPaths: passed,
+    rawFailedPaths: failed,
+    rawSupersededPaths: superseded,
     evidence,
   };
+}
+
+function buildObsoleteReferencePaths(paths) {
+  const obsolete = new Set();
+  for (const bundlePath of [...paths.rawSupersededPaths, ...paths.rawFailedPaths]) {
+    if (!pathHasTargetExamOrHint(bundlePath)) continue;
+    if (
+      paths.rawPassedPaths.has(bundlePath) ||
+      paths.deletePaths.has(bundlePath) ||
+      !fs.existsSync(bundlePath)
+    ) {
+      obsolete.add(bundlePath);
+    }
+  }
+  return obsolete;
+}
+
+function filterPathArray(items, obsoletePaths) {
+  if (!Array.isArray(items)) return { value: items, removed: 0 };
+  const kept = [];
+  let removed = 0;
+  for (const item of items) {
+    const bundlePath = normalizeBundlePath(item);
+    if (bundlePath && obsoletePaths.has(bundlePath)) {
+      removed += 1;
+    } else {
+      kept.push(item);
+    }
+  }
+  return { value: kept, removed };
+}
+
+function scrubReportReferences(obsoletePaths, apply) {
+  const stats = {
+    obsoleteReferencePaths: obsoletePaths.size,
+    scannedFiles: 0,
+    changedFiles: 0,
+    removedReferences: 0,
+  };
+  if (obsoletePaths.size === 0) return stats;
+
+  for (const file of listJsonFiles(REPORT_ROOT)) {
+    stats.scannedFiles += 1;
+    const json = readJson(file);
+    let removed = 0;
+
+    for (const key of ["failedBundles", "rejectedBundles", "supersededBundlePaths"]) {
+      if (Array.isArray(json?.[key])) {
+        const result = filterPathArray(json[key], obsoletePaths);
+        json[key] = result.value;
+        removed += result.removed;
+      }
+    }
+
+    if (Array.isArray(json?.bundles)) {
+      const kept = [];
+      for (const bundle of json.bundles) {
+        const bundlePath = normalizeBundlePath(bundle);
+        const isObsoleteVerdict =
+          bundle?.finalVerdict === "fail" || bundle?.finalVerdict === "rejected";
+        if (bundlePath && isObsoleteVerdict && obsoletePaths.has(bundlePath)) {
+          removed += 1;
+        } else {
+          kept.push(bundle);
+        }
+      }
+      json.bundles = kept;
+    }
+
+    if (path.basename(file).includes("failed-manifest") && Array.isArray(json?.bundlePaths)) {
+      const result = filterPathArray(json.bundlePaths, obsoletePaths);
+      json.bundlePaths = result.value;
+      removed += result.removed;
+    }
+
+    if (removed > 0) {
+      stats.changedFiles += 1;
+      stats.removedReferences += removed;
+      if (apply) {
+        fs.writeFileSync(file, `${JSON.stringify(json, null, 2)}\n`);
+      }
+    }
+  }
+
+  return stats;
 }
 
 function contentHashesForBundle(bundlePath) {
@@ -654,7 +762,14 @@ async function writeSummary(summary) {
 async function main() {
   const apply = hasFlag("--apply");
   const write = hasFlag("--write");
-  const paths = collectReportPaths();
+  const scrubReferences = hasFlag("--scrub-report-references");
+  let paths = collectReportPaths();
+  const reportReferenceScrub = scrubReferences
+    ? scrubReportReferences(buildObsoleteReferencePaths(paths), apply)
+    : undefined;
+  if (scrubReferences && apply && reportReferenceScrub?.changedFiles > 0) {
+    paths = collectReportPaths();
+  }
   const deleteContentHashes = collectContentHashes(paths.deletePaths);
   const approvedContentHashes = collectContentHashes(paths.keepPaths);
 
@@ -688,6 +803,7 @@ async function main() {
     dbDeletePlan,
     dbDeleteStats,
     sourceDeleteStats,
+    ...(reportReferenceScrub ? { reportReferenceScrub } : {}),
     beforeStats,
     afterStats,
   };
