@@ -667,7 +667,8 @@ export const questionArchetypes: QuestionArchetype[] = [
       codeStructureTags: ["concept", "environment"],
       feature: "操作系统与路径概念",
       trapType: "absolute_relative_path",
-      promptDirective: "必须考操作系统、路径或文件概念中的可判定场景。",
+      promptDirective:
+        "必须给出当前目录、相对路径和至少 3 个路径解析/文件访问步骤，考最终访问对象或路径合法性；不得只问路径概念定义。",
     },
     {
       suffix: "network-ip-mask",
@@ -727,7 +728,8 @@ export const questionArchetypes: QuestionArchetype[] = [
       codeStructureTags: ["debug", "trace"],
       feature: "调试与变量跟踪",
       trapType: "breakpoint_position",
-      promptDirective: "必须考断点位置、变量值或调试输出的可追踪结果。",
+      promptDirective:
+        "必须给出带行号的 4-6 行小代码，明确断点是在执行某行之前还是之后，考至少 3 条语句后的变量值或调试输出；不得使用含糊的“执行到断点”。",
     },
     {
       suffix: "compiler-error-class",
@@ -757,7 +759,8 @@ export const questionArchetypes: QuestionArchetype[] = [
       codeStructureTags: ["memory", "concept"],
       feature: "内存与变量存储",
       trapType: "address_vs_value",
-      promptDirective: "必须考 CPU/内存/I/O 或变量地址和值的基础概念。",
+      promptDirective:
+        "必须用 3-5 步的小代码或表格考变量值、地址/引用和值拷贝的区别，答案需由状态变化推出；不得只问 CPU/内存/I/O 定义。",
     },
     {
       suffix: "algorithm-description",
