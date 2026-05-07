@@ -55,6 +55,11 @@ export const questionBundleCommands: StableScriptCommand[] = [
     summary: "批量执行 LLM 复核",
   },
   {
+    name: "repair-db-rewrite-queue",
+    scriptPath: "commands/repairDbQuestionRewriteQueue.ts",
+    summary: "按 diversity rewrite queue 生成 DB 题目替换 bundle",
+  },
+  {
     name: "export-imported-snapshots",
     scriptPath: "commands/exportImportedQuestionBundleSnapshots.ts",
     summary: "Export imported DB questions into reviewable question bundle snapshots",
