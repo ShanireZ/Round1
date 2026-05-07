@@ -2544,6 +2544,7 @@ async function main() {
         shardBundles: combos.length,
         shardQuestions: combos.length * args.questionsPerBundle,
         questionsPerBundle: args.questionsPerBundle,
+        providerLanePolicy: args.providerLanePolicy,
         shardIndex: args.shardIndex,
         shardCount: args.shardCount,
         inventoryPlan: selection.plan ?? null,
@@ -2553,7 +2554,7 @@ async function main() {
     return;
   }
 
-  const plannedTargets = collectPlannedExternalLlmTargets();
+  const plannedTargets = collectPlannedExternalLlmTargets(args.providerLanePolicy);
   const externalLlmDisclosure = assertExternalLlmAllowed({
     allowExternalLlm: args.allowExternalLlm,
     operation: "bulk question-bundle LLM generation, review, repair, and fallback regeneration",
@@ -2578,7 +2579,9 @@ async function main() {
       combos.length * args.questionsPerBundle
     } default=${env.LLM_PROVIDER_DEFAULT} backup=${env.LLM_PROVIDER_BACKUP} concurrency=${
       args.maxConcurrency
-    } shard=${args.shardIndex}/${args.shardCount} inventory=${args.inventoryPath ?? "none"}`,
+    } providerLane=${args.providerLanePolicy} shard=${args.shardIndex}/${args.shardCount} inventory=${
+      args.inventoryPath ?? "none"
+    }`,
   );
 
   const results = await runPool(combos, args.maxConcurrency, async (combo) => {
@@ -2600,6 +2603,7 @@ async function main() {
         skipExisting: args.skipExisting,
         dryRun: args.dryRun,
         dbDuplicateChecks: args.dbDuplicateChecks,
+        providerLanePolicy: args.providerLanePolicy,
         seenHashes,
       });
     } catch (error) {
@@ -2610,6 +2614,7 @@ async function main() {
           pipelineLabel,
           runDate,
           questionsPerBundle: args.questionsPerBundle,
+          providerLanePolicy: args.providerLanePolicy,
           error,
         }),
       };
@@ -2634,6 +2639,7 @@ async function main() {
     overwrite: args.overwrite,
     dryRun: args.dryRun,
     externalLlmDisclosure,
+    providerLanePolicy: args.providerLanePolicy,
   });
 
   if (args.inventoryReportDir && selection.plan) {
