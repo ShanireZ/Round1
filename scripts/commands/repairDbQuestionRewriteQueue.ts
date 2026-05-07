@@ -29,6 +29,10 @@ import { assertExternalLlmAllowed } from "../lib/externalLlmDisclosure.js";
 import { extractJsonObject } from "../lib/modelJson.js";
 import { classifyQuestionDiversity } from "../lib/questionDiversity.js";
 import {
+  ScriptSceneContinuationError,
+  callScriptSceneWithContinuation,
+} from "../lib/scriptConversation.js";
+import {
   callScriptLlmScene,
   resolveScriptProviderChain,
   type CallScriptLlmSceneResult,
@@ -369,7 +373,10 @@ function buildRepairPrompt(params: {
     "保持不变：questionType、difficulty、primaryKpCode、examTypes、source。",
     "必须修复：低质量、hard 难度不达标、参数化模板、DS stack/queue 过载等队列原因。",
     "CSP-J hard 题必须有至少两步推理或非平凡状态跟踪，不得是一眼可得的定义题或单步计算。",
-    "如果是 DS 且原因包含 stack/queue 过载，优先改写为 priority_queue、deque、set/map、图遍历、并查集、复合状态模拟等更有区分度的内容；不要继续产出普通栈/普通队列模板题。",
+    "hard 单选题也必须包含可追踪的 C++ 代码片段、状态表或操作序列；不能只问概念定义、容器性质或最终一步计算。",
+    "如果是 DS 且原因包含 stack/queue 过载，必须改写为 priority_queue、deque/单调队列、set/map、图遍历、并查集、复合状态模拟或二分边界维护之一；不要继续产出普通栈/普通队列模板题。",
+    "DS hard 题题干中应出现至少两个状态量或结构标签，例如堆顶与占用集合、deque 前后端与窗口左界、set 迭代器与删除位置、BFS 层数与访问标记。",
+    "优先参考这类素材思想：单调队列滑窗、双堆调度、set 前驱后继、分层 BFS、二分答案边界；不要照抄外部题面或代码。",
     "单选题必须恰好四个选项且唯一正确，answer 使用 A/B/C/D。",
     "阅读程序题必须是确定性、自包含 C++，不依赖 stdin，不出现样例输入/样例输出表述，answerJson.subQuestions 与 contentJson.subQuestions 一一对应。",
     "完善程序题必须给出可理解的 cppCode、fullCode、blanks；answerJson.blanks 与 blank id 一一对应。",
@@ -603,34 +610,66 @@ async function callRepair(params: {
   timeoutMs: number;
   previousError?: string;
 }) {
-  const result = await callScriptLlmScene({
-    scene: "generate",
-    system: [
-      "你是谨慎的信息学竞赛题库修复员。",
-      "你必须输出合法 JSON，不能输出 Markdown。",
-      "你会保留题型、难度、主知识点和考试类型，只修复题目内容、答案与解析。",
-    ].join("\n"),
-    prompt: buildRepairPrompt(params),
-    maxTokens: 3600,
-    timeoutMs: params.timeoutMs,
-    allowBackupFallback: true,
+  const system = [
+    "你是谨慎的信息学竞赛题库修复员。",
+    "你必须输出合法 JSON，不能输出 Markdown。",
+    "你会保留题型、难度、主知识点和考试类型，只修复题目内容、答案与解析。",
+  ].join("\n");
+  const prompt = buildRepairPrompt(params);
+  return callScriptSceneWithContinuation({
+    initialPrompt: prompt,
+    maxContinuationTurns: 1,
+    call: ({ prompt: currentPrompt, messages }) =>
+      callScriptLlmScene({
+        scene: "generate",
+        system,
+        prompt: currentPrompt,
+        messages,
+        maxTokens: 3600,
+        timeoutMs: params.timeoutMs,
+        allowBackupFallback: true,
+      }),
+    parse: (text) => parseRepairResponse(text),
+    buildContinuationPrompt: ({ error }) => {
+      const message = error instanceof Error ? error.message : String(error);
+      return [
+        `上一轮输出无法解析为目标 JSON：${message}`,
+        "请只返回一个 JSON object，不要解释，不要 Markdown，不要代码块。",
+        '目标格式：{"contentJson":{},"answerJson":{},"explanationJson":{"explanation":"..."},"repairNotes":"..."}',
+      ].join("\n");
+    },
   });
-  return { result, parsed: parseRepairResponse(result.text) };
 }
 
 async function callJudge(item: QuestionBundleItem, timeoutMs: number) {
-  const result = await callScriptLlmScene({
-    scene: "judge",
-    system: [
-      "你是严格的信息学竞赛题目审核员。",
-      "你必须独立验算答案，且只输出合法 JSON。",
-    ].join("\n"),
-    prompt: buildJudgePrompt(item),
-    maxTokens: 1600,
-    timeoutMs,
-    allowBackupFallback: true,
+  const system = [
+    "你是严格的信息学竞赛题目审核员。",
+    "你必须独立验算答案，且只输出合法 JSON。",
+  ].join("\n");
+  const prompt = buildJudgePrompt(item);
+  return callScriptSceneWithContinuation({
+    initialPrompt: prompt,
+    maxContinuationTurns: 1,
+    call: ({ prompt: currentPrompt, messages }) =>
+      callScriptLlmScene({
+        scene: "judge",
+        system,
+        prompt: currentPrompt,
+        messages,
+        maxTokens: 1600,
+        timeoutMs,
+        allowBackupFallback: true,
+      }),
+    parse: (text) => parseJudgeResponse(text),
+    buildContinuationPrompt: ({ error }) => {
+      const message = error instanceof Error ? error.message : String(error);
+      return [
+        `上一轮审核输出无法解析为目标 JSON：${message}`,
+        "请只返回一个 JSON object，不要解释，不要 Markdown，不要代码块。",
+        '目标格式：{"approved":true,"confidence":0.0,"issues":[],"qualityScore":0.0,"difficultyFit":"pass"}',
+      ].join("\n");
+    },
   });
-  return { result, parsed: parseJudgeResponse(result.text) };
 }
 
 function slugifySegment(value: string) {
@@ -818,11 +857,22 @@ async function repairOne(params: {
         ],
       };
     } catch (error) {
+      if (error instanceof ScriptSceneContinuationError) {
+        if (repairResult) {
+          judgeResult ??= error.result;
+        } else {
+          repairResult = error.result;
+        }
+      }
       previousError = error instanceof Error ? error.message : String(error);
       attempts.push({
         attempt,
         status: "failed",
         error: previousError,
+        rawSnippet:
+          error instanceof ScriptSceneContinuationError
+            ? error.result.text.slice(0, 600)
+            : undefined,
         repairProvider: summarizeProvider(repairResult),
         judgeProvider: summarizeProvider(judgeResult),
       });
