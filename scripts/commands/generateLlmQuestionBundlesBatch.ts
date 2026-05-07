@@ -8,6 +8,11 @@ import { blueprintSpecs } from "../../config/blueprint.js";
 import { env } from "../../config/env.js";
 import { EXAM_TYPES, type ExamType } from "../../config/examTypes.js";
 import {
+  DIVERSITY_POLICY_VERSION,
+  buildArchetypePlanForBundle,
+  type ArchetypePlanItem,
+} from "../../config/questionArchetypes.js";
+import {
   createProviderLanguageModel,
   getSceneExecutionChain,
   type LLMLane,
@@ -39,6 +44,14 @@ import {
 import { defaultOfflineReportPath, defaultQuestionBundleOutputPath } from "../lib/paperPaths.js";
 import { extractJsonObject } from "../lib/modelJson.js";
 import { validateQuestionBundle } from "../lib/questionBundleWorkflow.js";
+import {
+  attachPlannedDiversityMeta,
+  classifyQuestionDiversity,
+  formatDiversityIssue,
+  refreshBundleDiversityMeta,
+  validateBundleDiversity,
+  type DiversityValidationResult,
+} from "../lib/questionDiversity.js";
 import { toDisplayRepoPath } from "../lib/scriptCli.js";
 
 (globalThis as typeof globalThis & { AI_SDK_LOG_WARNINGS?: boolean }).AI_SDK_LOG_WARNINGS = false;
@@ -81,6 +94,7 @@ interface InventoryFulfillmentPlan {
 interface GeneratedBundle {
   bundle: QuestionBundle;
   combo: Combo;
+  archetypePlan: ArchetypePlanItem[];
   outputPath: string;
   repoPath: string;
   generation: {
@@ -109,6 +123,16 @@ interface ReviewAttemptReport {
   verdict: "pass" | "fail" | "error";
   issueCount: number;
   issues: Array<AuditIssue & { itemIndex: number }>;
+  qualityScores?: Array<{
+    itemIndex: number;
+    reasoningSteps: number;
+    stateVariables: number;
+    conceptCount: number;
+    traceSteps: number;
+    trapType: string | null;
+    difficultyFit: "pass" | "warning" | "fail";
+    qualityScore: number;
+  }>;
   notes?: string;
   error?: string;
 }
@@ -154,6 +178,19 @@ interface BundleReport {
   published: false;
   rewritesApplied: number;
   validationErrors: ImportError[];
+  diversityPolicyVersion?: string;
+  archetypePlan?: ArchetypePlanItem[];
+  diversityGateResult?: DiversityValidationResult;
+  qualityScores?: Array<{
+    itemIndex: number;
+    reasoningSteps: number;
+    stateVariables: number;
+    conceptCount: number;
+    traceSteps: number;
+    trapType: string | null;
+    difficultyFit: "pass" | "warning" | "fail";
+    qualityScore: number;
+  }>;
   reviewAttempts: ReviewAttemptReport[];
   repairAttempts: RepairAttemptReport[];
   checksum: string;
@@ -254,6 +291,13 @@ const auditItemSchema = z.object({
   itemIndex: z.number().int().min(0),
   verdict: z.enum(["pass", "fail"]),
   confidence: z.number().min(0).max(1),
+  reasoningSteps: z.number().int().min(0).optional(),
+  stateVariables: z.number().int().min(0).optional(),
+  conceptCount: z.number().int().min(0).optional(),
+  traceSteps: z.number().int().min(0).optional(),
+  trapType: z.string().nullable().optional(),
+  difficultyFit: z.enum(["pass", "warning", "fail"]).optional(),
+  qualityScore: z.number().min(0).max(1).optional(),
   issues: z.array(issueSchema).default([]),
 });
 
@@ -887,12 +931,35 @@ function buildComboSpecificInstruction(combo: Combo): string {
   return "";
 }
 
+function buildArchetypeInstructionBlock(params: {
+  plans: ArchetypePlanItem[];
+  difficulty: Difficulty;
+}) {
+  return [
+    "Diversity blueprint for this response:",
+    `Policy version: ${DIVERSITY_POLICY_VERSION}`,
+    "Follow the itemIndex mapping exactly. Do not collapse two requested archetypes into the same template.",
+    ...params.plans.map((plan) =>
+      [
+        `- itemIndex ${plan.itemIndex}: archetypeId=${plan.archetypeId}; taskFlavor=${plan.taskFlavor}.`,
+        `  Required directive: ${plan.promptDirective}`,
+        `  Difficulty rubric for ${params.difficulty}: conceptCount>=${plan.difficultyProfile.conceptCount}, stateVariables>=${plan.difficultyProfile.stateVariables}, traceSteps=${plan.difficultyProfile.traceSteps[0]}-${plan.difficultyProfile.traceSteps[1]}, requiredFeature=${plan.difficultyProfile.requiredFeature}${
+          plan.difficultyProfile.trapType ? `, trapType=${plan.difficultyProfile.trapType}` : ""
+        }.`,
+        `  Reject rules: ${plan.rejectRules.join("；")}`,
+      ].join("\n"),
+    ),
+    "For hard difficulty, a single loop-count or final-scalar trace is not acceptable unless combined with a boundary, invariant, nested container, or counterexample trap.",
+  ].join("\n");
+}
+
 function buildGenerationPrompt(params: {
   combo: Combo;
   count: number;
   kpName: string;
   batchRunId: string;
   attempt: number;
+  archetypePlans: ArchetypePlanItem[];
 }) {
   return [
     "Generate original Chinese information-olympiad practice questions.",
@@ -915,6 +982,10 @@ function buildGenerationPrompt(params: {
     "If a question depends on C++ boolean-to-integer conversion, make the context explicit, such as asking for the output of cout << (...).",
     "For medium difficulty, require 1-2 reasoning steps. For hard difficulty, require a nontrivial trace or combined concept.",
     "Keep primaryKpCode exactly equal to the requested code. auxiliaryKpCodes may be empty.",
+    buildArchetypeInstructionBlock({
+      plans: params.archetypePlans,
+      difficulty: params.combo.difficulty,
+    }),
     buildComboSpecificInstruction(params.combo),
     buildQuestionTypeInstruction(params.combo.questionType),
   ].join("\n");
@@ -1213,6 +1284,7 @@ async function generateBundle(params: {
   questionsPerBundle: number;
   kpName: string;
   batchRunId: string;
+  seed: string;
   agentLabel: string;
   pipelineLabel: string;
   runDate: string;
@@ -1229,8 +1301,17 @@ async function generateBundle(params: {
   let generationModel: string | undefined;
   let inputTokens = 0;
   let outputTokens = 0;
+  const archetypePlan = buildArchetypePlanForBundle({
+    examType: params.combo.examType,
+    questionType: params.combo.questionType,
+    kpGroup: params.combo.primaryKpCode,
+    difficulty: params.combo.difficulty,
+    bundleNo: params.combo.bundleNo,
+    questionsPerBundle: params.questionsPerBundle,
+    seed: params.seed,
+  });
 
-  async function generateItems(count: number, attempt: number) {
+  async function generateItems(count: number, attempt: number, itemPlans: ArchetypePlanItem[]) {
     const responseSchema = z.object({
       items: z.array(itemSchema).length(count),
     });
@@ -1240,6 +1321,7 @@ async function generateBundle(params: {
       kpName: params.kpName,
       batchRunId: params.batchRunId,
       attempt,
+      archetypePlans: itemPlans,
     });
     prompts.push(prompt);
     const { result, parsed } = await callJsonScene({
@@ -1259,16 +1341,29 @@ async function generateBundle(params: {
     generationModel ??= result.model;
     inputTokens += result.inputTokens;
     outputTokens += result.outputTokens;
-    return parsed.items.map((item) =>
-      normalizeGeneratedQuestion(item as Record<string, unknown>, params.combo),
+    return parsed.items.map((item, index) =>
+      attachPlannedDiversityMeta(
+        normalizeGeneratedQuestion(item as Record<string, unknown>, params.combo),
+        itemPlans[index]!,
+      ),
     );
   }
 
   if (params.combo.questionType === "single_choice") {
-    items.push(...(await generateItems(params.questionsPerBundle, params.generationAttempt)));
+    items.push(
+      ...(await generateItems(
+        params.questionsPerBundle,
+        params.generationAttempt,
+        archetypePlan,
+      )),
+    );
   } else {
     for (let itemIndex = 0; itemIndex < params.questionsPerBundle; itemIndex += 1) {
-      items.push(...(await generateItems(1, params.generationAttempt * 100 + itemIndex + 1)));
+      items.push(
+        ...(await generateItems(1, params.generationAttempt * 100 + itemIndex + 1, [
+          archetypePlan[itemIndex]!,
+        ])),
+      );
     }
   }
 
@@ -1322,6 +1417,7 @@ async function generateBundle(params: {
   return {
     bundle,
     combo: params.combo,
+    archetypePlan,
     outputPath,
     repoPath: toRepoPath(outputPath),
     generation: {
@@ -1455,11 +1551,14 @@ function buildAuditPrompt(bundle: QuestionBundle, round: "review-pass-1" | "revi
     "- reading_program/completion_program code is deterministic, self-contained C++17 without undefined behavior;",
     "- completion answers match blank ids and fullCode behavior;",
     "- no external image, file, URL, or copyright-sensitive copied problem text is required.",
+    "- the item follows its diversityMeta.archetypeId and taskFlavor; do not accept a generic template that ignores the archetype directive;",
+    "- difficulty must meet the measurable rubric: easy uses one concept and a short 3-5 step trace; medium combines 2 concepts or 2-3 state variables with a boundary/branch; hard requires multiple states plus an invariant, nested container, complexity boundary, or explicit trapType;",
+    "- hard items that only ask for loop iteration count or one final scalar value must fail.",
     "Report only defects. Do not include positive observations as issues.",
     "If any item verdict is fail, include at least one concrete issue for that item. Do not put defects only in notes.",
     "If bundleVerdict is fail, at least one item must contain a major or blocker issue.",
     "Use severity major or blocker for answer errors, ambiguous stems, invalid code, impossible blanks, malformed options, or metadata that changes the target bucket.",
-    'Output schema: {"bundleVerdict":"pass|fail","items":[{"itemIndex":0,"verdict":"pass|fail","confidence":0.0,"issues":[{"code":"...","severity":"minor|major|blocker","message":"..."}]}],"notes":"..."}',
+    'Output schema: {"bundleVerdict":"pass|fail","items":[{"itemIndex":0,"verdict":"pass|fail","confidence":0.0,"reasoningSteps":0,"stateVariables":0,"conceptCount":0,"traceSteps":0,"trapType":"... or null","difficultyFit":"pass|warning|fail","qualityScore":0.0,"issues":[{"code":"...","severity":"minor|major|blocker","message":"..."}]}],"notes":"..."}',
     "Input bundle:",
     JSON.stringify(buildAuditPayload(bundle), null, 2),
   ].join("\n");
@@ -1492,6 +1591,13 @@ function normalizeAuditIssue(
   itemIndex: number,
 ): (AuditIssue & { itemIndex: number }) | null {
   const combined = `${issue.code} ${issue.message}`.toLowerCase();
+  if (/(quality|diversity|archetype|rubric|taskflavor|template|hard_difficulty)/i.test(issue.code)) {
+    return {
+      ...issue,
+      itemIndex,
+      severity: issue.severity === "minor" ? "major" : issue.severity,
+    };
+  }
   if (/answer[_ -]?correct|correct answer|supplied answer is correct/.test(combined)) {
     return null;
   }
@@ -1542,6 +1648,22 @@ function extractReviewIssues(
       });
     }
     issues.push(...itemIssues);
+    if (item.qualityScore !== undefined && item.qualityScore < 0.65) {
+      issues.push({
+        itemIndex: item.itemIndex,
+        code: "QUALITY_SCORE_BELOW_THRESHOLD",
+        severity: "major",
+        message: `LLM qualityScore ${item.qualityScore} is below 0.65.`,
+      });
+    }
+    if (item.difficultyFit === "fail") {
+      issues.push({
+        itemIndex: item.itemIndex,
+        code: "DIFFICULTY_RUBRIC_FAILED",
+        severity: "major",
+        message: "LLM marked the item as failing the measurable difficulty rubric.",
+      });
+    }
     if (item.confidence < 0.6) {
       issues.push({
         itemIndex: item.itemIndex,
@@ -1583,6 +1705,42 @@ function extractReviewIssues(
   return issues.filter((issue) => issue.severity !== "minor");
 }
 
+function qualityScoresForBundle(bundle: QuestionBundle) {
+  return bundle.items.map((item, itemIndex) => {
+    const metrics = classifyQuestionDiversity(item);
+    return {
+      itemIndex,
+      ...metrics.quality,
+    };
+  });
+}
+
+function qualityScoresForAudit(audit: AuditResponse, bundle: QuestionBundle) {
+  const fallback = new Map(qualityScoresForBundle(bundle).map((score) => [score.itemIndex, score]));
+  return audit.items.map((item) => {
+    const fallbackScore = fallback.get(item.itemIndex) ?? {
+      itemIndex: item.itemIndex,
+      reasoningSteps: 0,
+      stateVariables: 0,
+      conceptCount: 0,
+      traceSteps: 0,
+      trapType: null,
+      difficultyFit: "fail" as const,
+      qualityScore: 0,
+    };
+    return {
+      itemIndex: item.itemIndex,
+      reasoningSteps: item.reasoningSteps ?? fallbackScore.reasoningSteps,
+      stateVariables: item.stateVariables ?? fallbackScore.stateVariables,
+      conceptCount: item.conceptCount ?? fallbackScore.conceptCount,
+      traceSteps: item.traceSteps ?? fallbackScore.traceSteps,
+      trapType: item.trapType ?? fallbackScore.trapType,
+      difficultyFit: item.difficultyFit ?? fallbackScore.difficultyFit,
+      qualityScore: item.qualityScore ?? fallbackScore.qualityScore,
+    };
+  });
+}
+
 function buildRepairPrompt(
   bundle: QuestionBundle,
   issues: Array<AuditIssue & { itemIndex: number }>,
@@ -1594,6 +1752,7 @@ function buildRepairPrompt(
     "Do not change itemIndex, question type, exam type, difficulty, or primary knowledge point.",
     "For each listed itemIndex, return complete replacement contentJson, answerJson, and explanationJson matching the original item type schema.",
     "If repairing reading_program code, keep it self-contained, do not read stdin, and keep sampleInputs/expectedOutputs empty. If repairing completion_program code, keep sampleInputs/expectedOutputs consistent.",
+    "Preserve the original diversityMeta intent: the repaired item must still match its archetypeId/taskFlavor and meet the difficulty rubric.",
     `You must return exactly these item indexes: ${indexes.join(", ")}.`,
     'Output schema: {"items":[{"itemIndex":0,"contentJson":{},"answerJson":{},"explanationJson":{},"repairNotes":"..."}]}',
     "Issues:",
@@ -1769,16 +1928,76 @@ async function reviewBundle(params: {
   reviewAttempts: ReviewAttemptReport[];
   repairAttempts: RepairAttemptReport[];
   validationErrors: ImportError[];
+  diversityGateResult: DiversityValidationResult;
   rewritesApplied: number;
 }> {
   let bundle = params.generated.bundle;
   let validationErrors: ImportError[] = [];
+  let diversityGateResult: DiversityValidationResult = {
+    policyVersion: DIVERSITY_POLICY_VERSION,
+    enforced: false,
+    errors: [],
+    warnings: [],
+  };
   const reviewAttempts: ReviewAttemptReport[] = [];
   const repairAttempts: RepairAttemptReport[] = [];
   let rewritesApplied = 0;
 
   for (let repairCycle = 0; repairCycle <= params.maxRepairCycles; repairCycle += 1) {
     bundle = await normalizeCodeSampleOutputs(bundle);
+    bundle = refreshBundleDiversityMeta(bundle);
+    diversityGateResult = validateBundleDiversity(bundle, params.generated.repoPath);
+    if (diversityGateResult.errors.length > 0) {
+      validationErrors = diversityGateResult.errors.map((issue) => ({
+        code: issue.code,
+        message: formatDiversityIssue(issue),
+        itemIndex: issue.itemIndex,
+      }));
+      if (repairCycle >= params.maxRepairCycles) {
+        break;
+      }
+      const syntheticIssues = validationErrors.map((error) => ({
+        itemIndex: error.itemIndex ?? 0,
+        code: error.code,
+        severity: "major" as const,
+        message: error.message,
+      }));
+      const diversityRepairLane: LLMLane =
+        params.providerLanePolicy === "default-only" ? "default" : "backup";
+      try {
+        const repair = await callRepair({
+          bundle,
+          lane: diversityRepairLane,
+          issues: syntheticIssues,
+          timeoutMs: params.timeoutMs,
+          llmJsonAttempts: params.llmJsonAttempts,
+        });
+        const restrictedRepair = restrictRepairResponse(
+          repair.parsed,
+          new Set(syntheticIssues.map((issue) => issue.itemIndex)),
+        );
+        bundle = applyRepairResponse(bundle, restrictedRepair);
+        rewritesApplied += restrictedRepair.items.length;
+        repairAttempts.push({
+          repairCycle,
+          lane: diversityRepairLane,
+          providerName: repair.result.providerName,
+          model: repair.result.model,
+          inputTokens: repair.result.inputTokens,
+          outputTokens: repair.result.outputTokens,
+          repairedItems: restrictedRepair.items.map((item) => item.itemIndex),
+        });
+        continue;
+      } catch (error) {
+        repairAttempts.push({
+          repairCycle,
+          lane: diversityRepairLane,
+          repairedItems: [],
+          error: error instanceof Error ? error.message : String(error),
+        });
+        break;
+      }
+    }
     const validation = await validateAndFinalizeBundle(bundle, params.generated.outputPath, {
       dbDuplicateChecks: params.dbDuplicateChecks,
     });
@@ -1865,6 +2084,7 @@ async function reviewBundle(params: {
           verdict,
           issueCount: issues.length,
           issues,
+          qualityScores: qualityScoresForAudit(audit.parsed, bundle),
           notes: audit.parsed.notes,
         });
         if (issues.length > 0) {
@@ -1902,6 +2122,7 @@ async function reviewBundle(params: {
         reviewAttempts,
         repairAttempts,
         validationErrors: [],
+        diversityGateResult,
         rewritesApplied,
       };
     }
@@ -1913,6 +2134,7 @@ async function reviewBundle(params: {
         reviewAttempts,
         repairAttempts,
         validationErrors,
+        diversityGateResult,
         rewritesApplied,
       };
     }
@@ -1957,6 +2179,7 @@ async function reviewBundle(params: {
         reviewAttempts,
         repairAttempts,
         validationErrors,
+        diversityGateResult,
         rewritesApplied,
       };
     }
@@ -1968,6 +2191,7 @@ async function reviewBundle(params: {
     reviewAttempts,
     repairAttempts,
     validationErrors,
+    diversityGateResult,
     rewritesApplied,
   };
 }
@@ -2008,6 +2232,7 @@ function buildBundleReport(params: {
   validationErrors: ImportError[];
   reviewAttempts: ReviewAttemptReport[];
   repairAttempts: RepairAttemptReport[];
+  diversityGateResult: DiversityValidationResult;
   rewritesApplied: number;
 }): BundleReport {
   const raw = `${JSON.stringify(params.bundle, null, 2)}\n`;
@@ -2034,6 +2259,10 @@ function buildBundleReport(params: {
     published: false,
     rewritesApplied: params.rewritesApplied,
     validationErrors: params.validationErrors,
+    diversityPolicyVersion: DIVERSITY_POLICY_VERSION,
+    archetypePlan: params.generated.archetypePlan,
+    diversityGateResult: params.diversityGateResult,
+    qualityScores: qualityScoresForBundle(params.bundle),
     reviewAttempts: params.reviewAttempts,
     repairAttempts: params.repairAttempts,
     checksum: computeChecksum(raw),
@@ -2110,6 +2339,7 @@ async function processCombo(params: {
   questionsPerBundle: number;
   kpNames: Map<string, string>;
   batchRunId: string;
+  seed: string;
   agentLabel: string;
   pipelineLabel: string;
   runDate: string;
@@ -2187,6 +2417,7 @@ async function processCombo(params: {
         questionsPerBundle: params.questionsPerBundle,
         kpName: params.kpNames.get(params.combo.primaryKpCode) ?? params.combo.primaryKpCode,
         batchRunId: params.batchRunId,
+        seed: params.seed,
         agentLabel: params.agentLabel,
         pipelineLabel: params.pipelineLabel,
         runDate: params.runDate,
@@ -2214,6 +2445,7 @@ async function processCombo(params: {
         validationErrors: review.validationErrors,
         reviewAttempts: review.reviewAttempts,
         repairAttempts: review.repairAttempts,
+        diversityGateResult: review.diversityGateResult,
         rewritesApplied: review.rewritesApplied,
       });
       if (review.finalVerdict === "fail" && generationAttempt < params.maxGenerationAttempts) {
@@ -2357,10 +2589,41 @@ async function writeReport(params: {
     failedBundles: params.reports.filter((report) => report.finalVerdict === "fail").length,
     rewritesApplied: params.reports.reduce((sum, report) => sum + report.rewritesApplied, 0),
   };
+  const qualityScores = params.reports.flatMap((report) => report.qualityScores ?? []);
+  const diversitySummary = {
+    policyVersion: DIVERSITY_POLICY_VERSION,
+    bundleGateErrors: params.reports.reduce(
+      (sum, report) => sum + (report.diversityGateResult?.errors.length ?? 0),
+      0,
+    ),
+    lowQualityItems: qualityScores.filter((score) => score.qualityScore < 0.65).length,
+    averageQualityScore:
+      qualityScores.length === 0
+        ? null
+        : Number(
+            (
+              qualityScores.reduce((sum, score) => sum + score.qualityScore, 0) /
+              qualityScores.length
+            ).toFixed(4),
+          ),
+    archetypeDistribution: params.reports.reduce<Record<string, number>>((counts, report) => {
+      for (const plan of report.archetypePlan ?? []) {
+        counts[plan.archetypeId] = (counts[plan.archetypeId] ?? 0) + 1;
+      }
+      return counts;
+    }, {}),
+    taskFlavorDistribution: params.reports.reduce<Record<string, number>>((counts, report) => {
+      for (const plan of report.archetypePlan ?? []) {
+        counts[plan.taskFlavor] = (counts[plan.taskFlavor] ?? 0) + 1;
+      }
+      return counts;
+    }, {}),
+  };
   const report = {
     meta: {
       runId: params.batchRunId,
       reportType: "llm_question_bundle_generation_2026",
+      diversityPolicyVersion: DIVERSITY_POLICY_VERSION,
       startedAt: params.startedAt,
       finishedAt: new Date().toISOString(),
       outputRoot: "papers/2026",
@@ -2409,6 +2672,7 @@ async function writeReport(params: {
         }
       : undefined,
     summary,
+    diversity: diversitySummary,
     distribution: summarizeDistribution(params.reports),
     bundles: params.reports,
   };
@@ -2521,15 +2785,42 @@ async function main() {
 
   if (args.planOnly) {
     const distribution: Record<string, number> = {};
+    const archetypeDistribution: Record<string, number> = {};
+    const taskFlavorDistribution: Record<string, number> = {};
+    const archetypePlan = combos.map((combo) => ({
+      bundleNo: combo.bundleNo,
+      examType: combo.examType,
+      questionType: combo.questionType,
+      difficulty: combo.difficulty,
+      primaryKpCode: combo.primaryKpCode,
+      items: buildArchetypePlanForBundle({
+        examType: combo.examType,
+        questionType: combo.questionType,
+        kpGroup: combo.primaryKpCode,
+        difficulty: combo.difficulty,
+        bundleNo: combo.bundleNo,
+        questionsPerBundle: args.questionsPerBundle,
+        seed: args.seed,
+      }),
+    }));
     for (const combo of combos) {
       const key = [combo.examType, combo.questionType, combo.difficulty, combo.primaryKpCode].join(
         "|",
       );
       distribution[key] = (distribution[key] ?? 0) + args.questionsPerBundle;
     }
+    for (const bundlePlan of archetypePlan) {
+      for (const itemPlan of bundlePlan.items) {
+        archetypeDistribution[itemPlan.archetypeId] =
+          (archetypeDistribution[itemPlan.archetypeId] ?? 0) + 1;
+        taskFlavorDistribution[itemPlan.taskFlavor] =
+          (taskFlavorDistribution[itemPlan.taskFlavor] ?? 0) + 1;
+      }
+    }
     console.log(
       `LLM-BULK-PLAN ${JSON.stringify({
         batchRunId: args.batchRunId,
+        diversityPolicyVersion: DIVERSITY_POLICY_VERSION,
         inventoryPath: args.inventoryPath ?? null,
         totalBundles: selection.combos.length,
         shardBundles: combos.length,
@@ -2540,6 +2831,9 @@ async function main() {
         shardCount: args.shardCount,
         inventoryPlan: selection.plan ?? null,
         distribution,
+        archetypeDistribution,
+        taskFlavorDistribution,
+        archetypePlan,
       })}`,
     );
     return;
@@ -2583,6 +2877,7 @@ async function main() {
         questionsPerBundle: args.questionsPerBundle,
         kpNames,
         batchRunId: args.batchRunId,
+        seed: args.seed,
         agentLabel,
         pipelineLabel,
         runDate,

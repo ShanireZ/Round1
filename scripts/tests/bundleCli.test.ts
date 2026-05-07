@@ -35,6 +35,13 @@ assert.equal(
   "commands/llmReviewQuestionBundlesBatch.ts",
 );
 assert.equal(
+  resolveCommand(
+    (await import("../audit.js")).auditCommands,
+    "audit-question-diversity-2026",
+  ).scriptPath,
+  "commands/audit/auditQuestionDiversity2026.ts",
+);
+assert.equal(
   resolveCommand(questionBundleCommands, "export-imported-snapshots").scriptPath,
   "commands/exportImportedQuestionBundleSnapshots.ts",
 );

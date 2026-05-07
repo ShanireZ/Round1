@@ -114,8 +114,9 @@ question bundle apply 前必须通过：
 2. 题型/知识点/考试类型枚举校验。
 3. 结构完整性和答案解析一致性校验。
 4. 去重校验。
-5. 程序题 sandbox 或等价离线校验。
-6. LLM 判官或人工抽样复核（按批次风险决定）。
+5. 带 `diversityMeta.policyVersion` 的 LLM 批次必须通过题型多样性门禁：bundle 内不重复 archetype/参数化模板，shard 内限制 `taskFlavor` 与 `archetypeId` 占比，DS shard 限制 stack/queue 过载并覆盖多类容器标签。
+6. 程序题 sandbox 或等价离线校验。
+7. LLM 判官或人工抽样复核（按批次风险决定），其中新 LLM 批次必须记录可验证难度 rubric 与质量分。
 
 prebuilt paper bundle apply 前必须通过：
 
@@ -134,6 +135,8 @@ prebuilt paper bundle apply 前必须通过：
 | high | 真题批量导入、预制卷批量发布、程序题大批生成 | sandbox、官方答案比对、人工复核、发布 smoke |
 
 风险越高，越要增加确定性校验和人工抽样；不要用“模型看起来没问题”替代答案一致性和结构校验。
+
+LLM 模拟题批次应在导入前运行 `audit-question-diversity-2026` 或同等 workflow。旧历史 bundle 可以只作为审计输入；带新 diversity policy 的 bundle dry-run/apply 失败不得绕过。
 
 ## Admin 导入
 

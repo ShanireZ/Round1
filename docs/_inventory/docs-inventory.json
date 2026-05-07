@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-05-07T01:32:55.840Z",
+  "generatedAt": "2026-05-07T02:24:29.337Z",
   "sourceDir": "docs",
   "summary": {
-    "markdownFiles": 28,
+    "markdownFiles": 29,
     "rootDocs": 5,
-    "planDocs": 23,
+    "planDocs": 24,
     "filesWithoutStatusHeader": 21,
     "filesWithOpenTasks": 1,
     "openTaskMarkers": 18
@@ -308,6 +308,18 @@
       "closedTasks": 0,
       "hasIssueTable": false,
       "hasVerificationSection": false,
+      "hasMaintenanceSection": false
+    },
+    {
+      "path": "docs/plans/2026-05-07-question-diversity-gates.md",
+      "section": "plans",
+      "title": "题库多样性蓝图与三道质量门实施记录",
+      "date": "2026-05-07",
+      "status": "completed",
+      "openTasks": 0,
+      "closedTasks": 0,
+      "hasIssueTable": false,
+      "hasVerificationSection": true,
       "hasMaintenanceSection": false
     },
     {

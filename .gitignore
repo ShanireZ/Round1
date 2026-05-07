@@ -40,3 +40,5 @@ logs/
 /.commandcode
 /.worktrees
 /.serena
+/.playwright-mcp
+/tmp

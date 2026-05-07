@@ -84,6 +84,27 @@ const ExplanationSchema = z.object({
   explanation: z.string().min(1),
 });
 
+export const QuestionQualityRubricSchema = z.object({
+  reasoningSteps: z.number().int().min(0),
+  stateVariables: z.number().int().min(0),
+  conceptCount: z.number().int().min(0),
+  traceSteps: z.number().int().min(0),
+  trapType: z.string().min(1).nullable().default(null),
+  difficultyFit: z.enum(["pass", "warning", "fail"]),
+  qualityScore: z.number().min(0).max(1),
+});
+
+export const QuestionDiversityMetaSchema = z.object({
+  policyVersion: z.string().min(1),
+  archetypeId: z.string().min(1),
+  taskFlavor: z.string().min(1),
+  stemPatternFamily: z.string().min(1).optional(),
+  codeStructureTags: z.array(z.string().min(1)).default([]),
+  containerTags: z.array(z.string().min(1)).default([]),
+  normalizedTemplateKey: z.string().min(1).optional(),
+  quality: QuestionQualityRubricSchema.optional(),
+});
+
 export const BundleIntegritySchema = z.object({
   algorithm: z.literal(CHECKSUM_ALGORITHM),
   generatedAt: z.iso.datetime(),
@@ -115,6 +136,7 @@ export const QuestionBundleItemSchema = z.discriminatedUnion("type", [
     contentHash: z.string().min(1).max(64),
     sandboxVerified: z.boolean().default(false),
     source: QuestionSourceSchema.default("ai"),
+    diversityMeta: QuestionDiversityMetaSchema.optional(),
     contentJson: SingleChoiceContentSchema,
     answerJson: SingleChoiceAnswerSchema,
     explanationJson: ExplanationSchema,
@@ -128,6 +150,7 @@ export const QuestionBundleItemSchema = z.discriminatedUnion("type", [
     contentHash: z.string().min(1).max(64),
     sandboxVerified: z.boolean().default(false),
     source: QuestionSourceSchema.default("ai"),
+    diversityMeta: QuestionDiversityMetaSchema.optional(),
     contentJson: ReadingProgramContentSchema,
     answerJson: ReadingProgramAnswerSchema,
     explanationJson: ExplanationSchema,
@@ -141,6 +164,7 @@ export const QuestionBundleItemSchema = z.discriminatedUnion("type", [
     contentHash: z.string().min(1).max(64),
     sandboxVerified: z.boolean().default(false),
     source: QuestionSourceSchema.default("ai"),
+    diversityMeta: QuestionDiversityMetaSchema.optional(),
     contentJson: CompletionProgramContentSchema,
     answerJson: CompletionProgramAnswerSchema,
     explanationJson: ExplanationSchema,
@@ -233,6 +257,8 @@ export const PrebuiltPaperBundleSchema = z.object({
 export type QuestionType = z.infer<typeof QuestionTypeSchema>;
 export type Difficulty = z.infer<typeof DifficultySchema>;
 export type ExamType = z.infer<typeof ExamTypeSchema>;
+export type QuestionQualityRubric = z.infer<typeof QuestionQualityRubricSchema>;
+export type QuestionDiversityMeta = z.infer<typeof QuestionDiversityMetaSchema>;
 export type QuestionBundleItem = z.infer<typeof QuestionBundleItemSchema>;
 export type QuestionBundleMeta = z.infer<typeof QuestionBundleMetaSchema>;
 export type QuestionBundle = z.infer<typeof QuestionBundleSchema>;

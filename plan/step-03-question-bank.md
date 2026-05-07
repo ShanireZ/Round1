@@ -238,6 +238,7 @@ docker run --rm --runtime=runsc --read-only --network=none \
 - [x] CSP-J/S 与 GESP 历史题库完成一轮全量确定性审计、官方答案比对和 LLM/人工语义抽样复核（2026-04-26：官方比对 110 份卷 mismatch=0；解析覆盖、代码字段、质量、元数据、结构审计均为 0 问题；`reviewRealPapers.ts --write` 抽样覆盖 CSP-J、CSP-S、GESP 和单选/阅读程序/完善程序，skipped/warnings/manual_check 均为 0）
 - [x] LLM 客户端可调用生成/判官两种任务（2026-04-26：`scripts/verifyLlmTasks.ts` 用合成 prompt 实跑 `generate` / `judge`，`.env` 默认链路解析为 `xiaomi -> deepseek`）
 - [x] `llm_provider_logs` 记录费用台账（2026-04-26：实跑确认成功日志记录 tokens/latency/cost_estimate，受控失败日志记录 error_message；当前 `mimo-v2.5-pro` 未维护本地静态费率，cost_estimate 为 0）
+- [x] LLM 模拟题生产增加题型多样性蓝图与三道质量门（2026-05-07：新增 `config/questionArchetypes.ts`、生成前 archetype selector、两轮 judge 质量 rubric、导入前 diversity validator，以及 `audit-question-diversity-2026` 审计 CLI；`batch-generate-llm --plan-only` 已输出 `diversityPolicyVersion`、archetype plan 和 taskFlavor 分布。）
 - [x] `scripts/validateQuestionBundle.ts` dry-run 通过（2026-04-26：两份首批规模化 question bundle 均完成 `--run-sandbox --write` 校验，summary 为 30/30/0 与 20/20/0）
 - [x] `scripts/importQuestionBundle.ts --apply` 导入成功，并写入 `import_batches`（2026-04-26：reading bundle apply batch=`1f74c813-8425-4847-8ac8-17f072e76565`，completion bundle apply batch=`56fcb6ab-9ba9-4369-90fa-e8828b29afb9`）
 - [x] `cpp-runner` 健康检查通过（响应时间 < 200ms）

@@ -19,6 +19,11 @@ export const auditCommands: StableScriptCommand[] = [
     summary: "审计 question bundle 相似度",
   },
   {
+    name: "audit-question-diversity-2026",
+    scriptPath: "commands/audit/auditQuestionDiversity2026.ts",
+    summary: "审计 question bundle 题型多样性、难度 rubric 与参数化模板",
+  },
+  {
     name: "audit-real-papers",
     scriptPath: "commands/audit/auditRealPapers.ts",
     summary: "执行真题确定性审计",

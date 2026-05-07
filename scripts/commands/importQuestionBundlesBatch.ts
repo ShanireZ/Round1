@@ -13,6 +13,10 @@ import {
   validateQuestionBundle,
 } from "../lib/questionBundleWorkflow.js";
 import {
+  formatDiversityIssue,
+  validateQuestionBundleFilesDiversity,
+} from "../lib/questionDiversity.js";
+import {
   parsePositiveInteger,
   printJsonOutput,
   readNamedArg,
@@ -94,6 +98,17 @@ async function main() {
     summary.failed += preflight.duplicateErrors.length;
     for (const error of preflight.duplicateErrors) {
       console.error(`FAIL ${error}`);
+    }
+    printJsonOutput(summary);
+    process.exitCode = 1;
+    return;
+  }
+
+  const diversity = validateQuestionBundleFilesDiversity(files);
+  if (diversity.enforced && diversity.errors.length > 0) {
+    summary.failed += diversity.errors.length;
+    for (const issue of diversity.errors) {
+      console.error(`FAIL ${formatDiversityIssue(issue)}`);
     }
     printJsonOutput(summary);
     process.exitCode = 1;
