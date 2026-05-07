@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { and, eq, inArray, ne } from "drizzle-orm";
@@ -52,6 +52,7 @@ interface Args {
   timeoutMs: number;
   maxRepairAttempts: number;
   write: boolean;
+  skipExisting: boolean;
   skipJaccard: boolean;
   allowExternalLlm: boolean;
   externalLlmConsent?: string;
@@ -143,6 +144,7 @@ Options:
   --timeout-ms <number>            Timeout per LLM call (default: 120000)
   --max-repair-attempts <number>   Repair attempts per question (default: 2)
   --skip-jaccard                   Skip near-duplicate DB check
+  --skip-existing                  Reuse existing replacement bundle files
   --write                          Persist repaired replacement bundles under papers/2026
   --allow-external-llm             Required acknowledgement before provider calls
   --external-llm-consent <path>    Consent JSON allowlisting provider/data transfer
@@ -196,6 +198,7 @@ function parseArgs(argv: string[]): Args {
     timeoutMs: readPositiveInt(args, "timeout-ms", 120_000),
     maxRepairAttempts: readPositiveInt(args, "max-repair-attempts", 2),
     write: args.write === true,
+    skipExisting: args["skip-existing"] === true,
     skipJaccard: args["skip-jaccard"] === true,
     allowExternalLlm: args["allow-external-llm"] === true,
     externalLlmConsent:
@@ -759,6 +762,27 @@ function replacementRunId(args: Args, entry: QueueEntry, item: QuestionBundleIte
   return `${date}-csp-j-rescue-b${bundleNo}-${item.difficulty}-v01`;
 }
 
+function replacementBundlePath(args: Args, entry: QueueEntry, item: QuestionBundleItem) {
+  const runId = replacementRunId(args, entry, item);
+  const kpSlug = slugifySegment(item.primaryKpCode);
+  return path.join(
+    "papers",
+    "2026",
+    runId,
+    "question-bundles",
+    `${runId}__question-bundle__${item.type}__${kpSlug}__n1__v01.json`,
+  );
+}
+
+async function fileExists(filePath: string) {
+  try {
+    await access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function writeReplacementBundle(params: {
   args: Args;
   entry: QueueEntry;
@@ -767,7 +791,6 @@ async function writeReplacementBundle(params: {
   startedAt: string;
 }) {
   const runId = replacementRunId(params.args, params.entry, params.validation.item);
-  const kpSlug = slugifySegment(params.validation.item.primaryKpCode);
   const bundle: QuestionBundle = {
     meta: {
       bundleType: "question_bundle",
@@ -803,13 +826,7 @@ async function writeReplacementBundle(params: {
     },
     items: [params.validation.item],
   };
-  const bundlePath = path.join(
-    "papers",
-    "2026",
-    runId,
-    "question-bundles",
-    `${runId}__question-bundle__${params.validation.item.type}__${kpSlug}__n1__v01.json`,
-  );
+  const bundlePath = replacementBundlePath(params.args, params.entry, params.validation.item);
   await mkdir(path.dirname(bundlePath), { recursive: true });
   await writeFile(bundlePath, formatJsonOutput(bundle), "utf8");
   return {
@@ -839,6 +856,29 @@ async function repairOne(params: {
   const attempts: unknown[] = [];
   let previousError: string | undefined;
   const startedAt = new Date().toISOString();
+  const existingBundlePath = replacementBundlePath(params.args, params.entry, original);
+
+  if (params.args.skipExisting && (await fileExists(existingBundlePath))) {
+    return {
+      id: `db:${params.row.id}`,
+      status: "skipped_existing",
+      wrote: true,
+      bundleOutput: {
+        runId: replacementRunId(params.args, params.entry, original),
+        bundlePath: toDisplayRepoPath(existingBundlePath),
+      },
+      queue: params.entry,
+      before: {
+        contentHash: params.row.contentHash,
+        status: params.row.status,
+        sandboxVerified: params.row.sandboxVerified,
+        type: params.row.type,
+        difficulty: params.row.difficulty,
+        primaryKpCode: params.row.primaryKpCode,
+      },
+      attempts: [],
+    };
+  }
 
   for (let attempt = 1; attempt <= params.args.maxRepairAttempts; attempt += 1) {
     let repairResult: CallScriptLlmSceneResult | undefined;
@@ -1044,6 +1084,7 @@ async function main() {
       maxConcurrency: args.maxConcurrency,
       timeoutMs: args.timeoutMs,
       maxRepairAttempts: args.maxRepairAttempts,
+      skipExisting: args.skipExisting,
       skipJaccard: args.skipJaccard,
       externalLlmDisclosure,
     },
@@ -1051,6 +1092,7 @@ async function main() {
       selected: selected.length,
       missing: missing.length,
       repaired: 0,
+      skippedExisting: 0,
       failed: 0,
       wrote: 0,
     },
@@ -1078,6 +1120,9 @@ async function main() {
     report.summary.repaired = report.items.filter(
       (item) => (item as { status?: string }).status === "repaired",
     ).length;
+    report.summary.skippedExisting = report.items.filter(
+      (item) => (item as { status?: string }).status === "skipped_existing",
+    ).length;
     report.summary.failed = report.items.filter(
       (item) => (item as { status?: string }).status === "failed",
     ).length;
@@ -1094,6 +1139,9 @@ async function main() {
   report.items = results;
   report.summary.repaired = results.filter(
     (item) => (item as { status?: string }).status === "repaired",
+  ).length;
+  report.summary.skippedExisting = results.filter(
+    (item) => (item as { status?: string }).status === "skipped_existing",
   ).length;
   report.summary.failed = results.filter(
     (item) => (item as { status?: string }).status === "failed",
