@@ -43,7 +43,7 @@ interface DeficitRow {
   deficit: number;
 }
 
-const usage = `Usage: npx tsx scripts/commands/audit/reportQuestionInventory.ts [--source-dir papers/2026] [--manifest bundle-manifest.json] [--exclude-manifest excluded-bundles.json] [--target-papers 100] [--write] [--out-dir artifacts/reports/2026/state] [--out-run-dir artifacts/reports/2026/runs/<run>]`;
+const usage = `Usage: npx tsx scripts/commands/audit/reportQuestionInventory.ts [--source-dir papers/2026] [--manifest bundle-manifest.json] [--exclude-manifest excluded-bundles.json] [--target-papers 100] [--write] [--out-dir count/state] [--out-run-dir count/runs/<run>]`;
 
 function readArg(args: string[], name: string) {
   const index = args.indexOf(name);
@@ -68,7 +68,7 @@ function parseArgs(argv: string[]): InventoryArgs {
     excludeManifestPath: readArg(argv, "--exclude-manifest"),
     targetPapers,
     write: argv.includes("--write"),
-    outDir: readArg(argv, "--out-dir") ?? "artifacts/reports/2026/state",
+    outDir: readArg(argv, "--out-dir") ?? "count/state",
     outRunDir: readArg(argv, "--out-run-dir"),
   };
 }

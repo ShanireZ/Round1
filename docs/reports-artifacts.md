@@ -2,8 +2,9 @@
 
 Status: current policy
 
-`artifacts/reports` stores audit evidence and long-lived content state. Keep it
-structured by lifecycle, not by whatever command happened to produce a file.
+`artifacts/reports` stores audit evidence and run-local reports. Current
+question-count state now lives in `count/`; keep this directory structured by
+lifecycle, not by whatever command happened to produce a file.
 
 ## Canonical Layout
 
@@ -12,9 +13,6 @@ artifacts/reports/
   README.md
   <year>/
     README.md
-    state/
-      question-inventory.json
-      question-inventory.md
     audits/
       similarity/
         threshold-075/
@@ -29,9 +27,8 @@ artifacts/reports/
 
 ## Rules
 
-- `state/` is for current durable status. Files here are overwritten by the
-  canonical script for the year. Use it for inventory and other "current truth"
-  reports.
+- Current question inventory and quality-adjusted count reports are maintained
+  under `count/`, not `artifacts/reports/<year>/state/`.
 - `runs/<runId>/` is for one batch or one investigation. Logs, manifests, judge
   summaries, dry-run exports, and temporary review shards stay here.
 - `audits/<topic>/...` is for cross-run audit outputs that may be referenced by
@@ -43,11 +40,13 @@ artifacts/reports/
 - Do not put throwaway probes or scratch JSON here. Use `artifacts/tmp/<year>/`
   for discardable intermediate files.
 
-## Current 2026 State
+## Current 2026 Count State
 
-`scripts/reportQuestionInventory.ts --write` writes the current inventory to
-`artifacts/reports/2026/state/question-inventory.json` and
-`artifacts/reports/2026/state/question-inventory.md`.
+`npm run inventory:questions -- --write` writes the raw inventory to
+`count/state/question-inventory.json` and `count/state/question-inventory.md`.
 
-Pass `--out-run-dir artifacts/reports/2026/runs/<runId>` when the same inventory
-snapshot should also be attached to a specific run.
+`npm run count:questions -- --write ...` writes the merged count surface to
+`count/question-counts-current.*` and `count/snapshots/<snapshotId>.*`.
+
+Pass `--out-run-dir count/runs/<runId>` when the same raw inventory snapshot
+should also be attached to a specific counting run.

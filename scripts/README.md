@@ -54,7 +54,8 @@
 - `audit.ts verify-question-bundle-guards`：构造临时候选题，验证规则去重可用 `DUPLICATE_JACCARD` 拦截近似题，并验证 LLM 判官可用 `JUDGE_REJECTED` 拦截答案不一致题。
 - `audit.ts report-docs-inventory`：扫描 `docs/` 并在需要时写回 `docs/_inventory`；文档改动后可用 `npm run inventory:docs -- --write`。
 - `audit.ts report-papers-inventory`：扫描 `papers/real-papers` 与 `papers/<year>` 生成物，并在需要时写回 `papers/_inventory`；题库改动后可用 `npm run inventory:papers -- --write`。
-- `audit.ts report-question-inventory`：生成 2026 question bundle 覆盖率与配额盘点报告。
+- `audit.ts report-question-inventory`：生成 2026 question bundle 覆盖率与配额盘点报告，默认写入 `count/state`。
+- `audit.ts report-question-counts`：合并 `count/state/question-inventory.json` 与 diversity audit 的 rewrite/archive CSV，生成 `count/question-counts-current.*`、`count/snapshots/*` 和 bucket 明细 CSV。
 - `audit.ts verify-offline-artifacts`：检查正式离线产物是否使用 runId 持久化命名，并校验 bundle JSON meta 与文件名一致；拒绝 `paper-packs.json`、`artifacts/llm-step3/probe*.json` 以及所有 `papers/<year>/*.json` 旧布局，但允许 `papers/_inventory` 作为统计元数据目录。
 - `audit.ts verify-ui-tokens`：检查 `client/src` 的 TS/TSX 与非 token CSS 是否重新引入原始 hex/rgb/hsl 颜色字面量；颜色应落到 design token、语义 Tailwind class 或共享 CSS utility。
 - tests/verifyExamMappings.ts：校验共享考试映射是否包含关键批次。
@@ -106,6 +107,7 @@
 - 程序题离线 sandbox 校验并写回：`npx tsx scripts/questionBundle.ts validate papers/2026/<runId>/question-bundles/<bundle-file>.json --run-sandbox --write --write-metadata`
 - question bundle 守卫验证：`npx tsx scripts/audit.ts verify-question-bundle-guards`
 - 文档盘点刷新：`npm run inventory:docs -- --write`
+- 题目数量统计刷新：`npm run inventory:questions -- --write`，再运行 `audit-question-diversity-2026 --dir papers/2026 --out-dir count/audits/<runId>`，最后运行 `npm run count:questions -- --write --diversity-audit count/audits/<runId>/papers-2026__diversity-audit.json --rewrite-queue count/audits/<runId>/papers-2026__rewrite-queue.csv --archive-suggestions count/audits/<runId>/papers-2026__archive-suggestions.csv --snapshot-id <snapshotId>`
 - 离线产物命名守卫：`npm run verify:offline-artifacts`
 - 首个管理员 dry-run：`ROUND1_INITIAL_ADMIN_PASSWORD='<临时强密码>' npm run init:admin -- --dry-run`
 - 生产健康检查：`npm run healthcheck -- --api-url https://round1.example.com/api/v1/health --frontend-url https://round1.example.com --pm2`

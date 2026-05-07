@@ -24,7 +24,8 @@ The batch used `--provider-lane default-only`, so generation, repair, and both r
 - Generation report: `artifacts/reports/2026/runs/2026-05-07-bulk36-gesp6-default-only-gap-fill-v01/2026-05-07-bulk36-gesp6-default-only-gap-fill-v01__report__llm-question-generation-review.json`
 - Import dry-run: 12 files validated, 0 failed, 0 duplicate content hashes
 - Import apply: 36 questions imported, 0 failed
-- Inventory after: `artifacts/reports/2026/runs/2026-05-07-bulk36-gesp6-default-only-gap-fill-v01/inventory-after/question-inventory.json`
+- Run-local inventory evidence: `artifacts/reports/2026/runs/2026-05-07-bulk36-gesp6-default-only-gap-fill-v01/inventory-after/question-inventory.json`
+- Canonical current count surface: `count/state/question-inventory.json` and `count/question-counts-current.json`
 
 ## Continuation Results
 
@@ -37,7 +38,8 @@ The batch used `--provider-lane default-only`, so generation, repair, and both r
 - Generation report: `artifacts/reports/2026/runs/2026-05-07-bulk36-gesp6-default-only-gap-fill-v02/2026-05-07-bulk36-gesp6-default-only-gap-fill-v02__report__llm-question-generation-review.json`
 - Import dry-run: 12 files validated, 0 failed, 0 duplicate content hashes
 - Import apply: 36 questions imported, 0 failed
-- Inventory after: `artifacts/reports/2026/runs/2026-05-07-bulk36-gesp6-default-only-gap-fill-v02/inventory-after/question-inventory.json`
+- Run-local inventory evidence: `artifacts/reports/2026/runs/2026-05-07-bulk36-gesp6-default-only-gap-fill-v02/inventory-after/question-inventory.json`
+- Canonical current count surface: `count/state/question-inventory.json` and `count/question-counts-current.json`
 - Papers inventory after: `papers/_inventory/papers-inventory.json`
 
 ## Inventory Delta
@@ -53,7 +55,16 @@ The batch used `--provider-lane default-only`, so generation, repair, and both r
 - Bundle files found: 3036 -> 3048
 - Counted exam-tagged question rows: 13621 -> 13657
 - GESP-6 `single_choice|medium|ALG`: available 66 -> 102, deficit 159 -> 123
-- Papers inventory for `papers/2026`: 3048 generated bundles/files, 13657 questions/items, 0 duplicates, 0 invalid files
+- Papers inventory for this run-local snapshot: 3048 generated bundles/files, 13657 questions/items, 0 duplicates, 0 invalid files
+
+## Current Canonical Count
+
+Current maintained question-count statistics have moved to `count/`. The
+post-audit canonical files are `count/question-counts-current.*`,
+`count/state/question-inventory.*`, and
+`count/snapshots/2026-05-07-non-real-question-audit.*`. These current files
+include the later diversity smoke bundle and therefore show 3049 bundle files
+and 13660 exam-tagged rows while keeping total raw deficit at 7494.
 
 ## Follow-Up
 

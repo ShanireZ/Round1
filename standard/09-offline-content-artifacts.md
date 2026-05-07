@@ -23,6 +23,7 @@ generate / judge / cpp-runner / build prebuilt paper -> JSON bundle -> validate 
 - report：校验摘要、judge 摘要、导入导出记录，放入 `artifacts/reports/`。
 - tmp：probe、草稿、调试 JSON，放入 `artifacts/tmp/`。
 - papers inventory：`papers/` 内部统计元数据，放入 `papers/_inventory/`，不得混入可导入 question bundle。
+- question count：题目数量、质量扣减、rewrite/archive 建议与缺口统计统一放入 `count/`，不得再把 `artifacts/reports/<year>/state/` 作为当前统计真源。
 
 ## runId
 
@@ -79,18 +80,22 @@ artifacts/prebuilt-papers/<year>/<runId>/
 ## 临时与报告
 
 ```text
-artifacts/reports/<year>/state/
 artifacts/reports/<year>/audits/<topic>/
 artifacts/reports/<year>/cleanups/<topic>/
 artifacts/reports/<year>/runs/<runId>/
 artifacts/tmp/<year>/<runId>/
 papers/_inventory/
 papers/_inventory/sections/
+count/
+count/state/
+count/audits/<runId>/
+count/snapshots/
 ```
 
 - `artifacts/tmp/**` 可清理。
 - `papers/**`、`artifacts/prebuilt-papers/**`、`artifacts/reports/**` 作为审计输入保留。
 - `papers/_inventory/**` 是由 `scripts/reportPapersInventory.ts` 生成的统计元数据；更新纸面文件后运行 `npm run inventory:papers -- --write` 刷新。
+- `count/**` 是题目数量观察与统计的维护真源；更新题库后先刷新 `count/state/question-inventory.*`，再生成 `count/question-counts-current.*`。
 - `latest.json`、`paper-packs.json`、`probe*.json` 只能作为本地临时 alias，不得进入可导入/可审计目录。
 
 ## 元数据
@@ -136,7 +141,7 @@ prebuilt paper bundle apply 前必须通过：
 
 风险越高，越要增加确定性校验和人工抽样；不要用“模型看起来没问题”替代答案一致性和结构校验。
 
-LLM 模拟题批次应在导入前运行 `audit-question-diversity-2026` 或同等 workflow。旧历史 bundle 可以只作为审计输入；带新 diversity policy 的 bundle dry-run/apply 失败不得绕过。
+LLM 模拟题批次应在导入前运行 `audit-question-diversity-2026` 或同等 workflow，并将数量与质量统计汇总到 `count/`。旧历史 bundle 可以只作为审计输入；带新 diversity policy 的 bundle dry-run/apply 失败不得绕过。
 
 ## Admin 导入
 
@@ -222,6 +227,7 @@ Admin UI 需要能展示错误报告并支持修复重试。
 | --- | --- |
 | `papers/**` | 保留，审计输入 |
 | `papers/_inventory/**` | 保留，统计元数据，可由 inventory 脚本重建 |
+| `count/**` | 保留，当前题目数量统计真源 |
 | `artifacts/prebuilt-papers/**` | 保留，审计输入 |
 | `artifacts/reports/**` | 保留，审计/复盘 |
 | `artifacts/tmp/**` | 可清理 |

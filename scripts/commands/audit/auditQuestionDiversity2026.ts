@@ -69,7 +69,7 @@ function parseArgs(argv: string[]): Args {
     dir,
     db: useDb,
     examTypes: parseExamTypes(readArg(argv, "--exam-type")),
-    outDir: readArg(argv, "--out-dir") ?? "artifacts/reports/2026/audits/diversity",
+    outDir: readArg(argv, "--out-dir") ?? "count/audits/diversity",
     enforce: argv.includes("--enforce"),
   };
 }

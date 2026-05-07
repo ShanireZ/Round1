@@ -1,0 +1,4016 @@
+{
+  "generatedAt": "2026-05-07T05:34:04.929Z",
+  "sourceDir": "papers/2026",
+  "targetPapersPerExamType": 100,
+  "filesFound": 3049,
+  "invalidFiles": [],
+  "countedQuestionRows": 13660,
+  "counts": {
+    "nonRealPaperByExamTypeQuestionTypeDifficultyKpGroup": [
+      {
+        "key": "CSP-J|completion_program|easy|ALG",
+        "count": 16
+      },
+      {
+        "key": "CSP-J|completion_program|easy|DS",
+        "count": 16
+      },
+      {
+        "key": "CSP-J|completion_program|hard|ALG",
+        "count": 34
+      },
+      {
+        "key": "CSP-J|completion_program|hard|DS",
+        "count": 33
+      },
+      {
+        "key": "CSP-J|completion_program|medium|ALG",
+        "count": 36
+      },
+      {
+        "key": "CSP-J|completion_program|medium|DS",
+        "count": 49
+      },
+      {
+        "key": "CSP-J|reading_program|easy|ALG",
+        "count": 20
+      },
+      {
+        "key": "CSP-J|reading_program|easy|CPP",
+        "count": 20
+      },
+      {
+        "key": "CSP-J|reading_program|easy|DS",
+        "count": 18
+      },
+      {
+        "key": "CSP-J|reading_program|hard|ALG",
+        "count": 35
+      },
+      {
+        "key": "CSP-J|reading_program|hard|CPP",
+        "count": 41
+      },
+      {
+        "key": "CSP-J|reading_program|hard|DS",
+        "count": 45
+      },
+      {
+        "key": "CSP-J|reading_program|medium|ALG",
+        "count": 74
+      },
+      {
+        "key": "CSP-J|reading_program|medium|CPP",
+        "count": 50
+      },
+      {
+        "key": "CSP-J|reading_program|medium|DS",
+        "count": 62
+      },
+      {
+        "key": "CSP-J|single_choice|easy|ALG",
+        "count": 125
+      },
+      {
+        "key": "CSP-J|single_choice|easy|BAS",
+        "count": 164
+      },
+      {
+        "key": "CSP-J|single_choice|easy|CPP",
+        "count": 160
+      },
+      {
+        "key": "CSP-J|single_choice|easy|CS",
+        "count": 31
+      },
+      {
+        "key": "CSP-J|single_choice|easy|DS",
+        "count": 80
+      },
+      {
+        "key": "CSP-J|single_choice|easy|MATH",
+        "count": 40
+      },
+      {
+        "key": "CSP-J|single_choice|hard|ALG",
+        "count": 60
+      },
+      {
+        "key": "CSP-J|single_choice|hard|BAS",
+        "count": 80
+      },
+      {
+        "key": "CSP-J|single_choice|hard|CPP",
+        "count": 62
+      },
+      {
+        "key": "CSP-J|single_choice|hard|CS",
+        "count": 11
+      },
+      {
+        "key": "CSP-J|single_choice|hard|DS",
+        "count": 40
+      },
+      {
+        "key": "CSP-J|single_choice|hard|MATH",
+        "count": 20
+      },
+      {
+        "key": "CSP-J|single_choice|medium|ALG",
+        "count": 120
+      },
+      {
+        "key": "CSP-J|single_choice|medium|BAS",
+        "count": 154
+      },
+      {
+        "key": "CSP-J|single_choice|medium|CPP",
+        "count": 160
+      },
+      {
+        "key": "CSP-J|single_choice|medium|CS",
+        "count": 31
+      },
+      {
+        "key": "CSP-J|single_choice|medium|DS",
+        "count": 80
+      },
+      {
+        "key": "CSP-J|single_choice|medium|MATH",
+        "count": 38
+      },
+      {
+        "key": "CSP-S|completion_program|easy|ALG",
+        "count": 10
+      },
+      {
+        "key": "CSP-S|completion_program|easy|DS",
+        "count": 10
+      },
+      {
+        "key": "CSP-S|completion_program|hard|ALG",
+        "count": 49
+      },
+      {
+        "key": "CSP-S|completion_program|hard|DS",
+        "count": 50
+      },
+      {
+        "key": "CSP-S|completion_program|medium|ALG",
+        "count": 37
+      },
+      {
+        "key": "CSP-S|completion_program|medium|DS",
+        "count": 32
+      },
+      {
+        "key": "CSP-S|reading_program|easy|ALG",
+        "count": 20
+      },
+      {
+        "key": "CSP-S|reading_program|easy|DS",
+        "count": 10
+      },
+      {
+        "key": "CSP-S|reading_program|hard|ALG",
+        "count": 97
+      },
+      {
+        "key": "CSP-S|reading_program|hard|DS",
+        "count": 40
+      },
+      {
+        "key": "CSP-S|reading_program|medium|ALG",
+        "count": 101
+      },
+      {
+        "key": "CSP-S|reading_program|medium|DS",
+        "count": 73
+      },
+      {
+        "key": "CSP-S|single_choice|easy|ALG",
+        "count": 71
+      },
+      {
+        "key": "CSP-S|single_choice|easy|BAS",
+        "count": 20
+      },
+      {
+        "key": "CSP-S|single_choice|easy|CPP",
+        "count": 60
+      },
+      {
+        "key": "CSP-S|single_choice|easy|CS",
+        "count": 8
+      },
+      {
+        "key": "CSP-S|single_choice|easy|DS",
+        "count": 62
+      },
+      {
+        "key": "CSP-S|single_choice|easy|MATH",
+        "count": 32
+      },
+      {
+        "key": "CSP-S|single_choice|hard|ALG",
+        "count": 130
+      },
+      {
+        "key": "CSP-S|single_choice|hard|BAS",
+        "count": 30
+      },
+      {
+        "key": "CSP-S|single_choice|hard|CPP",
+        "count": 91
+      },
+      {
+        "key": "CSP-S|single_choice|hard|CS",
+        "count": 30
+      },
+      {
+        "key": "CSP-S|single_choice|hard|DS",
+        "count": 140
+      },
+      {
+        "key": "CSP-S|single_choice|hard|MATH",
+        "count": 65
+      },
+      {
+        "key": "CSP-S|single_choice|medium|ALG",
+        "count": 212
+      },
+      {
+        "key": "CSP-S|single_choice|medium|BAS",
+        "count": 41
+      },
+      {
+        "key": "CSP-S|single_choice|medium|CPP",
+        "count": 141
+      },
+      {
+        "key": "CSP-S|single_choice|medium|CS",
+        "count": 41
+      },
+      {
+        "key": "CSP-S|single_choice|medium|DS",
+        "count": 215
+      },
+      {
+        "key": "CSP-S|single_choice|medium|MATH",
+        "count": 99
+      },
+      {
+        "key": "GESP-1|completion_program|easy|CPP",
+        "count": 37
+      },
+      {
+        "key": "GESP-1|completion_program|hard|CPP",
+        "count": 35
+      },
+      {
+        "key": "GESP-1|completion_program|medium|CPP",
+        "count": 80
+      },
+      {
+        "key": "GESP-1|reading_program|easy|CPP",
+        "count": 103
+      },
+      {
+        "key": "GESP-1|reading_program|hard|CPP",
+        "count": 55
+      },
+      {
+        "key": "GESP-1|reading_program|medium|CPP",
+        "count": 157
+      },
+      {
+        "key": "GESP-1|single_choice|easy|BAS",
+        "count": 182
+      },
+      {
+        "key": "GESP-1|single_choice|easy|CPP",
+        "count": 324
+      },
+      {
+        "key": "GESP-1|single_choice|easy|CS",
+        "count": 88
+      },
+      {
+        "key": "GESP-1|single_choice|hard|BAS",
+        "count": 50
+      },
+      {
+        "key": "GESP-1|single_choice|hard|CPP",
+        "count": 63
+      },
+      {
+        "key": "GESP-1|single_choice|hard|CS",
+        "count": 21
+      },
+      {
+        "key": "GESP-1|single_choice|medium|BAS",
+        "count": 190
+      },
+      {
+        "key": "GESP-1|single_choice|medium|CPP",
+        "count": 272
+      },
+      {
+        "key": "GESP-1|single_choice|medium|CS",
+        "count": 77
+      },
+      {
+        "key": "GESP-2|completion_program|easy|CPP",
+        "count": 40
+      },
+      {
+        "key": "GESP-2|completion_program|hard|CPP",
+        "count": 34
+      },
+      {
+        "key": "GESP-2|completion_program|medium|CPP",
+        "count": 78
+      },
+      {
+        "key": "GESP-2|reading_program|easy|CPP",
+        "count": 103
+      },
+      {
+        "key": "GESP-2|reading_program|hard|CPP",
+        "count": 50
+      },
+      {
+        "key": "GESP-2|reading_program|medium|CPP",
+        "count": 172
+      },
+      {
+        "key": "GESP-2|single_choice|easy|BAS",
+        "count": 194
+      },
+      {
+        "key": "GESP-2|single_choice|easy|CPP",
+        "count": 318
+      },
+      {
+        "key": "GESP-2|single_choice|easy|CS",
+        "count": 147
+      },
+      {
+        "key": "GESP-2|single_choice|hard|BAS",
+        "count": 40
+      },
+      {
+        "key": "GESP-2|single_choice|hard|CPP",
+        "count": 62
+      },
+      {
+        "key": "GESP-2|single_choice|hard|CS",
+        "count": 21
+      },
+      {
+        "key": "GESP-2|single_choice|medium|BAS",
+        "count": 153
+      },
+      {
+        "key": "GESP-2|single_choice|medium|CPP",
+        "count": 257
+      },
+      {
+        "key": "GESP-2|single_choice|medium|CS",
+        "count": 117
+      },
+      {
+        "key": "GESP-3|completion_program|easy|ALG",
+        "count": 6
+      },
+      {
+        "key": "GESP-3|completion_program|hard|ALG",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|completion_program|medium|ALG",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|reading_program|easy|CPP",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|reading_program|hard|ALG",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|reading_program|medium|ALG",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|single_choice|easy|ALG",
+        "count": 29
+      },
+      {
+        "key": "GESP-3|single_choice|easy|BAS",
+        "count": 19
+      },
+      {
+        "key": "GESP-3|single_choice|easy|CPP",
+        "count": 16
+      },
+      {
+        "key": "GESP-3|single_choice|easy|MATH",
+        "count": 15
+      },
+      {
+        "key": "GESP-3|single_choice|hard|ALG",
+        "count": 10
+      },
+      {
+        "key": "GESP-3|single_choice|hard|BAS",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|single_choice|hard|CPP",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|single_choice|hard|MATH",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|single_choice|medium|ALG",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|single_choice|medium|BAS",
+        "count": 22
+      },
+      {
+        "key": "GESP-3|single_choice|medium|CPP",
+        "count": 20
+      },
+      {
+        "key": "GESP-4|completion_program|easy|ALG",
+        "count": 4
+      },
+      {
+        "key": "GESP-4|completion_program|medium|ALG",
+        "count": 5
+      },
+      {
+        "key": "GESP-4|reading_program|easy|ALG",
+        "count": 5
+      },
+      {
+        "key": "GESP-4|reading_program|easy|CPP",
+        "count": 5
+      },
+      {
+        "key": "GESP-4|reading_program|hard|ALG",
+        "count": 4
+      },
+      {
+        "key": "GESP-4|reading_program|medium|ALG",
+        "count": 9
+      },
+      {
+        "key": "GESP-4|single_choice|easy|ALG",
+        "count": 25
+      },
+      {
+        "key": "GESP-4|single_choice|easy|BAS",
+        "count": 19
+      },
+      {
+        "key": "GESP-4|single_choice|easy|CPP",
+        "count": 25
+      },
+      {
+        "key": "GESP-4|single_choice|easy|MATH",
+        "count": 14
+      },
+      {
+        "key": "GESP-4|single_choice|hard|ALG",
+        "count": 14
+      },
+      {
+        "key": "GESP-4|single_choice|hard|BAS",
+        "count": 10
+      },
+      {
+        "key": "GESP-4|single_choice|hard|CPP",
+        "count": 10
+      },
+      {
+        "key": "GESP-4|single_choice|medium|ALG",
+        "count": 19
+      },
+      {
+        "key": "GESP-4|single_choice|medium|BAS",
+        "count": 8
+      },
+      {
+        "key": "GESP-4|single_choice|medium|CPP",
+        "count": 7
+      },
+      {
+        "key": "GESP-4|single_choice|medium|MATH",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|completion_program|hard|ALG",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|completion_program|hard|MATH",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|completion_program|medium|ALG",
+        "count": 1
+      },
+      {
+        "key": "GESP-5|reading_program|easy|ALG",
+        "count": 10
+      },
+      {
+        "key": "GESP-5|reading_program|easy|DS",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|reading_program|hard|DS",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|single_choice|easy|ALG",
+        "count": 44
+      },
+      {
+        "key": "GESP-5|single_choice|easy|CPP",
+        "count": 15
+      },
+      {
+        "key": "GESP-5|single_choice|easy|DS",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|single_choice|easy|MATH",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|single_choice|hard|ALG",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|single_choice|hard|BAS",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|single_choice|hard|CPP",
+        "count": 10
+      },
+      {
+        "key": "GESP-5|single_choice|hard|DS",
+        "count": 3
+      },
+      {
+        "key": "GESP-5|single_choice|hard|MATH",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|single_choice|medium|ALG",
+        "count": 201
+      },
+      {
+        "key": "GESP-5|single_choice|medium|BAS",
+        "count": 9
+      },
+      {
+        "key": "GESP-5|single_choice|medium|CPP",
+        "count": 2
+      },
+      {
+        "key": "GESP-5|single_choice|medium|DS",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|single_choice|medium|MATH",
+        "count": 15
+      },
+      {
+        "key": "GESP-6|completion_program|easy|DS",
+        "count": 1
+      },
+      {
+        "key": "GESP-6|completion_program|hard|ALG",
+        "count": 5
+      },
+      {
+        "key": "GESP-6|completion_program|medium|DS",
+        "count": 5
+      },
+      {
+        "key": "GESP-6|reading_program|easy|ALG",
+        "count": 5
+      },
+      {
+        "key": "GESP-6|reading_program|hard|ALG",
+        "count": 5
+      },
+      {
+        "key": "GESP-6|reading_program|medium|ALG",
+        "count": 5
+      },
+      {
+        "key": "GESP-6|reading_program|medium|DS",
+        "count": 5
+      },
+      {
+        "key": "GESP-6|single_choice|easy|ALG",
+        "count": 20
+      },
+      {
+        "key": "GESP-6|single_choice|easy|CPP",
+        "count": 10
+      },
+      {
+        "key": "GESP-6|single_choice|easy|DS",
+        "count": 25
+      },
+      {
+        "key": "GESP-6|single_choice|hard|ALG",
+        "count": 10
+      },
+      {
+        "key": "GESP-6|single_choice|hard|CPP",
+        "count": 15
+      },
+      {
+        "key": "GESP-6|single_choice|hard|DS",
+        "count": 20
+      },
+      {
+        "key": "GESP-6|single_choice|hard|MATH",
+        "count": 10
+      },
+      {
+        "key": "GESP-6|single_choice|medium|ALG",
+        "count": 102
+      },
+      {
+        "key": "GESP-6|single_choice|medium|CPP",
+        "count": 10
+      },
+      {
+        "key": "GESP-6|single_choice|medium|DS",
+        "count": 209
+      },
+      {
+        "key": "GESP-6|single_choice|medium|MATH",
+        "count": 11
+      },
+      {
+        "key": "GESP-7|completion_program|easy|ALG",
+        "count": 9
+      },
+      {
+        "key": "GESP-7|completion_program|easy|DS",
+        "count": 14
+      },
+      {
+        "key": "GESP-7|completion_program|hard|ALG",
+        "count": 49
+      },
+      {
+        "key": "GESP-7|completion_program|hard|DS",
+        "count": 74
+      },
+      {
+        "key": "GESP-7|completion_program|medium|ALG",
+        "count": 54
+      },
+      {
+        "key": "GESP-7|completion_program|medium|DS",
+        "count": 65
+      },
+      {
+        "key": "GESP-7|reading_program|easy|ALG",
+        "count": 31
+      },
+      {
+        "key": "GESP-7|reading_program|easy|DS",
+        "count": 17
+      },
+      {
+        "key": "GESP-7|reading_program|hard|ALG",
+        "count": 102
+      },
+      {
+        "key": "GESP-7|reading_program|hard|DS",
+        "count": 71
+      },
+      {
+        "key": "GESP-7|reading_program|medium|ALG",
+        "count": 115
+      },
+      {
+        "key": "GESP-7|reading_program|medium|DS",
+        "count": 70
+      },
+      {
+        "key": "GESP-7|single_choice|easy|ALG",
+        "count": 139
+      },
+      {
+        "key": "GESP-7|single_choice|easy|CPP",
+        "count": 90
+      },
+      {
+        "key": "GESP-7|single_choice|easy|DS",
+        "count": 146
+      },
+      {
+        "key": "GESP-7|single_choice|easy|MATH",
+        "count": 59
+      },
+      {
+        "key": "GESP-7|single_choice|hard|ALG",
+        "count": 230
+      },
+      {
+        "key": "GESP-7|single_choice|hard|CPP",
+        "count": 162
+      },
+      {
+        "key": "GESP-7|single_choice|hard|DS",
+        "count": 212
+      },
+      {
+        "key": "GESP-7|single_choice|hard|MATH",
+        "count": 87
+      },
+      {
+        "key": "GESP-7|single_choice|medium|ALG",
+        "count": 275
+      },
+      {
+        "key": "GESP-7|single_choice|medium|CPP",
+        "count": 172
+      },
+      {
+        "key": "GESP-7|single_choice|medium|DS",
+        "count": 221
+      },
+      {
+        "key": "GESP-7|single_choice|medium|MATH",
+        "count": 113
+      },
+      {
+        "key": "GESP-8|completion_program|easy|ALG",
+        "count": 9
+      },
+      {
+        "key": "GESP-8|completion_program|easy|MATH",
+        "count": 9
+      },
+      {
+        "key": "GESP-8|completion_program|hard|ALG",
+        "count": 65
+      },
+      {
+        "key": "GESP-8|completion_program|hard|MATH",
+        "count": 57
+      },
+      {
+        "key": "GESP-8|completion_program|medium|ALG",
+        "count": 42
+      },
+      {
+        "key": "GESP-8|completion_program|medium|MATH",
+        "count": 57
+      },
+      {
+        "key": "GESP-8|reading_program|easy|ALG",
+        "count": 35
+      },
+      {
+        "key": "GESP-8|reading_program|easy|DS",
+        "count": 21
+      },
+      {
+        "key": "GESP-8|reading_program|hard|ALG",
+        "count": 101
+      },
+      {
+        "key": "GESP-8|reading_program|hard|DS",
+        "count": 44
+      },
+      {
+        "key": "GESP-8|reading_program|medium|ALG",
+        "count": 89
+      },
+      {
+        "key": "GESP-8|reading_program|medium|DS",
+        "count": 56
+      },
+      {
+        "key": "GESP-8|single_choice|easy|ALG",
+        "count": 110
+      },
+      {
+        "key": "GESP-8|single_choice|easy|CPP",
+        "count": 75
+      },
+      {
+        "key": "GESP-8|single_choice|easy|DS",
+        "count": 95
+      },
+      {
+        "key": "GESP-8|single_choice|easy|MATH",
+        "count": 79
+      },
+      {
+        "key": "GESP-8|single_choice|hard|ALG",
+        "count": 165
+      },
+      {
+        "key": "GESP-8|single_choice|hard|CPP",
+        "count": 130
+      },
+      {
+        "key": "GESP-8|single_choice|hard|DS",
+        "count": 185
+      },
+      {
+        "key": "GESP-8|single_choice|hard|MATH",
+        "count": 145
+      },
+      {
+        "key": "GESP-8|single_choice|medium|ALG",
+        "count": 187
+      },
+      {
+        "key": "GESP-8|single_choice|medium|CPP",
+        "count": 155
+      },
+      {
+        "key": "GESP-8|single_choice|medium|DS",
+        "count": 227
+      },
+      {
+        "key": "GESP-8|single_choice|medium|MATH",
+        "count": 200
+      }
+    ],
+    "realPaperByExamTypeQuestionTypeDifficultyKpGroup": [],
+    "exactPrimaryKpByExamTypeQuestionTypeDifficultySource": [
+      {
+        "key": "CSP-J|completion_program|easy|ALG|ai",
+        "count": 16
+      },
+      {
+        "key": "CSP-J|completion_program|easy|DS|ai",
+        "count": 16
+      },
+      {
+        "key": "CSP-J|completion_program|hard|ALG|ai",
+        "count": 34
+      },
+      {
+        "key": "CSP-J|completion_program|hard|DS|ai",
+        "count": 33
+      },
+      {
+        "key": "CSP-J|completion_program|medium|ALG|ai",
+        "count": 36
+      },
+      {
+        "key": "CSP-J|completion_program|medium|DS|ai",
+        "count": 49
+      },
+      {
+        "key": "CSP-J|reading_program|easy|ALG|ai",
+        "count": 20
+      },
+      {
+        "key": "CSP-J|reading_program|easy|CPP|ai",
+        "count": 20
+      },
+      {
+        "key": "CSP-J|reading_program|easy|DS|ai",
+        "count": 18
+      },
+      {
+        "key": "CSP-J|reading_program|hard|ALG|ai",
+        "count": 35
+      },
+      {
+        "key": "CSP-J|reading_program|hard|CPP|ai",
+        "count": 41
+      },
+      {
+        "key": "CSP-J|reading_program|hard|DS|ai",
+        "count": 45
+      },
+      {
+        "key": "CSP-J|reading_program|medium|ALG|ai",
+        "count": 74
+      },
+      {
+        "key": "CSP-J|reading_program|medium|CPP|ai",
+        "count": 50
+      },
+      {
+        "key": "CSP-J|reading_program|medium|DS|ai",
+        "count": 62
+      },
+      {
+        "key": "CSP-J|single_choice|easy|ALG|ai",
+        "count": 125
+      },
+      {
+        "key": "CSP-J|single_choice|easy|BAS|ai",
+        "count": 164
+      },
+      {
+        "key": "CSP-J|single_choice|easy|CPP|ai",
+        "count": 160
+      },
+      {
+        "key": "CSP-J|single_choice|easy|CS|ai",
+        "count": 31
+      },
+      {
+        "key": "CSP-J|single_choice|easy|DS|ai",
+        "count": 80
+      },
+      {
+        "key": "CSP-J|single_choice|easy|MATH|ai",
+        "count": 40
+      },
+      {
+        "key": "CSP-J|single_choice|hard|ALG|ai",
+        "count": 60
+      },
+      {
+        "key": "CSP-J|single_choice|hard|BAS|ai",
+        "count": 80
+      },
+      {
+        "key": "CSP-J|single_choice|hard|CPP|ai",
+        "count": 62
+      },
+      {
+        "key": "CSP-J|single_choice|hard|CS|ai",
+        "count": 11
+      },
+      {
+        "key": "CSP-J|single_choice|hard|DS|ai",
+        "count": 40
+      },
+      {
+        "key": "CSP-J|single_choice|hard|MATH|ai",
+        "count": 20
+      },
+      {
+        "key": "CSP-J|single_choice|medium|ALG|ai",
+        "count": 120
+      },
+      {
+        "key": "CSP-J|single_choice|medium|BAS|ai",
+        "count": 154
+      },
+      {
+        "key": "CSP-J|single_choice|medium|CPP|ai",
+        "count": 160
+      },
+      {
+        "key": "CSP-J|single_choice|medium|CS|ai",
+        "count": 31
+      },
+      {
+        "key": "CSP-J|single_choice|medium|DS|ai",
+        "count": 80
+      },
+      {
+        "key": "CSP-J|single_choice|medium|MATH|ai",
+        "count": 38
+      },
+      {
+        "key": "CSP-S|completion_program|easy|ALG|ai",
+        "count": 10
+      },
+      {
+        "key": "CSP-S|completion_program|easy|DS|ai",
+        "count": 10
+      },
+      {
+        "key": "CSP-S|completion_program|hard|ALG|ai",
+        "count": 49
+      },
+      {
+        "key": "CSP-S|completion_program|hard|DS|ai",
+        "count": 50
+      },
+      {
+        "key": "CSP-S|completion_program|medium|ALG|ai",
+        "count": 37
+      },
+      {
+        "key": "CSP-S|completion_program|medium|DS|ai",
+        "count": 32
+      },
+      {
+        "key": "CSP-S|reading_program|easy|ALG|ai",
+        "count": 20
+      },
+      {
+        "key": "CSP-S|reading_program|easy|DS|ai",
+        "count": 10
+      },
+      {
+        "key": "CSP-S|reading_program|hard|ALG|ai",
+        "count": 97
+      },
+      {
+        "key": "CSP-S|reading_program|hard|DS|ai",
+        "count": 40
+      },
+      {
+        "key": "CSP-S|reading_program|medium|ALG|ai",
+        "count": 101
+      },
+      {
+        "key": "CSP-S|reading_program|medium|DS|ai",
+        "count": 73
+      },
+      {
+        "key": "CSP-S|single_choice|easy|ALG|ai",
+        "count": 71
+      },
+      {
+        "key": "CSP-S|single_choice|easy|BAS|ai",
+        "count": 20
+      },
+      {
+        "key": "CSP-S|single_choice|easy|CPP|ai",
+        "count": 60
+      },
+      {
+        "key": "CSP-S|single_choice|easy|CS|ai",
+        "count": 8
+      },
+      {
+        "key": "CSP-S|single_choice|easy|DS|ai",
+        "count": 62
+      },
+      {
+        "key": "CSP-S|single_choice|easy|MATH|ai",
+        "count": 32
+      },
+      {
+        "key": "CSP-S|single_choice|hard|ALG|ai",
+        "count": 130
+      },
+      {
+        "key": "CSP-S|single_choice|hard|BAS|ai",
+        "count": 30
+      },
+      {
+        "key": "CSP-S|single_choice|hard|CPP|ai",
+        "count": 91
+      },
+      {
+        "key": "CSP-S|single_choice|hard|CS|ai",
+        "count": 30
+      },
+      {
+        "key": "CSP-S|single_choice|hard|DS|ai",
+        "count": 140
+      },
+      {
+        "key": "CSP-S|single_choice|hard|MATH|ai",
+        "count": 65
+      },
+      {
+        "key": "CSP-S|single_choice|medium|ALG|ai",
+        "count": 212
+      },
+      {
+        "key": "CSP-S|single_choice|medium|BAS|ai",
+        "count": 41
+      },
+      {
+        "key": "CSP-S|single_choice|medium|CPP|ai",
+        "count": 141
+      },
+      {
+        "key": "CSP-S|single_choice|medium|CS|ai",
+        "count": 41
+      },
+      {
+        "key": "CSP-S|single_choice|medium|DS|ai",
+        "count": 215
+      },
+      {
+        "key": "CSP-S|single_choice|medium|MATH|ai",
+        "count": 99
+      },
+      {
+        "key": "GESP-1|completion_program|easy|CPP|ai",
+        "count": 13
+      },
+      {
+        "key": "GESP-1|completion_program|easy|CPP|manual",
+        "count": 24
+      },
+      {
+        "key": "GESP-1|completion_program|hard|CPP|ai",
+        "count": 35
+      },
+      {
+        "key": "GESP-1|completion_program|medium|CPP|ai",
+        "count": 80
+      },
+      {
+        "key": "GESP-1|reading_program|easy|CPP|ai",
+        "count": 98
+      },
+      {
+        "key": "GESP-1|reading_program|easy|CPP|manual",
+        "count": 5
+      },
+      {
+        "key": "GESP-1|reading_program|hard|CPP|ai",
+        "count": 55
+      },
+      {
+        "key": "GESP-1|reading_program|medium|CPP|ai",
+        "count": 157
+      },
+      {
+        "key": "GESP-1|single_choice|easy|BAS|ai",
+        "count": 153
+      },
+      {
+        "key": "GESP-1|single_choice|easy|BAS|manual",
+        "count": 29
+      },
+      {
+        "key": "GESP-1|single_choice|easy|CPP|ai",
+        "count": 297
+      },
+      {
+        "key": "GESP-1|single_choice|easy|CPP|manual",
+        "count": 27
+      },
+      {
+        "key": "GESP-1|single_choice|easy|CS|ai",
+        "count": 84
+      },
+      {
+        "key": "GESP-1|single_choice|easy|CS|manual",
+        "count": 4
+      },
+      {
+        "key": "GESP-1|single_choice|hard|BAS|ai",
+        "count": 50
+      },
+      {
+        "key": "GESP-1|single_choice|hard|CPP|ai",
+        "count": 60
+      },
+      {
+        "key": "GESP-1|single_choice|hard|CPP|manual",
+        "count": 3
+      },
+      {
+        "key": "GESP-1|single_choice|hard|CS|ai",
+        "count": 21
+      },
+      {
+        "key": "GESP-1|single_choice|medium|BAS|ai",
+        "count": 178
+      },
+      {
+        "key": "GESP-1|single_choice|medium|BAS|manual",
+        "count": 12
+      },
+      {
+        "key": "GESP-1|single_choice|medium|CPP|ai",
+        "count": 260
+      },
+      {
+        "key": "GESP-1|single_choice|medium|CPP|manual",
+        "count": 12
+      },
+      {
+        "key": "GESP-1|single_choice|medium|CS|ai",
+        "count": 75
+      },
+      {
+        "key": "GESP-1|single_choice|medium|CS|manual",
+        "count": 2
+      },
+      {
+        "key": "GESP-2|completion_program|easy|CPP|ai",
+        "count": 40
+      },
+      {
+        "key": "GESP-2|completion_program|hard|CPP|ai",
+        "count": 34
+      },
+      {
+        "key": "GESP-2|completion_program|medium|CPP|ai",
+        "count": 78
+      },
+      {
+        "key": "GESP-2|reading_program|easy|CPP|ai",
+        "count": 103
+      },
+      {
+        "key": "GESP-2|reading_program|hard|CPP|ai",
+        "count": 50
+      },
+      {
+        "key": "GESP-2|reading_program|medium|CPP|ai",
+        "count": 172
+      },
+      {
+        "key": "GESP-2|single_choice|easy|BAS|ai",
+        "count": 194
+      },
+      {
+        "key": "GESP-2|single_choice|easy|CPP|ai",
+        "count": 318
+      },
+      {
+        "key": "GESP-2|single_choice|easy|CS|ai",
+        "count": 147
+      },
+      {
+        "key": "GESP-2|single_choice|hard|BAS|ai",
+        "count": 40
+      },
+      {
+        "key": "GESP-2|single_choice|hard|CPP|ai",
+        "count": 62
+      },
+      {
+        "key": "GESP-2|single_choice|hard|CS|ai",
+        "count": 21
+      },
+      {
+        "key": "GESP-2|single_choice|medium|BAS|ai",
+        "count": 153
+      },
+      {
+        "key": "GESP-2|single_choice|medium|CPP|ai",
+        "count": 257
+      },
+      {
+        "key": "GESP-2|single_choice|medium|CS|ai",
+        "count": 117
+      },
+      {
+        "key": "GESP-3|completion_program|easy|ALG|ai",
+        "count": 6
+      },
+      {
+        "key": "GESP-3|completion_program|hard|ALG|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|completion_program|medium|ALG|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|reading_program|easy|CPP|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|reading_program|hard|ALG|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|reading_program|medium|ALG|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|single_choice|easy|ALG|ai",
+        "count": 29
+      },
+      {
+        "key": "GESP-3|single_choice|easy|BAS|ai",
+        "count": 19
+      },
+      {
+        "key": "GESP-3|single_choice|easy|CPP|ai",
+        "count": 16
+      },
+      {
+        "key": "GESP-3|single_choice|easy|MATH|ai",
+        "count": 15
+      },
+      {
+        "key": "GESP-3|single_choice|hard|ALG|ai",
+        "count": 10
+      },
+      {
+        "key": "GESP-3|single_choice|hard|BAS|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|single_choice|hard|CPP|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|single_choice|hard|MATH|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|single_choice|medium|ALG|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-3|single_choice|medium|BAS|ai",
+        "count": 22
+      },
+      {
+        "key": "GESP-3|single_choice|medium|CPP|ai",
+        "count": 20
+      },
+      {
+        "key": "GESP-4|completion_program|easy|ALG|ai",
+        "count": 4
+      },
+      {
+        "key": "GESP-4|completion_program|medium|ALG|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-4|reading_program|easy|ALG|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-4|reading_program|easy|CPP|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-4|reading_program|hard|ALG|ai",
+        "count": 4
+      },
+      {
+        "key": "GESP-4|reading_program|medium|ALG|ai",
+        "count": 9
+      },
+      {
+        "key": "GESP-4|single_choice|easy|ALG|ai",
+        "count": 25
+      },
+      {
+        "key": "GESP-4|single_choice|easy|BAS|ai",
+        "count": 19
+      },
+      {
+        "key": "GESP-4|single_choice|easy|CPP|ai",
+        "count": 25
+      },
+      {
+        "key": "GESP-4|single_choice|easy|MATH|ai",
+        "count": 14
+      },
+      {
+        "key": "GESP-4|single_choice|hard|ALG|ai",
+        "count": 14
+      },
+      {
+        "key": "GESP-4|single_choice|hard|BAS|ai",
+        "count": 10
+      },
+      {
+        "key": "GESP-4|single_choice|hard|CPP|ai",
+        "count": 10
+      },
+      {
+        "key": "GESP-4|single_choice|medium|ALG|ai",
+        "count": 19
+      },
+      {
+        "key": "GESP-4|single_choice|medium|BAS|ai",
+        "count": 8
+      },
+      {
+        "key": "GESP-4|single_choice|medium|CPP|ai",
+        "count": 7
+      },
+      {
+        "key": "GESP-4|single_choice|medium|MATH|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|completion_program|hard|ALG|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|completion_program|hard|MATH|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|completion_program|medium|ALG|ai",
+        "count": 1
+      },
+      {
+        "key": "GESP-5|reading_program|easy|ALG|ai",
+        "count": 10
+      },
+      {
+        "key": "GESP-5|reading_program|easy|DS|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|reading_program|hard|DS|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|single_choice|easy|ALG|ai",
+        "count": 44
+      },
+      {
+        "key": "GESP-5|single_choice|easy|CPP|ai",
+        "count": 15
+      },
+      {
+        "key": "GESP-5|single_choice|easy|DS|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|single_choice|easy|MATH|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|single_choice|hard|ALG|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|single_choice|hard|BAS|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|single_choice|hard|CPP|ai",
+        "count": 10
+      },
+      {
+        "key": "GESP-5|single_choice|hard|DS|ai",
+        "count": 3
+      },
+      {
+        "key": "GESP-5|single_choice|hard|MATH|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|single_choice|medium|ALG|ai",
+        "count": 201
+      },
+      {
+        "key": "GESP-5|single_choice|medium|BAS|ai",
+        "count": 9
+      },
+      {
+        "key": "GESP-5|single_choice|medium|CPP|ai",
+        "count": 2
+      },
+      {
+        "key": "GESP-5|single_choice|medium|DS|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-5|single_choice|medium|MATH|ai",
+        "count": 15
+      },
+      {
+        "key": "GESP-6|completion_program|easy|DS|ai",
+        "count": 1
+      },
+      {
+        "key": "GESP-6|completion_program|hard|ALG|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-6|completion_program|medium|DS|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-6|reading_program|easy|ALG|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-6|reading_program|hard|ALG|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-6|reading_program|medium|ALG|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-6|reading_program|medium|DS|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-6|single_choice|easy|ALG|ai",
+        "count": 20
+      },
+      {
+        "key": "GESP-6|single_choice|easy|CPP|ai",
+        "count": 10
+      },
+      {
+        "key": "GESP-6|single_choice|easy|DS|ai",
+        "count": 25
+      },
+      {
+        "key": "GESP-6|single_choice|hard|ALG|ai",
+        "count": 10
+      },
+      {
+        "key": "GESP-6|single_choice|hard|CPP|ai",
+        "count": 15
+      },
+      {
+        "key": "GESP-6|single_choice|hard|DS|ai",
+        "count": 20
+      },
+      {
+        "key": "GESP-6|single_choice|hard|MATH|ai",
+        "count": 10
+      },
+      {
+        "key": "GESP-6|single_choice|medium|ALG|ai",
+        "count": 102
+      },
+      {
+        "key": "GESP-6|single_choice|medium|CPP|ai",
+        "count": 10
+      },
+      {
+        "key": "GESP-6|single_choice|medium|DS|ai",
+        "count": 209
+      },
+      {
+        "key": "GESP-6|single_choice|medium|MATH|ai",
+        "count": 11
+      },
+      {
+        "key": "GESP-7|completion_program|easy|ALG|manual",
+        "count": 9
+      },
+      {
+        "key": "GESP-7|completion_program|easy|DS|ai",
+        "count": 5
+      },
+      {
+        "key": "GESP-7|completion_program|easy|DS|manual",
+        "count": 9
+      },
+      {
+        "key": "GESP-7|completion_program|hard|ALG|ai",
+        "count": 15
+      },
+      {
+        "key": "GESP-7|completion_program|hard|ALG|manual",
+        "count": 34
+      },
+      {
+        "key": "GESP-7|completion_program|hard|DS|ai",
+        "count": 34
+      },
+      {
+        "key": "GESP-7|completion_program|hard|DS|manual",
+        "count": 40
+      },
+      {
+        "key": "GESP-7|completion_program|medium|ALG|ai",
+        "count": 12
+      },
+      {
+        "key": "GESP-7|completion_program|medium|ALG|manual",
+        "count": 42
+      },
+      {
+        "key": "GESP-7|completion_program|medium|DS|ai",
+        "count": 42
+      },
+      {
+        "key": "GESP-7|completion_program|medium|DS|manual",
+        "count": 23
+      },
+      {
+        "key": "GESP-7|reading_program|easy|ALG|ai",
+        "count": 12
+      },
+      {
+        "key": "GESP-7|reading_program|easy|ALG|manual",
+        "count": 19
+      },
+      {
+        "key": "GESP-7|reading_program|easy|DS|ai",
+        "count": 6
+      },
+      {
+        "key": "GESP-7|reading_program|easy|DS|manual",
+        "count": 11
+      },
+      {
+        "key": "GESP-7|reading_program|hard|ALG|ai",
+        "count": 52
+      },
+      {
+        "key": "GESP-7|reading_program|hard|ALG|manual",
+        "count": 50
+      },
+      {
+        "key": "GESP-7|reading_program|hard|DS|ai",
+        "count": 38
+      },
+      {
+        "key": "GESP-7|reading_program|hard|DS|manual",
+        "count": 33
+      },
+      {
+        "key": "GESP-7|reading_program|medium|ALG|ai",
+        "count": 56
+      },
+      {
+        "key": "GESP-7|reading_program|medium|ALG|manual",
+        "count": 59
+      },
+      {
+        "key": "GESP-7|reading_program|medium|DS|ai",
+        "count": 38
+      },
+      {
+        "key": "GESP-7|reading_program|medium|DS|manual",
+        "count": 32
+      },
+      {
+        "key": "GESP-7|single_choice|easy|ALG|ai",
+        "count": 55
+      },
+      {
+        "key": "GESP-7|single_choice|easy|ALG|manual",
+        "count": 84
+      },
+      {
+        "key": "GESP-7|single_choice|easy|CPP|ai",
+        "count": 20
+      },
+      {
+        "key": "GESP-7|single_choice|easy|CPP|manual",
+        "count": 70
+      },
+      {
+        "key": "GESP-7|single_choice|easy|DS|ai",
+        "count": 60
+      },
+      {
+        "key": "GESP-7|single_choice|easy|DS|manual",
+        "count": 86
+      },
+      {
+        "key": "GESP-7|single_choice|easy|MATH|ai",
+        "count": 20
+      },
+      {
+        "key": "GESP-7|single_choice|easy|MATH|manual",
+        "count": 39
+      },
+      {
+        "key": "GESP-7|single_choice|hard|ALG|ai",
+        "count": 110
+      },
+      {
+        "key": "GESP-7|single_choice|hard|ALG|manual",
+        "count": 120
+      },
+      {
+        "key": "GESP-7|single_choice|hard|CPP|ai",
+        "count": 55
+      },
+      {
+        "key": "GESP-7|single_choice|hard|CPP|manual",
+        "count": 107
+      },
+      {
+        "key": "GESP-7|single_choice|hard|DS|ai",
+        "count": 108
+      },
+      {
+        "key": "GESP-7|single_choice|hard|DS|manual",
+        "count": 104
+      },
+      {
+        "key": "GESP-7|single_choice|hard|MATH|ai",
+        "count": 23
+      },
+      {
+        "key": "GESP-7|single_choice|hard|MATH|manual",
+        "count": 64
+      },
+      {
+        "key": "GESP-7|single_choice|medium|ALG|ai",
+        "count": 129
+      },
+      {
+        "key": "GESP-7|single_choice|medium|ALG|manual",
+        "count": 146
+      },
+      {
+        "key": "GESP-7|single_choice|medium|CPP|ai",
+        "count": 47
+      },
+      {
+        "key": "GESP-7|single_choice|medium|CPP|manual",
+        "count": 125
+      },
+      {
+        "key": "GESP-7|single_choice|medium|DS|ai",
+        "count": 205
+      },
+      {
+        "key": "GESP-7|single_choice|medium|DS|manual",
+        "count": 16
+      },
+      {
+        "key": "GESP-7|single_choice|medium|MATH|ai",
+        "count": 17
+      },
+      {
+        "key": "GESP-7|single_choice|medium|MATH|manual",
+        "count": 96
+      },
+      {
+        "key": "GESP-8|completion_program|easy|ALG|ai",
+        "count": 4
+      },
+      {
+        "key": "GESP-8|completion_program|easy|ALG|manual",
+        "count": 5
+      },
+      {
+        "key": "GESP-8|completion_program|easy|MATH|ai",
+        "count": 9
+      },
+      {
+        "key": "GESP-8|completion_program|hard|ALG|ai",
+        "count": 60
+      },
+      {
+        "key": "GESP-8|completion_program|hard|ALG|manual",
+        "count": 5
+      },
+      {
+        "key": "GESP-8|completion_program|hard|MATH|ai",
+        "count": 52
+      },
+      {
+        "key": "GESP-8|completion_program|hard|MATH|manual",
+        "count": 5
+      },
+      {
+        "key": "GESP-8|completion_program|medium|ALG|ai",
+        "count": 37
+      },
+      {
+        "key": "GESP-8|completion_program|medium|ALG|manual",
+        "count": 5
+      },
+      {
+        "key": "GESP-8|completion_program|medium|MATH|ai",
+        "count": 52
+      },
+      {
+        "key": "GESP-8|completion_program|medium|MATH|manual",
+        "count": 5
+      },
+      {
+        "key": "GESP-8|reading_program|easy|ALG|ai",
+        "count": 35
+      },
+      {
+        "key": "GESP-8|reading_program|easy|DS|ai",
+        "count": 21
+      },
+      {
+        "key": "GESP-8|reading_program|hard|ALG|ai",
+        "count": 101
+      },
+      {
+        "key": "GESP-8|reading_program|hard|DS|ai",
+        "count": 44
+      },
+      {
+        "key": "GESP-8|reading_program|medium|ALG|ai",
+        "count": 89
+      },
+      {
+        "key": "GESP-8|reading_program|medium|DS|ai",
+        "count": 51
+      },
+      {
+        "key": "GESP-8|reading_program|medium|DS|manual",
+        "count": 5
+      },
+      {
+        "key": "GESP-8|single_choice|easy|ALG|ai",
+        "count": 110
+      },
+      {
+        "key": "GESP-8|single_choice|easy|CPP|ai",
+        "count": 70
+      },
+      {
+        "key": "GESP-8|single_choice|easy|CPP|manual",
+        "count": 5
+      },
+      {
+        "key": "GESP-8|single_choice|easy|DS|ai",
+        "count": 90
+      },
+      {
+        "key": "GESP-8|single_choice|easy|DS|manual",
+        "count": 5
+      },
+      {
+        "key": "GESP-8|single_choice|easy|MATH|ai",
+        "count": 74
+      },
+      {
+        "key": "GESP-8|single_choice|easy|MATH|manual",
+        "count": 5
+      },
+      {
+        "key": "GESP-8|single_choice|hard|ALG|ai",
+        "count": 160
+      },
+      {
+        "key": "GESP-8|single_choice|hard|ALG|manual",
+        "count": 5
+      },
+      {
+        "key": "GESP-8|single_choice|hard|CPP|ai",
+        "count": 125
+      },
+      {
+        "key": "GESP-8|single_choice|hard|CPP|manual",
+        "count": 5
+      },
+      {
+        "key": "GESP-8|single_choice|hard|DS|ai",
+        "count": 185
+      },
+      {
+        "key": "GESP-8|single_choice|hard|MATH|ai",
+        "count": 140
+      },
+      {
+        "key": "GESP-8|single_choice|hard|MATH|manual",
+        "count": 5
+      },
+      {
+        "key": "GESP-8|single_choice|medium|ALG|ai",
+        "count": 187
+      },
+      {
+        "key": "GESP-8|single_choice|medium|CPP|ai",
+        "count": 150
+      },
+      {
+        "key": "GESP-8|single_choice|medium|CPP|manual",
+        "count": 5
+      },
+      {
+        "key": "GESP-8|single_choice|medium|DS|ai",
+        "count": 227
+      },
+      {
+        "key": "GESP-8|single_choice|medium|MATH|ai",
+        "count": 195
+      },
+      {
+        "key": "GESP-8|single_choice|medium|MATH|manual",
+        "count": 5
+      }
+    ]
+  },
+  "deficits": [
+    {
+      "examType": "GESP-4",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 200,
+      "available": 7,
+      "deficit": 193
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 200,
+      "available": 16,
+      "deficit": 184
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 200,
+      "available": 19,
+      "deficit": 181
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 200,
+      "available": 20,
+      "deficit": 180
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 200,
+      "available": 25,
+      "deficit": 175
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 200,
+      "available": 25,
+      "deficit": 175
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 160,
+      "available": 5,
+      "deficit": 155
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "BAS",
+      "required": 160,
+      "available": 19,
+      "deficit": 141
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "BAS",
+      "required": 160,
+      "available": 22,
+      "deficit": 138
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 135,
+      "available": 2,
+      "deficit": 133
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 160,
+      "available": 29,
+      "deficit": 131
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 150,
+      "available": 20,
+      "deficit": 130
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 135,
+      "available": 10,
+      "deficit": 125
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 150,
+      "available": 25,
+      "deficit": 125
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 225,
+      "available": 102,
+      "deficit": 123
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 125,
+      "available": 5,
+      "deficit": 120
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "MATH",
+      "required": 135,
+      "available": 15,
+      "deficit": 120
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 125,
+      "available": 10,
+      "deficit": 115
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "BAS",
+      "required": 120,
+      "available": 8,
+      "deficit": 112
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 150,
+      "available": 44,
+      "deficit": 106
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 125,
+      "available": 20,
+      "deficit": 105
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "BAS",
+      "required": 120,
+      "available": 19,
+      "deficit": 101
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 99,
+      "available": 0,
+      "deficit": 99
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 100,
+      "available": 5,
+      "deficit": 95
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 99,
+      "available": 5,
+      "deficit": 94
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 100,
+      "available": 10,
+      "deficit": 90
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 94,
+      "available": 5,
+      "deficit": 89
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 100,
+      "available": 14,
+      "deficit": 86
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 94,
+      "available": 9,
+      "deficit": 85
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 90,
+      "available": 5,
+      "deficit": 85
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "MATH",
+      "required": 90,
+      "available": 5,
+      "deficit": 85
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 89,
+      "available": 5,
+      "deficit": 84
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 89,
+      "available": 5,
+      "deficit": 84
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 400,
+      "available": 318,
+      "deficit": 82
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "BAS",
+      "required": 90,
+      "available": 9,
+      "deficit": 81
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "MATH",
+      "required": 80,
+      "available": 0,
+      "deficit": 80
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 90,
+      "available": 10,
+      "deficit": 80
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "MATH",
+      "required": 90,
+      "available": 11,
+      "deficit": 79
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 400,
+      "available": 324,
+      "deficit": 76
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "BAS",
+      "required": 80,
+      "available": 5,
+      "deficit": 75
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "MATH",
+      "required": 80,
+      "available": 5,
+      "deficit": 75
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 90,
+      "available": 15,
+      "deficit": 75
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 80,
+      "available": 10,
+      "deficit": 70
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "MATH",
+      "required": 75,
+      "available": 5,
+      "deficit": 70
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "BAS",
+      "required": 250,
+      "available": 182,
+      "deficit": 68
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 67,
+      "available": 0,
+      "deficit": 67
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "MATH",
+      "required": 80,
+      "available": 14,
+      "deficit": 66
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "MATH",
+      "required": 80,
+      "available": 15,
+      "deficit": 65
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 65,
+      "available": 0,
+      "deficit": 65
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 75,
+      "available": 10,
+      "deficit": 65
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 320,
+      "available": 257,
+      "deficit": 63
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 67,
+      "available": 5,
+      "deficit": 62
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "BAS",
+      "required": 60,
+      "available": 0,
+      "deficit": 60
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 65,
+      "available": 5,
+      "deficit": 60
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 75,
+      "available": 15,
+      "deficit": 60
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "MATH",
+      "required": 60,
+      "available": 0,
+      "deficit": 60
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 60,
+      "available": 5,
+      "deficit": 55
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 51,
+      "available": 0,
+      "deficit": 51
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 55,
+      "available": 4,
+      "deficit": 51
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 55,
+      "available": 5,
+      "deficit": 50
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "BAS",
+      "required": 60,
+      "available": 10,
+      "deficit": 50
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 50,
+      "available": 0,
+      "deficit": 50
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 320,
+      "available": 272,
+      "deficit": 48
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 47,
+      "available": 0,
+      "deficit": 47
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 47,
+      "available": 0,
+      "deficit": 47
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 50,
+      "available": 3,
+      "deficit": 47
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 51,
+      "available": 5,
+      "deficit": 46
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "MATH",
+      "required": 46,
+      "available": 0,
+      "deficit": 46
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 46,
+      "available": 0,
+      "deficit": 46
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 46,
+      "available": 1,
+      "deficit": 45
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "BAS",
+      "required": 50,
+      "available": 5,
+      "deficit": 45
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 50,
+      "available": 5,
+      "deficit": 45
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 46,
+      "available": 5,
+      "deficit": 41
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 44,
+      "available": 4,
+      "deficit": 40
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "MATH",
+      "required": 40,
+      "available": 0,
+      "deficit": 40
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "MATH",
+      "required": 50,
+      "available": 10,
+      "deficit": 40
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 39,
+      "available": 0,
+      "deficit": 39
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 44,
+      "available": 6,
+      "deficit": 38
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "MATH",
+      "required": 40,
+      "available": 5,
+      "deficit": 35
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 39,
+      "available": 5,
+      "deficit": 34
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "MATH",
+      "required": 39,
+      "available": 5,
+      "deficit": 34
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 39,
+      "available": 5,
+      "deficit": 34
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 32,
+      "available": 0,
+      "deficit": 32
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 36,
+      "available": 5,
+      "deficit": 31
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 28,
+      "available": 0,
+      "deficit": 28
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 28,
+      "available": 0,
+      "deficit": 28
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 32,
+      "available": 5,
+      "deficit": 27
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 36,
+      "available": 10,
+      "deficit": 26
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 62,
+      "available": 37,
+      "deficit": 25
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 225,
+      "available": 201,
+      "deficit": 24
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 62,
+      "available": 40,
+      "deficit": 22
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 100,
+      "available": 78,
+      "deficit": 22
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 100,
+      "available": 80,
+      "deficit": 20
+    },
+    {
+      "examType": "GESP-3",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 25,
+      "available": 5,
+      "deficit": 20
+    },
+    {
+      "examType": "GESP-4",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 25,
+      "available": 5,
+      "deficit": 20
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 80,
+      "available": 62,
+      "deficit": 18
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 80,
+      "available": 62,
+      "deficit": 18
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 80,
+      "available": 62,
+      "deficit": 18
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 18,
+      "available": 0,
+      "deficit": 18
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 80,
+      "available": 63,
+      "deficit": 17
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 225,
+      "available": 209,
+      "deficit": 16
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 15,
+      "available": 0,
+      "deficit": 15
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "MATH",
+      "required": 15,
+      "available": 0,
+      "deficit": 15
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 15,
+      "available": 0,
+      "deficit": 15
+    },
+    {
+      "examType": "GESP-6",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 15,
+      "available": 1,
+      "deficit": 14
+    },
+    {
+      "examType": "GESP-5",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 18,
+      "available": 5,
+      "deficit": 13
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "CS",
+      "required": 20,
+      "available": 8,
+      "deficit": 12
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "CS",
+      "required": 100,
+      "available": 88,
+      "deficit": 12
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "BAS",
+      "required": 200,
+      "available": 190,
+      "deficit": 10
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "CS",
+      "required": 40,
+      "available": 31,
+      "deficit": 9
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "CS",
+      "required": 20,
+      "available": 11,
+      "deficit": 9
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "CS",
+      "required": 40,
+      "available": 31,
+      "deficit": 9
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 80,
+      "available": 71,
+      "deficit": 9
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "BAS",
+      "required": 50,
+      "available": 41,
+      "deficit": 9
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 150,
+      "available": 141,
+      "deficit": 9
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "CS",
+      "required": 50,
+      "available": 41,
+      "deficit": 9
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "CS",
+      "required": 30,
+      "available": 21,
+      "deficit": 9
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 40,
+      "available": 32,
+      "deficit": 8
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "MATH",
+      "required": 40,
+      "available": 32,
+      "deficit": 8
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 40,
+      "available": 33,
+      "deficit": 7
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "BAS",
+      "required": 160,
+      "available": 153,
+      "deficit": 7
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 40,
+      "available": 34,
+      "deficit": 6
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "BAS",
+      "required": 160,
+      "available": 154,
+      "deficit": 6
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "BAS",
+      "required": 200,
+      "available": 194,
+      "deficit": 6
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 20,
+      "available": 16,
+      "deficit": 4
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 40,
+      "available": 36,
+      "deficit": 4
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 20,
+      "available": 16,
+      "deficit": 4
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 38,
+      "available": 34,
+      "deficit": 4
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 225,
+      "available": 221,
+      "deficit": 4
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 93,
+      "available": 89,
+      "deficit": 4
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 40,
+      "available": 37,
+      "deficit": 3
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 38,
+      "available": 35,
+      "deficit": 3
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "CS",
+      "required": 80,
+      "available": 77,
+      "deficit": 3
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "CS",
+      "required": 150,
+      "available": 147,
+      "deficit": 3
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "CS",
+      "required": 120,
+      "available": 117,
+      "deficit": 3
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 20,
+      "available": 18,
+      "deficit": 2
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "MATH",
+      "required": 40,
+      "available": 38,
+      "deficit": 2
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 50,
+      "available": 49,
+      "deficit": 1
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "MATH",
+      "required": 100,
+      "available": 99,
+      "deficit": 1
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "MATH",
+      "required": 80,
+      "available": 79,
+      "deficit": 1
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 40,
+      "available": 49,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 20,
+      "available": 20,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 30,
+      "available": 35,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 50,
+      "available": 74,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 20,
+      "available": 20,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 30,
+      "available": 41,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 50,
+      "available": 50,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 30,
+      "available": 45,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 50,
+      "available": 62,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 120,
+      "available": 125,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 60,
+      "available": 60,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 120,
+      "available": 120,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "BAS",
+      "required": 160,
+      "available": 164,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "BAS",
+      "required": 80,
+      "available": 80,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 160,
+      "available": 160,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 160,
+      "available": 160,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 80,
+      "available": 80,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 40,
+      "available": 40,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 80,
+      "available": 80,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "MATH",
+      "required": 40,
+      "available": 40,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "MATH",
+      "required": 20,
+      "available": 20,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 10,
+      "available": 10,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 10,
+      "available": 10,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 50,
+      "available": 50,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 20,
+      "available": 20,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 80,
+      "available": 97,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 100,
+      "available": 101,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 10,
+      "available": 10,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 40,
+      "available": 40,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 50,
+      "available": 73,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 120,
+      "available": 130,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 200,
+      "available": 212,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "BAS",
+      "required": 20,
+      "available": 20,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "BAS",
+      "required": 30,
+      "available": 30,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 60,
+      "available": 60,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 90,
+      "available": 91,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "CS",
+      "required": 30,
+      "available": 30,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 120,
+      "available": 140,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 200,
+      "available": 215,
+      "deficit": 0
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "MATH",
+      "required": 60,
+      "available": 65,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 103,
+      "available": 103,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 45,
+      "available": 55,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 152,
+      "available": 157,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "BAS",
+      "required": 50,
+      "available": 50,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "CS",
+      "required": 20,
+      "available": 21,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 103,
+      "available": 103,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 45,
+      "available": 50,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 152,
+      "available": 172,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "BAS",
+      "required": 40,
+      "available": 40,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 9,
+      "available": 9,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 49,
+      "available": 49,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 42,
+      "available": 54,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 9,
+      "available": 14,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 49,
+      "available": 74,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 42,
+      "available": 65,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 22,
+      "available": 31,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 85,
+      "available": 102,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 93,
+      "available": 115,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 11,
+      "available": 17,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 43,
+      "available": 71,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 46,
+      "available": 70,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 100,
+      "available": 139,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 175,
+      "available": 230,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 225,
+      "available": 275,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 60,
+      "available": 90,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 105,
+      "available": 162,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 135,
+      "available": 172,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 100,
+      "available": 146,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 175,
+      "available": 212,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "MATH",
+      "required": 40,
+      "available": 59,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "MATH",
+      "required": 70,
+      "available": 87,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-7",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "MATH",
+      "required": 90,
+      "available": 113,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 9,
+      "available": 9,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 49,
+      "available": 65,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 42,
+      "available": 42,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "completion_program",
+      "difficulty": "easy",
+      "kpGroup": "MATH",
+      "required": 9,
+      "available": 9,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "MATH",
+      "required": 49,
+      "available": 57,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "completion_program",
+      "difficulty": "medium",
+      "kpGroup": "MATH",
+      "required": 42,
+      "available": 57,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 22,
+      "available": 35,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 85,
+      "available": 101,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 11,
+      "available": 21,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 43,
+      "available": 44,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "reading_program",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 46,
+      "available": 56,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "ALG",
+      "required": 80,
+      "available": 110,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "required": 140,
+      "available": 165,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 180,
+      "available": 187,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 60,
+      "available": 75,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 105,
+      "available": 130,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "CPP",
+      "required": 135,
+      "available": 155,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "DS",
+      "required": 80,
+      "available": 95,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 140,
+      "available": 185,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "DS",
+      "required": 180,
+      "available": 227,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "single_choice",
+      "difficulty": "hard",
+      "kpGroup": "MATH",
+      "required": 140,
+      "available": 145,
+      "deficit": 0
+    },
+    {
+      "examType": "GESP-8",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "MATH",
+      "required": 180,
+      "available": 200,
+      "deficit": 0
+    }
+  ],
+  "summary": {
+    "totalDeficit": 7494,
+    "deficitRows": 140,
+    "satisfiedRows": 94
+  }
+}

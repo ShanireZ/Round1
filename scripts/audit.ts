@@ -49,6 +49,11 @@ export const auditCommands: StableScriptCommand[] = [
     summary: "生成 question inventory 报告",
   },
   {
+    name: "report-question-counts",
+    scriptPath: "commands/audit/reportQuestionCounts.ts",
+    summary: "合并 question inventory 与 diversity audit，生成 count/ 统计真源",
+  },
+  {
     name: "verify-llm-tasks",
     scriptPath: "commands/audit/verifyLlmTasks.ts",
     summary: "验证脚本侧 LLM generate/judge 任务",
