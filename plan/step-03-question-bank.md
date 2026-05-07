@@ -11,7 +11,7 @@
 > **GESP-6 库存补充记录（2026-05-07）**：`2026-05-07-bulk36-gesp6-default-only-gap-fill-v01` 与 `2026-05-07-bulk36-gesp6-default-only-gap-fill-v02` 已分别按 3 题/bundle 生成 12 个 GESP-6 `single_choice/medium/ALG` bundle，共 72 题；生成、两轮 LLM 审核与修复均通过 `--provider-lane default-only` 使用 `.env` 的 `LLM_PROVIDER_DEFAULT`。两轮导入 dry-run 均 12/12 通过，apply 共 72 题，duplicate content hash 均为 0。`artifacts/reports/2026/state/question-inventory.*` 与 `papers/_inventory/*` 已刷新，GESP-6 `single_choice/medium/ALG` 可用数从 30 增至 102，缺口从 195 降至 123。本日继续相同 `bulk36` shard 时需使用新的 `--agent-label` 或不同 pipeline label，避免 `--skip-existing` 复用已有 `bulk36-a01-b0001...` bundle 路径。
 
 > **阅读程序样例 IO 收口（2026-05-07）**：`reading_program` 题面只保留代码与子问题，不再生成或导入非空 `sampleInputs` / `expectedOutputs`，题干、子题和解析也不得出现“样例输入 / 样例输出”表述；需要固定数据时直接写入 C++ 初始化语句。`completion_program` 仍保留样例 IO，用于校验填空后的完整程序行为。
-> 同日追加：已补 `scripts/cleanup_reading_program_sample_io_pdfs.py` 并清理 `example/*quality-sample*.pdf` 中既有阅读程序样例 IO 残留；脚本的 `--check` 可回归确认阅读程序章节不再含“样例输入 / 样例输出”。
+> 同日追加：已补 `scripts/cleanup_reading_program_sample_io_pdfs.py` 并清理 `example/*quality-sample*.pdf` 中既有阅读程序样例 IO 残留；脚本的 `--check` 可回归确认阅读程序章节不再含“样例输入 / 样例输出”。为消除删除样例后留下的页尾空白，`scripts/reflow_quality_sample_pdfs.py` 会从已清理文本重新分页生成这些示例 PDF，允许题目与选项自然跨页。
 
 ### 性能估算假设
 

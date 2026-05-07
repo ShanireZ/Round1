@@ -950,6 +950,7 @@ function buildArchetypeInstructionBlock(params: {
       ].join("\n"),
     ),
     "For hard difficulty, a single loop-count or final-scalar trace is not acceptable unless combined with a boundary, invariant, nested container, or counterexample trap.",
+    "Even for easy difficulty, do not write pure definition or vocabulary recall. Use a concrete scenario, trace table, short code fragment, input/output observation, or step-by-step decision with 3-5 observable steps.",
   ].join("\n");
 }
 
@@ -980,7 +981,7 @@ function buildGenerationPrompt(params: {
     "For any C++ trace question, use only sequencing that is unambiguous in C++17, and state the printed output or final variable values exactly.",
     "Do not place semantically equivalent choices in the same option set. In particular, avoid mixing true/false with 1/0 for boolean-expression questions unless the stem explicitly asks for printed output.",
     "If a question depends on C++ boolean-to-integer conversion, make the context explicit, such as asking for the output of cout << (...).",
-    "For medium difficulty, require 1-2 reasoning steps. For hard difficulty, require a nontrivial trace or combined concept.",
+    "Difficulty must match the measurable rubric: easy = one concept with 3-5 observable trace/decision steps; medium = 2 concepts or 2-3 state variables with 5-8 steps plus a boundary, branch, or container-state change; hard = multi-step state, invariant, nested container, complexity/boundary counterexample, and at least one explicit trapType.",
     "Keep primaryKpCode exactly equal to the requested code. auxiliaryKpCodes may be empty.",
     buildArchetypeInstructionBlock({
       plans: params.archetypePlans,
@@ -2458,7 +2459,7 @@ async function processCombo(params: {
         continue;
       }
       if (review.finalVerdict === "fail") {
-        throw new Error(`bundle failed review: ${summarizeFailure(report)}`);
+        return { bundle: review.bundle, report };
       }
       reserveHashes(review.bundle, params.seenHashes, generated.repoPath);
       if (!params.dryRun) {

@@ -66,6 +66,12 @@ class BlockShift:
     delta_y: float
 
 
+FOOTER_SAFE_Y = 55.0
+CROSS_PAGE_GAP = 18.0
+MIN_CROSS_PAGE_FILL = 36.0
+MAX_CROSS_PAGE_PASSES = 6
+
+
 def register_font() -> str:
     for candidate in FONT_CANDIDATES:
         if candidate.exists():
@@ -441,6 +447,116 @@ def shift_content_block(segment: bytes, delta_y: float) -> bytes:
     )
 
 
+def page_content_data(page) -> bytes:
+    contents = page.get_contents()
+    return contents.get_data() if contents is not None else b""
+
+
+def set_page_content_data(page, data: bytes) -> None:
+    stream = DecodedStreamObject()
+    stream.set_data(data)
+    page[NameObject("/Contents")] = stream
+
+
+def content_lines(page) -> list[TextLine]:
+    return [
+        line
+        for line in extract_lines(page)
+        if line.y > FOOTER_SAFE_Y and line.text.strip()
+    ]
+
+
+def movable_blocks(data: bytes) -> list[ContentBlock]:
+    return [block for block in parse_blocks(data) if block.y > FOOTER_SAFE_Y]
+
+
+def shift_blocks_in_data(data: bytes, block_shifts: list[BlockShift]) -> bytes:
+    if not block_shifts:
+        return data
+    return apply_content_changes(data, set(), [], block_shifts)
+
+
+def append_shifted_blocks(data: bytes, source_data: bytes, blocks: list[ContentBlock], delta_y: float) -> bytes:
+    segments = [
+        shift_content_block(block_segment(source_data, block), delta_y)
+        for block in sorted(blocks, key=lambda item: item.start)
+    ]
+    if not segments:
+        return data
+    return data.rstrip() + b"\n" + b"\n".join(segments) + b"\n"
+
+
+def compact_page_pair(previous_page, next_page) -> int:
+    previous_data = page_content_data(previous_page)
+    next_data = page_content_data(next_page)
+    previous_blocks = movable_blocks(previous_data)
+    next_blocks = movable_blocks(next_data)
+    if not previous_blocks or not next_blocks:
+        return 0
+
+    previous_floor = min(block.y for block in previous_blocks)
+    next_top = max(block.y for block in next_blocks)
+    new_top = previous_floor - CROSS_PAGE_GAP
+    if new_top <= FOOTER_SAFE_Y + MIN_CROSS_PAGE_FILL:
+        return 0
+
+    delta_y = new_top - next_top
+    selected_block_ys = [
+        block.y
+        for block in sorted(next_blocks, key=lambda item: item.y, reverse=True)
+        if block.y + delta_y > FOOTER_SAFE_Y
+    ]
+    if not selected_block_ys:
+        return 0
+
+    cutoff_y = min(selected_block_ys) - 4.0
+    moving_blocks = [block for block in next_blocks if block.y >= cutoff_y]
+    if not moving_blocks:
+        return 0
+
+    set_page_content_data(
+        previous_page,
+        append_shifted_blocks(previous_data, next_data, moving_blocks, delta_y),
+    )
+
+    removals = {(block.start, block.end) for block in moving_blocks}
+    remaining_blocks = [
+        block
+        for block in next_blocks
+        if (block.start, block.end) not in removals
+    ]
+    if remaining_blocks:
+        remaining_top = max(block.y for block in remaining_blocks)
+        pull_up = next_top - remaining_top
+        shifts = [
+            BlockShift(block=block, delta_y=pull_up)
+            for block in remaining_blocks
+            if pull_up > 0
+        ]
+    else:
+        shifts = []
+    changed_next_data = apply_content_changes(next_data, removals, [], shifts)
+    set_page_content_data(next_page, changed_next_data)
+    return len(moving_blocks)
+
+
+def compact_pages_across_boundaries(pages: list) -> list[str]:
+    notes: list[str] = []
+    for pass_index in range(1, MAX_CROSS_PAGE_PASSES + 1):
+        moved_this_pass = 0
+        for page_index in range(len(pages) - 1):
+            moved = compact_page_pair(pages[page_index], pages[page_index + 1])
+            if moved:
+                moved_this_pass += moved
+                notes.append(
+                    f"cross-page pass {pass_index}: moved {moved} blocks "
+                    f"from page {page_index + 2} to page {page_index + 1}"
+                )
+        if not moved_this_pass:
+            break
+    return notes
+
+
 def overlay_replacements(page, replacements: list[Replacement], font_name: str) -> None:
     if not replacements:
         return
@@ -711,6 +827,7 @@ def collect_page_changes(
 def rewrite_pdf(path: Path, *, font_name: str, check_only: bool) -> tuple[bool, list[str]]:
     reader = PdfReader(str(path))
     writer = PdfWriter()
+    pages = list(reader.pages)
     reading_active = False
     pending_spill = False
     pending_payload = False
@@ -718,7 +835,7 @@ def rewrite_pdf(path: Path, *, font_name: str, check_only: bool) -> tuple[bool, 
     changed = False
     notes: list[str] = []
 
-    for page_index, page in enumerate(reader.pages, start=1):
+    for page_index, page in enumerate(pages, start=1):
         (
             removals,
             replacements,
@@ -747,14 +864,13 @@ def rewrite_pdf(path: Path, *, font_name: str, check_only: bool) -> tuple[bool, 
                 f"rewrote {len(stream_replacements)} code lines"
             )
             if not check_only:
-                contents = page.get_contents()
-                data = contents.get_data() if contents is not None else b""
+                data = page_content_data(page)
                 changed_data = apply_content_changes(data, removals, stream_replacements, block_shifts)
                 if changed_data != data:
-                    stream = DecodedStreamObject()
-                    stream.set_data(changed_data)
-                    page[NameObject("/Contents")] = stream
+                    set_page_content_data(page, changed_data)
                 overlay_replacements(page, replacements, font_name)
+
+    for page in pages:
         writer.add_page(page)
 
     if changed and not check_only:

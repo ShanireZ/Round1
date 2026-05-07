@@ -232,6 +232,18 @@ function renderMarkdown(params: {
     lines.push(`| ${grid.key} | ${grid.count} | ${topFlavors} | ${topArchetypes} |`);
   }
 
+  lines.push("", "## Knowledge Point Template Distribution", "");
+  lines.push("| knowledge point / type / difficulty | count | top task flavors | top stem patterns |");
+  lines.push("| --- | ---: | --- | --- |");
+  for (const bucket of params.audit.distributions.byKnowledgePoint.slice(0, 80)) {
+    lines.push(
+      `| ${bucket.key} | ${bucket.count} | ${topCounts(bucket.taskFlavors, 6)} | ${topCounts(
+        bucket.stemPatternFamilies,
+        6,
+      )} |`,
+    );
+  }
+
   lines.push("", "## Rewrite Queue Preview", "");
   if (params.audit.rewriteQueue.length === 0) {
     lines.push("No rewrite candidates.", "");
@@ -253,6 +265,61 @@ function renderMarkdown(params: {
   return `${lines.join("\n")}\n`;
 }
 
+function topCounts(counts: Record<string, number>, limit: number) {
+  return Object.entries(counts)
+    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+    .slice(0, limit)
+    .map(([key, count]) => `${key}:${count}`)
+    .join(", ");
+}
+
+function csvEscape(value: string | number) {
+  const raw = String(value);
+  return /[",\r\n]/.test(raw) ? `"${raw.replace(/"/g, '""')}"` : raw;
+}
+
+function writeCsv(pathname: string, rows: Array<Record<string, string | number>>) {
+  if (rows.length === 0) {
+    fs.writeFileSync(pathname, "", "utf8");
+    return;
+  }
+  const headers = Object.keys(rows[0]!);
+  const lines = [
+    headers.map(csvEscape).join(","),
+    ...rows.map((row) => headers.map((header) => csvEscape(row[header] ?? "")).join(",")),
+  ];
+  fs.writeFileSync(pathname, `${lines.join("\n")}\n`, "utf8");
+}
+
+function distributionRows(
+  buckets: ReturnType<typeof buildDiversityAudit>["distributions"]["byGrid"],
+) {
+  return buckets.map((bucket) => ({
+    key: bucket.key,
+    count: bucket.count,
+    topTaskFlavors: topCounts(bucket.taskFlavors, 10),
+    topArchetypes: topCounts(bucket.archetypes, 10),
+    topStemPatterns: topCounts(bucket.stemPatternFamilies, 10),
+    topContainerTags: topCounts(bucket.containerTags, 10),
+  }));
+}
+
+function actionForRewriteCandidate(candidate: ReturnType<typeof buildDiversityAudit>["rewriteQueue"][number]) {
+  if (
+    candidate.reasons.includes("qualityScore_below_0.65") &&
+    candidate.reasons.includes("parameterized_template_cluster")
+  ) {
+    return "rewrite_or_archive_review";
+  }
+  if (candidate.reasons.includes("hard_difficulty_rubric_failed")) {
+    return "rewrite_hard_rubric";
+  }
+  if (candidate.reasons.includes("ds_stack_queue_overused_candidate")) {
+    return "rewrite_for_ds_rebalance";
+  }
+  return "rewrite_review";
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const sourceLabel = args.db
@@ -271,17 +338,70 @@ async function main() {
     .toLowerCase();
   const jsonPath = path.join(outDir, `${slug || "question-diversity"}__diversity-audit.json`);
   const mdPath = path.join(outDir, `${slug || "question-diversity"}__diversity-audit.md`);
+  const gridCsvPath = path.join(outDir, `${slug || "question-diversity"}__grid-template-distribution.csv`);
+  const kpCsvPath = path.join(
+    outDir,
+    `${slug || "question-diversity"}__knowledge-point-template-distribution.csv`,
+  );
+  const rewriteQueuePath = path.join(outDir, `${slug || "question-diversity"}__rewrite-queue.csv`);
+  const archiveSuggestionsPath = path.join(
+    outDir,
+    `${slug || "question-diversity"}__archive-suggestions.csv`,
+  );
   fs.writeFileSync(
     jsonPath,
     `${JSON.stringify({ ...audit, validation }, null, 2)}\n`,
     "utf8",
   );
   fs.writeFileSync(mdPath, renderMarkdown({ sourceLabel, audit, validation }), "utf8");
+  writeCsv(gridCsvPath, distributionRows(audit.distributions.byGrid));
+  writeCsv(kpCsvPath, distributionRows(audit.distributions.byKnowledgePoint));
+  writeCsv(
+    rewriteQueuePath,
+    audit.rewriteQueue.map((candidate) => ({
+      id: candidate.id,
+      sourcePath: candidate.sourcePath,
+      examTypes: candidate.examTypes.join("|"),
+      questionType: candidate.questionType,
+      difficulty: candidate.difficulty,
+      kpGroup: candidate.kpGroup,
+      archetypeId: candidate.archetypeId,
+      taskFlavor: candidate.taskFlavor,
+      qualityScore: candidate.qualityScore,
+      reasons: candidate.reasons.join("|"),
+      recommendedAction: actionForRewriteCandidate(candidate),
+    })),
+  );
+  writeCsv(
+    archiveSuggestionsPath,
+    audit.rewriteQueue
+      .filter(
+        (candidate) =>
+          candidate.reasons.includes("qualityScore_below_0.65") &&
+          candidate.reasons.includes("parameterized_template_cluster"),
+      )
+      .map((candidate) => ({
+        id: candidate.id,
+        sourcePath: candidate.sourcePath,
+        examTypes: candidate.examTypes.join("|"),
+        questionType: candidate.questionType,
+        difficulty: candidate.difficulty,
+        kpGroup: candidate.kpGroup,
+        taskFlavor: candidate.taskFlavor,
+        qualityScore: candidate.qualityScore,
+        reasons: candidate.reasons.join("|"),
+        recommendedAction: "archive_after_replacement_or_manual_review",
+      })),
+  );
   console.log(
     JSON.stringify(
       {
         jsonPath: toDisplayRepoPath(jsonPath),
         markdownPath: toDisplayRepoPath(mdPath),
+        gridCsvPath: toDisplayRepoPath(gridCsvPath),
+        knowledgePointCsvPath: toDisplayRepoPath(kpCsvPath),
+        rewriteQueuePath: toDisplayRepoPath(rewriteQueuePath),
+        archiveSuggestionsPath: toDisplayRepoPath(archiveSuggestionsPath),
         items: records.length,
         rewriteCandidates: audit.totals.rewriteCandidates,
         templateClusters: audit.totals.templateClusters,

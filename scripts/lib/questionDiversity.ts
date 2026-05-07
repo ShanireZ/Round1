@@ -705,6 +705,14 @@ export interface DiversityAuditSummary {
       stemPatternFamilies: Record<string, number>;
       containerTags: Record<string, number>;
     }>;
+    byKnowledgePoint: Array<{
+      key: string;
+      count: number;
+      archetypes: Record<string, number>;
+      taskFlavors: Record<string, number>;
+      stemPatternFamilies: Record<string, number>;
+      containerTags: Record<string, number>;
+    }>;
   };
   templateClusters: Array<{
     normalizedTemplateKey: string;
@@ -732,7 +740,13 @@ function increment(target: Record<string, number>, key: string) {
 
 export function buildDiversityAudit(records: DiversityRecord[]): DiversityAuditSummary {
   const byGrid = new Map<string, DiversityRecord[]>();
+  const byKnowledgePoint = new Map<string, DiversityRecord[]>();
   for (const record of records) {
+    const knowledgePointKey = `${record.primaryKpCode}|${record.questionType}|${record.difficulty}`;
+    byKnowledgePoint.set(knowledgePointKey, [
+      ...(byKnowledgePoint.get(knowledgePointKey) ?? []),
+      record,
+    ]);
     for (const examType of record.examTypes) {
       const key = `${examType}|${record.questionType}|${record.difficulty}|${record.kpGroup}`;
       byGrid.set(key, [...(byGrid.get(key) ?? []), record]);
@@ -803,25 +817,37 @@ export function buildDiversityAudit(records: DiversityRecord[]): DiversityAuditS
       templateClusters: templateClusters.length,
     },
     distributions: {
-      byGrid: [...byGrid.entries()]
-        .map(([key, matches]) => {
-          const archetypes: Record<string, number> = {};
-          const taskFlavors: Record<string, number> = {};
-          const stemPatternFamilies: Record<string, number> = {};
-          const containerTags: Record<string, number> = {};
-          for (const match of matches) {
-            increment(archetypes, match.metrics.archetypeId);
-            increment(taskFlavors, match.metrics.taskFlavor);
-            increment(stemPatternFamilies, match.metrics.stemPatternFamily);
-            for (const tag of match.metrics.containerTags) increment(containerTags, tag);
-          }
-          return { key, count: matches.length, archetypes, taskFlavors, stemPatternFamilies, containerTags };
-        })
-        .sort((left, right) => right.count - left.count || left.key.localeCompare(right.key)),
+      byGrid: distributionEntries(byGrid),
+      byKnowledgePoint: distributionEntries(byKnowledgePoint),
     },
     templateClusters,
     rewriteQueue,
   };
+}
+
+function distributionEntries(buckets: Map<string, DiversityRecord[]>) {
+  return [...buckets.entries()]
+    .map(([key, matches]) => {
+      const archetypes: Record<string, number> = {};
+      const taskFlavors: Record<string, number> = {};
+      const stemPatternFamilies: Record<string, number> = {};
+      const containerTags: Record<string, number> = {};
+      for (const match of matches) {
+        increment(archetypes, match.metrics.archetypeId);
+        increment(taskFlavors, match.metrics.taskFlavor);
+        increment(stemPatternFamilies, match.metrics.stemPatternFamily);
+        for (const tag of match.metrics.containerTags) increment(containerTags, tag);
+      }
+      return {
+        key,
+        count: matches.length,
+        archetypes,
+        taskFlavors,
+        stemPatternFamilies,
+        containerTags,
+      };
+    })
+    .sort((left, right) => right.count - left.count || left.key.localeCompare(right.key));
 }
 
 export function coverageFailuresForBlueprints(minimum = 12) {
