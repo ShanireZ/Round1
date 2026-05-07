@@ -5,6 +5,7 @@ import {
   DIVERSITY_POLICY_VERSION,
   type ArchetypePlanItem,
   listArchetypesForCombo,
+  minimumArchetypeCountForExam,
 } from "../../config/questionArchetypes.js";
 import { blueprintSpecs } from "../../config/blueprint.js";
 import {
@@ -868,7 +869,8 @@ export function coverageFailuresForBlueprints(minimum = 12) {
             kpGroup: quota.kpCode,
             difficulty,
           }).length;
-          if (count < minimum) {
+          const required = minimumArchetypeCountForExam(spec.examType, minimum);
+          if (count < required) {
             failures.push({
               examType: spec.examType,
               questionType: section.questionType,

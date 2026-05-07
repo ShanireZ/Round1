@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   buildArchetypePlanForBundle,
   listArchetypesForCombo,
+  minimumArchetypeCountForExam,
 } from "../../config/questionArchetypes.js";
 import { blueprintSpecs } from "../../config/blueprint.js";
 import {
@@ -75,19 +76,32 @@ for (const spec of Object.values(blueprintSpecs)) {
   for (const section of spec.sections) {
     for (const quota of section.primaryKpQuota) {
       for (const difficulty of Object.keys(section.difficultyDistribution) as Difficulty[]) {
-        assert.ok(
-          listArchetypesForCombo({
+        const archetypes = listArchetypesForCombo({
             examType: spec.examType,
             questionType: section.questionType as QuestionType,
             kpGroup: quota.kpCode,
             difficulty,
-          }).length >= 12,
+          });
+        const requiredCoverage = minimumArchetypeCountForExam(spec.examType);
+        assert.ok(
+          archetypes.length >= requiredCoverage,
           `${spec.examType}|${section.questionType}|${difficulty}|${quota.kpCode}`,
         );
       }
     }
   }
 }
+
+const gesp5DsArchetypes = listArchetypesForCombo({
+  examType: "GESP-5",
+  questionType: "single_choice",
+  kpGroup: "DS",
+  difficulty: "hard",
+});
+assert.ok(gesp5DsArchetypes.every((archetype) => archetype.minGespLevel <= 5));
+assert.ok(!gesp5DsArchetypes.some((archetype) => archetype.id === "ds-priority-queue-order"));
+assert.ok(!gesp5DsArchetypes.some((archetype) => archetype.id === "ds-map-count-query"));
+assert.ok(!gesp5DsArchetypes.some((archetype) => archetype.id === "ds-adjacency-list-bfs"));
 
 const validPlan = buildArchetypePlanForBundle({
   examType: "GESP-6",
