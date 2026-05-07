@@ -53,6 +53,8 @@ interface Combo {
   difficulty: Difficulty;
 }
 
+type ProviderLanePolicy = "balanced" | "default-only";
+
 interface InventoryDeficitRow {
   examType: ExamType;
   questionType: QuestionType;
@@ -296,6 +298,7 @@ Options:
   --inventory-path <path>          Use question-inventory.json deficits as the generation plan
   --inventory-report-dir <dir>     Write per-shard inventory fulfillment records into this report dir
   --db-duplicate-checks            Check generated items against the current database during review/repair
+  --provider-lane <policy>         LLM lane policy: balanced or default-only (default: balanced)
   --agent-label <label>            Override bundle run id agent label (default: a01, a02, ...)
   --shard-index <number>           Zero-based shard index (default: 0)
   --shard-count <number>           Total shard count (default: 1)
@@ -373,6 +376,7 @@ function parseArgs(argv: string[]) {
     inventoryReportDir:
       typeof args["inventory-report-dir"] === "string" ? args["inventory-report-dir"] : undefined,
     dbDuplicateChecks: args["db-duplicate-checks"] === true,
+    providerLanePolicy: readProviderLanePolicy(args),
     agentLabel: typeof args["agent-label"] === "string" ? slugify(args["agent-label"]) : undefined,
     onlyBundleNos:
       typeof args["only-bundles"] === "string"
@@ -390,6 +394,17 @@ function parseArgs(argv: string[]) {
     externalLlmConsent:
       typeof args["external-llm-consent"] === "string" ? args["external-llm-consent"] : undefined,
   };
+}
+
+function readProviderLanePolicy(args: Record<string, ArgValue>): ProviderLanePolicy {
+  const raw = args["provider-lane"];
+  if (raw === undefined) {
+    return "balanced";
+  }
+  if (raw !== "balanced" && raw !== "default-only") {
+    throw new Error("--provider-lane must be balanced or default-only");
+  }
+  return raw;
 }
 
 function readPositiveInt(args: Record<string, ArgValue>, key: string, fallback: number): number {
@@ -533,13 +548,20 @@ function deriveShardReportRunId(
   return `${batchRunId.slice(0, versionMatch.index)}-${suffix}${versionMatch[0]}`;
 }
 
-function generationLaneFor(bundleNo: number): LLMLane {
+function generationLaneFor(
+  bundleNo: number,
+  providerLanePolicy: ProviderLanePolicy = "balanced",
+): LLMLane {
+  if (providerLanePolicy === "default-only") {
+    return "default";
+  }
   return bundleNo % 2 === 1 ? "default" : "backup";
 }
 
-function collectPlannedExternalLlmTargets() {
+function collectPlannedExternalLlmTargets(providerLanePolicy: ProviderLanePolicy) {
   const scenes: LLMScene[] = ["generate", "judge"];
-  const lanes: LLMLane[] = ["default", "backup"];
+  const lanes: LLMLane[] =
+    providerLanePolicy === "default-only" ? ["default"] : ["default", "backup"];
   const providers = new Set<string>();
   const baseUrls = new Set<string>();
 
@@ -1203,8 +1225,9 @@ async function generateBundle(params: {
   timeoutMs: number;
   llmJsonAttempts: number;
   generationAttempt: number;
+  providerLanePolicy: ProviderLanePolicy;
 }): Promise<GeneratedBundle> {
-  const lane = generationLaneFor(params.combo.bundleNo);
+  const lane = generationLaneFor(params.combo.bundleNo, params.providerLanePolicy);
   const itemSchema = generatedItemSchema(params.combo.questionType);
   const prompts: string[] = [];
   const items: QuestionBundleItem[] = [];
@@ -1748,6 +1771,7 @@ async function reviewBundle(params: {
   timeoutMs: number;
   llmJsonAttempts: number;
   dbDuplicateChecks: boolean;
+  providerLanePolicy: ProviderLanePolicy;
 }): Promise<{
   bundle: QuestionBundle;
   finalVerdict: "pass" | "fail";
@@ -1779,10 +1803,12 @@ async function reviewBundle(params: {
         severity: "major" as const,
         message: error.message,
       }));
+      const validationRepairLane: LLMLane =
+        params.providerLanePolicy === "default-only" ? "default" : "backup";
       try {
         const repair = await callRepair({
           bundle,
-          lane: "backup",
+          lane: validationRepairLane,
           issues: syntheticIssues,
           timeoutMs: params.timeoutMs,
           llmJsonAttempts: params.llmJsonAttempts,
@@ -1795,7 +1821,7 @@ async function reviewBundle(params: {
         rewritesApplied += restrictedRepair.items.length;
         repairAttempts.push({
           repairCycle,
-          lane: "backup",
+          lane: validationRepairLane,
           providerName: repair.result.providerName,
           model: repair.result.model,
           inputTokens: repair.result.inputTokens,
@@ -1806,7 +1832,7 @@ async function reviewBundle(params: {
       } catch (error) {
         repairAttempts.push({
           repairCycle,
-          lane: "backup",
+          lane: validationRepairLane,
           repairedItems: [],
           error: error instanceof Error ? error.message : String(error),
         });
@@ -2094,6 +2120,7 @@ async function processCombo(params: {
   skipExisting: boolean;
   dryRun: boolean;
   dbDuplicateChecks: boolean;
+  providerLanePolicy: ProviderLanePolicy;
   seenHashes: Set<string>;
 }): Promise<ProcessResult> {
   let lastError: unknown;
@@ -2127,7 +2154,7 @@ async function processCombo(params: {
         primaryKpCode: params.combo.primaryKpCode,
         difficulty: params.combo.difficulty,
         itemCount: bundle.items.length,
-        generationLane: generationLaneFor(params.combo.bundleNo),
+        generationLane: generationLaneFor(params.combo.bundleNo, params.providerLanePolicy),
         generationProvider: bundle.meta.provider,
         generationModel: bundle.meta.model,
         finalVerdict: "pass",
@@ -2165,6 +2192,7 @@ async function processCombo(params: {
         timeoutMs: params.timeoutMs,
         llmJsonAttempts: params.llmJsonAttempts,
         generationAttempt,
+        providerLanePolicy: params.providerLanePolicy,
       });
       if (!params.dryRun && (await fileExists(generated.outputPath)) && !params.overwrite) {
         throw new Error(`output already exists: ${generated.repoPath}`);
@@ -2176,6 +2204,7 @@ async function processCombo(params: {
         timeoutMs: params.timeoutMs,
         llmJsonAttempts: params.llmJsonAttempts,
         dbDuplicateChecks: params.dbDuplicateChecks,
+        providerLanePolicy: params.providerLanePolicy,
       });
       const report = buildBundleReport({
         generated,
