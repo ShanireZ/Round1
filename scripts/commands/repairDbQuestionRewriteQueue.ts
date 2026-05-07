@@ -93,6 +93,7 @@ interface CandidateValidation {
   qualityScore: number;
   difficultyFit: string;
   taskFlavor: string;
+  containerTags: string[];
   normalizedTemplateKey: string;
 }
 
@@ -111,11 +112,18 @@ const repairResponseSchema = z.object({
   repairNotes: z.string().optional().default(""),
 });
 
+const zeroToOneScoreSchema = z.preprocess((value) => {
+  if (typeof value !== "number") {
+    return value;
+  }
+  return value > 1 && value <= 10 ? value / 10 : value;
+}, z.number().min(0).max(1));
+
 const judgeResponseSchema = z.object({
   approved: z.boolean(),
-  confidence: z.number().min(0).max(1).default(0),
+  confidence: zeroToOneScoreSchema.default(0),
   issues: z.array(z.string()).default([]),
-  qualityScore: z.number().min(0).max(1).optional(),
+  qualityScore: zeroToOneScoreSchema.optional(),
   difficultyFit: z.enum(["pass", "warning", "fail"]).optional(),
 });
 
@@ -447,11 +455,71 @@ function buildJudgePrompt(item: QuestionBundleItem) {
 }
 
 function parseRepairResponse(text: string) {
-  return repairResponseSchema.parse(JSON.parse(extractJsonObject(text)));
+  return repairResponseSchema.parse(JSON.parse(extractModelJsonObject(text)));
 }
 
 function parseJudgeResponse(text: string) {
-  return judgeResponseSchema.parse(JSON.parse(extractJsonObject(text)));
+  return judgeResponseSchema.parse(JSON.parse(extractModelJsonObject(text)));
+}
+
+function extractModelJsonObject(text: string): string {
+  const balanced = extractFirstBalancedObject(text);
+  if (balanced) {
+    return balanced;
+  }
+  return extractJsonObject(text);
+}
+
+function extractFirstBalancedObject(text: string): string | undefined {
+  let start = -1;
+  let depth = 0;
+  let inString = false;
+  let escaping = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+
+    if (inString) {
+      if (escaping) {
+        escaping = false;
+        continue;
+      }
+
+      if (char === "\\") {
+        escaping = true;
+        continue;
+      }
+
+      if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (char === "{") {
+      if (depth === 0) {
+        start = index;
+      }
+      depth += 1;
+      continue;
+    }
+
+    if (char !== "}" || depth === 0) {
+      continue;
+    }
+
+    depth -= 1;
+    if (depth === 0 && start >= 0) {
+      return text.slice(start, index + 1);
+    }
+  }
+
+  return undefined;
 }
 
 function isAnswerChoice(value: string) {
@@ -536,9 +604,13 @@ function buildCandidateItem(params: {
   if (item.difficulty === "hard" && metrics.quality.difficultyFit === "fail") {
     throw new Error("hard candidate still fails deterministic difficulty rubric");
   }
+  const hasRicherDsContainer = metrics.containerTags.some(
+    (tag) => tag !== "stack" && tag !== "queue",
+  );
   if (
     params.entry.reasons.includes("ds_stack_queue_overused_candidate") &&
-    (metrics.taskFlavor === "stack_state_trace" || metrics.taskFlavor === "queue_state_trace")
+    (metrics.taskFlavor === "stack_state_trace" || metrics.taskFlavor === "queue_state_trace") &&
+    !hasRicherDsContainer
   ) {
     throw new Error(`DS candidate still uses overrepresented taskFlavor ${metrics.taskFlavor}`);
   }
@@ -549,6 +621,7 @@ function buildCandidateItem(params: {
     qualityScore: metrics.quality.qualityScore,
     difficultyFit: metrics.quality.difficultyFit,
     taskFlavor: metrics.taskFlavor,
+    containerTags: metrics.containerTags,
     normalizedTemplateKey: metrics.normalizedTemplateKey,
   };
 }
@@ -840,6 +913,7 @@ async function repairOne(params: {
           qualityScore: validation.qualityScore,
           difficultyFit: validation.difficultyFit,
           taskFlavor: validation.taskFlavor,
+          containerTags: validation.containerTags,
           sandboxVerified: false,
           source: "ai",
         },
