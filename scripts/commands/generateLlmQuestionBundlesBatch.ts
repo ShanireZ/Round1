@@ -1840,10 +1840,16 @@ async function reviewBundle(params: {
       }
     }
 
-    const roundPlan: Array<{ round: "review-pass-1" | "review-pass-2"; lane: LLMLane }> = [
-      { round: "review-pass-1", lane: "backup" },
-      { round: "review-pass-2", lane: "default" },
-    ];
+    const roundPlan: Array<{ round: "review-pass-1" | "review-pass-2"; lane: LLMLane }> =
+      params.providerLanePolicy === "default-only"
+        ? [
+            { round: "review-pass-1", lane: "default" },
+            { round: "review-pass-2", lane: "default" },
+          ]
+        : [
+            { round: "review-pass-1", lane: "backup" },
+            { round: "review-pass-2", lane: "default" },
+          ];
     let failedIssues: Array<AuditIssue & { itemIndex: number }> = [];
 
     for (const step of roundPlan) {
@@ -1920,7 +1926,10 @@ async function reviewBundle(params: {
       };
     }
 
-    const repairLane = reviewAttempts.at(-1)?.lane ?? "backup";
+    const repairLane: LLMLane =
+      params.providerLanePolicy === "default-only"
+        ? "default"
+        : (reviewAttempts.at(-1)?.lane ?? "backup");
     try {
       const repair = await callRepair({
         bundle,
@@ -2046,6 +2055,7 @@ function buildFailedBundleReport(params: {
   pipelineLabel: string;
   runDate: string;
   questionsPerBundle: number;
+  providerLanePolicy: ProviderLanePolicy;
   error: unknown;
 }): BundleReport {
   const runId = makeRunId(params.combo, params.agentLabel, params.pipelineLabel, params.runDate);
@@ -2067,7 +2077,7 @@ function buildFailedBundleReport(params: {
     primaryKpCode: params.combo.primaryKpCode,
     difficulty: params.combo.difficulty,
     itemCount: 0,
-    generationLane: generationLaneFor(params.combo.bundleNo),
+    generationLane: generationLaneFor(params.combo.bundleNo, params.providerLanePolicy),
     generationProvider: "unavailable",
     generationModel: "unavailable",
     finalVerdict: "fail",
@@ -2347,6 +2357,7 @@ async function writeReport(params: {
   overwrite: boolean;
   dryRun: boolean;
   externalLlmDisclosure: ExternalLlmDisclosure | null;
+  providerLanePolicy: ProviderLanePolicy;
 }) {
   const summary = {
     totalBundles: params.reports.length,
@@ -2365,11 +2376,17 @@ async function writeReport(params: {
       requestedQuestions: params.totalQuestions,
       questionsPerBundle: params.questionsPerBundle,
       defaultProvider: env.LLM_PROVIDER_DEFAULT,
-      backupProvider: env.LLM_PROVIDER_BACKUP,
+      backupProvider: params.providerLanePolicy === "default-only" ? null : env.LLM_PROVIDER_BACKUP,
       externalLlmDisclosure: params.externalLlmDisclosure,
+      providerLanePolicy: params.providerLanePolicy,
       generationLanePolicy:
-        "odd bundleNo uses LLM_PROVIDER_DEFAULT; even bundleNo uses LLM_PROVIDER_BACKUP",
-      reviewLanePolicy: "round 1 uses LLM_PROVIDER_BACKUP; round 2 uses LLM_PROVIDER_DEFAULT",
+        params.providerLanePolicy === "default-only"
+          ? "all bundle generation uses LLM_PROVIDER_DEFAULT"
+          : "odd bundleNo uses LLM_PROVIDER_DEFAULT; even bundleNo uses LLM_PROVIDER_BACKUP",
+      reviewLanePolicy:
+        params.providerLanePolicy === "default-only"
+          ? "round 1 and round 2 both use LLM_PROVIDER_DEFAULT"
+          : "round 1 uses LLM_PROVIDER_BACKUP; round 2 uses LLM_PROVIDER_DEFAULT",
       shardIndex: params.shardIndex,
       shardCount: params.shardCount,
       dryRun: params.dryRun,
