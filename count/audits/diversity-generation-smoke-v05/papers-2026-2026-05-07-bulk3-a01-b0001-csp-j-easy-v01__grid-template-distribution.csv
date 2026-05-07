@@ -1,0 +1,2 @@
+key,count,topTaskFlavors,topArchetypes,topStemPatterns,topContainerTags
+CSP-J|single_choice|easy|BAS,3,"debug_trace_reasoning:1, memory_layout_basic:1, os_file_path_reasoning:1","bas-debug-trace:1, bas-memory-layout-basic:1, bas-os-file-path:1","short_trace:2, final_value:1",

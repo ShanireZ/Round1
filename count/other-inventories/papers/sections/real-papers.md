@@ -1,0 +1,172 @@
+# Papers Inventory: real-papers
+
+- Generated at: 2026-05-07T06:02:12.566Z
+- Source dir: papers/real-papers
+- Section type: real-papers
+- Files found: 116
+- Questions: 2828
+- Sub-question/blanks: 1256
+- Invalid files: 0
+- Exact duplicate contentHash groups: 97
+
+## Counts
+
+### byExamType
+
+| key | count |
+| --- | ---: |
+| CSP-J | 9 |
+| CSP-S | 7 |
+| GESP-1 | 14 |
+| GESP-2 | 14 |
+| GESP-3 | 13 |
+| GESP-4 | 13 |
+| GESP-5 | 12 |
+| GESP-6 | 12 |
+| GESP-7 | 11 |
+| GESP-8 | 11 |
+
+### byYear
+
+| key | count |
+| --- | ---: |
+| 2019 | 2 |
+| 2020 | 3 |
+| 2021 | 3 |
+| 2022 | 2 |
+| 2023 | 30 |
+| 2024 | 34 |
+| 2025 | 34 |
+| 2026 | 8 |
+
+### byQuestionType
+
+| key | count |
+| --- | ---: |
+| completion_program | 201 |
+| reading_program | 699 |
+| single_choice | 1928 |
+
+### byDifficulty
+
+| key | count |
+| --- | ---: |
+| easy | 2220 |
+| hard | 17 |
+| medium | 591 |
+
+### byPrimaryKpGroup
+
+| key | count |
+| --- | ---: |
+| ALG | 735 |
+| BAS | 385 |
+| CPP | 1074 |
+| CS | 46 |
+| DS | 358 |
+| MATH | 230 |
+
+### byExamTypeYear
+
+| key | count |
+| --- | ---: |
+| CSP-J|2019 | 1 |
+| CSP-J|2020 | 2 |
+| CSP-J|2021 | 2 |
+| CSP-J|2022 | 1 |
+| CSP-J|2023 | 1 |
+| CSP-J|2024 | 1 |
+| CSP-J|2025 | 1 |
+| CSP-S|2019 | 1 |
+| CSP-S|2020 | 1 |
+| CSP-S|2021 | 1 |
+| CSP-S|2022 | 1 |
+| CSP-S|2023 | 1 |
+| CSP-S|2024 | 1 |
+| CSP-S|2025 | 1 |
+| GESP-1|2023 | 5 |
+| GESP-1|2024 | 4 |
+| GESP-1|2025 | 4 |
+| GESP-1|2026 | 1 |
+| GESP-2|2023 | 5 |
+| GESP-2|2024 | 4 |
+| GESP-2|2025 | 4 |
+| GESP-2|2026 | 1 |
+| GESP-3|2023 | 4 |
+| GESP-3|2024 | 4 |
+| GESP-3|2025 | 4 |
+| GESP-3|2026 | 1 |
+| GESP-4|2023 | 4 |
+| GESP-4|2024 | 4 |
+| GESP-4|2025 | 4 |
+| GESP-4|2026 | 1 |
+| GESP-5|2023 | 3 |
+| GESP-5|2024 | 4 |
+| GESP-5|2025 | 4 |
+| GESP-5|2026 | 1 |
+| GESP-6|2023 | 3 |
+| GESP-6|2024 | 4 |
+| GESP-6|2025 | 4 |
+| GESP-6|2026 | 1 |
+| GESP-7|2023 | 2 |
+| GESP-7|2024 | 4 |
+| GESP-7|2025 | 4 |
+| GESP-7|2026 | 1 |
+| GESP-8|2023 | 2 |
+| GESP-8|2024 | 4 |
+| GESP-8|2025 | 4 |
+| GESP-8|2026 | 1 |
+
+## Duplicate Content Hash Groups
+
+- 00ec35ca9d093b434a6b439872499143c9769a9fa96bec9b477ae9b4c92697b3: 4
+- 20f2ae5babd72326974dbc047c7224a22f4055fe135ee887701cc27167d49ecc: 4
+- 45b85a86f17c3ece792718163be5c768132de387f944d56e8f21d58ce92eb8cb: 4
+- 46f5b2f098b76ef6ccffb1f5e199a86b1c20c32ce71331b18a8a3c68778b5d1e: 4
+- 51bb85a990117ea77317b2aa269a3ec4e9dda9d549e51e972c154ddcd5d2b5c6: 4
+- a0c0425336ca70de109ec61394549e26d29b835be416ebc2979d694e2fa61f28: 4
+- ecb7d5264d68ec37ee6c2abfbd47408432e0081fd377cec7266bc26c3faab88e: 4
+- 01867a0e4f845c4a64a6742befb9ac1fbae71bee4125a578792bdc892545a4c8: 3
+- 0ab533d8cd29ae6d3fb6432fe9267ca6a70d10c65ccdcdea2865f2d642b0d780: 3
+- 87bf59c9e4f65046398194d560a27ca468bba39a59f74b9d63667684c03c773d: 3
+- a89988b4ab8a14ac60d8901336b9d428cf9057acb431adaa7723026a3bb2de84: 3
+- e069a33d7e47450c7c570b275c825519da5cc4d9acebc42bf4baa22babea33ea: 3
+- 00acffe66941c99f0301c3995ec505addc9def477d3237f970b8b38f472f82dd: 2
+- 03478f1b19e792541d1533d59a517fad877f949acc2342dacbeb447d1eb3aaa1: 2
+- 0578c1ff3996641743b755eedbc1638b9bed4cfe545fd1a7f9f6c902ad3190b3: 2
+- 07c7e69f2f5ef0c1ec37f364ca2280685e8a26172eb4d739c5bb2f3e54d1701f: 2
+- 080fb2dbe218e74c45092d7609153aa84c4d6fc857d90a89bf2514ef6aef52f9: 2
+- 11f47ebcfc3b869820d581e3773aa70a9faeba47e861e96e211442dfaf64b2ee: 2
+- 14ec96da290f9566ab596a34817f97d0232f1a5893c9b11946b9eb58e2f2bdf1: 2
+- 159ec3bdc80a067eaaac7a057d867a04bdb70042513f79681bec570e53283c68: 2
+- 1957c76cd5fdb66efbdd3d0db0ddad321a9661d89d0a161fc84ec7d57472e79c: 2
+- 1ddf46fe1a437ed9793b1b9d1f75af2e94bc8a3a56a5429a97499707176413f5: 2
+- 212bc4e2c1556f56e17a55ca09c4d774ecf42abf5e79e98e735e12f94b9c9804: 2
+- 213e143922300ab810762397150cb4610cc5bcac01185bcdd855346ad86aeb8d: 2
+- 2774ff2e20b319bc84fa197f5880266dc6e615d69a37c3e2ecf814871afbcda0: 2
+- 2b110cbcd2ae20af4d32546345facf3e5b07182ba71c6c85ae51546008b6c117: 2
+- 2c0d55c760a23621b179feb0ea30fa299d4aceb92829957b6afef2963dbb41c1: 2
+- 2fedd5900e064bd4031b968e1d9780243ab4929fb5bbef0354cdc5358f8bae1b: 2
+- 35a8070e9a2d2ff8d7c5378e66faac344249bb756633df6d51a82394331e646b: 2
+- 36dbcde7434065e90d0ce7bd0196b32a0e33d647161e95085961d58a2cd18766: 2
+- 3cfd4263da2419061baec05f3850001b8f0ef124a316724b606b9a271ecae8a8: 2
+- 41a5a05679992b9bff07e0154a669ed050a13d03e03bc22b9dc69660f32d0f2c: 2
+- 45165226b36eb71626abd4b73a0f5db7cb7b8c8bb3d0bffed0fc133d62fc9c4e: 2
+- 47534b7661f2706c92063cbd7fa92bff6b32295a746d6316cdd4bc6a669c2034: 2
+- 491c03a3f0029759aa9348af384c10c8f176d2ece09e25fd585696729df45b2d: 2
+- 4b5e2a081525f76b506ecab335824a6134bd25bf35fb0709be5be4d1e2185da0: 2
+- 5033a60f982f682b6e60ee571cd24546a684ed6196f17e45dc267b6a53f24a67: 2
+- 50ffb3a2be5ff6afc5005b160e690c943ae03cb7fc4f51060215b03c9e01d186: 2
+- 52ef6a7fb6c8fb29ea08667bf2fd4c59457d6fcc6e0332fe37088005f4678278: 2
+- 5494b741eb2bd2cf00986ecc80844cd46f075f63bcff2cb365b818ff055e84e8: 2
+- 5513689863c1eda5dd9223ab6447e2d20684b5eb63f9b7c616ed542274bfac31: 2
+- 56f8d0a50be153cee619bc006d71e380395125cd1e421a90bbe1f3d78625b798: 2
+- 643be30264fe922b0370c3b3552f220990c99dd9b3b1b215d6c4e3d4635dad1e: 2
+- 65c47f052eae384638b7106b470d1537e472a436a44208fbccdfdee814350e9f: 2
+- 6d85f3db920c8b4667a6a7a2806e09a2b1d9e93c101f5bc2f6b369ff706d7a04: 2
+- 6e110ab7ad43f332181cd18bf70eed32a1ab5f2884e61338675276a6d84d614c: 2
+- 6ed31e6f883011e71f6632c578269bac79b3cbf85385919808d9af31b7ff370a: 2
+- 7061fa57ef0b0c9befa83a4f98628b48ffa95bfbc69ef4674052beeefdab1457: 2
+- 71b206de7b822c465142eb9d3c9e374b4643692635694993204689d15318f644: 2
+- 7285433224045109f7c4e6ad7bd0f6de589023b664a447f42e76f3393ec17b98: 2
+

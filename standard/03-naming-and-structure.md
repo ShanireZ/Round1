@@ -32,8 +32,8 @@
 | `plan/`                      | 长期方案、reference、阶段计划                       |
 | `docs/`                      | 当前文档入口、专题运维说明、问题汇总与日期化计划    |
 | `docs/plans/`                | 日期化执行计划、收口记录、临时推进记录              |
-| `docs/_inventory/`           | 文档盘点元数据，由 `reportDocsInventory.ts` 生成     |
 | `papers/`                    | 持久化 question bundle 审计输入                     |
+| `count/`                     | 当前题目数量、质量扣减、docs/papers 库存统计真源     |
 | `artifacts/prebuilt-papers/` | 持久化 prebuilt paper bundle                        |
 | `artifacts/reports/`         | 校验报告、judge 摘要、导入记录导出                  |
 | `artifacts/tmp/`             | 可清理临时产物                                      |
@@ -126,7 +126,7 @@
 
 - `papers/real-papers/`: official historical paper source JSON, imported as real-paper sets and excluded from generated simulated-question targets.
 - `papers/<year>/`: generated question bundles for that simulated library year.
-- `papers/_inventory/`: generated paper inventory metadata from `scripts/reportPapersInventory.ts`; it is not an importable bundle area.
+- `count/other-inventories/papers/`: generated paper inventory metadata from `scripts/audit.ts report-papers-inventory`; it is not an importable bundle area.
 
 ## 路径变更规则
 

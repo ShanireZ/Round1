@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-05-07T06:02:12.566Z",
+  "sourceDir": "papers",
+  "sections": [
+    {
+      "section": "real-papers",
+      "sectionType": "real-papers",
+      "sourceDir": "papers/real-papers",
+      "filesOrBundles": 116,
+      "questionsOrItems": 2828,
+      "duplicateContentHashGroups": 97,
+      "invalidFiles": 0
+    },
+    {
+      "section": "2026",
+      "sectionType": "generated-year",
+      "sourceDir": "papers/2026",
+      "filesOrBundles": 3049,
+      "questionsOrItems": 13660,
+      "duplicateContentHashGroups": 0,
+      "invalidFiles": 0
+    }
+  ]
+}

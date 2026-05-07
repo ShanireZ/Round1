@@ -7,9 +7,9 @@ import { pathToFileURL } from "node:url";
 import { QuestionBundleSchema, type QuestionBundleItem } from "../../lib/bundleTypes.js";
 
 const DEFAULT_SOURCE_DIR = "papers";
-const DEFAULT_OUT_DIR = "papers/_inventory";
+const DEFAULT_OUT_DIR = "count/other-inventories/papers";
 
-const usage = `Usage: npx tsx scripts/commands/audit/reportPapersInventory.ts [--source-dir papers] [--out-dir papers/_inventory] [--write]`;
+const usage = `Usage: npx tsx scripts/commands/audit/reportPapersInventory.ts [--source-dir papers] [--out-dir count/other-inventories/papers] [--write]`;
 
 interface Args {
   sourceDir: string;

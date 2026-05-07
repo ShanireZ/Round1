@@ -1,0 +1,1749 @@
+{
+  "section": "real-papers",
+  "sectionType": "real-papers",
+  "sourceDir": "papers/real-papers",
+  "generatedAt": "2026-05-07T06:02:12.566Z",
+  "filesFound": 116,
+  "questionCount": 2828,
+  "subQuestionCount": 1256,
+  "invalidFiles": [],
+  "counts": {
+    "byExamType": {
+      "CSP-J": 9,
+      "CSP-S": 7,
+      "GESP-1": 14,
+      "GESP-2": 14,
+      "GESP-3": 13,
+      "GESP-4": 13,
+      "GESP-5": 12,
+      "GESP-6": 12,
+      "GESP-7": 11,
+      "GESP-8": 11
+    },
+    "byYear": {
+      "2019": 2,
+      "2020": 3,
+      "2021": 3,
+      "2022": 2,
+      "2023": 30,
+      "2024": 34,
+      "2025": 34,
+      "2026": 8
+    },
+    "byQuestionType": {
+      "single_choice": 1928,
+      "reading_program": 699,
+      "completion_program": 201
+    },
+    "byDifficulty": {
+      "easy": 2220,
+      "medium": 591,
+      "hard": 17
+    },
+    "byPrimaryKpGroup": {
+      "BAS": 385,
+      "CPP": 1074,
+      "ALG": 735,
+      "DS": 358,
+      "MATH": 230,
+      "CS": 46
+    },
+    "byExamTypeYear": {
+      "CSP-J|2019": 1,
+      "CSP-J|2020": 2,
+      "CSP-J|2021": 2,
+      "CSP-J|2022": 1,
+      "CSP-J|2023": 1,
+      "CSP-J|2024": 1,
+      "CSP-J|2025": 1,
+      "CSP-S|2019": 1,
+      "CSP-S|2020": 1,
+      "CSP-S|2021": 1,
+      "CSP-S|2022": 1,
+      "CSP-S|2023": 1,
+      "CSP-S|2024": 1,
+      "CSP-S|2025": 1,
+      "GESP-1|2023": 5,
+      "GESP-1|2024": 4,
+      "GESP-1|2025": 4,
+      "GESP-1|2026": 1,
+      "GESP-2|2023": 5,
+      "GESP-2|2024": 4,
+      "GESP-2|2025": 4,
+      "GESP-2|2026": 1,
+      "GESP-3|2023": 4,
+      "GESP-3|2024": 4,
+      "GESP-3|2025": 4,
+      "GESP-3|2026": 1,
+      "GESP-4|2023": 4,
+      "GESP-4|2024": 4,
+      "GESP-4|2025": 4,
+      "GESP-4|2026": 1,
+      "GESP-5|2023": 3,
+      "GESP-5|2024": 4,
+      "GESP-5|2025": 4,
+      "GESP-5|2026": 1,
+      "GESP-6|2023": 3,
+      "GESP-6|2024": 4,
+      "GESP-6|2025": 4,
+      "GESP-6|2026": 1,
+      "GESP-7|2023": 2,
+      "GESP-7|2024": 4,
+      "GESP-7|2025": 4,
+      "GESP-7|2026": 1,
+      "GESP-8|2023": 2,
+      "GESP-8|2024": 4,
+      "GESP-8|2025": 4,
+      "GESP-8|2026": 1
+    }
+  },
+  "duplicateContentHashGroups": [
+    {
+      "contentHash": "00ec35ca9d093b434a6b439872499143c9769a9fa96bec9b477ae9b4c92697b3",
+      "count": 4,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202312.json",
+          "itemIndex": 14
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202312.json",
+          "itemIndex": 13
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202312.json",
+          "itemIndex": 14
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202312.json",
+          "itemIndex": 13
+        }
+      ]
+    },
+    {
+      "contentHash": "20f2ae5babd72326974dbc047c7224a22f4055fe135ee887701cc27167d49ecc",
+      "count": 4,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202312.json",
+          "itemIndex": 13
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202312.json",
+          "itemIndex": 12
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202312.json",
+          "itemIndex": 13
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202312.json",
+          "itemIndex": 12
+        }
+      ]
+    },
+    {
+      "contentHash": "45b85a86f17c3ece792718163be5c768132de387f944d56e8f21d58ce92eb8cb",
+      "count": 4,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202403.json",
+          "itemIndex": 13
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202403.json",
+          "itemIndex": 13
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202403.json",
+          "itemIndex": 13
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202403.json",
+          "itemIndex": 13
+        }
+      ]
+    },
+    {
+      "contentHash": "46f5b2f098b76ef6ccffb1f5e199a86b1c20c32ce71331b18a8a3c68778b5d1e",
+      "count": 4,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202312.json",
+          "itemIndex": 23
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202312.json",
+          "itemIndex": 23
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202312.json",
+          "itemIndex": 23
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202312.json",
+          "itemIndex": 23
+        }
+      ]
+    },
+    {
+      "contentHash": "51bb85a990117ea77317b2aa269a3ec4e9dda9d549e51e972c154ddcd5d2b5c6",
+      "count": 4,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202403.json",
+          "itemIndex": 24
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202403.json",
+          "itemIndex": 24
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202403.json",
+          "itemIndex": 24
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202403.json",
+          "itemIndex": 24
+        }
+      ]
+    },
+    {
+      "contentHash": "a0c0425336ca70de109ec61394549e26d29b835be416ebc2979d694e2fa61f28",
+      "count": 4,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202312.json",
+          "itemIndex": 24
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202312.json",
+          "itemIndex": 24
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202312.json",
+          "itemIndex": 24
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202312.json",
+          "itemIndex": 24
+        }
+      ]
+    },
+    {
+      "contentHash": "ecb7d5264d68ec37ee6c2abfbd47408432e0081fd377cec7266bc26c3faab88e",
+      "count": 4,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202403.json",
+          "itemIndex": 14
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202403.json",
+          "itemIndex": 14
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202403.json",
+          "itemIndex": 14
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202403.json",
+          "itemIndex": 14
+        }
+      ]
+    },
+    {
+      "contentHash": "01867a0e4f845c4a64a6742befb9ac1fbae71bee4125a578792bdc892545a4c8",
+      "count": 3,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202406.json",
+          "itemIndex": 24
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202406.json",
+          "itemIndex": 24
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202406.json",
+          "itemIndex": 15
+        }
+      ]
+    },
+    {
+      "contentHash": "0ab533d8cd29ae6d3fb6432fe9267ca6a70d10c65ccdcdea2865f2d642b0d780",
+      "count": 3,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202403.json",
+          "itemIndex": 23
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202403.json",
+          "itemIndex": 23
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202403.json",
+          "itemIndex": 23
+        }
+      ]
+    },
+    {
+      "contentHash": "87bf59c9e4f65046398194d560a27ca468bba39a59f74b9d63667684c03c773d",
+      "count": 3,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202306.json",
+          "itemIndex": 0
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202306.json",
+          "itemIndex": 0
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202306.json",
+          "itemIndex": 0
+        }
+      ]
+    },
+    {
+      "contentHash": "a89988b4ab8a14ac60d8901336b9d428cf9057acb431adaa7723026a3bb2de84",
+      "count": 3,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202306.json",
+          "itemIndex": 16
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202306.json",
+          "itemIndex": 16
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202306.json",
+          "itemIndex": 15
+        }
+      ]
+    },
+    {
+      "contentHash": "e069a33d7e47450c7c570b275c825519da5cc4d9acebc42bf4baa22babea33ea",
+      "count": 3,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202506.json",
+          "itemIndex": 13
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-8-202403.json",
+          "itemIndex": 11
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-8-202509.json",
+          "itemIndex": 9
+        }
+      ]
+    },
+    {
+      "contentHash": "00acffe66941c99f0301c3995ec505addc9def477d3237f970b8b38f472f82dd",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-8-202403.json",
+          "itemIndex": 13
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-8-202406.json",
+          "itemIndex": 14
+        }
+      ]
+    },
+    {
+      "contentHash": "03478f1b19e792541d1533d59a517fad877f949acc2342dacbeb447d1eb3aaa1",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202412.json",
+          "itemIndex": 4
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202503.json",
+          "itemIndex": 3
+        }
+      ]
+    },
+    {
+      "contentHash": "0578c1ff3996641743b755eedbc1638b9bed4cfe545fd1a7f9f6c902ad3190b3",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202309.json",
+          "itemIndex": 1
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202309.json",
+          "itemIndex": 1
+        }
+      ]
+    },
+    {
+      "contentHash": "07c7e69f2f5ef0c1ec37f364ca2280685e8a26172eb4d739c5bb2f3e54d1701f",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202309.json",
+          "itemIndex": 24
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-sample.json",
+          "itemIndex": 23
+        }
+      ]
+    },
+    {
+      "contentHash": "080fb2dbe218e74c45092d7609153aa84c4d6fc857d90a89bf2514ef6aef52f9",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202506.json",
+          "itemIndex": 9
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-8-202506.json",
+          "itemIndex": 7
+        }
+      ]
+    },
+    {
+      "contentHash": "11f47ebcfc3b869820d581e3773aa70a9faeba47e861e96e211442dfaf64b2ee",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202506.json",
+          "itemIndex": 22
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202509.json",
+          "itemIndex": 22
+        }
+      ]
+    },
+    {
+      "contentHash": "14ec96da290f9566ab596a34817f97d0232f1a5893c9b11946b9eb58e2f2bdf1",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202409.json",
+          "itemIndex": 0
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202409.json",
+          "itemIndex": 0
+        }
+      ]
+    },
+    {
+      "contentHash": "159ec3bdc80a067eaaac7a057d867a04bdb70042513f79681bec570e53283c68",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202406.json",
+          "itemIndex": 0
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202406.json",
+          "itemIndex": 2
+        }
+      ]
+    },
+    {
+      "contentHash": "1957c76cd5fdb66efbdd3d0db0ddad321a9661d89d0a161fc84ec7d57472e79c",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202406.json",
+          "itemIndex": 9
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202409.json",
+          "itemIndex": 11
+        }
+      ]
+    },
+    {
+      "contentHash": "1ddf46fe1a437ed9793b1b9d1f75af2e94bc8a3a56a5429a97499707176413f5",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202503.json",
+          "itemIndex": 0
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202503.json",
+          "itemIndex": 0
+        }
+      ]
+    },
+    {
+      "contentHash": "212bc4e2c1556f56e17a55ca09c4d774ecf42abf5e79e98e735e12f94b9c9804",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202512.json",
+          "itemIndex": 2
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202512.json",
+          "itemIndex": 2
+        }
+      ]
+    },
+    {
+      "contentHash": "213e143922300ab810762397150cb4610cc5bcac01185bcdd855346ad86aeb8d",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202409.json",
+          "itemIndex": 6
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202409.json",
+          "itemIndex": 5
+        }
+      ]
+    },
+    {
+      "contentHash": "2774ff2e20b319bc84fa197f5880266dc6e615d69a37c3e2ecf814871afbcda0",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202309.json",
+          "itemIndex": 0
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202309.json",
+          "itemIndex": 0
+        }
+      ]
+    },
+    {
+      "contentHash": "2b110cbcd2ae20af4d32546345facf3e5b07182ba71c6c85ae51546008b6c117",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202409.json",
+          "itemIndex": 20
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202412.json",
+          "itemIndex": 23
+        }
+      ]
+    },
+    {
+      "contentHash": "2c0d55c760a23621b179feb0ea30fa299d4aceb92829957b6afef2963dbb41c1",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202603.json",
+          "itemIndex": 19
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202603.json",
+          "itemIndex": 18
+        }
+      ]
+    },
+    {
+      "contentHash": "2fedd5900e064bd4031b968e1d9780243ab4929fb5bbef0354cdc5358f8bae1b",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202503.json",
+          "itemIndex": 5
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-8-202503.json",
+          "itemIndex": 2
+        }
+      ]
+    },
+    {
+      "contentHash": "35a8070e9a2d2ff8d7c5378e66faac344249bb756633df6d51a82394331e646b",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202412.json",
+          "itemIndex": 18
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202503.json",
+          "itemIndex": 18
+        }
+      ]
+    },
+    {
+      "contentHash": "36dbcde7434065e90d0ce7bd0196b32a0e33d647161e95085961d58a2cd18766",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202503.json",
+          "itemIndex": 15
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202503.json",
+          "itemIndex": 15
+        }
+      ]
+    },
+    {
+      "contentHash": "3cfd4263da2419061baec05f3850001b8f0ef124a316724b606b9a271ecae8a8",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202509.json",
+          "itemIndex": 15
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202509.json",
+          "itemIndex": 14
+        }
+      ]
+    },
+    {
+      "contentHash": "41a5a05679992b9bff07e0154a669ed050a13d03e03bc22b9dc69660f32d0f2c",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202512.json",
+          "itemIndex": 6
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202512.json",
+          "itemIndex": 7
+        }
+      ]
+    },
+    {
+      "contentHash": "45165226b36eb71626abd4b73a0f5db7cb7b8c8bb3d0bffed0fc133d62fc9c4e",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202412.json",
+          "itemIndex": 16
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202503.json",
+          "itemIndex": 17
+        }
+      ]
+    },
+    {
+      "contentHash": "47534b7661f2706c92063cbd7fa92bff6b32295a746d6316cdd4bc6a669c2034",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202309.json",
+          "itemIndex": 0
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202309.json",
+          "itemIndex": 0
+        }
+      ]
+    },
+    {
+      "contentHash": "491c03a3f0029759aa9348af384c10c8f176d2ece09e25fd585696729df45b2d",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202312.json",
+          "itemIndex": 24
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202312.json",
+          "itemIndex": 24
+        }
+      ]
+    },
+    {
+      "contentHash": "4b5e2a081525f76b506ecab335824a6134bd25bf35fb0709be5be4d1e2185da0",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202312.json",
+          "itemIndex": 23
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202312.json",
+          "itemIndex": 23
+        }
+      ]
+    },
+    {
+      "contentHash": "5033a60f982f682b6e60ee571cd24546a684ed6196f17e45dc267b6a53f24a67",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202406.json",
+          "itemIndex": 13
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202406.json",
+          "itemIndex": 0
+        }
+      ]
+    },
+    {
+      "contentHash": "50ffb3a2be5ff6afc5005b160e690c943ae03cb7fc4f51060215b03c9e01d186",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202403.json",
+          "itemIndex": 17
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202509.json",
+          "itemIndex": 20
+        }
+      ]
+    },
+    {
+      "contentHash": "52ef6a7fb6c8fb29ea08667bf2fd4c59457d6fcc6e0332fe37088005f4678278",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202412.json",
+          "itemIndex": 19
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202503.json",
+          "itemIndex": 20
+        }
+      ]
+    },
+    {
+      "contentHash": "5494b741eb2bd2cf00986ecc80844cd46f075f63bcff2cb365b818ff055e84e8",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202406.json",
+          "itemIndex": 15
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202409.json",
+          "itemIndex": 20
+        }
+      ]
+    },
+    {
+      "contentHash": "5513689863c1eda5dd9223ab6447e2d20684b5eb63f9b7c616ed542274bfac31",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202603.json",
+          "itemIndex": 5
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-8-202603.json",
+          "itemIndex": 4
+        }
+      ]
+    },
+    {
+      "contentHash": "56f8d0a50be153cee619bc006d71e380395125cd1e421a90bbe1f3d78625b798",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202409.json",
+          "itemIndex": 19
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202412.json",
+          "itemIndex": 20
+        }
+      ]
+    },
+    {
+      "contentHash": "643be30264fe922b0370c3b3552f220990c99dd9b3b1b215d6c4e3d4635dad1e",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202509.json",
+          "itemIndex": 0
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202509.json",
+          "itemIndex": 0
+        }
+      ]
+    },
+    {
+      "contentHash": "65c47f052eae384638b7106b470d1537e472a436a44208fbccdfdee814350e9f",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202509.json",
+          "itemIndex": 24
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202509.json",
+          "itemIndex": 21
+        }
+      ]
+    },
+    {
+      "contentHash": "6d85f3db920c8b4667a6a7a2806e09a2b1d9e93c101f5bc2f6b369ff706d7a04",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/csp-j/2021.json",
+          "itemIndex": 0
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202309.json",
+          "itemIndex": 2
+        }
+      ]
+    },
+    {
+      "contentHash": "6e110ab7ad43f332181cd18bf70eed32a1ab5f2884e61338675276a6d84d614c",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202306.json",
+          "itemIndex": 23
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202309.json",
+          "itemIndex": 23
+        }
+      ]
+    },
+    {
+      "contentHash": "6ed31e6f883011e71f6632c578269bac79b3cbf85385919808d9af31b7ff370a",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202509.json",
+          "itemIndex": 14
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202509.json",
+          "itemIndex": 9
+        }
+      ]
+    },
+    {
+      "contentHash": "7061fa57ef0b0c9befa83a4f98628b48ffa95bfbc69ef4674052beeefdab1457",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202506.json",
+          "itemIndex": 0
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202506.json",
+          "itemIndex": 0
+        }
+      ]
+    },
+    {
+      "contentHash": "71b206de7b822c465142eb9d3c9e374b4643692635694993204689d15318f644",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202509.json",
+          "itemIndex": 2
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202509.json",
+          "itemIndex": 2
+        }
+      ]
+    },
+    {
+      "contentHash": "7285433224045109f7c4e6ad7bd0f6de589023b664a447f42e76f3393ec17b98",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202303.json",
+          "itemIndex": 5
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202306.json",
+          "itemIndex": 5
+        }
+      ]
+    },
+    {
+      "contentHash": "72f102bcddd05e514d5d98166c2ccbfa812f7389bce8a17e60a244be00b334db",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/csp-j/2023.json",
+          "itemIndex": 6
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202409.json",
+          "itemIndex": 13
+        }
+      ]
+    },
+    {
+      "contentHash": "75c92e4023fce8266382d19eb7c1331b397375446aa79b128b6734935f9b02f3",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202512.json",
+          "itemIndex": 0
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202512.json",
+          "itemIndex": 0
+        }
+      ]
+    },
+    {
+      "contentHash": "76e7dd34a47b6111fb6c5674aa8a7bfec9da00456be82f6bcc0b0891620a02e3",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202603.json",
+          "itemIndex": 18
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202603.json",
+          "itemIndex": 22
+        }
+      ]
+    },
+    {
+      "contentHash": "7f70aa1fe958c2f6b29413963f969ab2f07f0a17bcdbec726682d61cf010f7e2",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202412.json",
+          "itemIndex": 0
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202412.json",
+          "itemIndex": 0
+        }
+      ]
+    },
+    {
+      "contentHash": "8ce812239856dad0c89d7a7fc2ba4b787105ab064362904991b4443676e4374c",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202309.json",
+          "itemIndex": 23
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-sample.json",
+          "itemIndex": 15
+        }
+      ]
+    },
+    {
+      "contentHash": "8d230ba4f76fddc8159a3a10c29761098575e3c37d9ac782e1b39a8f1ba9039f",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202306.json",
+          "itemIndex": 3
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202309.json",
+          "itemIndex": 3
+        }
+      ]
+    },
+    {
+      "contentHash": "904e32d7e6d5c09a177f7720d826171951485684b5a0338f3c6ef2ac4e4a9774",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202603.json",
+          "itemIndex": 15
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202603.json",
+          "itemIndex": 14
+        }
+      ]
+    },
+    {
+      "contentHash": "914d18bb272135946de7d1be03e625c819fa934b3a80222c294b8bd4a0c6fc7d",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202312.json",
+          "itemIndex": 20
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202406.json",
+          "itemIndex": 22
+        }
+      ]
+    },
+    {
+      "contentHash": "92f035a90b03f4c4d7cbb1f5d0ba59854a048a296b0aae2cf38e0465ed4ed5e1",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202603.json",
+          "itemIndex": 8
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202603.json",
+          "itemIndex": 12
+        }
+      ]
+    },
+    {
+      "contentHash": "93e8e8b5afc2d74c578f8e8c037f68d8de2f04c344dd017375aba2844d5f901f",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202312.json",
+          "itemIndex": 13
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202312.json",
+          "itemIndex": 13
+        }
+      ]
+    },
+    {
+      "contentHash": "97e75dd866706c201635be2f9b9b66bf4a63ab851fa0fb92d3be141930911102",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202309.json",
+          "itemIndex": 15
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202309.json",
+          "itemIndex": 15
+        }
+      ]
+    },
+    {
+      "contentHash": "97fd0734c728252f11b2bb26736f513b6c7f94616fa7081b63100973fc385bf1",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202506.json",
+          "itemIndex": 15
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202509.json",
+          "itemIndex": 15
+        }
+      ]
+    },
+    {
+      "contentHash": "9db28b7aea31e6791940439512f40f8acc0881789a8c63dfa085b54a2de99f5a",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-8-202409.json",
+          "itemIndex": 10
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-8-202509.json",
+          "itemIndex": 13
+        }
+      ]
+    },
+    {
+      "contentHash": "a045957cca5fcacea7090d01fe42f283f74540eb33077a864d5a2139efc75c57",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202312.json",
+          "itemIndex": 17
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202312.json",
+          "itemIndex": 20
+        }
+      ]
+    },
+    {
+      "contentHash": "a0ca2b5a722816f67c38fe5fe08e2df906770a2ea97e1c377741051763bfcfb2",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202309.json",
+          "itemIndex": 16
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202309.json",
+          "itemIndex": 16
+        }
+      ]
+    },
+    {
+      "contentHash": "a70f866c1127097beeba8342f8860157111fe552d820e2243f094e2d852a76c9",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202309.json",
+          "itemIndex": 17
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202312.json",
+          "itemIndex": 15
+        }
+      ]
+    },
+    {
+      "contentHash": "a75726f27b7709356ecedd032fa0d64cd7ba4c96c14e1d832c4a3d85d42823f8",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202403.json",
+          "itemIndex": 19
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202409.json",
+          "itemIndex": 19
+        }
+      ]
+    },
+    {
+      "contentHash": "a7f96c30c9fc91da9e0c22a5e2813d04ac7361f3583688c13c73c833504b657e",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202403.json",
+          "itemIndex": 24
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202409.json",
+          "itemIndex": 23
+        }
+      ]
+    },
+    {
+      "contentHash": "b3ee5306ba500831299cf4bb938321ac447636dcb8c7c768a7634b957780d85b",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202603.json",
+          "itemIndex": 2
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202603.json",
+          "itemIndex": 1
+        }
+      ]
+    },
+    {
+      "contentHash": "b46b08107dc4c5b52e58e16fe6274d5992297e3f889286fe3288e0c8f923196d",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202506.json",
+          "itemIndex": 10
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202512.json",
+          "itemIndex": 12
+        }
+      ]
+    },
+    {
+      "contentHash": "b9199dc7c6e2e5e0dc35fc97109bb7c258d6bf8b0914c212a8f358287e1b3ea6",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202312.json",
+          "itemIndex": 12
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202312.json",
+          "itemIndex": 12
+        }
+      ]
+    },
+    {
+      "contentHash": "b99e55732ceec043539a425bf182f820e9004a538398712f78dddab693aa6163",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-sample.json",
+          "itemIndex": 16
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-sample.json",
+          "itemIndex": 16
+        }
+      ]
+    },
+    {
+      "contentHash": "c37357cbb5d67a650257fe00b8972e7a9a2c3a5c9696ade5ee17d25bca0ff49b",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202306.json",
+          "itemIndex": 20
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202412.json",
+          "itemIndex": 24
+        }
+      ]
+    },
+    {
+      "contentHash": "c69748c041e8b5da473f1d3566c0572a6cf62416d0616faa480a190c108c0df1",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202603.json",
+          "itemIndex": 0
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202603.json",
+          "itemIndex": 0
+        }
+      ]
+    },
+    {
+      "contentHash": "cb797eed8665cefa72e936275e86b9f96dbe32b04f36cee54c9f8cdd8b2ae697",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-sample.json",
+          "itemIndex": 8
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-sample.json",
+          "itemIndex": 7
+        }
+      ]
+    },
+    {
+      "contentHash": "cbc681cec4aaef64ab30038519620c691efaf57e52cbd62ce2aac218903f0488",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202409.json",
+          "itemIndex": 17
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202509.json",
+          "itemIndex": 17
+        }
+      ]
+    },
+    {
+      "contentHash": "d169a0af97c4110ca37ce8d0aa4689797721cbfcd65607bf2904c3386c98627e",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202309.json",
+          "itemIndex": 24
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202309.json",
+          "itemIndex": 24
+        }
+      ]
+    },
+    {
+      "contentHash": "d20dab54abe6424131c07ba20b9b2a0bd8a265fa40855a421c65d442df4e04a4",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/csp-s/2023.json",
+          "itemIndex": 14
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202409.json",
+          "itemIndex": 7
+        }
+      ]
+    },
+    {
+      "contentHash": "d3baf208a88e04ac58113ac5eae4ca27e47ea793f8047bfd3128ef499e25c01f",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202306.json",
+          "itemIndex": 15
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-sample.json",
+          "itemIndex": 15
+        }
+      ]
+    },
+    {
+      "contentHash": "d4e4b3599536e95b321422f2e4324d50dbb5dc8c7831793615c30dcc8d86b03a",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202512.json",
+          "itemIndex": 15
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202512.json",
+          "itemIndex": 15
+        }
+      ]
+    },
+    {
+      "contentHash": "d91790bfb7bebc56827102c882b1cda6d07403f52347b4e6bd7e7dea720afb6c",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202509.json",
+          "itemIndex": 13
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-8-202509.json",
+          "itemIndex": 11
+        }
+      ]
+    },
+    {
+      "contentHash": "e1593bda126df4f64eb224a64298fd5e750bb94c6cc1f80161ffb98f74fc4ff9",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-sample.json",
+          "itemIndex": 12
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-sample.json",
+          "itemIndex": 12
+        }
+      ]
+    },
+    {
+      "contentHash": "e1d8bda27bd84c81622d5a8bc01c5fb21306b2af368b9d3276ac791d9ff28fed",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202409.json",
+          "itemIndex": 15
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202409.json",
+          "itemIndex": 15
+        }
+      ]
+    },
+    {
+      "contentHash": "e324054321177578f60beb6c5e28724a9ab98be52fc393223cd3d739c918c628",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202509.json",
+          "itemIndex": 13
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202509.json",
+          "itemIndex": 8
+        }
+      ]
+    },
+    {
+      "contentHash": "e333564af65713d92fc86a25c6b1213082aa017d511e225f6fc239e1878ef678",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202412.json",
+          "itemIndex": 13
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202509.json",
+          "itemIndex": 12
+        }
+      ]
+    },
+    {
+      "contentHash": "e7b48083352c3eb98ea0ff9e8b79f95292b1bde3156e6f17d4fb57301a3bdb0a",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202412.json",
+          "itemIndex": 14
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-4-202503.json",
+          "itemIndex": 13
+        }
+      ]
+    },
+    {
+      "contentHash": "e8e306ccbccb7454c576c4238a04ce588f185a172decff20f316def943884f27",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-1-202412.json",
+          "itemIndex": 15
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202412.json",
+          "itemIndex": 15
+        }
+      ]
+    },
+    {
+      "contentHash": "ec7e9281dde26e2c2a21ae72e5b935fc22fde872648bca138858186b3b388b0a",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202403.json",
+          "itemIndex": 5
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-8-202409.json",
+          "itemIndex": 14
+        }
+      ]
+    },
+    {
+      "contentHash": "ecdb136def68f0e68642a20afe406b1a94a1dd93c3d1f447e83a9aff5aa1c57b",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202406.json",
+          "itemIndex": 6
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-2-202409.json",
+          "itemIndex": 8
+        }
+      ]
+    },
+    {
+      "contentHash": "ed170fb15b791cc6c608f25e0dd0635ab79c758441d7c4463d26d2e273369f9e",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202406.json",
+          "itemIndex": 16
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202512.json",
+          "itemIndex": 15
+        }
+      ]
+    },
+    {
+      "contentHash": "f5baf1eaea1617424a0e9cf06e6f3bb47e3d04f96fef6116038f1ca5928f389d",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202603.json",
+          "itemIndex": 6
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-7-202603.json",
+          "itemIndex": 8
+        }
+      ]
+    },
+    {
+      "contentHash": "f5ce26c98b66c53df120ed09f0dcfbc97de4e7dc001eaeef5e701c224bea5737",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202403.json",
+          "itemIndex": 17
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-5-202409.json",
+          "itemIndex": 22
+        }
+      ]
+    },
+    {
+      "contentHash": "f65f0dc2194595204b312e3b3d712ee7a19bdc24e3a3f97c4c230a1f27cb266b",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202403.json",
+          "itemIndex": 10
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202406.json",
+          "itemIndex": 10
+        }
+      ]
+    },
+    {
+      "contentHash": "f8a39fab3192aeb385bb9465639bd8e2ad090123f93ae921a6722df822fb6620",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/csp-j/2021.json",
+          "itemIndex": 6
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202406.json",
+          "itemIndex": 4
+        }
+      ]
+    },
+    {
+      "contentHash": "fa8865f1b15f49578be0bb65a9542017cf0cff7ab8169712af95be331669ad4b",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202309.json",
+          "itemIndex": 23
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-sample.json",
+          "itemIndex": 22
+        }
+      ]
+    },
+    {
+      "contentHash": "fe876e6a3e072e83398c20ef0121bef124b303cfaf255dc248a0b34ab744410e",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/csp-j/2022.json",
+          "itemIndex": 7
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-6-202409.json",
+          "itemIndex": 8
+        }
+      ]
+    },
+    {
+      "contentHash": "ffeb6d94317be10bff27d0f00f6b86f2bcefe73366bd1606e9b76500930c2175",
+      "count": 2,
+      "locations": [
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202306.json",
+          "itemIndex": 24
+        },
+        {
+          "section": "real-papers",
+          "file": "papers/real-papers/gesp/level-3-202406.json",
+          "itemIndex": 21
+        }
+      ]
+    }
+  ]
+}

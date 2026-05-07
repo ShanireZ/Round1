@@ -52,11 +52,11 @@
 - `review.ts review-real-papers`：逐题 LLM 复核脚本，统一复核 `questionType`、`difficulty`、知识点标签与 explanation；支持 `--metadata-only`、`--write`，并将低置信度或 stem/code 可疑项输出到 `scripts/.tmp/paper-review-report-*.json`。
 - `audit.ts verify-llm-tasks`：用合成 prompt 实跑 `generate` / `judge` 两类 LLM 任务，并回查 `llm_provider_logs` 是否记录 tokens、cost estimate、latency 与受控失败信息。
 - `audit.ts verify-question-bundle-guards`：构造临时候选题，验证规则去重可用 `DUPLICATE_JACCARD` 拦截近似题，并验证 LLM 判官可用 `JUDGE_REJECTED` 拦截答案不一致题。
-- `audit.ts report-docs-inventory`：扫描 `docs/` 并在需要时写回 `docs/_inventory`；文档改动后可用 `npm run inventory:docs -- --write`。
-- `audit.ts report-papers-inventory`：扫描 `papers/real-papers` 与 `papers/<year>` 生成物，并在需要时写回 `papers/_inventory`；题库改动后可用 `npm run inventory:papers -- --write`。
+- `audit.ts report-docs-inventory`：扫描 `docs/` 并在需要时写回 `count/other-inventories/docs`；文档改动后可用 `npm run inventory:docs -- --write`。
+- `audit.ts report-papers-inventory`：扫描 `papers/real-papers` 与 `papers/<year>` 生成物，并在需要时写回 `count/other-inventories/papers`；题库改动后可用 `npm run inventory:papers -- --write`。
 - `audit.ts report-question-inventory`：生成 2026 question bundle 覆盖率与配额盘点报告，默认写入 `count/state`。
 - `audit.ts report-question-counts`：合并 `count/state/question-inventory.json` 与 diversity audit 的 rewrite/archive CSV，生成 `count/question-counts-current.*`、`count/snapshots/*` 和 bucket 明细 CSV。
-- `audit.ts verify-offline-artifacts`：检查正式离线产物是否使用 runId 持久化命名，并校验 bundle JSON meta 与文件名一致；拒绝 `paper-packs.json`、`artifacts/llm-step3/probe*.json` 以及所有 `papers/<year>/*.json` 旧布局，但允许 `papers/_inventory` 作为统计元数据目录。
+- `audit.ts verify-offline-artifacts`：检查正式离线产物是否使用 runId 持久化命名，并校验 bundle JSON meta 与文件名一致；拒绝 `paper-packs.json`、`artifacts/llm-step3/probe*.json` 以及所有 `papers/<year>/*.json` 旧布局；当前统计归入 `count/`。
 - `audit.ts verify-ui-tokens`：检查 `client/src` 的 TS/TSX 与非 token CSS 是否重新引入原始 hex/rgb/hsl 颜色字面量；颜色应落到 design token、语义 Tailwind class 或共享 CSS utility。
 - tests/verifyExamMappings.ts：校验共享考试映射是否包含关键批次。
 

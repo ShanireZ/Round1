@@ -1,0 +1,64 @@
+{
+  "generatedAt": "2026-05-07T03:46:40.257Z",
+  "reportType": "question_diversity_audit_2026",
+  "policyVersion": "round1-question-diversity/2026-05-07.1",
+  "totals": {
+    "items": 3,
+    "policyTaggedItems": 3,
+    "lowQualityCandidates": 0,
+    "rewriteCandidates": 0,
+    "templateClusters": 0
+  },
+  "distributions": {
+    "byGrid": [
+      {
+        "key": "CSP-J|single_choice|easy|BAS",
+        "count": 3,
+        "archetypes": {
+          "bas-memory-layout-basic": 1,
+          "bas-os-file-path": 1,
+          "bas-debug-trace": 1
+        },
+        "taskFlavors": {
+          "memory_layout_basic": 1,
+          "os_file_path_reasoning": 1,
+          "debug_trace_reasoning": 1
+        },
+        "stemPatternFamilies": {
+          "short_trace": 2,
+          "final_value": 1
+        },
+        "containerTags": {}
+      }
+    ],
+    "byKnowledgePoint": [
+      {
+        "key": "BAS|single_choice|easy",
+        "count": 3,
+        "archetypes": {
+          "bas-memory-layout-basic": 1,
+          "bas-os-file-path": 1,
+          "bas-debug-trace": 1
+        },
+        "taskFlavors": {
+          "memory_layout_basic": 1,
+          "os_file_path_reasoning": 1,
+          "debug_trace_reasoning": 1
+        },
+        "stemPatternFamilies": {
+          "short_trace": 2,
+          "final_value": 1
+        },
+        "containerTags": {}
+      }
+    ]
+  },
+  "templateClusters": [],
+  "rewriteQueue": [],
+  "validation": {
+    "policyVersion": "round1-question-diversity/2026-05-07.1",
+    "enforced": true,
+    "errors": [],
+    "warnings": []
+  }
+}

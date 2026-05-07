@@ -6,6 +6,10 @@ This document defines the maintained Round1 question-count audit method. Future
 question quantity and quality statistics should be generated into `count/` and
 linked from plans or standards instead of introducing another counting surface.
 
+For non-question generated inventories, use `count/other-inventories/**`. For
+legacy statistic surfaces found elsewhere in the repository, maintain the
+migration and retention record in `count/legacy-statistics-index.*`.
+
 ## Scope
 
 - Include non-real-paper question bundles under `papers/2026`.
@@ -92,6 +96,12 @@ The canonical generated files are:
 - `count/snapshots/<snapshotId>.md`
 - `count/snapshots/<snapshotId>.json`
 - `count/snapshots/<snapshotId>__bucket-details.csv`
+
+Other maintained generated inventories:
+
+- `count/other-inventories/docs/docs-inventory.*`
+- `count/other-inventories/papers/papers-inventory.*`
+- `count/other-inventories/papers/sections/*`
 
 ## Manual Review Boundary
 

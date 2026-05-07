@@ -40,7 +40,7 @@ The batch used `--provider-lane default-only`, so generation, repair, and both r
 - Import apply: 36 questions imported, 0 failed
 - Run-local inventory evidence: `artifacts/reports/2026/runs/2026-05-07-bulk36-gesp6-default-only-gap-fill-v02/inventory-after/question-inventory.json`
 - Canonical current count surface: `count/state/question-inventory.json` and `count/question-counts-current.json`
-- Papers inventory after: `papers/_inventory/papers-inventory.json`
+- Papers inventory after: `count/other-inventories/papers/papers-inventory.json`
 
 ## Inventory Delta
 

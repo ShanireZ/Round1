@@ -76,17 +76,17 @@
 执行前先拿到当前批次的基线输出，至少包括：
 
 ```bash
-npx tsx scripts/auditRealPapers.ts answers --official --limit <N>
-npx tsx scripts/auditRealPapers.ts coverage
-npx tsx scripts/auditRealPapers.ts code
-npx tsx scripts/auditRealPapers.ts quality --dir <DIR>
-npx tsx scripts/auditRealPapers.ts metadata --dir <DIR>
+npx tsx scripts/audit.ts audit-real-papers answers --official --limit <N>
+npx tsx scripts/audit.ts audit-real-papers coverage
+npx tsx scripts/audit.ts audit-real-papers code
+npx tsx scripts/audit.ts audit-real-papers quality --dir <DIR>
+npx tsx scripts/audit.ts audit-real-papers metadata --dir <DIR>
 ```
 
 如需限定批次，可附加：
 
 ```bash
-npx tsx scripts/auditRealPapers.ts answers --official --dir csp-j --year 2021 --limit <N>
+npx tsx scripts/audit.ts audit-real-papers answers --official --dir csp-j --year 2021 --limit <N>
 ```
 
 解释：
@@ -110,19 +110,19 @@ npx tsx scripts/auditRealPapers.ts answers --official --dir csp-j --year 2021 --
 若批次较大，优先使用自动化脚本做两段式复核：
 
 ```bash
-npx tsx scripts/reviewRealPapers.ts --dir csp-s --write --chunk-size 1
+npx tsx scripts/review.ts review-real-papers --dir csp-s --write --chunk-size 1
 ```
 
 仅复核元数据时可使用：
 
 ```bash
-npx tsx scripts/reviewRealPapers.ts --dir csp-j --write --chunk-size 1 --metadata-only
+npx tsx scripts/review.ts review-real-papers --dir csp-j --write --chunk-size 1 --metadata-only
 ```
 
 若只需补强 explanation，可直接使用 explanation 专用脚本：
 
 ```bash
-npx tsx scripts/rewritePaperExplanations.ts --file 2025.json --start-q 16 --end-q 18 --write --chunk-size 1 --timeout 180000
+npx tsx scripts/review.ts rewrite-paper-explanations --file 2025.json --start-q 16 --end-q 18 --write --chunk-size 1 --timeout 180000
 ```
 
 说明：
@@ -180,16 +180,16 @@ npx tsx scripts/rewritePaperExplanations.ts --file 2025.json --start-q 16 --end-
 每完成 1 到 2 份卷，至少重新跑一次：
 
 ```bash
-npx tsx scripts/auditRealPapers.ts coverage
-npx tsx scripts/auditRealPapers.ts code
-npx tsx scripts/auditRealPapers.ts quality --dir <DIR>
-npx tsx scripts/auditRealPapers.ts metadata --dir <DIR>
+npx tsx scripts/audit.ts audit-real-papers coverage
+npx tsx scripts/audit.ts audit-real-papers code
+npx tsx scripts/audit.ts audit-real-papers quality --dir <DIR>
+npx tsx scripts/audit.ts audit-real-papers metadata --dir <DIR>
 ```
 
 在批次收尾阶段，再补跑一次官方答案比对：
 
 ```bash
-npx tsx scripts/auditRealPapers.ts answers --official --limit <N>
+npx tsx scripts/audit.ts audit-real-papers answers --official --limit <N>
 ```
 
 若本轮刚修过 JSON 结构，也应额外做一轮解析验证，例如使用编辑器错误检查或命令行 JSON 解析校验。
@@ -248,9 +248,9 @@ npx tsx scripts/auditRealPapers.ts answers --official --limit <N>
 
 ## 7. 当前落地脚本约定
 
-- `scripts/auditRealPapers.ts`：确定性基线与回归审计。
-- `scripts/reviewRealPapers.ts`：逐题 metadata + explanation 复核，支持 `--metadata-only`。
-- `scripts/rewritePaperExplanations.ts`： explanation 专用重写，用于清理 `quality` 审计剩余弱项。
+- `scripts/audit.ts audit-real-papers`：确定性基线与回归审计。
+- `scripts/review.ts review-real-papers`：逐题 metadata + explanation 复核，支持 `--metadata-only`。
+- `scripts/review.ts rewrite-paper-explanations`： explanation 专用重写，用于清理 `quality` 审计剩余弱项。
 - `scripts/lib/scriptLlmClient.ts`：统一 scripts 侧 scene 路由和 provider fallback，避免 prompt 逻辑与调用主体耦合。
 
 ---
@@ -259,4 +259,4 @@ npx tsx scripts/auditRealPapers.ts answers --official --limit <N>
 
 - `csp-s`：先确认官方比对脚本的目录过滤问题，再开始批量比对。
 - `gesp`：优先按级别分批，不建议一次性覆盖所有 level；每个 level 单独建执行计划和收尾总结。
-- 若后续此类批次持续发生，建议把 `scripts/auditRealPapers.ts` 扩展为支持目录、年份或 glob 过滤，减少人工解释 `--limit` 含义的成本。
+- 若后续此类批次持续发生，建议继续扩展 `scripts/audit.ts audit-real-papers` 的目录、年份或 glob 过滤能力，减少人工解释 `--limit` 含义的成本。

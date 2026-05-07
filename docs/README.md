@@ -2,7 +2,7 @@
 
 Status: current index
 
-This directory is the working documentation layer for Round1. It holds current operational docs, dated plans, follow-up records, and generated documentation inventory.
+This directory is the working documentation layer for Round1. It holds current operational docs, dated plans, and follow-up records. Generated documentation inventory is maintained under `count/`.
 
 ## Layout
 
@@ -11,9 +11,6 @@ docs/
   README.md
   maintenance.md
   issues-and-followups.md
-  _inventory/
-    docs-inventory.json
-    docs-inventory.md
   plans/
     README.md
     YYYY-MM-DD-<topic>.md
@@ -27,7 +24,7 @@ docs/
 - `docs/maintenance.md`: documentation lifecycle, cleanup, completion, and follow-up rules.
 - `docs/issues-and-followups.md`: current issue register and situation summary for doc-maintenance and cross-cutting follow-ups.
 - `docs/plans/`: dated execution plans, design notes, follow-up records, and closure records.
-- `docs/_inventory/`: generated inventory from `scripts/reportDocsInventory.ts`.
+- `count/other-inventories/docs/`: generated inventory from `scripts/audit.ts report-docs-inventory`.
 - Topic docs such as `papers-layout.md` and `reports-artifacts.md`: stable operating rules for a specific local area.
 
 Long-lived product, architecture, and domain contracts belong in `plan/` or `standard/`. Dated execution records and investigation notes belong in `docs/plans/`.
@@ -55,4 +52,4 @@ New docs must include a status line near the top:
 Status: active | current index | completed | superseded | archived | reference | blocked | deferred
 ```
 
-Older files without a status header are tracked in `docs/_inventory/docs-inventory.md` until they are triaged.
+Older files without a status header are tracked in `count/other-inventories/docs/docs-inventory.md` until they are triaged.

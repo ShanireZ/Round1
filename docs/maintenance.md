@@ -9,7 +9,7 @@ This file defines how `docs/` stays useful after plans are implemented, blocked,
 - Keep `docs/README.md` as the entry point.
 - Keep `docs/issues-and-followups.md` as the current issue and situation register.
 - Keep dated work records in `docs/plans/`.
-- Keep generated documentation inventory in `docs/_inventory/`.
+- Keep generated documentation inventory in `count/other-inventories/docs/`.
 - Do not create `docs/plan/`; the only dated plan directory is `docs/plans/`.
 
 ## Lifecycle

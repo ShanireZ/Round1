@@ -2,21 +2,13 @@
 
 Status: current policy
 
-`papers/` is split into durable content sections and generated inventory metadata.
+`papers/` is split into durable content sections. Generated inventory metadata is maintained under `count/`.
 
 ## Canonical Layout
 
 ```text
 papers/
   README.md
-  _inventory/
-    papers-inventory.json
-    papers-inventory.md
-    sections/
-      real-papers.json
-      real-papers.md
-      <year>.json
-      <year>.md
   real-papers/
   <year>/
 ```
@@ -25,7 +17,7 @@ papers/
 
 - `papers/real-papers/`: historical official papers. These are imported as real-paper sets and are excluded from the generated 20,000-question target.
 - `papers/<year>/`: generated question bundles for a single simulated-question library year, such as `2026` or future `2027`.
-- `papers/_inventory/`: generated metadata. Do not put importable question bundles here.
+- `count/other-inventories/papers/`: generated metadata. Do not put importable question bundles here.
 
 Generated question bundles keep the established runId layout:
 
@@ -42,14 +34,14 @@ npm run inventory:papers -- --write
 npm run verify:offline-artifacts
 ```
 
-`scripts/reportPapersInventory.ts` writes root and per-section statistics. The per-section files are the source of truth for:
+`scripts/audit.ts report-papers-inventory` writes root and per-section statistics to `count/other-inventories/papers/`. The per-section files are the source of truth for:
 
 - `real-papers` file and question counts.
 - Each generated year bundle and item counts.
 - Question type, exam type, difficulty, and knowledge-point group distributions.
 - Exact duplicate content-hash groups that need review.
 
-`scripts/reportQuestionInventory.ts` remains the quota-deficit inventory for generated simulated questions, and currently writes to `artifacts/reports/<year>/state/`.
+`scripts/reportQuestionInventory.ts` remains the quota-deficit inventory for generated simulated questions, and currently writes to `count/state/`.
 
 ## Cleanup Policy
 

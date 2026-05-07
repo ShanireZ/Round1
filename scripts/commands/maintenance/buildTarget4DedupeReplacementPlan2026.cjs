@@ -1,13 +1,14 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const reportDir = path.resolve(
+const sourceRunDir = path.resolve(
   process.cwd(),
   "artifacts/reports/2026/runs/2026-05-02T02-05-46-784Z",
 );
+const reportDir = path.resolve(process.cwd(), "count/runs/2026-05-02T02-05-46-784Z");
 const manifestPath = process.argv[2]
   ? path.resolve(process.cwd(), process.argv[2])
-  : path.join(reportDir, "target4-generated-question-bundles-manifest.json");
+  : path.join(sourceRunDir, "target4-generated-question-bundles-manifest.json");
 
 function toRepoPath(filePath) {
   return path.relative(process.cwd(), filePath).replaceAll(path.sep, "/");

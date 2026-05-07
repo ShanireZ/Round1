@@ -1,0 +1,122 @@
+{
+  "status": "current migration index",
+  "generatedAt": "2026-05-07T06:02:12.000Z",
+  "decision": {
+    "countIsCanonicalForMaintainedStatistics": true,
+    "artifactsReportsRetention": "historical generation, judge, import, cleanup, and run-local evidence",
+    "artifactsReportsIsCurrentCountingSource": false
+  },
+  "consolidatedSurfaces": [
+    {
+      "formerSurface": "artifacts/reports/2026/state/question-inventory.*",
+      "newSurface": "count/state/question-inventory.*",
+      "action": "removed stale state files and regenerated current inventory in count/state"
+    },
+    {
+      "formerSurface": "artifacts/reports/2026/audits/*",
+      "newSurface": "count/audits/*",
+      "action": "copied cross-run audit directories into count/audits and removed the old audit directory"
+    },
+    {
+      "formerSurface": "docs/_inventory/*",
+      "newSurface": "count/other-inventories/docs/*",
+      "action": "regenerated docs inventory in count and removed the old tracked directory"
+    },
+    {
+      "formerSurface": "papers/_inventory/*",
+      "newSurface": "count/other-inventories/papers/*",
+      "action": "regenerated papers inventory in count and removed the old ignored directory"
+    },
+    {
+      "formerSurface": "target4 replacement/final-fill inventory scripts",
+      "newSurface": "count/runs/2026-05-02T02-05-46-784Z/*",
+      "action": "updated maintenance scripts to write statistic outputs under count/runs"
+    }
+  ],
+  "currentGeneratedInventories": {
+    "docs": {
+      "path": "count/other-inventories/docs/docs-inventory.*",
+      "markdownFiles": 29,
+      "rootDocs": 5,
+      "planDocs": 24,
+      "filesWithoutStatusHeader": 21,
+      "openTaskMarkers": 18
+    },
+    "papers": {
+      "path": "count/other-inventories/papers/papers-inventory.*",
+      "realPapers": {
+        "files": 116,
+        "questions": 2828,
+        "duplicateGroups": 97,
+        "invalidFiles": 0
+      },
+      "generated2026": {
+        "bundles": 3049,
+        "items": 13660,
+        "duplicateGroups": 0,
+        "invalidFiles": 0
+      }
+    },
+    "audits": [
+      {
+        "path": "count/audits/2026-05-07-non-real-files-all-v01",
+        "files": 6,
+        "role": "current full non-real-paper diversity audit"
+      },
+      {
+        "path": "count/audits/diversity-csp-js-2026-05-07",
+        "files": 6,
+        "role": "migrated database diversity audit"
+      },
+      {
+        "path": "count/audits/diversity-generation-smoke-v05",
+        "files": 6,
+        "role": "migrated generation smoke diversity audit"
+      },
+      {
+        "path": "count/audits/diversity-smoke-2026-05-07",
+        "files": 2,
+        "role": "migrated smoke diversity audit"
+      },
+      {
+        "path": "count/audits/diversity-smoke-2026-05-07-csp",
+        "files": 2,
+        "role": "migrated CSP smoke diversity audit"
+      },
+      {
+        "path": "count/audits/similarity",
+        "files": 7,
+        "role": "migrated similarity audit"
+      }
+    ]
+  },
+  "retainedHistoricalEvidence": [
+    {
+      "surface": "artifacts/reports/2026/runs/*",
+      "directoryCount": 321,
+      "reason": "run-local generation, judge, import, repair, and review evidence"
+    },
+    {
+      "surface": "artifacts/reports/2026/2026-*",
+      "reason": "historical LLM review and provider probe reports"
+    },
+    {
+      "surface": "artifacts/reports/2026/cleanups/*",
+      "reason": "cleanup evidence and operational reports"
+    }
+  ],
+  "artifactsReportsAfterCleanup": {
+    "json": 3767,
+    "log": 374,
+    "tsv": 29,
+    "md": 26,
+    "txt": 2,
+    "ps1": 1
+  },
+  "futureAuditRule": [
+    "current maintained statistic: move or regenerate it under count/**",
+    "run-local evidence: keep it near the run and link to the canonical count surface when needed",
+    "duplicate or stale state: regenerate in count, then delete the old copy",
+    "temporary scratch data: move to artifacts/tmp/** or delete when no longer needed"
+  ]
+}

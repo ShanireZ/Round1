@@ -32,4 +32,4 @@ npm run inventory:docs -- --write
 
 Use `docs/issues-and-followups.md` for live follow-ups that outlive one dated plan.
 
-The generated plan list lives in `docs/_inventory/docs-inventory.md`.
+The generated plan list lives in `count/other-inventories/docs/docs-inventory.md`.

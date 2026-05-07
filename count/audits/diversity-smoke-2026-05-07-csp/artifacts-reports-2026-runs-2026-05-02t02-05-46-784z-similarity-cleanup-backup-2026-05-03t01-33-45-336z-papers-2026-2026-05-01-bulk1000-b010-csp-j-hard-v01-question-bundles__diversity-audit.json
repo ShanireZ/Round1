@@ -1,0 +1,82 @@
+{
+  "generatedAt": "2026-05-07T02:26:44.116Z",
+  "reportType": "question_diversity_audit_2026",
+  "policyVersion": "round1-question-diversity/2026-05-07.1",
+  "totals": {
+    "items": 5,
+    "policyTaggedItems": 0,
+    "lowQualityCandidates": 0,
+    "rewriteCandidates": 2,
+    "templateClusters": 1
+  },
+  "distributions": {
+    "byGrid": [
+      {
+        "key": "CSP-J|completion_program|hard|ALG",
+        "count": 5,
+        "archetypes": {
+          "inferred-blank_completion": 5
+        },
+        "taskFlavors": {
+          "blank_completion": 5
+        },
+        "stemPatternFamilies": {
+          "blank_completion": 5
+        },
+        "containerTags": {}
+      }
+    ]
+  },
+  "templateClusters": [
+    {
+      "normalizedTemplateKey": "completion_program:blank_completion:idid-id/id补全循环累加程序使整除分支按权重累加#include<id/id++.id>usingnamespacestd;intid(){intid;id>>id;intid=/*id*/;for(intid=id;id<=id;++id){if(id%id==id)id+=/*id*/;elseid+=id;}id<<id<<id;returnid;}#include<id/id++.id>usingnamespacestd;intid(){intid;id>>id;intid=id;for(intid=id;id<=id;++id){if(id%id==id)id+=id*id;elseid+=id;}id<<id<<id;returnid;}idid.idid.idid.idid.-ididid.idid.idid.id+idid.id*ididid",
+      "count": 2,
+      "itemIds": [
+        "artifacts/reports/2026/runs/2026-05-02T02-05-46-784Z/similarity-cleanup-backup-2026-05-03T01-33-45-336Z/papers/2026/2026-05-01-bulk1000-b010-csp-j-hard-v01/question-bundles/2026-05-01-bulk1000-b010-csp-j-hard-v01__question-bundle__completion-program__alg__n5__v01.json#0",
+        "artifacts/reports/2026/runs/2026-05-02T02-05-46-784Z/similarity-cleanup-backup-2026-05-03T01-33-45-336Z/papers/2026/2026-05-01-bulk1000-b010-csp-j-hard-v01/question-bundles/2026-05-01-bulk1000-b010-csp-j-hard-v01__question-bundle__completion-program__alg__n5__v01.json#4"
+      ]
+    }
+  ],
+  "rewriteQueue": [
+    {
+      "id": "artifacts/reports/2026/runs/2026-05-02T02-05-46-784Z/similarity-cleanup-backup-2026-05-03T01-33-45-336Z/papers/2026/2026-05-01-bulk1000-b010-csp-j-hard-v01/question-bundles/2026-05-01-bulk1000-b010-csp-j-hard-v01__question-bundle__completion-program__alg__n5__v01.json#0",
+      "sourcePath": "artifacts/reports/2026/runs/2026-05-02T02-05-46-784Z/similarity-cleanup-backup-2026-05-03T01-33-45-336Z/papers/2026/2026-05-01-bulk1000-b010-csp-j-hard-v01/question-bundles/2026-05-01-bulk1000-b010-csp-j-hard-v01__question-bundle__completion-program__alg__n5__v01.json",
+      "itemIndex": 0,
+      "examTypes": [
+        "CSP-J"
+      ],
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "archetypeId": "inferred-blank_completion",
+      "taskFlavor": "blank_completion",
+      "qualityScore": 0.86,
+      "reasons": [
+        "parameterized_template_cluster"
+      ]
+    },
+    {
+      "id": "artifacts/reports/2026/runs/2026-05-02T02-05-46-784Z/similarity-cleanup-backup-2026-05-03T01-33-45-336Z/papers/2026/2026-05-01-bulk1000-b010-csp-j-hard-v01/question-bundles/2026-05-01-bulk1000-b010-csp-j-hard-v01__question-bundle__completion-program__alg__n5__v01.json#4",
+      "sourcePath": "artifacts/reports/2026/runs/2026-05-02T02-05-46-784Z/similarity-cleanup-backup-2026-05-03T01-33-45-336Z/papers/2026/2026-05-01-bulk1000-b010-csp-j-hard-v01/question-bundles/2026-05-01-bulk1000-b010-csp-j-hard-v01__question-bundle__completion-program__alg__n5__v01.json",
+      "itemIndex": 4,
+      "examTypes": [
+        "CSP-J"
+      ],
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "ALG",
+      "archetypeId": "inferred-blank_completion",
+      "taskFlavor": "blank_completion",
+      "qualityScore": 0.86,
+      "reasons": [
+        "parameterized_template_cluster"
+      ]
+    }
+  ],
+  "validation": {
+    "policyVersion": "round1-question-diversity/2026-05-07.1",
+    "enforced": false,
+    "errors": [],
+    "warnings": []
+  }
+}

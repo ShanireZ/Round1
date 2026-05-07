@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-05-07T02:25:53.223Z",
+  "reportType": "question_diversity_audit_2026",
+  "policyVersion": "round1-question-diversity/2026-05-07.1",
+  "totals": {
+    "items": 0,
+    "policyTaggedItems": 0,
+    "lowQualityCandidates": 0,
+    "rewriteCandidates": 0,
+    "templateClusters": 0
+  },
+  "distributions": {
+    "byGrid": []
+  },
+  "templateClusters": [],
+  "rewriteQueue": [],
+  "validation": {
+    "policyVersion": "round1-question-diversity/2026-05-07.1",
+    "enforced": false,
+    "errors": [],
+    "warnings": []
+  }
+}

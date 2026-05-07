@@ -4,9 +4,9 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const DEFAULT_SOURCE_DIR = "docs";
-const DEFAULT_OUT_DIR = "docs/_inventory";
+const DEFAULT_OUT_DIR = "count/other-inventories/docs";
 
-const usage = `Usage: npx tsx scripts/commands/audit/reportDocsInventory.ts [--source-dir docs] [--out-dir docs/_inventory] [--write] [--strict]`;
+const usage = `Usage: npx tsx scripts/commands/audit/reportDocsInventory.ts [--source-dir docs] [--out-dir count/other-inventories/docs] [--write] [--strict]`;
 
 interface Args {
   sourceDir: string;
@@ -17,7 +17,7 @@ interface Args {
 
 interface DocsInventoryEntry {
   path: string;
-  section: "root" | "plans" | "inventory" | "other";
+  section: "root" | "plans" | "other";
   title: string;
   date: string | null;
   status: string | null;
@@ -62,9 +62,6 @@ function listMarkdownFiles(dir: string): string[] {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const entryPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (repoPath(entryPath).startsWith("docs/_inventory")) {
-        continue;
-      }
       files.push(...listMarkdownFiles(entryPath));
       continue;
     }
@@ -79,9 +76,6 @@ function listMarkdownFiles(dir: string): string[] {
 function sectionOf(repoFilePath: string): DocsInventoryEntry["section"] {
   if (repoFilePath.startsWith("docs/plans/")) {
     return "plans";
-  }
-  if (repoFilePath.startsWith("docs/_inventory/")) {
-    return "inventory";
   }
   if (path.dirname(repoFilePath) === "docs") {
     return "root";

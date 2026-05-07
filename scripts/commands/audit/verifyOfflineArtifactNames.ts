@@ -51,15 +51,7 @@ function isQuestionBundleDirectlyUnderYear(repoPath: string): boolean {
   return /^papers\/\d{4}\/[^/]+\.json$/.test(repoPath);
 }
 
-function isPapersInventoryMetadata(repoPath: string): boolean {
-  return repoPath.startsWith("papers/_inventory/");
-}
-
 function validateRepoPath(repoPath: string): string | null {
-  if (isPapersInventoryMetadata(repoPath)) {
-    return null;
-  }
-
   if (repoPath === "artifacts/prebuilt-papers/paper-packs.json") {
     return "prebuilt paper bundle uses the deprecated generic paper-packs.json name";
   }

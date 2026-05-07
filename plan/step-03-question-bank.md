@@ -54,7 +54,7 @@
 
 > 真题人工审计、解析回填、题面修复与抽样复核的统一流程见 [reference-paper-audit.md](reference-paper-audit.md)。后续进行 `csp-j`、`csp-s`、`gesp` 历史题库修订时，统一按该规范执行。
 
-> 批量复核时优先使用两段式脚本：`scripts/reviewRealPapers.ts` 负责 metadata/explanation 逐题复核与低风险写回，`scripts/rewritePaperExplanations.ts` 负责 explanation 定点补写；两者共用 scripts 侧共享 LLM 客户端，避免提示词与调用主体漂移。
+> 批量复核时优先使用两段式脚本：`scripts/review.ts review-real-papers` 负责 metadata/explanation 逐题复核与低风险写回，`scripts/review.ts rewrite-paper-explanations` 负责 explanation 定点补写；两者共用 scripts 侧共享 LLM 客户端，避免提示词与调用主体漂移。
 
 **AI 辅助审核（基于 `question_reviews` 表）**：
 
