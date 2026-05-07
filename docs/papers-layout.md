@@ -41,7 +41,7 @@ npm run verify:offline-artifacts
 - Question type, exam type, difficulty, and knowledge-point group distributions.
 - Exact duplicate content-hash groups that need review.
 
-`scripts/reportQuestionInventory.ts` remains the quota-deficit inventory for generated simulated questions, and currently writes to `count/state/`.
+`scripts/audit.ts report-question-inventory` remains the quota-deficit inventory for generated simulated questions, and currently writes to `count/state/`.
 
 ## Cleanup Policy
 

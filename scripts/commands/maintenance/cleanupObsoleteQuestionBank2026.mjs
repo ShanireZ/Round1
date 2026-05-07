@@ -11,7 +11,7 @@ import { buildBundleIntegrity, computeChecksum } from "../../lib/bundleTypes.js"
 
 const TARGET_EXAMS = new Set(["CSP-J", "CSP-S", "GESP-1", "GESP-2", "GESP-7", "GESP-8"]);
 const REPORT_ROOT = "artifacts/reports/2026";
-const AUDIT_DIR = "artifacts/reports/2026/runs/2026-05-05-non-real-question-audit";
+const CLEANUP_DIR = "artifacts/reports/2026/cleanups/obsolete-question-bank-2026-05-05";
 const SOURCE_ROOT = "papers/2026";
 
 function readArg(name) {
@@ -752,7 +752,7 @@ async function queryTargetStats() {
 }
 
 async function writeSummary(summary) {
-  const outDir = path.join(AUDIT_DIR, "cleanup-obsolete-question-bank");
+  const outDir = path.join(CLEANUP_DIR, "cleanup-obsolete-question-bank");
   fs.mkdirSync(outDir, { recursive: true });
   const outPath = path.join(outDir, "summary.json");
   fs.writeFileSync(outPath, `${JSON.stringify(summary, null, 2)}\n`);

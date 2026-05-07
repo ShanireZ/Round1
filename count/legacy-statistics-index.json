@@ -30,7 +30,7 @@
     {
       "formerSurface": "target4 replacement/final-fill inventory scripts",
       "newSurface": "count/runs/2026-05-02T02-05-46-784Z/*",
-      "action": "updated maintenance scripts to write statistic outputs under count/runs"
+      "action": "copied required target4 manifests, reports, and inventories into count/runs and updated maintenance scripts to read/write statistic outputs there"
     }
   ],
   "currentGeneratedInventories": {
@@ -87,6 +87,11 @@
         "path": "count/audits/similarity",
         "files": 7,
         "role": "migrated similarity audit"
+      },
+      {
+        "path": "count/runs/2026-05-02T02-05-46-784Z",
+        "files": 8,
+        "role": "migrated target4 maintenance run evidence and frozen question inventory required by count/runs scripts"
       }
     ]
   },

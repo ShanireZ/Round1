@@ -39,7 +39,7 @@ This keeps historical real papers distinct from simulated prebuilt papers, while
 
 - Target simulated prebuilt inventory: 100 papers for each of `CSP-J`, `CSP-S`, `GESP-1` through `GESP-8`.
 - Real paper questions are counted separately and excluded from the simulated prebuilt deficit.
-- `scripts/reportQuestionInventory.ts` reads `papers/2026` recursively, counts by exam type, question type, difficulty, and knowledge-point group, then compares counts with blueprint quotas.
+- `scripts/audit.ts report-question-inventory` reads `papers/2026` recursively, counts by exam type, question type, difficulty, and knowledge-point group, then compares counts with blueprint quotas.
 - `npm run inventory:questions -- --write` writes the current JSON and Markdown inventory to `count/state`.
 - Use `--out-run-dir count/runs/<runId>` only when a point-in-time inventory snapshot also needs to be attached to a specific counting run.
 - `scripts/audit.ts report-papers-inventory` maintains the broader `papers/` section inventory. Run `npm run inventory:papers -- --write` after changing `papers/real-papers` or any `papers/<year>` generated-bundle section. It writes root and per-section statistics to `count/other-inventories/papers`.

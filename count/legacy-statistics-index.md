@@ -21,7 +21,7 @@ remain outside `count` only when it is not used as the current counting source.
 | `artifacts/reports/2026/audits/*` | `count/audits/*` | Copied cross-run audit directories into `count/audits` and removed the old audit directory. |
 | `docs/_inventory/*` | `count/other-inventories/docs/*` | Regenerated docs inventory in `count` and removed the old tracked directory. |
 | `papers/_inventory/*` | `count/other-inventories/papers/*` | Regenerated papers inventory in `count` and removed the old ignored directory. |
-| target4 replacement/final-fill inventory scripts | `count/runs/2026-05-02T02-05-46-784Z/*` | Updated maintenance scripts to write statistic outputs under `count/runs`. |
+| target4 replacement/final-fill inventory scripts | `count/runs/2026-05-02T02-05-46-784Z/*` | Copied required target4 manifests/reports/inventories into `count/runs` and updated maintenance scripts to read/write statistic outputs there. |
 
 ## Current Generated Inventories
 
@@ -35,6 +35,7 @@ remain outside `count` only when it is not used as the current counting source.
 | `count/audits/diversity-smoke-2026-05-07/` | Migrated smoke diversity audit, 2 files. |
 | `count/audits/diversity-smoke-2026-05-07-csp/` | Migrated CSP smoke diversity audit, 2 files. |
 | `count/audits/similarity/` | Migrated similarity audit, 7 files. |
+| `count/runs/2026-05-02T02-05-46-784Z/` | Migrated target4 manifests, duplicate report, frozen question inventory, replacement inventory, final-fill inventory, final import manifest, and deletion report, 8 files. |
 
 ## Retained Historical Evidence
 

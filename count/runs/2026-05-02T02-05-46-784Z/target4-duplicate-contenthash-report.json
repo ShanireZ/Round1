@@ -1,0 +1,111 @@
+{
+  "generatedAt": "2026-05-02T14:43:53.536Z",
+  "sourceManifestPath": "artifacts/reports/2026/2026-05-02T02-05-46-784Z/target4-generated-question-bundles-manifest.json",
+  "duplicateContentHashes": 6,
+  "filesFound": 1030,
+  "itemCount": 5385,
+  "excludedBundles": 6,
+  "excludedItemCount": 30,
+  "cleanBundles": 1024,
+  "cleanItemCount": 5355,
+  "duplicates": [
+    {
+      "contentHash": "d3e9c7714c072e0583239a14f66c4759a922ae825697016ac00dfeef4e45b5a9",
+      "firstLocation": "papers/2026/2026-05-02-bulk5355-a01-b0019-gesp-2-easy-v01/question-bundles/2026-05-02-bulk5355-a01-b0019-gesp-2-easy-v01__question-bundle__single-choice__bas__n5__v01.json#4",
+      "duplicateLocation": "papers/2026/2026-05-02-bulk5355-a03-b0021-gesp-2-easy-v01/question-bundles/2026-05-02-bulk5355-a03-b0021-gesp-2-easy-v01__question-bundle__single-choice__bas__n5__v01.json#4",
+      "excludedBundlePath": "papers/2026/2026-05-02-bulk5355-a03-b0021-gesp-2-easy-v01/question-bundles/2026-05-02-bulk5355-a03-b0021-gesp-2-easy-v01__question-bundle__single-choice__bas__n5__v01.json"
+    },
+    {
+      "contentHash": "ec293d3146241ea6698b857a7bcf9d65930b9d1cfc1f078d770e590d462dc615",
+      "firstLocation": "papers/2026/2026-05-02-bulk5355-a02-b0074-gesp-1-medium-v01/question-bundles/2026-05-02-bulk5355-a02-b0074-gesp-1-medium-v01__question-bundle__single-choice__bas__n5__v01.json#3",
+      "duplicateLocation": "papers/2026/2026-05-02-bulk5355-a04-b0022-gesp-2-easy-v01/question-bundles/2026-05-02-bulk5355-a04-b0022-gesp-2-easy-v01__question-bundle__single-choice__bas__n5__v01.json#2",
+      "excludedBundlePath": "papers/2026/2026-05-02-bulk5355-a04-b0022-gesp-2-easy-v01/question-bundles/2026-05-02-bulk5355-a04-b0022-gesp-2-easy-v01__question-bundle__single-choice__bas__n5__v01.json"
+    },
+    {
+      "contentHash": "a767b8dff1aadf4518f7ae3bd44ba2418ca9ba71209a9be5cad1cc6ac7d6582a",
+      "firstLocation": "papers/2026/2026-05-02-bulk5355-a03-b0195-csp-j-easy-v01/question-bundles/2026-05-02-bulk5355-a03-b0195-csp-j-easy-v01__question-bundle__single-choice__bas__n5__v01.json#2",
+      "duplicateLocation": "papers/2026/2026-05-02-bulk5355-a04-b0094-gesp-1-medium-v01/question-bundles/2026-05-02-bulk5355-a04-b0094-gesp-1-medium-v01__question-bundle__single-choice__bas__n5__v01.json#1",
+      "excludedBundlePath": "papers/2026/2026-05-02-bulk5355-a04-b0094-gesp-1-medium-v01/question-bundles/2026-05-02-bulk5355-a04-b0094-gesp-1-medium-v01__question-bundle__single-choice__bas__n5__v01.json"
+    },
+    {
+      "contentHash": "0c3a97e27a424cc78d5351c1ff1b5d74c130262cbfaccbb816116fe4a437fee9",
+      "firstLocation": "papers/2026/2026-05-02-bulk5355-a02-b0074-gesp-1-medium-v01/question-bundles/2026-05-02-bulk5355-a02-b0074-gesp-1-medium-v01__question-bundle__single-choice__bas__n5__v01.json#2",
+      "duplicateLocation": "papers/2026/2026-05-02-bulk5355-a04-b0184-csp-j-easy-v01/question-bundles/2026-05-02-bulk5355-a04-b0184-csp-j-easy-v01__question-bundle__single-choice__bas__n5__v01.json#1",
+      "excludedBundlePath": "papers/2026/2026-05-02-bulk5355-a04-b0184-csp-j-easy-v01/question-bundles/2026-05-02-bulk5355-a04-b0184-csp-j-easy-v01__question-bundle__single-choice__bas__n5__v01.json"
+    },
+    {
+      "contentHash": "e39e164d81045d4b6e7bccfc4c128e729eb42e31e35a27c8688215e89c4c307e",
+      "firstLocation": "papers/2026/2026-05-02-bulk5355-a01-b0193-csp-j-easy-v01/question-bundles/2026-05-02-bulk5355-a01-b0193-csp-j-easy-v01__question-bundle__single-choice__bas__n5__v01.json#1",
+      "duplicateLocation": "papers/2026/2026-05-02-bulk5355-a05-b0071-csp-s-medium-v01/question-bundles/2026-05-02-bulk5355-a05-b0071-csp-s-medium-v01__question-bundle__single-choice__alg__n5__v01.json#2",
+      "excludedBundlePath": "papers/2026/2026-05-02-bulk5355-a05-b0071-csp-s-medium-v01/question-bundles/2026-05-02-bulk5355-a05-b0071-csp-s-medium-v01__question-bundle__single-choice__alg__n5__v01.json"
+    },
+    {
+      "contentHash": "c237baf859ec77eb8164228e5dd36b4adddc35d9f08e7ac742d0e50dbf4d5f96",
+      "firstLocation": "papers/2026/2026-05-02-bulk5355-a04-b0292-gesp-2-medium-v01/question-bundles/2026-05-02-bulk5355-a04-b0292-gesp-2-medium-v01__question-bundle__reading-program__cpp__n5__v01.json#1",
+      "duplicateLocation": "papers/2026/2026-05-02-bulk5355-a06-b0510-gesp-2-easy-v01/question-bundles/2026-05-02-bulk5355-a06-b0510-gesp-2-easy-v01__question-bundle__reading-program__cpp__n5__v01.json#1",
+      "excludedBundlePath": "papers/2026/2026-05-02-bulk5355-a06-b0510-gesp-2-easy-v01/question-bundles/2026-05-02-bulk5355-a06-b0510-gesp-2-easy-v01__question-bundle__reading-program__cpp__n5__v01.json"
+    }
+  ],
+  "excludedBundleRows": [
+    {
+      "examType": "GESP-2",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "BAS",
+      "required": 5,
+      "available": 0,
+      "deficit": 5,
+      "excludedBundlePath": "papers/2026/2026-05-02-bulk5355-a03-b0021-gesp-2-easy-v01/question-bundles/2026-05-02-bulk5355-a03-b0021-gesp-2-easy-v01__question-bundle__single-choice__bas__n5__v01.json"
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "BAS",
+      "required": 5,
+      "available": 0,
+      "deficit": 5,
+      "excludedBundlePath": "papers/2026/2026-05-02-bulk5355-a04-b0022-gesp-2-easy-v01/question-bundles/2026-05-02-bulk5355-a04-b0022-gesp-2-easy-v01__question-bundle__single-choice__bas__n5__v01.json"
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "BAS",
+      "required": 5,
+      "available": 0,
+      "deficit": 5,
+      "excludedBundlePath": "papers/2026/2026-05-02-bulk5355-a04-b0094-gesp-1-medium-v01/question-bundles/2026-05-02-bulk5355-a04-b0094-gesp-1-medium-v01__question-bundle__single-choice__bas__n5__v01.json"
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "BAS",
+      "required": 5,
+      "available": 0,
+      "deficit": 5,
+      "excludedBundlePath": "papers/2026/2026-05-02-bulk5355-a04-b0184-csp-j-easy-v01/question-bundles/2026-05-02-bulk5355-a04-b0184-csp-j-easy-v01__question-bundle__single-choice__bas__n5__v01.json"
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 5,
+      "available": 0,
+      "deficit": 5,
+      "excludedBundlePath": "papers/2026/2026-05-02-bulk5355-a05-b0071-csp-s-medium-v01/question-bundles/2026-05-02-bulk5355-a05-b0071-csp-s-medium-v01__question-bundle__single-choice__alg__n5__v01.json"
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 5,
+      "available": 0,
+      "deficit": 5,
+      "excludedBundlePath": "papers/2026/2026-05-02-bulk5355-a06-b0510-gesp-2-easy-v01/question-bundles/2026-05-02-bulk5355-a06-b0510-gesp-2-easy-v01__question-bundle__reading-program__cpp__n5__v01.json"
+    }
+  ]
+}

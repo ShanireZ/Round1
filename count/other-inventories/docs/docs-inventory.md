@@ -1,6 +1,6 @@
 # Docs Inventory
 
-- Generated at: 2026-05-07T06:02:12.436Z
+- Generated at: 2026-05-07T06:16:50.629Z
 - Source dir: docs
 - Markdown files: 29
 - Root docs: 5

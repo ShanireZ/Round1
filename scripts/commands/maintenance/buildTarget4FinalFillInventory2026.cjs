@@ -2,9 +2,19 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const reportDir = path.resolve(process.cwd(), "count/runs/2026-05-02T02-05-46-784Z");
-const replacementInventoryPath = path.join(reportDir, "target4-dedupe-replacement-inventory.json");
-const currentInventoryPath = path.resolve(process.cwd(), "count/state/question-inventory.json");
-const outputPath = path.join(reportDir, "target4-final-fill-inventory.json");
+const defaultRunInventoryPath = path.join(reportDir, "question-inventory.json");
+const replacementInventoryPath = readArg("--replacement-inventory")
+  ? path.resolve(process.cwd(), readArg("--replacement-inventory"))
+  : path.join(reportDir, "target4-dedupe-replacement-inventory.json");
+const currentInventoryPath = readArg("--question-inventory")
+  ? path.resolve(process.cwd(), readArg("--question-inventory"))
+  : fs.existsSync(defaultRunInventoryPath)
+    ? defaultRunInventoryPath
+    : path.resolve(process.cwd(), "count/state/question-inventory.json");
+const outputPath = readArg("--output")
+  ? path.resolve(process.cwd(), readArg("--output"))
+  : path.join(reportDir, "target4-final-fill-inventory.json");
+const refresh = process.argv.includes("--refresh");
 
 const targetExamTypes = new Set(["GESP-1", "GESP-2", "CSP-J", "CSP-S"]);
 
@@ -12,8 +22,31 @@ function toRepoPath(filePath) {
   return path.relative(process.cwd(), filePath).replaceAll(path.sep, "/");
 }
 
+function readArg(name) {
+  const index = process.argv.indexOf(name);
+  return index >= 0 ? process.argv[index + 1] : undefined;
+}
+
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+if (fs.existsSync(outputPath) && !refresh) {
+  const existing = readJson(outputPath);
+  console.log(
+    JSON.stringify(
+      {
+        outputPath: toRepoPath(outputPath),
+        reusedExisting: true,
+        totalDeficit: existing.totalDeficit,
+        replacementDeficit: existing.replacementDeficit,
+        targetDeficit: existing.targetDeficit,
+      },
+      null,
+      2,
+    ),
+  );
+  process.exit(0);
 }
 
 const replacementInventory = readJson(replacementInventoryPath);

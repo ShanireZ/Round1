@@ -1,0 +1,82 @@
+{
+  "generatedAt": "2026-05-02T14:46:01.150Z",
+  "sourceReplacementInventoryPath": "artifacts/reports/2026/2026-05-02T02-05-46-784Z/target4-dedupe-replacement-inventory.json",
+  "sourceQuestionInventoryPath": "artifacts/reports/2026/2026-05-02T02-05-46-784Z/question-inventory.json",
+  "totalDeficit": 40,
+  "replacementDeficit": 30,
+  "targetDeficit": 10,
+  "deficits": [
+    {
+      "examType": "GESP-2",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "BAS",
+      "required": 5,
+      "available": 0,
+      "deficit": 5
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "BAS",
+      "required": 5,
+      "available": 0,
+      "deficit": 5
+    },
+    {
+      "examType": "GESP-1",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "BAS",
+      "required": 5,
+      "available": 0,
+      "deficit": 5
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "single_choice",
+      "difficulty": "easy",
+      "kpGroup": "BAS",
+      "required": 5,
+      "available": 0,
+      "deficit": 5
+    },
+    {
+      "examType": "CSP-S",
+      "questionType": "single_choice",
+      "difficulty": "medium",
+      "kpGroup": "ALG",
+      "required": 5,
+      "available": 0,
+      "deficit": 5
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "reading_program",
+      "difficulty": "easy",
+      "kpGroup": "CPP",
+      "required": 5,
+      "available": 0,
+      "deficit": 5
+    },
+    {
+      "examType": "CSP-J",
+      "questionType": "reading_program",
+      "difficulty": "hard",
+      "kpGroup": "DS",
+      "required": 5,
+      "available": 0,
+      "deficit": 5
+    },
+    {
+      "examType": "GESP-2",
+      "questionType": "completion_program",
+      "difficulty": "hard",
+      "kpGroup": "CPP",
+      "required": 5,
+      "available": 0,
+      "deficit": 5
+    }
+  ]
+}

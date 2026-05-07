@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-05-02T15:18:38.281Z",
+  "sourceDuplicateReportPath": "artifacts/reports/2026/2026-05-02T02-05-46-784Z/target4-duplicate-contenthash-report.json",
+  "deleteExcluded": true,
+  "deletedBundleFiles": [
+    "papers/2026/2026-05-02-bulk5355-a03-b0021-gesp-2-easy-v01/question-bundles/2026-05-02-bulk5355-a03-b0021-gesp-2-easy-v01__question-bundle__single-choice__bas__n5__v01.json",
+    "papers/2026/2026-05-02-bulk5355-a04-b0022-gesp-2-easy-v01/question-bundles/2026-05-02-bulk5355-a04-b0022-gesp-2-easy-v01__question-bundle__single-choice__bas__n5__v01.json",
+    "papers/2026/2026-05-02-bulk5355-a04-b0094-gesp-1-medium-v01/question-bundles/2026-05-02-bulk5355-a04-b0094-gesp-1-medium-v01__question-bundle__single-choice__bas__n5__v01.json",
+    "papers/2026/2026-05-02-bulk5355-a04-b0184-csp-j-easy-v01/question-bundles/2026-05-02-bulk5355-a04-b0184-csp-j-easy-v01__question-bundle__single-choice__bas__n5__v01.json",
+    "papers/2026/2026-05-02-bulk5355-a05-b0071-csp-s-medium-v01/question-bundles/2026-05-02-bulk5355-a05-b0071-csp-s-medium-v01__question-bundle__single-choice__alg__n5__v01.json",
+    "papers/2026/2026-05-02-bulk5355-a06-b0510-gesp-2-easy-v01/question-bundles/2026-05-02-bulk5355-a06-b0510-gesp-2-easy-v01__question-bundle__reading-program__cpp__n5__v01.json"
+  ],
+  "prunedDirectories": [
+    "papers/2026/2026-05-02-bulk5355-a03-b0021-gesp-2-easy-v01/question-bundles",
+    "papers/2026/2026-05-02-bulk5355-a03-b0021-gesp-2-easy-v01",
+    "papers/2026/2026-05-02-bulk5355-a04-b0022-gesp-2-easy-v01/question-bundles",
+    "papers/2026/2026-05-02-bulk5355-a04-b0022-gesp-2-easy-v01",
+    "papers/2026/2026-05-02-bulk5355-a04-b0094-gesp-1-medium-v01/question-bundles",
+    "papers/2026/2026-05-02-bulk5355-a04-b0094-gesp-1-medium-v01",
+    "papers/2026/2026-05-02-bulk5355-a04-b0184-csp-j-easy-v01/question-bundles",
+    "papers/2026/2026-05-02-bulk5355-a04-b0184-csp-j-easy-v01",
+    "papers/2026/2026-05-02-bulk5355-a05-b0071-csp-s-medium-v01/question-bundles",
+    "papers/2026/2026-05-02-bulk5355-a05-b0071-csp-s-medium-v01",
+    "papers/2026/2026-05-02-bulk5355-a06-b0510-gesp-2-easy-v01/question-bundles",
+    "papers/2026/2026-05-02-bulk5355-a06-b0510-gesp-2-easy-v01"
+  ]
+}

@@ -338,7 +338,7 @@ Options:
   --max-repair-cycles <n>          Repair failed review cycles per bundle before regeneration (default: 3)
   --llm-json-attempts <n>          JSON parse retries per LLM call (default: 2)
   --inventory-path <path>          Use count/state/question-inventory.json deficits as the generation plan
-  --inventory-report-dir <dir>     Write per-shard inventory fulfillment records into this report dir
+  --inventory-report-dir <dir>     Write per-shard inventory fulfillment records, normally under count/runs/<runId>
   --db-duplicate-checks            Check generated items against the current database during review/repair
   --provider-lane <policy>         LLM lane policy: balanced or default-only (default: balanced)
   --agent-label <label>            Override bundle run id agent label (default: a01, a02, ...)
