@@ -40,8 +40,6 @@ const generatedReadingProgramSchema = z.object({
     )
     .min(3)
     .max(6),
-  sampleInputs: z.array(z.string()).default([]),
-  expectedOutputs: z.array(z.string()).default([]),
   primaryKpCode: z.string().min(1),
   auxiliaryKpCodes: z.array(z.string().min(1)).max(3).default([]),
 });
@@ -241,10 +239,8 @@ function normalizeGeneratedQuestion(
       stem: String(payload.stem ?? ""),
       cppCode: String(payload.cppCode ?? ""),
       subQuestions,
-      sampleInputs: Array.isArray(payload.sampleInputs) ? payload.sampleInputs.map(String) : [],
-      expectedOutputs: Array.isArray(payload.expectedOutputs)
-        ? payload.expectedOutputs.map(String)
-        : [],
+      sampleInputs: [],
+      expectedOutputs: [],
     };
 
     const answerJson = {

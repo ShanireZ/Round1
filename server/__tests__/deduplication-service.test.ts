@@ -86,8 +86,6 @@ int main() {
           options: ["A. 5 5", "B. 6 5", "C. 7 4", "D. 8 4"],
         },
       ],
-      sampleInputs: ["5\n"],
-      expectedOutputs: [`${1 + offset} 5\n`],
     });
 
     whereMock.mockResolvedValue([

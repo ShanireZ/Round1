@@ -72,8 +72,6 @@ describe("server/services/worker/sandboxVerifyProcessor", () => {
       {
         contentJson: {
           cppCode: "#include <iostream>\nint main(){std::cout<<2;}",
-          sampleInputs: [""],
-          expectedOutputs: ["2"],
         },
       },
     ]);
@@ -110,8 +108,8 @@ describe("server/services/worker/sandboxVerifyProcessor", () => {
     expect(result).toEqual({ status: "verified" });
     expect(verifyCppMock).toHaveBeenCalledWith({
       source: "#include <iostream>\nint main(){std::cout<<2;}",
-      sampleInputs: [""],
-      expectedOutputs: ["2"],
+      sampleInputs: [],
+      expectedOutputs: [],
     });
     expect(updateSetCalls[0]).toEqual(
       expect.objectContaining({
@@ -188,8 +186,6 @@ describe("server/services/worker/sandboxVerifyProcessor", () => {
       difficulty: "medium",
       contentJson: {
         cppCode: "#include <iostream>\nint main(){std::cout<<2;}",
-        sampleInputs: [""],
-        expectedOutputs: ["999"],
       },
     },
     {

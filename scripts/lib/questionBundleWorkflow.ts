@@ -107,6 +107,42 @@ function isAnswerChoice(value: string): boolean {
   return /^[A-D]$/.test(value.trim().toUpperCase());
 }
 
+const READING_PROGRAM_SAMPLE_IO_PATTERN =
+  /样例\s*(?:输入|输出)|(?:输入|输出)\s*样例|(?:sample|example)\s*(?:input|output)/iu;
+
+function hasReadingProgramSampleIoWording(
+  item: Extract<QuestionBundleItem, { type: "reading_program" }>,
+) {
+  const texts = [
+    item.contentJson.stem,
+    ...item.contentJson.subQuestions.flatMap((question) => [question.stem, ...question.options]),
+    ...Object.values(item.explanationJson).flatMap((value) =>
+      typeof value === "string" ? [value] : [],
+    ),
+  ];
+  return texts.some((text) => READING_PROGRAM_SAMPLE_IO_PATTERN.test(text));
+}
+
+function validateReadingProgramSampleIo(item: QuestionBundleItem, index: number): ImportError[] {
+  if (item.type !== "reading_program") {
+    return [];
+  }
+
+  const hasSampleArrays =
+    item.contentJson.sampleInputs.length > 0 || item.contentJson.expectedOutputs.length > 0;
+  if (!hasSampleArrays && !hasReadingProgramSampleIoWording(item)) {
+    return [];
+  }
+
+  return [
+    {
+      code: "READING_PROGRAM_SAMPLE_IO_UNSUPPORTED",
+      message: `item ${index} reading_program must not include sampleInputs/expectedOutputs or sample input/output wording`,
+      itemIndex: index,
+    },
+  ];
+}
+
 function validateAnswerShape(item: QuestionBundleItem, index: number): ImportError[] {
   if (item.type === "single_choice") {
     return isAnswerChoice(item.answerJson.answer)
@@ -419,6 +455,12 @@ export async function validateQuestionBundle(
       rejectedItems.add(index);
     }
 
+    const sampleIoErrors = validateReadingProgramSampleIo(item, index);
+    for (const error of sampleIoErrors) {
+      errors.push(error);
+      rejectedItems.add(index);
+    }
+
     if (isCodeQuestion(item)) {
       const payload = getCodeVerificationPayload(item);
       if (payload.sampleInputs.length !== payload.expectedOutputs.length) {
@@ -450,7 +492,10 @@ export async function validateQuestionBundle(
       }
     }
 
-    if (options.runJudge === true && (!options.judgeItemIndexes || options.judgeItemIndexes.has(index))) {
+    if (
+      options.runJudge === true &&
+      (!options.judgeItemIndexes || options.judgeItemIndexes.has(index))
+    ) {
       try {
         const judgeResult = await judgeQuestionBundleItem(
           item,

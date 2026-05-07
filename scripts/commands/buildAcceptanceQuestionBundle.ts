@@ -126,8 +126,7 @@ function buildReadingProgramItem(args: Args, index: number): QuestionBundleItem 
 using namespace std;
 
 int main() {
-    int n = 0;
-    if (!(cin >> n)) return 0;
+    int n = ${input};
     int multiplier = ${multiplier};
     int offset = ${offset};
     int answer = (n * multiplier + offset) % 97;
@@ -135,13 +134,13 @@ int main() {
     return 0;
 }
 `;
-  const stem = `阅读程序题 ${serial}：给定输入 n，程序会计算线性表达式并取模。`;
+  const stem = `阅读程序题 ${serial}：给定变量 n，程序会计算线性表达式并取模。`;
   const contentJson = {
     stem,
     cppCode,
     subQuestions: [
       {
-        stem: `当输入为 ${input} 时，程序输出是多少？`,
+        stem: "程序运行后输出是多少？",
         options: buildOptionSet(answer),
       },
       {
@@ -153,16 +152,16 @@ int main() {
         options: ["A. 加法", "B. 乘法", "C. 取模", "D. 位运算"],
       },
       {
-        stem: "若输入失败，程序的行为是什么？",
-        options: ["A. 输出 -1", "B. 立即返回", "C. 无限循环", "D. 抛出异常"],
+        stem: "程序中 n 的初始值来自哪里？",
+        options: ["A. 标准输入", "B. 文件读取", "C. 代码中的初始化语句", "D. 随机生成"],
       },
       {
         stem: "该程序的时间复杂度是多少？",
         options: ["A. O(1)", "B. O(log n)", "C. O(n)", "D. O(n^2)"],
       },
     ],
-    sampleInputs: [`${input}\n`],
-    expectedOutputs: [`${answer}\n`],
+    sampleInputs: [],
+    expectedOutputs: [],
   };
 
   return {
@@ -180,12 +179,12 @@ int main() {
         { answer: "B" },
         { answer: "B" },
         { answer: "C" },
-        { answer: "B" },
+        { answer: "C" },
         { answer: "A" },
       ],
     },
     explanationJson: {
-      explanation: `样例输出由 (${input} * ${multiplier} + ${offset}) % 97 = ${answer} 得到。`,
+      explanation: `程序输出由代码中 n=${input}、multiplier=${multiplier}、offset=${offset} 追踪得到，(${input} * ${multiplier} + ${offset}) % 97 = ${answer}。`,
     },
   };
 }

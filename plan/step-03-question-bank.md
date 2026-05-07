@@ -8,6 +8,11 @@
 
 > **当前推进状态（2026-04-26）**：离线 bundle 第一批最小可运行 slice 已经落地：`scripts/lib/bundleTypes.ts` 已定义 raw bundle 契约与统一 `ImportSummary`；`generateQuestionBundle.ts`、`validateQuestionBundle.ts`、`importQuestionBundle.ts` 以及 `buildPrebuiltPaperBundle.ts`、`validatePrebuiltPaperBundle.ts`、`importPrebuiltPaperBundle.ts` 六个 CLI entrypoint 已接入仓库；Admin 导入中心已直接接收 raw `QuestionBundleSchema` / `PrebuiltPaperBundleSchema` 并复用 scripts 侧 workflow。当前 Step 03 的剩余工作重点已经收敛为“更丰富的离线产物元数据与审计信息、批量内容生产实跑规模、知识点/真题复核批次，以及与 Step 04/05 的完整运行时闭环对齐”，而不是重新设计 bundle 基础契约。2026-04-26 已完成首批规模化本地确定性验收 question bundle 与程序题 sandbox 入库验收：阅读程序 30 道、完善程序 20 道均通过离线校验并 apply 入库，且规则去重/判官拦截守卫已实跑通过。该批次不等同于 LLM 出题批次；真实 LLM 生成题目仍需使用 `generateQuestionBundle.ts` 并显式跑 `validateQuestionBundle.ts --judge`。
 
+> **GESP-6 库存补充记录（2026-05-07）**：`2026-05-07-bulk36-gesp6-default-only-gap-fill-v01` 与 `2026-05-07-bulk36-gesp6-default-only-gap-fill-v02` 已分别按 3 题/bundle 生成 12 个 GESP-6 `single_choice/medium/ALG` bundle，共 72 题；生成、两轮 LLM 审核与修复均通过 `--provider-lane default-only` 使用 `.env` 的 `LLM_PROVIDER_DEFAULT`。两轮导入 dry-run 均 12/12 通过，apply 共 72 题，duplicate content hash 均为 0。`artifacts/reports/2026/state/question-inventory.*` 与 `papers/_inventory/*` 已刷新，GESP-6 `single_choice/medium/ALG` 可用数从 30 增至 102，缺口从 195 降至 123。本日继续相同 `bulk36` shard 时需使用新的 `--agent-label` 或不同 pipeline label，避免 `--skip-existing` 复用已有 `bulk36-a01-b0001...` bundle 路径。
+
+> **阅读程序样例 IO 收口（2026-05-07）**：`reading_program` 题面只保留代码与子问题，不再生成或导入非空 `sampleInputs` / `expectedOutputs`，题干、子题和解析也不得出现“样例输入 / 样例输出”表述；需要固定数据时直接写入 C++ 初始化语句。`completion_program` 仍保留样例 IO，用于校验填空后的完整程序行为。
+> 同日追加：已补 `scripts/cleanup_reading_program_sample_io_pdfs.py` 并清理 `example/*quality-sample*.pdf` 中既有阅读程序样例 IO 残留；脚本的 `--check` 可回归确认阅读程序章节不再含“样例输入 / 样例输出”。
+
 ### 性能估算假设
 
 离线内容生产先通过少量样本基准测试确定参数：
@@ -183,7 +188,7 @@ docker run --rm --runtime=runsc --read-only --network=none \
 ### 9.3 阅读程序 / 完善程序题校验
 
 - 阅读程序与完善程序题不再由线上 Worker 生成，而是在离线 bundle 阶段校验
-- 导入流程增加 `cppRunner.verify()`：编译 + 运行 + 期望输出比对
+- 导入流程增加 `cppRunner.verify()`：阅读程序仅做自包含代码编译/运行健康检查且禁止样例 IO；完善程序执行样例输入并做期望输出比对
 - `sandbox_verified=false` 的题目不允许发布
 - 阅读/完善程序题解析统一采用整体逻辑分析 + 逐小题分析
 

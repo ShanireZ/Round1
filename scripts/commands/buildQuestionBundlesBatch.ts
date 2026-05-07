@@ -498,8 +498,7 @@ function readingCase(combo: Combo, serial: number) {
 using namespace std;
 
 int main() {
-    int n;
-    cin >> n;
+    int n = ${n};
     queue<int> q;
     for (int i = 1; i <= n; ++i) {
         q.push(i);
@@ -513,8 +512,6 @@ int main() {
     return {
       stem: `${tag}（${combo.examType}/${combo.difficulty}）：阅读队列模拟程序，判断循环结束后的队首和队列长度。`,
       cppCode,
-      sampleInput: `${n}\n`,
-      sampleOutput: `${output}\n`,
       output,
       roleQuestion: "程序中 queue<int> q 主要体现了哪种数据结构特性？",
       roleCorrect: "先进先出",
@@ -534,8 +531,8 @@ int main() {
 using namespace std;
 
 int main() {
-    int a, b;
-    cin >> a >> b;
+    int a = ${a};
+    int b = ${b};
     while (b != 0) {
         int t = a % b;
         a = b;
@@ -549,8 +546,6 @@ int main() {
     return {
       stem: `${tag}（${combo.examType}/${combo.difficulty}）：阅读辗转相除程序，判断最大公约数的输出。`,
       cppCode,
-      sampleInput: `${a} ${b}\n`,
-      sampleOutput: `${gcd}\n`,
       output: gcd,
       roleQuestion: "while 循环中的 a % b 表示什么？",
       roleCorrect: "求余数",
@@ -566,8 +561,7 @@ int main() {
 using namespace std;
 
 int main() {
-    int n;
-    cin >> n;
+    int n = ${n};
     int ans = 0;
     for (int i = 1; i <= n; ++i) {
         if (i % ${k} == 0) ans += i * ${extra};
@@ -582,8 +576,6 @@ int main() {
   return {
     stem: `${tag}（${combo.examType}/${combo.difficulty}）：阅读循环累加程序，分析条件分支对 ans 的影响。`,
     cppCode,
-    sampleInput: `${n}\n`,
-    sampleOutput: `${output}\n`,
     output,
     roleQuestion: "循环变量 i 的取值范围是什么？",
     roleCorrect: `1 到 n，共 n 次`,
@@ -597,8 +589,7 @@ int main() {
 
 function buildReadingProgram(combo: Combo, serial: number): QuestionBundleItem {
   const data = readingCase(combo, serial);
-  const sampleOutputValue = Number.parseInt(data.sampleOutput.trim(), 10);
-  const outputOptions = numericOptions(sampleOutputValue, serial, [-3, -1, 1, 3]);
+  const outputOptions = numericOptions(data.output, serial, [-3, -1, 1, 3]);
   const roleOptions = makeOptions(data.roleCorrect, data.roleDistractors, answerSlot(serial + 2));
   const conceptOptions = makeOptions(
     data.conceptCorrect,
@@ -621,7 +612,7 @@ function buildReadingProgram(combo: Combo, serial: number): QuestionBundleItem {
     cppCode: data.cppCode,
     subQuestions: [
       {
-        stem: `当样例输入为 ${JSON.stringify(data.sampleInput.trim())} 时，程序输出是多少？`,
+        stem: "程序运行后输出的结果是多少？",
         options: outputOptions.options,
       },
       {
@@ -641,8 +632,8 @@ function buildReadingProgram(combo: Combo, serial: number): QuestionBundleItem {
         options: outputStyleOptions.options,
       },
     ],
-    sampleInputs: [data.sampleInput],
-    expectedOutputs: [data.sampleOutput],
+    sampleInputs: [],
+    expectedOutputs: [],
   };
 
   return {
@@ -665,7 +656,7 @@ function buildReadingProgram(combo: Combo, serial: number): QuestionBundleItem {
       ],
     },
     explanationJson: {
-      explanation: `样例输出由模板内置公式复算得到：${data.sampleOutput.trim()}。其余子题分别检查变量作用、核心条件、复杂度和同规则微调输出。`,
+      explanation: `程序输出由代码中的固定初值和分支逻辑追踪得到：${data.output}。其余子题分别检查变量作用、核心条件、复杂度和输出方式。`,
     },
   };
 }

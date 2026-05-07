@@ -338,8 +338,6 @@ describe("scripts/lib/offlineGenerationProcessor", () => {
             explanation: "代码里没有换行。",
           },
         ],
-        sampleInputs: [""],
-        expectedOutputs: ["2"],
         primaryKpCode: "CPP",
         auxiliaryKpCodes: [],
       },
@@ -413,6 +411,16 @@ describe("scripts/lib/offlineGenerationProcessor", () => {
           source: "ai",
         }),
       );
+      if (questionType === "reading_program") {
+        expect(insertValuesCalls[0]).toEqual(
+          expect.objectContaining({
+            contentJson: expect.not.objectContaining({
+              sampleInputs: expect.anything(),
+              expectedOutputs: expect.anything(),
+            }),
+          }),
+        );
+      }
       expect(insertOnConflictDoUpdateMock).not.toHaveBeenCalled();
       expect(sandboxVerifyQueueAddMock).toHaveBeenCalledWith(`verify-question-1`, {
         questionId: "question-1",

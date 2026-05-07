@@ -665,7 +665,7 @@ function renderMarkdown(params: {
     `- Generated at: ${params.generatedAt}`,
     `- Source: ${params.sourceLabel}`,
     `- Threshold: ${params.threshold}`,
-    `- Similarity basis: single_choice uses stem+options; code questions use code/subquestions/blanks/sample IO, not boilerplate stem`,
+    `- Similarity basis: single_choice uses stem+options; reading_program uses code+subquestions; completion_program uses code+blanks+sample IO, not boilerplate stem`,
     `- Bundle files: ${params.totalFiles}`,
     `- Items: ${params.totalItems}`,
     `- Candidate pairs scored: ${params.candidatePairsScored}`,
@@ -809,7 +809,7 @@ async function main() {
       comparisonScope: args.sameKpOnly ? "same question type and primary KP" : "same question type",
       crossKpFuzzyAudit: !args.sameKpOnly,
       similarityBasis:
-        "single_choice: stem+options; reading_program: cppCode+subQuestions+sample IO; completion_program: cppCode+fullCode+blanks+sample IO",
+        "single_choice: stem+options; reading_program: cppCode+subQuestions; completion_program: cppCode+fullCode+blanks+sample IO",
       candidatePairsScored,
       highSimilarityPairs: pairs.length,
       pairsTruncated: truncatedPairs.length < pairs.length,

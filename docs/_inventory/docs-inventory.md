@@ -1,10 +1,10 @@
 # Docs Inventory
 
-- Generated at: 2026-05-03T03:31:52.647Z
+- Generated at: 2026-05-07T01:32:55.840Z
 - Source dir: docs
-- Markdown files: 27
+- Markdown files: 28
 - Root docs: 5
-- Plan docs: 22
+- Plan docs: 23
 - Files without status header: 21
 - Files with open tasks: 1
 - Open task markers: 18
@@ -37,6 +37,7 @@
 | docs/plans/2026-05-02-real-paper-library-and-inventory.md | plans | missing | 0 | Real Paper Library and 2026 Inventory Plan |
 | docs/plans/2026-05-03-scripts-consolidation-design.md | plans | missing | 0 | Scripts Consolidation Design |
 | docs/plans/2026-05-03-scripts-consolidation.md | plans | missing | 0 | Scripts Consolidation Implementation Plan |
+| docs/plans/2026-05-07-gesp6-default-only-gap-fill.md | plans | completed | 0 | 2026-05-07 GESP-6 Default-Only Gap Fill |
 | docs/plans/README.md | plans | current index | 0 | Plans |
 | docs/README.md | root | current index | 0 | Docs |
 | docs/reports-artifacts.md | root | current policy | 0 | Reports Artifact Layout |

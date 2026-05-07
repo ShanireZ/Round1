@@ -61,6 +61,7 @@ import {
   validatePrebuiltPaperBundle,
 } from "../../scripts/lib/prebuiltPaperBundleWorkflow.js";
 import { buildBundleIntegrity } from "../../scripts/lib/bundleTypes.js";
+import { computeContentHash } from "../services/deduplicationService.js";
 
 describe("offline bundle workflow summaries", () => {
   beforeEach(() => {
@@ -158,6 +159,55 @@ describe("offline bundle workflow summaries", () => {
       code: "INTEGRITY_ITEM_CHECKSUM_MISMATCH",
       itemIndex: 0,
     });
+  });
+
+  it("rejects reading program bundles that expose sample input or output", async () => {
+    const loaded = await loadQuestionBundle("scripts/tests/fixtures/question-bundle.sample.json");
+    const contentJson = {
+      stem: "阅读以下程序并回答问题。",
+      cppCode: "#include <iostream>\nint main(){std::cout<<1;return 0;}",
+      subQuestions: [
+        {
+          stem: "当样例输入为空时，程序输出什么？",
+          options: ["A. 1", "B. 2", "C. 3", "D. 4"],
+        },
+      ],
+      sampleInputs: [""],
+      expectedOutputs: ["1"],
+    };
+    loaded.bundle.meta.questionType = "reading_program";
+    loaded.bundle.items = [
+      {
+        type: "reading_program",
+        difficulty: "easy",
+        primaryKpCode: "BAS",
+        auxiliaryKpCodes: [],
+        examTypes: ["CSP-J"],
+        contentHash: computeContentHash(contentJson.stem, contentJson.cppCode),
+        sandboxVerified: true,
+        source: "manual",
+        contentJson,
+        answerJson: { subQuestions: [{ answer: "A" }] },
+        explanationJson: { explanation: "样例输出是 1。" },
+      },
+    ];
+    loaded.bundle.meta.integrity = buildBundleIntegrity(loaded.bundle.items);
+
+    const result = await validateQuestionBundle(loaded, {
+      skipDuplicateChecks: true,
+    });
+
+    expect(result.summary).toMatchObject({
+      totalCount: 1,
+      importedCount: 0,
+      rejectedCount: 1,
+    });
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({
+        code: "READING_PROGRAM_SAMPLE_IO_UNSUPPORTED",
+        itemIndex: 0,
+      }),
+    );
   });
 
   it("rejects prebuilt paper bundles when the item checksum manifest is stale", async () => {

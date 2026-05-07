@@ -56,8 +56,6 @@ const readingProgramSchema = z.object({
     )
     .min(3)
     .max(6),
-  sampleInputs: z.array(z.string()).default([]),
-  expectedOutputs: z.array(z.string()).default([]),
   primaryKpCode: z.string(),
   auxiliaryKpCodes: z.array(z.string()).default([]),
 });

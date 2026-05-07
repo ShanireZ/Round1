@@ -219,8 +219,6 @@ const generatedReadingProgramSchema = z.object({
     )
     .min(1)
     .max(5),
-  sampleInputs: z.array(z.string()).default([]),
-  expectedOutputs: z.array(z.string()).default([]),
   primaryKpCode: z.string().min(1),
   auxiliaryKpCodes: z.array(z.string().min(1)).max(3).default([]),
 });
@@ -822,13 +820,14 @@ function buildQuestionTypeInstruction(questionType: QuestionType): string {
   if (questionType === "reading_program") {
     return [
       "Each item shape:",
-      '{"stem":"...","cppCode":"complete C++17 program","subQuestions":[{"stem":"...","options":["A. ...","B. ...","C. ...","D. ..."],"answer":"A|B|C|D","explanation":"..."}],"sampleInputs":["..."],"expectedOutputs":["..."],"primaryKpCode":"...","auxiliaryKpCodes":[]}',
+      '{"stem":"...","cppCode":"complete self-contained C++17 program","subQuestions":[{"stem":"...","options":["A. ...","B. ...","C. ...","D. ..."],"answer":"A|B|C|D","explanation":"..."}],"primaryKpCode":"...","auxiliaryKpCodes":[]}',
       "Each reading_program item must contain exactly five subQuestions.",
       "The C++ code must be deterministic, self-contained, and avoid undefined behavior.",
       "The C++ code must be complete compilable code. Never leave placeholders, ellipses, TODO comments, marker comments in place of statements, or expressions such as /* compute */.",
-      "Prefer short programs with at most 35 nonblank lines, one input integer or a tiny fixed array, and values small enough to solve by hand.",
-      "Every subQuestion should ask for exact output, final variable value, container size/front/top, or loop count under the given sample input.",
-      "The sampleInputs and expectedOutputs must be obtained from the same complete cppCode.",
+      "Do not read from stdin. Put any needed values directly in initialized variables or containers inside cppCode.",
+      "Do not include sampleInputs or expectedOutputs fields, and do not use sample input/sample output wording in the stem, subQuestions, options, or explanations.",
+      "Prefer short programs with at most 35 nonblank lines and values small enough to solve by hand.",
+      "Every subQuestion should ask for exact printed output, final variable value, container size/front/top, or loop count from tracing the code as written.",
       "For each subQuestion explanation, show the key trace steps and the exact reason the chosen option is unique; do not use generic phrases such as according to the template or by formula.",
       "Do not rely on locale, file IO, randomness, wall clock time, recursion depth beyond small examples, implementation-defined signed overflow, or unspecified evaluation order.",
     ].join("\n");
@@ -965,13 +964,8 @@ function normalizeGeneratedQuestion(
       stem: String(payload.stem ?? ""),
       cppCode: String(payload.cppCode ?? ""),
       subQuestions,
-      sampleInputs:
-        Array.isArray(payload.sampleInputs) && payload.sampleInputs.length > 0
-          ? payload.sampleInputs.map(String)
-          : [""],
-      expectedOutputs: Array.isArray(payload.expectedOutputs)
-        ? payload.expectedOutputs.map(String)
-        : [],
+      sampleInputs: [],
+      expectedOutputs: [],
     };
     return QuestionBundleItemSchema.parse({
       type: combo.questionType,
@@ -1599,7 +1593,7 @@ function buildRepairPrompt(
     "Return JSON only. No markdown.",
     "Do not change itemIndex, question type, exam type, difficulty, or primary knowledge point.",
     "For each listed itemIndex, return complete replacement contentJson, answerJson, and explanationJson matching the original item type schema.",
-    "If repairing code, keep deterministic C++17 and make sampleInputs/expectedOutputs consistent.",
+    "If repairing reading_program code, keep it self-contained, do not read stdin, and keep sampleInputs/expectedOutputs empty. If repairing completion_program code, keep sampleInputs/expectedOutputs consistent.",
     `You must return exactly these item indexes: ${indexes.join(", ")}.`,
     'Output schema: {"items":[{"itemIndex":0,"contentJson":{},"answerJson":{},"explanationJson":{},"repairNotes":"..."}]}',
     "Issues:",
@@ -1682,9 +1676,6 @@ function restrictRepairResponse(
 }
 
 function codeSourceForItem(item: QuestionBundleItem): string | null {
-  if (item.type === "reading_program") {
-    return item.contentJson.cppCode;
-  }
   if (item.type === "completion_program") {
     return item.contentJson.fullCode;
   }
@@ -1696,7 +1687,7 @@ async function normalizeCodeSampleOutputs(bundle: QuestionBundle): Promise<Quest
   let changed = false;
 
   for (const item of bundle.items) {
-    if (item.type === "single_choice") {
+    if (item.type !== "completion_program") {
       items.push(item);
       continue;
     }

@@ -269,9 +269,11 @@ describe("admin content api", () => {
 
     expect(listRes.status).toBe(200);
     expect(listRes.body.success).toBe(true);
-    expect(listRes.body.data.items.some((item: { key: string }) => item.key === "exam.autosaveIntervalSeconds")).toBe(
-      true,
-    );
+    expect(
+      listRes.body.data.items.some(
+        (item: { key: string }) => item.key === "exam.autosaveIntervalSeconds",
+      ),
+    ).toBe(true);
 
     expect(patchRes.status).toBe(201);
     expect(patchRes.body.success).toBe(true);
@@ -289,7 +291,9 @@ describe("admin content api", () => {
   });
 
   it("publishes and archives questions through lifecycle endpoints", async () => {
-    queuedResults.push([{ id: "question-1", status: "reviewed", type: "single_choice", sandboxVerified: false }]);
+    queuedResults.push([
+      { id: "question-1", status: "reviewed", type: "single_choice", sandboxVerified: false },
+    ]);
     queuedResults.push([{ id: "question-1", status: "published" }]);
     queuedResults.push([{ id: "question-1", status: "published" }]);
     queuedResults.push([{ id: "question-1", status: "archived" }]);
@@ -308,7 +312,9 @@ describe("admin content api", () => {
   });
 
   it("prevents publishing questions before review", async () => {
-    queuedResults.push([{ id: "question-1", status: "draft", type: "single_choice", sandboxVerified: false }]);
+    queuedResults.push([
+      { id: "question-1", status: "draft", type: "single_choice", sandboxVerified: false },
+    ]);
     const app = createTestApp();
 
     const publishRes = await supertest(app).post("/api/v1/admin/questions/question-1/publish");
@@ -320,7 +326,9 @@ describe("admin content api", () => {
   });
 
   it("rejects publishing unverified code questions", async () => {
-    queuedResults.push([{ id: "question-1", status: "reviewed", type: "reading_program", sandboxVerified: false }]);
+    queuedResults.push([
+      { id: "question-1", status: "reviewed", type: "reading_program", sandboxVerified: false },
+    ]);
     const app = createTestApp();
 
     const publishRes = await supertest(app).post("/api/v1/admin/questions/question-1/publish");
@@ -529,7 +537,10 @@ describe("admin content api", () => {
   });
 
   it("copies a prebuilt paper into a new draft lineage version", async () => {
-    queuedResults.push([{ id: "paper-1", status: "published", rootPaperId: "paper-root", versionNo: 3 }], []);
+    queuedResults.push(
+      [{ id: "paper-1", status: "published", rootPaperId: "paper-root", versionNo: 3 }],
+      [],
+    );
     queuedResults.push([{ slotNo: 1, questionId: "question-1" }]);
     queuedResults.push([
       {
@@ -590,7 +601,8 @@ describe("admin content api", () => {
         provider: "fixture",
         model: "fixture-model",
         promptHash: "1111111111111111111111111111111111111111111111111111111111111111",
-        sourceBatchId: "fixture-question-bundle:CSP-J:single_choice:BAS:easy:2026-04-25T00:00:00.000Z",
+        sourceBatchId:
+          "fixture-question-bundle:CSP-J:single_choice:BAS:easy:2026-04-25T00:00:00.000Z",
         sourceBatchIds: [
           "fixture-question-bundle:CSP-J:single_choice:BAS:easy:2026-04-25T00:00:00.000Z",
         ],
@@ -675,7 +687,8 @@ describe("admin content api", () => {
         provider: "fixture",
         model: "fixture-model",
         promptHash: "2222222222222222222222222222222222222222222222222222222222222222",
-        sourceBatchId: "fixture-question-bundle:CSP-J:reading_program:BAS:easy:2026-04-25T00:00:00.000Z",
+        sourceBatchId:
+          "fixture-question-bundle:CSP-J:reading_program:BAS:easy:2026-04-25T00:00:00.000Z",
         sourceBatchIds: [
           "fixture-question-bundle:CSP-J:reading_program:BAS:easy:2026-04-25T00:00:00.000Z",
         ],
@@ -698,8 +711,8 @@ describe("admin content api", () => {
             stem: "程序输出什么？",
             cppCode: "#include <iostream>\nint main(){std::cout<<1;}",
             subQuestions: [{ stem: "输出？", options: ["A", "B", "C", "D"] }],
-            sampleInputs: [""],
-            expectedOutputs: ["1"],
+            sampleInputs: [],
+            expectedOutputs: [],
           },
           answerJson: { subQuestions: [{ answer: "A" }] },
           explanationJson: { explanation: "Because" },
@@ -756,9 +769,7 @@ describe("admin content api", () => {
         createdAt: "2026-04-25T00:00:00.000Z",
         builtAt: "2026-04-25T00:00:00.000Z",
         sourceBatchId: "fixture-prebuilt-paper-bundle:CSP-J:easy:2026-04-25T00:00:00.000Z",
-        sourceBatchIds: [
-          "fixture-prebuilt-paper-bundle:CSP-J:easy:2026-04-25T00:00:00.000Z",
-        ],
+        sourceBatchIds: ["fixture-prebuilt-paper-bundle:CSP-J:easy:2026-04-25T00:00:00.000Z"],
         sourceTimestamp: "2026-04-25T00:00:00.000Z",
         examType: "CSP-J",
         difficulty: "easy",

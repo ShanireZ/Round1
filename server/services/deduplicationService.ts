@@ -78,7 +78,9 @@ function readString(record: Record<string, unknown>, key: string) {
 
 function readStringArray(record: Record<string, unknown>, key: string) {
   const value = record[key];
-  return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
 }
 
 function readRecordArray(record: Record<string, unknown>, key: string) {
@@ -104,8 +106,6 @@ export function buildQuestionSimilarityText(questionType: string, contentJson: u
         readString(subQuestion, "stem"),
         ...readStringArray(subQuestion, "options"),
       ]),
-      ...readStringArray(content, "sampleInputs"),
-      ...readStringArray(content, "expectedOutputs"),
     ].join("\n");
   }
 
@@ -158,7 +158,13 @@ const PARAMETERIZED_CODE_TEMPLATE_PATTERNS: Array<{
   },
   {
     questionTypes: ["reading_program", "completion_program"],
-    patterns: [/\bstack\s*</i, /\.push\s*\(/i, /\.pop\s*\(/i, /\.top\s*\(/i, /\(\s*'\('\s*\)|\(\s*'\)'\s*\)/i],
+    patterns: [
+      /\bstack\s*</i,
+      /\.push\s*\(/i,
+      /\.pop\s*\(/i,
+      /\.top\s*\(/i,
+      /\(\s*'\('\s*\)|\(\s*'\)'\s*\)/i,
+    ],
     minMatches: 3,
   },
   {
@@ -226,7 +232,7 @@ export async function findJaccardDuplicate(params: {
     .from(questions)
     .where(
       and(eq(questions.type, params.questionType), eq(questions.primaryKpId, params.primaryKpId)),
-  );
+    );
 
   const candidateText = buildQuestionSimilarityText(params.questionType, params.contentJson);
   const candidateSalientText = buildQuestionSalientText(candidateText);

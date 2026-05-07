@@ -38,6 +38,5 @@ logs/
 /.claude
 /.codex
 /.commandcode
-/.gemini
 /.worktrees
 /.serena
